@@ -10,6 +10,8 @@
 > **2026-10-11 三次整理**：面经检索（中文面经站/英文系统设计/模型八股三路）→ 缺口清单入 §4.2；全量学习规划入 §四（学习总纲：15 个知识域状态 + 分阶段顺序 + 完成判据）。
 >
 > **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——C-S8 范式速查 / H-S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ I-S4 升级为 Agent 安全全景 / L-S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → 当前 1.0.1）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
+>
+> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：I 课 S2.1 / M 课 S3+4 行 / C 课 S2 沙箱+评测闭环 / 新增 N 课 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 实测 11 spans/1 trace）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（8 页面，GitHub Actions→Pages，build 零错误，9 页全 200；P4 文案补充进行中）⑥ 提交 845628c 已推 main，secret 扫描干净。
 
 ---
 
