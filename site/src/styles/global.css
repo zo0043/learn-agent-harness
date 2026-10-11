@@ -357,6 +357,23 @@ a.card:hover {
   font-weight: 600;
 }
 
+/* 详解 kind 徽标（interview-question / design-detail / cost-detail） */
+.chip.kind-interview-question {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.chip.kind-cost-detail {
+  color: var(--doing);
+  border-color: color-mix(in srgb, var(--doing) 40%, var(--border));
+  background: var(--doing-bg);
+  font-weight: 600;
+}
+.chip.kind-design-detail {
+  color: var(--text-soft);
+}
+
 /* 空态 */
 .empty-state {
   text-align: center;
@@ -621,6 +638,32 @@ div.mermaid.mermaid-error {
   color: var(--accent);
 }
 
+/* 作品卡区下方 small 注（whiteboard 口述版） */
+.works-note {
+  margin-top: 14px;
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+/* /details 入口卡 */
+.details-entry {
+  max-width: 48em;
+}
+.details-entry-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+.details-entry-links a {
+  font-size: 0.92rem;
+}
+.details-entry-links a::before {
+  content: '→ ';
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* ── 学习路线 /learn ──────────────────────────────────── */
 .phase-section {
   margin-top: 34px;
@@ -673,6 +716,15 @@ div.mermaid.mermaid-error {
 .dc-intro {
   color: var(--text-soft);
   font-size: 0.9rem;
+}
+.dc-angle {
+  color: var(--text-faint);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.dc-angle strong {
+  color: var(--accent);
+  font-weight: 600;
 }
 .dc-foot {
   margin-top: auto;
@@ -769,6 +821,55 @@ a.domain-card:hover .dc-foot {
   display: flex;
   gap: 6px 18px;
   flex-wrap: wrap;
+}
+
+/* 课页底部：相关面试题交叉索引 */
+.related-questions {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.related-questions h3 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+.rq-note {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+.rq-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.rq-list li {
+  margin: 6px 0;
+}
+.rq-list a {
+  display: block;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.rq-list a:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.rq-no {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ── 作品详解 /works ──────────────────────────────────── */

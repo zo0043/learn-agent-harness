@@ -4,6 +4,7 @@ slug: "05-hitl-security"
 domain: "沙箱安全"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "2026现行"
+kind: "interview-question"
 ---
 
 ## 一句话定义

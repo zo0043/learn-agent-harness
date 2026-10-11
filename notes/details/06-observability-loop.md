@@ -4,6 +4,7 @@ slug: "06-observability-loop"
 domain: "可观测与评测"
 source: "https://www.anthropic.com/engineering/multi-agent-research-system"
 status: "2026现行"
+kind: "design-detail"
 ---
 
 ## 一句话定义

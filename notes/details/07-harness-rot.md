@@ -4,6 +4,7 @@ slug: "07-harness-rot"
 domain: "架构演化"
 source: "https://www.anthropic.com/engineering/managed-agents"
 status: "2026现行"
+kind: "design-detail"
 ---
 
 ## 一句话定义

@@ -4,6 +4,7 @@ slug: "04-token-economics"
 domain: "成本与架构取舍"
 source: "https://www.anthropic.com/engineering/multi-agent-research-system"
 status: "2026现行"
+kind: "cost-detail"
 ---
 
 ## 一句话定义

@@ -4,6 +4,7 @@ slug: "03-error-paths"
 domain: "恢复与可靠性"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "稳定历史"
+kind: "interview-question"
 ---
 
 ## 一句话定义

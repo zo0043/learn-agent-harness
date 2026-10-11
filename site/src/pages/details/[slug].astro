@@ -19,6 +19,12 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const title = entry.data.title ?? entry.id;
+const KIND_LABEL: Record<string, string> = {
+  'interview-question': '面试高频',
+  'design-detail': '设计细节',
+  'cost-detail': '成本细节',
+};
+const kind = KIND_LABEL[entry.data.kind as string] ? (entry.data.kind as string) : undefined;
 ---
 
 <Base title={title}>
@@ -26,6 +32,7 @@ const title = entry.data.title ?? entry.id;
     <header class="course-meta-bar">
       <div class="meta-row">
         <span class="chip chip-strong">详解</span>
+        {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
         {entry.data.domain && <span class="chip">{entry.data.domain}</span>}
         {entry.data.source && <span class="chip">来源：{entry.data.source}</span>}
         {entry.data.status && <StatusBadge status={entry.data.status} />}

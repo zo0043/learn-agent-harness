@@ -1,35 +1,95 @@
 ---
 /**
- * /details 列表页：notes/details/*.md（frontmatter 带 title/slug/domain/source/status）。
+ * /details 列表页：notes/details/*.md（frontmatter 带 title/slug/domain/source/status/kind）。
  * 目录可能为空（并行 worker 正在新增）→ 显示空态。
+ * kind：interview-question 面试高频问法 / design-detail 设计细节 / cost-detail 成本细节。
  */
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import { getCollection } from 'astro:content';
 
 const items = await getCollection('details');
+
+const KIND_LABEL: Record<string, string> = {
+  'interview-question': '面试高频',
+  'design-detail': '设计细节',
+  'cost-detail': '成本细节',
+};
+const kindOf = (item: (typeof items)[number]) =>
+  KIND_LABEL[item.data.kind as string] ? (item.data.kind as string) : undefined;
+
+/** 面试最常考 top3（C2b 指定：context-rot / tool-granularity / harness-rot） */
+const TOP3_SLUGS = ['01-context-rot', '02-tool-granularity', '07-harness-rot'];
+const top3 = TOP3_SLUGS.map(
+  (slug) => items.find((i) => (i.data.slug ?? i.id) === slug),
+).filter((i): i is (typeof items)[number] => Boolean(i));
+
+/** 取正文“## 一句话定义”下第一段作为卡片摘要 */
+function oneLiner(body: string | undefined): string {
+  if (!body) return '';
+  const lines = body.split('\n');
+  const start = lines.findIndex((l) => l.trim() === '## 一句话定义');
+  if (start === -1) return '';
+  for (let j = start + 1; j < lines.length; j++) {
+    const t = lines[j].trim();
+    if (!t) continue;
+    if (t.startsWith('#')) return '';
+    return t.replace(/[*_`]/g, '');
+  }
+  return '';
+}
 ---
 
 <Base title="详解">
   <h1 class="page-title">详解</h1>
   <p class="page-lead">
-    课程之外的延伸详解（<code>notes/details/</code>）：事故复盘、机制拆解、一手资料精读等。
+    课程之外的延伸详解（<code>notes/details/</code>）：资深分水岭 8 细节、事故复盘、机制拆解、一手资料精读等。
   </p>
 
+  {
+    top3.length > 0 && (
+      <section class="details-top3">
+        <h2 class="page-title">面试最常考 top3</h2>
+        <div class="cards">
+          {
+            top3.map((item) => {
+              const kind = kindOf(item);
+              return (
+                <a class="card" href={import.meta.env.BASE_URL + `details/${item.data.slug ?? item.id}/`}>
+                  <h3>{item.data.title ?? item.id}</h3>
+                  <div class="dc-top">
+                    {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
+                    {item.data.domain && <span class="chip">{item.data.domain}</span>}
+                  </div>
+                  {oneLiner(item.body) && <p class="dc-intro">{oneLiner(item.body)}</p>}
+                </a>
+              );
+            })
+          }
+        </div>
+      </section>
+    )
+  }
+
+  <h2 class="page-title" style="margin-top: 34px">全部详解</h2>
   {
     items.length > 0 ? (
       <div class="cards">
         {
-          items.map((item) => (
-            <a class="card" href={import.meta.env.BASE_URL + `details/${item.data.slug ?? item.id}/`}>
-              <h3>{item.data.title ?? item.id}</h3>
-              <div class="dc-top">
-                {item.data.domain && <span class="chip">{item.data.domain}</span>}
-                {item.data.source && <span class="chip">来源：{item.data.source}</span>}
-              </div>
-              {item.data.status && <StatusBadge status={item.data.status} />}
-            </a>
-          ))
+          items.map((item) => {
+            const kind = kindOf(item);
+            return (
+              <a class="card" href={import.meta.env.BASE_URL + `details/${item.data.slug ?? item.id}/`}>
+                <h3>{item.data.title ?? item.id}</h3>
+                <div class="dc-top">
+                  {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
+                  {item.data.domain && <span class="chip">{item.data.domain}</span>}
+                  {item.data.source && <span class="chip">来源：{item.data.source}</span>}
+                </div>
+                {item.data.status && <StatusBadge status={item.data.status} />}
+              </a>
+            );
+          })
         }
       </div>
     ) : (

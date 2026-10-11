@@ -4,6 +4,7 @@ slug: "02-tool-granularity"
 domain: "工具设计"
 source: "https://www.anthropic.com/engineering/writing-tools-for-agents"
 status: "稳定历史"
+kind: "interview-question"
 ---
 
 ## 一句话定义

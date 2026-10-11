@@ -157,7 +157,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'mcp', letter: 'I', domain: 'MCP 协议 + 供应链安全', phase: 'P1', status: '🔄 进行中',
+    slug: 'mcp', letter: 'I', domain: 'MCP 协议 + 供应链安全', phase: 'P1', status: '⏳ 规划中',
     intro: 'MCP 架构 / 原语 / 认证 + Agent 安全全景；mcp-demo 投毒 + 四层防御实操已实现',
     interviewAngle: 'MCP 供应链投毒题素材：四层防御实操',
     relatedQuestions: [
@@ -191,7 +191,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── P2 ──────────────────────────────────────────────
   {
-    slug: 'observability', letter: 'D', domain: 'Agent 可观测', phase: 'P2', status: '🔄 进行中',
+    slug: 'observability', letter: 'D', domain: 'Agent 可观测', phase: 'P2', status: '⏳ 规划中',
     intro: 'agent tracing 模型 + OTel GenAI 属性 + 成本归因；S2 埋点已在 harness-demo 实操（demo:otel）',
     interviewAngle: '“agent tracing+成本归因”考点，demo:otel 实操',
     relatedQuestions: [
@@ -221,7 +221,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'framework-ecosystem', letter: 'M', domain: '框架生态', phase: 'P2', status: '🔄 进行中',
+    slug: 'framework-ecosystem', letter: 'M', domain: '框架生态', phase: 'P2', status: '⏳ 规划中',
     intro: '框架给你什么 / 藏什么；framework-demo 四能力实操已跑通，实测 allowedTools 抢跑坑',
     interviewAngle: '“框架给你什么/藏什么”：allowedTools 抢跑实证',
     relatedQuestions: [

@@ -4,6 +4,7 @@ slug: "01-context-rot"
 domain: "上下文工程"
 source: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
 status: "2026现行"
+kind: "interview-question"
 ---
 
 ## 一句话定义

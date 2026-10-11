@@ -4,6 +4,7 @@ slug: "08-single-threaded-write"
 domain: "多智能体协作"
 source: "https://cognition.ai/blog/multi-agents-working"
 status: "2026现行"
+kind: "interview-question"
 ---
 
 ## 一句话定义

@@ -20,60 +20,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     </div>
   </section>
 
-  <!-- ── 事故驱动 ─────────────────────────────────────── -->
-  <section>
-    <h2 class="page-title" style="margin-top: 44px">事故驱动</h2>
-    <p class="page-lead">
-      这个仓库的每个设计判断都来自真实事故，而非教程。三起事故、三套机制：
-    </p>
-    <div class="cards">
-      <div class="card" style="display: block">
-        <h3>幽灵事故 → 四通道沙箱</h3>
-        <p>
-          2026-10-09 18:00，一个并行 agent 会话在错误目录（旧 AINews compose 树）执行
-          <code>docker compose build+up</code>——每一步都合法——18:00:09 生产 worker/api 被幽灵代码替换，
-          18:25 重建恢复（25 分钟）。权限门全程放行，因为缺的不是“工具权限”：compose 是合法工具、命令是合法命令，
-          缺的是<strong>执行环境边界</strong>（哪个 compose 项目 / 目录树 / 命名空间）。
-        </p>
-        <p>
-          长出的机制：权限（意图门）与沙箱（执行环境边界）拆成<strong>两道独立的门</strong>，
-          policy 增加第四通道 sandbox；<a href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>sandbox-demo</a>
-          把事故重建成可重放剧本，3 次重放逐字节一致。
-        </p>
-      </div>
-      <div class="card" style="display: block">
-        <h3>模型列表轮换 → 能力侦察</h3>
-        <p>
-          本地 OpenAI 兼容代理（litellm 网关）的模型列表会随时间变：
-          <code>qwen3.8-flash</code> 下架后 qwen 系只剩 <code>qwen3.8-flash-next</code>（tool calling + SSE 已验证）；
-          <code>step-5-preview</code> 仍在，但直接回“无法调用工具”。
-        </p>
-        <p>
-          长出的机制：跑任务前先 <code>GET /v1/models</code> + tool-calling 冒烟测试——
-          <strong>能力矩阵必须动态侦察</strong>，静态配置必过期；provider 是组件不是基础设施，harness 必须能降级。
-        </p>
-      </div>
-      <div class="card" style="display: block">
-        <h3>代理 400 → 防御性解析</h3>
-        <p>
-          19:33 起代理持续 400（请求被路由到要求旧版 functions 格式的 code 后端），
-          同时工具名带不可见字符，造成 <code>unknown tool: get_weather</code> 假错。
-          同一请求重试 100 次也是 400——契约违约不盲目重试。
-        </p>
-        <p>
-          长出的机制：4xx 读响应体报真实错误、工具名 <code>tc.name.trim()</code>、
-          历史 tool_calls 统一按 OpenAI wire 格式回写（arguments 必须是 JSON 字符串）——
-          <strong>防御性解析是 API 层职责</strong>。
-        </p>
-      </div>
-    </div>
-    <p style="margin-top: 14px; color: var(--text-soft); font-size: 0.92rem">
-      完整时间线与修复记录见仓库 <a href={repo + '/notes'} target="_blank" rel="noopener">notes/ ↗</a>
-      （harness-from-scratch §⑨ 代理实录 / sandbox S1 / api-engineering S4）。
-    </p>
-  </section>
-
-  <!-- ── 作品 ─────────────────────────────────────────── -->
+  <!-- ── 作品（5 个可运行 demo）───────────────────────── -->
   <section>
     <h2 class="page-title">五个作品</h2>
     <div class="cards">
@@ -127,6 +74,79 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         <p class="work-lesson">一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——allowedTools 裸名抢跑 auto-approve（SDK 警告 CLAUDE_SDK_CAN_USE_TOOL_SHADOWED）</p>
       </a>
     </div>
+    <p class="works-note">
+      <a href={import.meta.env.BASE_URL + "works/#whiteboard"}>whiteboard/</a>：150 行 Python 面试口述版（见仓库）
+    </p>
+  </section>
+
+  <!-- ── 详解 /details 入口 ──────────────────────────── -->
+  <section>
+    <div class="card details-entry" style="display: block">
+      <h3>为什么资深 agent 工程师不卡在细节上</h3>
+      <p>
+        8 个分水岭细节，每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
+        面试答到机制层时直接用的素材。
+      </p>
+      <div class="details-entry-links">
+        <a href={import.meta.env.BASE_URL + "details/01-context-rot/"}>context rot：窗口大不等于能全塞</a>
+        <a href={import.meta.env.BASE_URL + "details/02-tool-granularity/"}>工具粒度：工具定义就是契约</a>
+        <a href={import.meta.env.BASE_URL + "details/07-harness-rot/"}>harness 假设会腐烂：为尚不存在的模型写稳定接口</a>
+      </div>
+      <a class="dc-foot" href={import.meta.env.BASE_URL + "details/"}>查看全部 8 个 →</a>
+    </div>
+  </section>
+
+  <!-- ── 事故驱动 ─────────────────────────────────────── -->
+  <section>
+    <h2 class="page-title" style="margin-top: 44px">事故驱动</h2>
+    <p class="page-lead">
+      这个仓库的每个设计判断都来自真实事故，而非教程。三起事故、三套机制：
+    </p>
+    <div class="cards">
+      <div class="card" style="display: block">
+        <h3>幽灵事故 → 四通道沙箱</h3>
+        <p>
+          2026-10-09 18:00，一个并行 agent 会话在错误目录（旧 AINews compose 树）执行
+          <code>docker compose build+up</code>——每一步都合法——18:00:09 生产 worker/api 被幽灵代码替换，
+          18:25 重建恢复（25 分钟）。权限门全程放行，因为缺的不是“工具权限”：compose 是合法工具、命令是合法命令，
+          缺的是<strong>执行环境边界</strong>（哪个 compose 项目 / 目录树 / 命名空间）。
+        </p>
+        <p>
+          长出的机制：权限（意图门）与沙箱（执行环境边界）拆成<strong>两道独立的门</strong>，
+          policy 增加第四通道 sandbox；<a href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>sandbox-demo</a>
+          把事故重建成可重放剧本，3 次重放逐字节一致。
+        </p>
+      </div>
+      <div class="card" style="display: block">
+        <h3>模型列表轮换 → 能力侦察</h3>
+        <p>
+          本地 OpenAI 兼容代理（litellm 网关）的模型列表会随时间变：
+          <code>qwen3.8-flash</code> 下架后 qwen 系只剩 <code>qwen3.8-flash-next</code>（tool calling + SSE 已验证）；
+          <code>step-5-preview</code> 仍在，但直接回“无法调用工具”。
+        </p>
+        <p>
+          长出的机制：跑任务前先 <code>GET /v1/models</code> + tool-calling 冒烟测试——
+          <strong>能力矩阵必须动态侦察</strong>，静态配置必过期；provider 是组件不是基础设施，harness 必须能降级。
+        </p>
+      </div>
+      <div class="card" style="display: block">
+        <h3>代理 400 → 防御性解析</h3>
+        <p>
+          19:33 起代理持续 400（请求被路由到要求旧版 functions 格式的 code 后端），
+          同时工具名带不可见字符，造成 <code>unknown tool: get_weather</code> 假错。
+          同一请求重试 100 次也是 400——契约违约不盲目重试。
+        </p>
+        <p>
+          长出的机制：4xx 读响应体报真实错误、工具名 <code>tc.name.trim()</code>、
+          历史 tool_calls 统一按 OpenAI wire 格式回写（arguments 必须是 JSON 字符串）——
+          <strong>防御性解析是 API 层职责</strong>。
+        </p>
+      </div>
+    </div>
+    <p style="margin-top: 14px; color: var(--text-soft); font-size: 0.92rem">
+      完整时间线与修复记录见仓库 <a href={repo + '/notes'} target="_blank" rel="noopener">notes/ ↗</a>
+      （harness-from-scratch §⑨ 代理实录 / sandbox S1 / api-engineering S4）。
+    </p>
   </section>
 
   <section>

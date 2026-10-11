@@ -40,6 +40,29 @@ const toc = extractToc(entry.body ?? '');
 
       <Content />
 
+      {
+        meta.relatedQuestions.length > 0 && (
+          <section class="related-questions" aria-label="相关面试题">
+            <h3>相关面试题</h3>
+            <p class="rq-note">
+              选自 <a href={import.meta.env.BASE_URL + "interview/"}>面试题库</a>（题号 = 题库内编号，链接锚到对应小节）——追问到底 = 合格线。
+            </p>
+            <ul class="rq-list">
+              {
+                meta.relatedQuestions.map((q) => (
+                  <li>
+                    <a href={`${import.meta.env.BASE_URL}interview/#${encodeURIComponent(q.anchor)}`}>
+                      <span class="rq-no">{q.no}</span>
+                      {q.text}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+        )
+      }
+
       <footer class="page-foot">
         <a href={import.meta.env.BASE_URL + "map/"}>知识地图</a>
         <a href={import.meta.env.BASE_URL + "interview/"}>面试题库</a>

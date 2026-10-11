@@ -55,6 +55,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                       <StatusBadge status={c.status} />
                     </div>
                     <p class="dc-intro">{c.intro}</p>
+                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
                     <p class="dc-foot">作品详解 →</p>
                   </a>
                 ) : exists ? (
@@ -65,6 +66,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                       <StatusBadge status={c.status} />
                     </div>
                     <p class="dc-intro">{c.intro}</p>
+                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
                     <p class="dc-foot">进入课程 →</p>
                   </a>
                 ) : (
@@ -75,6 +77,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                       <StatusBadge status={c.status} />
                     </div>
                     <p class="dc-intro">{c.intro}</p>
+                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
                     <p class="dc-foot">撰写中（文件未就位）</p>
                   </div>
                 );
