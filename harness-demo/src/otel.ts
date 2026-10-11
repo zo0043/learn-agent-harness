@@ -1,5 +1,5 @@
 // ============================================================
-// D 课 S2：OTel GenAI 埋点（厂商中立的轨迹格式，语义约定见 notes/observability.md）
+// 可观测 §S2：OTel GenAI 埋点（厂商中立的轨迹格式，语义约定见 notes/observability.md）
 //   span 树（S3）：invoke_agent（1 trace = 1 任务/会话）
 //                  ├─ chat          每次 LLM 调用（模型名/tokens/finish）
 //                  └─ execute_tool  每次工具调用（工具名/参数摘要/状态/结果摘要）

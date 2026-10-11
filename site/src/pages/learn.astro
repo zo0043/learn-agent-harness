@@ -50,7 +50,6 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                 return isWhiteboard ? (
                   <a class="card domain-card" href={import.meta.env.BASE_URL + "works/#whiteboard"}>
                     <div class="dc-top">
-                      <span class="dc-letter">{c.letter ?? '·'}</span>
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
                     </div>
@@ -61,7 +60,6 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                 ) : exists ? (
                   <a class="card domain-card" href={import.meta.env.BASE_URL + `c/${c.slug}/`}>
                     <div class="dc-top">
-                      <span class="dc-letter">{c.letter ?? '·'}</span>
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
                     </div>
@@ -72,7 +70,6 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                 ) : (
                   <div class="card domain-card soon" aria-label="撰写中">
                     <div class="dc-top">
-                      <span class="dc-letter">{c.letter ?? '·'}</span>
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
                     </div>
@@ -95,12 +92,12 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
     </div>
     <div class="card" style="display: block">
       <p style="margin-top: 0">
-        <code>C 系统设计</code> → <code>E 沙箱（续 S2）</code> → <code>H 评测</code> →
-        <code>G durable execution</code> → <code>I MCP + 安全</code> → <code>J API + 路由</code> →
-        <code>K 数据飞轮</code> →（P2 四课按目标岗位权重排）
+        <code>系统设计</code> → <code>沙箱与凭据（续 S2）</code> → <code>评测工程化</code> →
+        <code>durable execution</code> → <code>MCP 与供应链安全</code> → <code>API 与多模型路由</code> →
+        <code>数据飞轮</code> →（P2 四课按目标岗位权重排）
       </p>
       <p style="color: var(--text-soft); font-size: 0.92rem">
-        理由：C 把 A/B 收口成“设计能力”；E 续进行中且 demo 骨架已备；H 是 P1 三课（G/I/K）的公共地基。
+        理由:系统设计把「从零写 harness / RAG 与检索」收口成“设计能力”;沙箱与凭据讲义已展开且 demo 已落地;评测工程化是 P1 三课(durable execution / MCP 与供应链安全 / 数据飞轮)的公共地基。
       </p>
       <p style="font-size: 0.9rem">
         完整依赖图与横切知识点见 <a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a>

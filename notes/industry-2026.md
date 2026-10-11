@@ -1,7 +1,7 @@
 # 行业前线调研（2026-10）
 
 > 调研素材（非课程正文）。两轮外部调研（2026-10-11），核心论断均实抓官方一手源；2025 前时间线节点为公认公开事件。
-> 用途：① 站点「2026 前线」「资深分水岭」板块底稿 ② I/M/C 课更新输入 ③ 面试谈资弹药库。
+> 用途:1 站点「2026 前线」「资深分水岭」板块底稿 2 MCP 与供应链安全 / 框架生态 / 系统设计 更新输入 3 面试谈资弹药库。
 
 ## 一、头部团队工程经验（6 条）
 
@@ -53,7 +53,7 @@
 
 ## 五、候选域信号（外部验证后的定级）
 
-- **computer use / GUI agent = 升为一等**（高重要度）：Claude Code computer use/Chrome/iOS 模拟器；OpenAI 设 Agent Post-Training、Computer Use Research 专岗 → 建议并入 C 课主线，备"GUI agent 的权限与观察怎么处理"追问。
+- **computer use / GUI agent = 升为一等**（高重要度）：Claude Code computer use/Chrome/iOS 模拟器；OpenAI 设 Agent Post-Training、Computer Use Research 专岗 → 建议并入 系统设计主线，备"GUI agent 的权限与观察怎么处理"追问。
 - **A2A 身份互操作 = 真实但热度低于 MCP** → 维持观察级，备一句："AAIF 治理下与 MCP 互补（agent↔agent vs agent↔工具），企业采用早期，我们尚未引入"——主动说"未引入"即显示做过功课。
 - **deep research = 本轮无协议级新动作**，属应用形态层，知道即可。
 - **生成式 UI = AG-UI 与 MCP/A2A 并列为第三支柱**（agent↔前端），知道即可。

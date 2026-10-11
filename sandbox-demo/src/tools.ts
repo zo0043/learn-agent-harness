@@ -6,7 +6,7 @@ import { ToolError } from "./types.js";
 import type { World } from "./sandbox.js";
 import type { Sandbox } from "./sandbox.js";
 
-/** 执行上下文：host=生产世界；sandbox=隔离视图（null=无沙箱层，E 课之前的状态）；step=逻辑时钟 */
+/** 执行上下文：host=生产世界；sandbox=隔离视图（null=无沙箱层，沙箱与凭据之前的状态）；step=逻辑时钟 */
 export interface ExecCtx {
   host: World;
   sandbox: Sandbox | null;
@@ -23,7 +23,7 @@ export interface ToolSpec {
 const str = (args: Record<string, unknown>, k: string): string => String(args[k] ?? "");
 /** 本次调用作用于哪个世界视图：有沙箱就只见它的隔离视图（生产不可见） */
 const targetWorld = (ctx: ExecCtx): World => (ctx.sandbox ? ctx.sandbox.world : ctx.host);
-/** 路径参数：有沙箱过路径边界，无沙箱原样（E 课之前没有执行环境边界） */
+/** 路径参数：有沙箱过路径边界，无沙箱原样（沙箱与凭据之前没有执行环境边界） */
 const pth = (args: Record<string, unknown>, k: string, ctx: ExecCtx): string =>
   ctx.sandbox ? ctx.sandbox.path(str(args, k)) : str(args, k);
 

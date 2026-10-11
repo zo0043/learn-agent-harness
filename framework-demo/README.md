@@ -1,11 +1,11 @@
-# framework-demo · 框架实操（M 课 P2.4）
+# framework-demo · 框架实操(框架生态 P2)
 
 用 **Claude Agent SDK**（`@anthropic-ai/claude-agent-sdk`，Claude Code 的编程化）跑通
 **subagent + 权限 + 会话**的最小实操，指向**本地双格式代理**（同一代理同时支持 OpenAI
 `/v1/chat/completions` 与 Anthropic `/v1/messages`）。
 
-目的不是"会用 SDK"，而是 M 课 S3'**框架给你什么/藏什么**的实证：
-A 课 harness-demo 里从零写的每一层（loop/工具/权限/会话），在这里各被哪行 SDK 选项替代、
+目的不是"会用 SDK",而是 框架生态 §S3'**框架给你什么/藏什么**的实证:
+从零写 harness 里手写的每一层(loop/工具/权限/会话),在这里各被哪行 SDK 选项替代、
 哪些决策被藏进了 CLI 黑盒。
 
 ## 跑法
@@ -46,21 +46,21 @@ npm run demo    # 四能力全跑一遍（~12-15 次 LLM 调用），每步断�
 | ③ 权限 | `canUseTool` 回调：`rm` 命令返回 `{ behavior: "deny", message }`，deny 消息作为 tool_result 回进上下文 | ✅ 拦截到 `rm -rf` 并 deny；agent 未崩、最终回答说明处理方式 |
 | ④ session | run1 从 result 消息取 `session_id`；run2 `options: { resume: session_id }` | ✅ resume 后同一 session_id；第二次回答带出第一次记住的代号（Nebula-7） |
 
-会话持久化发生在 `~/.claude/projects/<cwd 的 slug>/` 下的 JSONL（和 A⑥ 手写的 JSONL 同构）——
+会话持久化发生在 `~/.claude/projects/<cwd 的 slug>/` 下的 JSONL(和从零写 harness §6 手写的 JSONL 同构)——
 resume = 从会话文件重建历史，框架替你做了"文件定位 + 重建 + 续写"。
 
 ## 与 harness-demo 对照表（同一问题：SDK 替你做了什么/藏了什么）
 
-| 层 | harness-demo（A 课，~600 行手写） | framework-demo（SDK） | 给 / 藏 |
+| 层 | harness-demo(从零写 harness,~600 行手写) | framework-demo(SDK) | 给 / 藏 |
 |---|---|---|---|
 | 控制 loop | `agent.ts` 自己写 while+轮次计数 | `query()` 一个 AsyncGenerator | **给**：loop 形态、流式事件模型全免费。**藏**：轮次如何计、何时停（`maxTurns` 边界语义实测过坑） |
 | 工具协议 | `tools.ts` 自己定义 schema+dispatch | 内置 Read/Bash/Grep…，`allowedTools` 过滤 | **给**：工具市场+参数 schema。**藏**：每个内置工具的实现与副作用面（Bash 能干什么你没审过） |
 | 权限门 | `policy.ts` 规则表+审批回调，自己拦截 | `canUseTool`/`allowedTools`/`disallowedTools`/permissionMode | **给**：每次调用前的回调点。**藏**：规则优先级——实测 `allowedTools` 裸名会**抢在 canUseTool 之前 auto-approve**（SDK 有警告），规则引擎本身不透明 |
 | 会话/恢复 | `session.ts` JSONL 手写 append/重建 | 自动写 `~/.claude/projects/`，`resume` 一行 | **给**：持久化+恢复默认值。**藏**：存哪、怎么 slug 化 cwd、压缩/截断策略（`resumeSessionAt` 只露了一角） |
-| 子代理 | （A 课没写；pi-agents-team 是进程级编排） | `agents` 选项 + Task 工具，同进程上下文隔离 | **给**：委派协议+隔离上下文。**藏**：默认**不转发**子代理对话（要 `forwardSubagentText` 才看得到），子代理预算/模型继承规则 |
+| 子代理 | (从零写 harness 未涉及;pi-agents-team 是进程级编排) | `agents` 选项 + Task 工具,同进程上下文隔离 | **给**:委派协议+隔离上下文。**藏**:默认**不转发**子代理对话(要 `forwardSubagentText` 才看得到),子代理预算/模型继承规则 |
 | 端点/鉴权 | `llm.ts` 自己 fetch + 重试 | 设 `ANTHROPIC_BASE_URL`/`ANTHROPIC_API_KEY` 即可（CLI 子进程读 env） | **给**：Anthropic 格式直连非官方端点（本代理双格式，实测跑通）。**藏**：CLI 还会发后台请求（小快模型/自更新），得用 env 逐个堵（`ANTHROPIC_SMALL_FAST_MODEL`/`DISABLE_AUTOUPDATER`） |
 
-**一句话结论（可背）**：SDK 把 A 课 6 个文件的"默认决策"全做了，代价是——
+**一句话结论(可背)**:SDK 把从零写 harness 6 个文件的"默认决策"全做了,代价是——
 规则优先级、持久化位置、后台行为都藏进 CLI 黑盒；要改某个默认决策，
 你要么找 env/选项撬，要么退回自写 loop。**这就是"选框架=选一组不用重新论证的决策"的活样本。**
 

@@ -21,8 +21,8 @@ Anthropic《Writing Tools for Agents》：工具定义即契约——名称与�
 
 ## 本地映射
 
-- 已覆盖：harness 架构课 §3.1（描述=模型读的 API 文档/ACI、"优化工具比优化提示词花时间多"、强制绝对路径的 poka-yoke、"最小可用集合"、"人类说不清该用哪个，模型也说不清"）；§3.2 三道门（校验/权限/执行）与"拒绝也是合法结果"；课程 A ③ 实现了 ToolSpec（name/description/parameters/readonly）+ validateArgs 三层校验，实测模型调用未注册工具 city→错误回写→自己改调 get_weather。
-- 未覆盖：没有"描述质量 vs 成功率"的量化基准；工具返回值的 token 成本没有实测（A ③ 只校验入参，不管出参膨胀）。
+- 已覆盖：harness 架构课 §3.1（描述=模型读的 API 文档/ACI、"优化工具比优化提示词花时间多"、强制绝对路径的 poka-yoke、"最小可用集合"、"人类说不清该用哪个，模型也说不清"）；§3.2 三道门（校验/权限/执行）与"拒绝也是合法结果"；从零写 harness §3 实现了 ToolSpec（name/description/parameters/readonly）+ validateArgs 三层校验，实测模型调用未注册工具 city→错误回写→自己改调 get_weather。
+- 未覆盖：没有"描述质量 vs 成功率"的量化基准；工具返回值的 token 成本没有实测（从零写 harness §3 只校验入参，不管出参膨胀）。
 
 ## 面试一句话
 

@@ -1,5 +1,5 @@
 // ============================================================
-// demo 入口 —— E 课 S2：四通道 policy 引擎 + 幽灵事故重放
+// demo 入口 —— 沙箱与凭据 §S2：四通道 policy 引擎 + 幽灵事故重放
 //   npm run demo   全离线确定性：不调模型 / 不联网 / 不碰真实 FS / 不用墙钟
 // ============================================================
 import { Policy, makeApprover } from "./policy.js";
@@ -31,7 +31,7 @@ const FLOW_EXPECTED = ["ok", "denied", "ok", "denied", "denied", "ok", "blocked"
 function main(): void {
   const policy4 = new Policy(POLICY_4CH_RULES);
   const approver = makeApprover(APPROVAL_TABLE);
-  console.log("[sandbox-demo] E 课 S2 · 四通道 policy 引擎 + 幽灵事故重放（全离线确定性：mock 工具执行器，不调模型）\n");
+  console.log("[sandbox-demo] 沙箱与凭据 §S2 · 四通道 policy 引擎 + 幽灵事故重放（全离线确定性：mock 工具执行器，不调模型）\n");
 
   console.log("一、四通道 policy 判定流（S2）");
   console.log("    通道语义: allow=直接执行 / approve=人工审批(离线=预置审批表) / deny=拒绝 / sandbox=隔离环境内执行");
@@ -62,7 +62,7 @@ function main(): void {
 
   console.log("\n三、幽灵事故重放（FinHot 2026-10-09 18:00，恢复代价 25 分钟；同一输入序列跑两遍）：");
   for (const c of GHOST_SCRIPT) console.log(`      ${c.id} ${c.tool} ${JSON.stringify(c.args)} —— ${c.note}`);
-  const mkRunA = () => ({ label: "A · 仅权限门（E 课之前，复现事故）", script: GHOST_SCRIPT, policy: new Policy(GATE_ONLY_RULES), approver, host: makeHostWorld(), hostEnv: HOST_ENV, sandbox: null });
+  const mkRunA = () => ({ label: "A · 仅权限门（沙箱与凭据之前，复现事故）", script: GHOST_SCRIPT, policy: new Policy(GATE_ONLY_RULES), approver, host: makeHostWorld(), hostEnv: HOST_ENV, sandbox: null });
   const mkRunB = () => ({ label: "B · 四通道 policy + 沙箱（本课之后）", script: GHOST_SCRIPT, policy: policy4, approver, host: makeHostWorld(), hostEnv: HOST_ENV, sandbox: freshSessionSandbox() });
   const ta = runScript(mkRunA());
   for (const l of ta.lines) console.log(`    ${l}`);

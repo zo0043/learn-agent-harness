@@ -28,7 +28,7 @@ const toc = extractToc(entry.body ?? '');
     <article class="markdown">
       <header class="course-meta-bar">
         <div class="meta-row">
-          <span class="chip chip-strong">{meta.letter ? `课程 ${meta.letter}` : meta.domain}</span>
+          <span class="chip chip-strong">{meta.domain}</span>
           <span class="chip">{meta.domain}</span>
           <span class="chip">{meta.phase === '—' ? '未分阶段' : meta.phase}</span>
           <StatusBadge status={meta.status} />

@@ -395,15 +395,15 @@ graph TD
 
 ```mermaid
 graph TD
-  H["✅ 已完成：harness 架构"] --> A["A 动手：从零写最小 harness<br/>loop+工具协议+权限门+日志"]
-  H --> B["B RAG：embedding→chunk→检索→rerank→生成<br/>→ 混合检索/RAG 评测"]
-  H --> F["F API 实操：SSE/结构化输出/caching/重试"]
-  B --> E["E 评测：golden set/LLM-judge/轨迹评测<br/>(嫁接 FinHot labeler 经验)"]
-  A --> C["C 系统设计模板：拆解→选模式→上下文策略→权限→评测→失败处理"]
+  H["✅ 已完成:harness 架构"] --> A["动手:从零写最小 harness<br/>loop+工具协议+权限门+日志"]
+  H --> B["RAG:embedding→chunk→检索→rerank→生成<br/>→ 混合检索/RAG 评测"]
+  H --> F["API 实操:SSE/结构化输出/caching/重试"]
+  B --> E["评测:golden set/LLM-judge/轨迹评测<br/>(嫁接 FinHot labeler 经验)"]
+  A --> C["系统设计模板:拆解→选模式→上下文策略→权限→评测→失败处理"]
   E --> C
   F --> C
-  A --> M["M MCP 协议"]
-  C --> Z["面试演练：模拟题+项目故事打磨"]
+  A --> M["MCP 协议"]
+  C --> Z["面试演练:模拟题+项目故事打磨"]
   M --> Z
 ```
 
@@ -430,7 +430,7 @@ graph TD
 | **agent 可观测**：OTel GenAI 语义约定、Span 建模、成本/token 归因、trace 回放调试 | 腾讯有专门岗（Agent 可观测研发工程师，2026-10） | 新热点 | ❌ 最大缺口：课程只有"离线评测闭环"，无 tracing/OTel |
 | **沙箱与凭据**：容器/microVM 隔离、凭据注入、行为漂移拦截、工具调用审计 | OpenAI Codex/Anthropic Runtime 均为一等公民；腾讯云 AgentRuntime 沙箱专门岗 | 新热点 | ❌ 缺口：课程"权限与 injection"≠执行环境隔离 |
 | **长期记忆**：跨会话 memory、记忆检索与遗忘 | 腾讯 2 个专门 JD（企微记忆系统、小微记忆方向） | 新热点 | ❌ 缺口 |
-| **durable execution**：checkpoint/快照恢复、long-horizon（稀疏反馈防能力衰减） | 腾讯 Harness 岗、OpenAI stateful workflows | 新热点 | ⚠️ 部分：harness 课第六节有恢复与重试，未延伸到 long-horizon |
+| **durable execution**：checkpoint/快照恢复、long-horizon（稀疏反馈防能力衰减） | 腾讯 Harness 岗、OpenAI stateful workflows | 新热点 | ⚠️ 部分：harness 架构课第六节有恢复与重试，未延伸到 long-horizon |
 | **评测 CI 化**：LLM-judge 设计、pass@k、轨迹级评分、评测集版本+CI 门禁 | 腾讯 Harness 岗、OpenAI Codex evals | 新热点 | ⚠️ 部分：有指标体系，缺 judge 校准/轨迹级/CI 门禁 |
 | **MCP 供应链安全**：工具投毒、跨源权限提升、运行时 Guardrails、红队 | 腾讯 Agent 安全专家岗（2026-09） | 新热点 | ⚠️ MCP 已计划，安全视角未列 |
 | **多模型路由/成本归因**：路由策略、token 预算、caching 命中率 | 腾讯 24/122 提成本/路由；OpenAI performance envelope | 主流 | ⚠️ 并入已计划的 API 实操课 |
@@ -446,20 +446,22 @@ graph TD
 - **企业工作流/业务 Agent**（腾讯 IEG/金融/WeTalk/营销）：RAG+企业知识库、MCP 集成、权限身份对接、全栈交付 0→1
 - **平台基础设施**（AgentRuntime/可观测/Managed Agents）：分布式、多租户沙箱、stateful workflow、capacity、OTel GenAI
 
-## 更新后的学习顺序（替换第十四节顺序）
+## 更新后的学习顺序(替换第十四节顺序)
+
+> 注:以下是 2026-10-10 的规划快照(按当时 JD 调研排)。此后课程体系已重排为 `knowledge-map.md` 的**课程总表**(16 域),以那份为准;这里的字母不再代表课程编号。
 
 ```
-P0（地基，不变）：A 从零写最小 harness → B RAG 实操 → C 系统设计模板
-P0（新）：D agent 可观测（OTel GenAI/tracing/成本归因）
-         E 沙箱与凭据安全（接 harness 课第七节，FinHot 幽灵事故=现成故事）
-         F 长期记忆（跨会话 memory 设计）
-P1：G durable execution/long-horizon（第六节延伸）
-    H 评测 CI 化（judge 校准/pass@k/轨迹级/CI 门禁；FinHot labeler 故事嫁接）
-    I MCP 协议 + MCP 供应链安全
-    J API 实操 + 多模型路由/成本工程（合并）
-    K harness 自进化/数据飞轮（评测课延伸）
-P2：L 模型基础、M 框架生态、N A2A/agent 身份（观察）、O computer use（认知）
-方向性（看目标岗）：生成式 UI、端侧推理
+P0(地基,不变):从零写最小 harness → RAG 实操 → 系统设计模板
+P0(新):可观测(OTel GenAI/tracing/成本归因)
+         沙箱与凭据安全(接 harness 架构课第七节,FinHot 幽灵事故=现成故事)
+         长期记忆(跨会话 memory 设计)
+P1:durable execution/long-horizon(第六节延伸)
+    评测 CI 化(judge 校准/pass@k/轨迹级/CI 门禁;FinHot labeler 故事嫁接)
+    MCP 协议 + MCP 供应链安全
+    API 实操 + 多模型路由/成本工程(合并)
+    harness 自进化/数据飞轮(评测课延伸)
+P2:模型基础、框架生态、A2A/agent 身份(观察)、computer use(认知)
+方向性(看目标岗):生成式 UI、端侧推理
 ```
 
 ## 待办

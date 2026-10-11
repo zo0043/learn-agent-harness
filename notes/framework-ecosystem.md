@@ -1,10 +1,10 @@
-# M 课 · 框架生态（懂原理不背 API）
+# 框架生态(懂原理不背 API)
 
 > 优先级 P2 · 状态：📐 讲义已展开，待提问演练
 > 深度定位：路线图原话"懂原理即可，不背 API"——目标是**选型判断力 + 框架边界感**
 > **我的独特资产**：pi 是**日常在用+读过文档+跑过 RPC 模式（pi-agents-team workers）的框架**——多数候选人对框架只有 API 级认知
 
-**本课导读**：框架课不是"API 速查"，而是回答三个问题——**它替我做了 A 课哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用 A 课（从零写 harness）的语言拆任何框架，面试官就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（Claude Agent SDK 四能力，2026-10-11 本机实测 **11/11** 通过）当实证，凡标"已实测"的结论都能指着代码复现。
+**本课导读**：框架课不是"API 速查"，而是回答三个问题——**它替我做了从零写 harness 的哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用从零写 harness 的语言拆任何框架，面试官就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（Claude Agent SDK 四能力，2026-10-11 本机实测 **11/11** 通过）当实证，凡标"已实测"的结论都能指着代码复现。
 
 **本课地图**（每节回答一个问题）：
 
@@ -24,11 +24,11 @@
 
 ## S1 框架三族（坐标系）
 
-**这一节解决什么问题**：先立坐标系。面试里问"你用过什么框架"时，真正被评估的不是名单长度，而是你**按什么轴给框架分类**。本课的轴只有一条：**它替你拿走了 A 课十节里的哪几层**。按这条轴，市面上的东西分成三族——不是按 star 数、不是按厂商，也不是按"是不是 LLM 原生"。
+**这一节解决什么问题**：先立坐标系。面试里问"你用过什么框架"时，真正被评估的不是名单长度，而是你**按什么轴给框架分类**。本课的轴只有一条：**它替你拿走了从零写 harness 十节里的哪几层**。按这条轴，市面上的东西分成三族——不是按 star 数、不是按厂商，也不是按"是不是 LLM 原生"。
 
 | 族 | 代表 | 给的是什么 | 藏的是什么 |
 |---|---|---|---|
-| **Harness 级**（完整 agent 运行时） | pi、Claude Code（及其 SDK 化） | loop+工具+会话+权限+子代理+技能+TUI/RPC——**整个 harness 课第十节的现成实现** | 每层的默认选择（loop 形态/压缩策略/恢复规则）——用得不深=知其然 |
+| **Harness 级**（完整 agent 运行时） | pi、Claude Code（及其 SDK 化） | loop+工具+会话+权限+子代理+技能+TUI/RPC——**整个 harness 架构课第十节的现成实现** | 每层的默认选择（loop 形态/压缩策略/恢复规则）——用得不深=知其然 |
 | **编排库**（代码里组装 agent） | LangGraph（图/状态/checkpoint）、OpenAI Agents SDK（handoffs/guardrails/sessions）、Claude Agent SDK | 原语：状态机/节点/边、agent 交接、会话持久化 | 抽象层的默认假设（状态怎么序列化、恢复语义）——图模型不是万能的 |
 | **平台**（低代码/托管） | Dify/Coze/n8n 等 | 拖拽流程+托管 | 几乎全部（自定义 loop 行为难） |
 
@@ -70,31 +70,31 @@ flowchart TD
 
 ### S2.2 框架给你什么 vs 框架藏什么（核心辨析题）
 
-**给**：正确的默认值（流式解析/重试/会话持久化——A 课手写的每一层都是框架的"藏"）+ 生态（MCP 支持/工具市场/社区）+ 演进（安全补丁/新模型适配）。
-**藏**：A 课 10 节的每一层决策都藏在某行框架代码里——**读源码才能把"藏"变"给"**。
+**给**：正确的默认值（流式解析/重试/会话持久化——从零写 harness 手写的每一层都是框架的"藏"）+ 生态（MCP 支持/工具市场/社区）+ 演进（安全补丁/新模型适配）。
+**藏**：从零写 harness 十节的每一层决策都藏在某行框架代码里——**读源码才能把"藏"变"给"**。
 
-`framework-demo` 就是"藏"的活样本：A 课 harness-demo 手写的 6 个文件（loop/工具/权限/会话/子代理/端点），SDK 各用一个选项替代，代价是**规则优先级、持久化位置、后台行为都进了 CLI 黑盒**（对照表见 `framework-demo/README.md`）。可背结论：**"选框架=选一组不用重新论证的决策"**——要改某个默认决策，要么找 env/选项撬，要么退回自写 loop。
+`framework-demo` 就是"藏"的活样本：从零写 harness harness-demo 手写的 6 个文件（loop/工具/权限/会话/子代理/端点），SDK 各用一个选项替代，代价是**规则优先级、持久化位置、后台行为都进了 CLI 黑盒**（对照表见 `framework-demo/README.md`）。可背结论：**"选框架=选一组不用重新论证的决策"**——要改某个默认决策，要么找 env/选项撬，要么退回自写 loop。
 
 **"什么时候不用框架"（标准反问，要能答）**：
 - 控制循环本身是产品差异（如 FinHot 的 6 次调用固定结构+状态机=workflow 不是 agent loop，编排库够用，harness 级框架反而重）
 - 框架的默认恢复/权限语义与你的安全模型冲突（如默认 allow 的工具面 vs 你的默认 deny）
 - 依赖锁定（框架 API 漂移/停更）> 自维护成本
-- 教学/面试白板场景（A 课本身就证明了 150 行能覆盖核心层）
+- 教学/面试白板场景（从零写 harness 本身就证明了 150 行能覆盖核心层）
 
 ### S2.3 各家要点（定位级，2026-10 已核实）
 
 | 框架 | 一句话架构 | 面试谈资 |
 |---|---|---|
-| **pi**（earendil/badlogic 谱系，1.1.0） | 极简核心+扩展系统（extensions/skills/TUI）；会话=JSONL（同 A⑥ 设计）；RPC 模式可当 worker 进程 | **我日常用它+用它跑多 agent（pi-agents-team）**；扩展机制=JS/TS 直接进运行时（skill 加载、工具扩展）——框架即文档 |
+| **pi**（earendil/badlogic 谱系，1.1.0） | 极简核心+扩展系统（extensions/skills/TUI）；会话=JSONL（同 从零写 harness §⑥ 设计）；RPC 模式可当 worker 进程 | **我日常用它+用它跑多 agent（pi-agents-team）**；扩展机制=JS/TS 直接进运行时（skill 加载、工具扩展）——框架即文档 |
 | **Claude Agent SDK** | Claude Code 的编程化：把完整 harness 当库用（subagents/hooks/MCP/权限模式/skills/sessions） | **2025-09 由 Claude Code SDK 改名而来**（Python+TypeScript，Apache 2.0）；"Claude Code 的机制=官方参考实现"，SDK=机制的可编程面 |
-| **OpenAI Agents SDK** | **Swarm 的官方后继**（2025 GA，Apache 2.0）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（C 课 S3）；guardrails=I 课 Guardrails 的框架版 |
-| **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x，当前 1.0.1；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 C 课 S3 的 workflow 模式显式化；checkpoint=G 课 durable 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
+| **OpenAI Agents SDK** | **Swarm 的官方后继**（2025 GA，Apache 2.0）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（系统设计 §S3）；guardrails=MCP 与供应链安全 Guardrails 的框架版 |
+| **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x，当前 1.0.1；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 系统设计 §S3 的 workflow 模式显式化；checkpoint=durable execution 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
 | **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF，A2A 同入（A2A **TSC 共 8 席**：Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM；AAIF 自身技术委员会另为 8 家） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
-| **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（I 课 S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
-| **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 面试谈资："GUI agent 不再是边角方向"；追问见 C 课 S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
+| **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（MCP 与供应链安全 §S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
+| **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 面试谈资："GUI agent 不再是边角方向"；追问见 系统设计 §S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
 | **OpenAI Codex** [2026现行] | 由 CLI 转向 **agent 基础设施**：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；**AgentKit=低代码入口** | "OpenAI 在把 Codex 做成平台而不是产品"；https://developers.openai.com/codex |
 
-**共同点（比单家更值钱的面试点）**：四家都在解同一组问题——会话持久化（JSONL/checkpoint）、子代理边界（上下文隔离）、工具标准化（MCP）、权限/护栏（guardrails/hooks/policy）。**框架生态的收敛=行业问题定义的收敛**——我用 A 课从零写过这些层，所以能看出四家在做同一件事。
+**共同点（比单家更值钱的面试点）**：四家都在解同一组问题——会话持久化（JSONL/checkpoint）、子代理边界（上下文隔离）、工具标准化（MCP）、权限/护栏（guardrails/hooks/policy）。**框架生态的收敛=行业问题定义的收敛**——我在从零写 harness 里从零写过这些层，所以能看出四家在做同一件事。
 
 ---
 
@@ -122,7 +122,7 @@ flowchart LR
 
 ### 方向二：状态泄漏
 
-**漏法**：会话到底存哪、`cwd` 怎么 slug 化、压缩/截断策略是什么，SDK 只露出 `resume` / `resumeSessionAt` 一角。`framework-demo` 实测：会话落在 `~/.claude/projects/<cwd 的 slug>/` 下的 JSONL，`resume` = 从文件重建历史（与 A⑥ 手写 JSONL 同构）——但**文件位置、slug 规则、压缩策略都不在你的代码里**。
+**漏法**：会话到底存哪、`cwd` 怎么 slug 化、压缩/截断策略是什么，SDK 只露出 `resume` / `resumeSessionAt` 一角。`framework-demo` 实测：会话落在 `~/.claude/projects/<cwd 的 slug>/` 下的 JSONL，`resume` = 从文件重建历史（与 从零写 harness §⑥ 手写 JSONL 同构）——但**文件位置、slug 规则、压缩策略都不在你的代码里**。
 
 **对照组**：pi 的会话是**条目树**、按活动分支重建；LangGraph 的 checkpoint 是**图状态的序列化**。三者都叫"持久化"，恢复语义却不同——这正是 S4 选型的第②层要问的。**状态泄漏的后果**：跨版本升级、迁移机器、审计取证时，你会发现恢复依赖一个你控制不了的框架内部格式。
 
@@ -130,7 +130,7 @@ flowchart LR
 
 **漏法**：`query()` 把 `AsyncGenerator<SDKMessage>` 给你（"流式事件模型全免费"），但**内部语义不透明**。`framework-demo` 两个实测坑：① **子代理对话默认不出主流**，只有 tool_use/tool_result 心跳，要 `forwardSubagentText: true` 才拿到带 `parent_tool_use_id` 的完整嵌套对话——所以"子代理上下文隔离"这个抽象，默认是**不让你看**的；② `maxTurns: 1` 直接 `error_max_turns`——turn 计数包含轮次边界，别按"1 次回答=1 turn"想。
 
-**后果**：想接自己的可观测（OTel/D 课）时会发现，框架给的事件不够、也不保证稳定；"可观测出口"必须在选型第④层单独问。
+**后果**：想接自己的可观测（OTel/可观测）时会发现，框架给的事件不够、也不保证稳定；"可观测出口"必须在选型第④层单独问。
 
 ### 失败模式小结
 
@@ -152,7 +152,7 @@ flowchart TD
   Q0 -->|"能（步骤可预定义）"| WF["编排库 / 图引擎（LangGraph 类）—— 不用 harness 级"]
   Q0 -->|"不能（需模型自决）"| Q1{"控制循环本身是产品差异吗？"}
   Q1 -->|"是"| Q2{"团队能长期维护 harness 吗？"}
-  Q2 -->|"能"| SELF["自研 harness（A 课路线）+ 选择性接 SDK 原语"]
+  Q2 -->|"能"| SELF["自研 harness（从零写 harness 路线）+ 选择性接 SDK 原语"]
   Q2 -->|"不能"| Q3{"需要多租户 / 托管 / 强沙箱隔离吗？"}
   Q1 -->|"不是（快速交付）"| Q3
   Q3 -->|"需要"| HOST["托管运行时（Managed Agents / Codex hosted）"]
@@ -166,14 +166,14 @@ flowchart TD
   SDK --> DONE
 ```
 
-**怎么读这棵树**：它逼你先回答"这任务是 workflow 还是 agent"（C 课 S3 的分水岭），再回答"这个 loop 是不是我的差异化"。**只有"需要模型自决 + loop 是差异化 + 团队养得起"三条同时成立，才轮到自研 harness。** 任何时候能用 workflow 表达，就往①走——自由度是成本。
+**怎么读这棵树**：它逼你先回答"这任务是 workflow 还是 agent"（系统设计 §S3 的分水岭），再回答"这个 loop 是不是我的差异化"。**只有"需要模型自决 + loop 是差异化 + 团队养得起"三条同时成立，才轮到自研 harness。** 任何时候能用 workflow 表达，就往①走——自由度是成本。
 
 ### S4.1 选型四层（可背话术）
 
 不管树走到哪个叶子，落选项之前过这四层（**顺序就是优先级**）：
 
-1. **控制循环模型**：自由 loop vs 图 vs 固定 workflow——先匹配任务形态（C 课 S3）。
-2. **持久化/恢复语义**：G 课三机制（journal/checkpoint/幂等）各做了多少？恢复的粒度、位置、可迁移性。
+1. **控制循环模型**：自由 loop vs 图 vs 固定 workflow——先匹配任务形态（系统设计 §S3）。
+2. **持久化/恢复语义**：durable execution 三机制（journal/checkpoint/幂等）各做了多少？恢复的粒度、位置、可迁移性。
 3. **权限/护栏模型**：默认 allow 还是默认 deny？审批粒度是"按工具"还是"按调用"？会不会像 `allowedTools` 那样泄漏（S3 方向一）？
 4. **可观测出口**：OTel？原始轨迹导出？事件是否稳定、够用（S3 方向三）？
 
@@ -186,7 +186,7 @@ flowchart TD
 | 升级破坏性 | 框架大版本改 API/行为（如 LangGraph 1.0 把 `create_react_agent` 迁走） | pin 版本 + 升级前跑回归断言（framework-demo 的断言矩阵就是模板） |
 | 锁定成本 | 状态格式/权限语义进框架黑盒，迁移要重写 | 关键状态自留事件日志（S5）；选状态/权限语义透明的实现 |
 | 维护人力 | harness 假设会随模型升级腐烂（industry-2026 §一.3） | 没人维护就别自研；有人维护也要为"尚不存在的模型"写稳定接口 |
-| 生态/标准 | MCP 支持、工具市场、社区 | 只把 MCP 当"工具接入面"，权限边界仍在自己执行层（I 课） |
+| 生态/标准 | MCP 支持、工具市场、社区 | 只把 MCP 当"工具接入面"，权限边界仍在自己执行层（MCP 与供应链安全） |
 
 ---
 
@@ -196,7 +196,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  subgraph SELF["自研 harness（A 课）"]
+  subgraph SELF["自研 harness(从零写 harness)"]
     A1["工具协议 / JSON schema"]
     A2["会话事件结构（JSONL 条目树）"]
     A3["权限三道门（校验→策略→执行）"]
@@ -218,7 +218,7 @@ flowchart LR
   KEEP["真正框架无关的资产：评测 golden set、轨迹断言、权限判据、失败分类学"] -.-> FW
 ```
 
-**能带走的三类**：① **接口设计知识**（工具 schema/描述=ACI，A③）；② **权限判据**（默认 deny、风险分级、审批粒度——实现要按框架重写，但要防 S3 方向一的泄漏）；③ **评测与可观测资产**（golden set、轨迹断言、失败分类学）——**这些永远框架无关，且是选型/迁移时唯一能判断"换完到底是好是坏"的尺子**。
+**能带走的三类**：① **接口设计知识**（工具 schema/描述=ACI，从零写 harness §③）；② **权限判据**（默认 deny、风险分级、审批粒度——实现要按框架重写，但要防 S3 方向一的泄漏）；③ **评测与可观测资产**（golden set、轨迹断言、失败分类学）——**这些永远框架无关，且是选型/迁移时唯一能判断"换完到底是好是坏"的尺子**。
 
 **沉没成本**：自研 loop 的控制流、手写流式 SSE 拼接、手写重试/退避。`framework-demo` 的对照表显示，这些正是 SDK 一个 `query()` 就吸收掉的层——迁移时**不心疼**，心疼的是没把这些层的**判据**沉淀成评测。
 
@@ -230,16 +230,16 @@ flowchart LR
 
 别人讲框架："我用过 LangGraph 做了个 demo。"
 我讲框架："**pi 是我每天干活的主力 harness**，我能讲到实现层：
-- 会话=JSONL 事件日志，上下文由日志确定性重建（=A⑥ 的设计，harness-demo 是我按它复现的）
+- 会话=JSONL 事件日志，上下文由日志确定性重建（=从零写 harness §⑥ 的设计，harness-demo 是我按它复现的）
 - 扩展系统：TS 扩展直接进运行时（quiz/md-log 扩展是我装过的）；skill=按需加载的指令包
 - **RPC 模式**：pi-agents-team 的 worker 就是 `pi --mode rpc` 子进程——我跑过 orchestrator+7 类 profile 的多 agent 编排（路径范围/final_answer 契约/relay 问答）
-- Magic Context：压缩/归档/检索的上下文工程实装（harness 课第五节的活教材，F 课记忆系统的活教材）"
+- Magic Context：压缩/归档/检索的上下文工程实装（harness 架构课第五节的活教材，长期记忆系统的活教材）"
 
-**失败模式**：把 pi 当成"一个 CLI"讲——面试官听不出你和普通用户的差别。正确的讲法是**每句话都落到 A 课某一层**：JSONL=会话层、扩展=定制资源层、RPC=宿主接口层、Magic Context=上下文工程层。
+**失败模式**：把 pi 当成"一个 CLI"讲——面试官听不出你和普通用户的差别。正确的讲法是**每句话都落到从零写 harness 的某一层**：JSONL=会话层、扩展=定制资源层、RPC=宿主接口层、Magic Context=上下文工程层。
 
-**这个故事的面试价值**：把"框架使用者"升级成"harness 机制的活样本"——每个框架话题都能落回自己的日常实操。.pi-agents-team 里 orchestrator+workers 的路径范围、`<final_answer>` 摘要、relay 问答，正好对应 C 课 S3 的 orchestrator-workers 与 harness 课 §8 的上下文隔离（N 课 S6 框架对照可交叉引用）。
+**这个故事的面试价值**：把"框架使用者"升级成"harness 机制的活样本"——每个框架话题都能落回自己的日常实操。.pi-agents-team 里 orchestrator+workers 的路径范围、`<final_answer>` 摘要、relay 问答，正好对应 系统设计 §S3 的 orchestrator-workers 与 harness 架构课 §8 的上下文隔离（多智能体编排 §S6 框架对照可交叉引用）。
 
-**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（harness 课第十二节）。
+**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（harness 架构课第十二节）。
 
 ---
 
@@ -252,7 +252,7 @@ flowchart LR
 ### 步骤 0 · 先问"该不该用框架"
 
 三个问题，缺一不可：
-1. **规则式方案/固定 workflow 能表达吗？** 不能——coding agent 的下一步不可预知（C 课 S3），必须有自由 loop。
+1. **规则式方案/固定 workflow 能表达吗？** 不能——coding agent 的下一步不可预知（系统设计 §S3），必须有自由 loop。
 2. **控制循环本身是产品差异吗？** 不是——目标是交付一个能跑的 agent，loop 形态可复用现成实现。
 3. **团队养得起自研 harness 吗？** 短期养不起，走框架起步。
 
@@ -309,7 +309,7 @@ flowchart LR
 ### S8.1 把框架当能力
 
 **错误**：以为"用了 Claude Agent SDK / LangGraph"就等于拥有了能力。
-**现象**：拿框架名当卖点，讲不出它替你做了 A 课哪几层、藏了什么默认决策。
+**现象**：拿框架名当卖点，讲不出它替你做了从零写 harness 的哪几层、藏了什么默认决策。
 **对策**：用 S1/S2 的语言拆解——框架=预制件+默认决策；每个能力指到具体层。
 **面试官追问**："用框架和自研，你团队的能力差别在哪？"——答：框架省的是**实现**，不省**判断**；判断（权限判据/评测/失败分类）仍然要自己建。
 
@@ -323,8 +323,8 @@ flowchart LR
 ### S8.3 把"支持多智能体"当优点
 
 **错误**：因为框架"支持多智能体"就选它，甚至一上来就多 agent。
-**现象**：为几个百分点烧掉 ~15× token（N 课 S1）；协调与调试成本陡增。
-**对策**：多智能体买的是**上下文隔离 + 并行**，不是"更聪明"；先证明单 agent + 检索打不满需求（C 课 S3 / N 课 S1）。
+**现象**：为几个百分点烧掉 ~15× token（多智能体编排 §S1）；协调与调试成本陡增。
+**对策**：多智能体买的是**上下文隔离 + 并行**，不是"更聪明"；先证明单 agent + 检索打不满需求（系统设计 §S3 / 多智能体编排 §S1）。
 **面试官追问**："框架内置 subagents，是不是就该用？"——答：内置只是**更容易**，不是**更该用**；值不值取决于任务可拆分性与预算。
 
 ### S8.4 忽略框架的升级破坏性
@@ -345,7 +345,7 @@ flowchart LR
 
 **错误**：以为"框架有 tracing/事件流"就等于可观测闭环。
 **现象**：S3 方向三——子代理对话默认不转发、事件语义不透明；结果定位不了失败归因。
-**对策**：选型第④层单问"OTel/原始轨迹导出在哪层"；不够就在自己执行层埋点（D 课），并像 `framework-demo` 一样做**确定性断言**当验收。
+**对策**：选型第④层单问"OTel/原始轨迹导出在哪层"；不够就在自己执行层埋点（可观测），并像 `framework-demo` 一样做**确定性断言**当验收。
 **面试官追问**："框架自带 tracing 够用吗？"——答：够不够取决于你要的失败归因粒度；能重放事件日志 + 逐轨迹 eval 才是闭环（industry-2026 §四.6）。
 
 ---
@@ -357,10 +357,10 @@ flowchart LR
 | # | 题目 | 考察 |
 |---|---|---|
 | 1 | "LangGraph 是不是比自研 loop 好？"——给出让它成立的两个条件+两个不成立的条件 | S2 |
-| 2 | pi 的 JSONL 会话 vs LangGraph checkpoint：恢复语义差在哪？ | S2（G 课联动） |
+| 2 | pi 的 JSONL 会话 vs LangGraph checkpoint：恢复语义差在哪？ | S2（durable execution联动） |
 | 3 | 一个需求："客服 agent，10 个意图分支，分支内 2-3 步固定操作"。选哪族框架？为什么不是 harness 级？ | S1/S2 |
 | 4 | 框架默认把工具结果直接进上下文。你的安全模型要求"工具结果隔离渲染"。改框架还是弃框架？判据？ | S2 |
-| 5 | 用 pi 跑过的 pi-agents-team 编排里，worker 之间的 trace 怎么关联？框架给了什么、缺什么？ | S6（D 课联动） |
+| 5 | 用 pi 跑过的 pi-agents-team 编排里，worker 之间的 trace 怎么关联？框架给了什么、缺什么？ | S6（可观测联动） |
 | 6 | Claude Agent SDK 和自研 harness 的边界在哪——什么功能你宁可自研也不等 SDK？ | S2 |
 | 7 | 框架停更了，你在上面有 3 年生产系统。迁移决策树？ | S1 锁定 |
 | 8 | 为什么"编排库"（LangGraph 类）和"harness 级"（pi 类）的恢复默认值会不同？ | S1/S2 |
@@ -374,12 +374,12 @@ flowchart LR
 ## 来源与锚点（2026-10 核实回填）
 
 - 各家现状：Claude Agent SDK（2025-09 改名，Python+TS）/ OpenAI Agents SDK（Swarm 后继，GA）已核实（Anthropic/OpenAI 官方博客+仓库）；LangGraph 1.0 已核实（2025-10 alpha → 稳定 1.0.x，GitHub releases + langchain 官方博客；2026-10-11 复核）——S2.3 已回填
-- 我的锚点：pi 1.1.0 日常（#38/#39 环境实践）、pi-agents-team 多 agent（orchestrator/worker/RPC，本会话正在用）、A 课（"框架藏什么"的实证）
+- 我的锚点：pi 1.1.0 日常（#38/#39 环境实践）、pi-agents-team 多 agent（orchestrator/worker/RPC，本会话正在用）、从零写 harness（"框架藏什么"的实证）
 - 实操已落地：framework-demo/（Claude Agent SDK 冒烟+四能力：agent/subagent/权限/会话，指向本地双格式代理）——S2/S3'框架给你什么/藏什么'的活样本；**2026-10-11 本机实测 `npm run demo` 退出码 0：11/11（10 条 `ok()` 断言 + 1 条整体判定）**，SDK 版本 `@anthropic-ai/claude-agent-sdk@0.3.296`
 - 对照 harness-demo 的踩坑实证见 framework-demo/README.md（2026-10-11：allowedTools 裸名会抢在 canUseTool 之前、子代理对话默认不出主流、maxTurns 语义反直觉）
 - 抽象泄漏定律：Joel Spolsky, *The Law of Leaky Abstractions*（2002）——S3 的理论锚点
 - 2026 行业上下文：Anthropic Managed Agents / token 经济学（agent ≈4×、多智能体 ≈15×）见 industry-2026.md §一；框架收敛=行业问题定义收敛（多智能体 S6 同源）
-- 接回：C（形态选型）、G（checkpoint）、D（可观测出口）、I（MCP 支持面）、F（Magic Context）、N（多智能体原语三条路）
+- 接回：系统设计(形态选型)、durable execution(checkpoint)、可观测(可观测出口)、MCP 与供应链安全(MCP 支持面)、长期记忆(Magic Context)、多智能体编排(多智能体原语三条路)
 
 <!-- TODO 核实: LangGraph 1.0.x 的 HITL interrupt 具体 API 名与语义（本课只作定位级引用，未本地实测） -->
 <!-- TODO 核实: OpenAI Agents SDK 是否提供一等人工审批/中断原语（本仓库未实测，沿用官方文档记忆，勿当既成事实） -->

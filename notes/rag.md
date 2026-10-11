@@ -3,7 +3,7 @@
 > 课程日志 · 2026-10-10 开课 · 完整教程版（先讲完，后续再练习提问）
 > 目标：**面试导向**——能讲清 embedding 机制、pipeline 每层为什么存在、应对"设计企业知识库问答"系统设计题
 > 探测结论：从未写过向量检索代码；机制理解到"大意"层
-> 节奏约定：沿用 harness 课——naive 版先行，每层 = "naive 在哪里坏 → 长出什么"
+> 节奏约定：沿用 harness 架构课——naive 版先行，每层 = "naive 在哪里坏 → 长出什么"
 
 ---
 
@@ -116,7 +116,7 @@ score(d) = Σ over each list: 1 / (k + rank_i(d))     # k 典型 60
 - cross-encoder：联合编码 → 更准、不能预建（每对都要现算）→ 只做精排
 - 中间还有 late interaction（如 ColBERT 的 token 级匹配），知道存在即可
 
-架构直觉（接回 harness 课）：**便宜的粗筛 + 贵的精修**——和"即时检索 + 深度阅读"、"摘要 + 按需展开"是同一个工程模式在检索里的投影。
+架构直觉（接回 harness 架构课）：**便宜的粗筛 + 贵的精修**——和"即时检索 + 深度阅读"、"摘要 + 按需展开"是同一个工程模式在检索里的投影。
 
 ---
 
@@ -131,7 +131,7 @@ score(d) = Σ over each list: 1 / (k + rank_i(d))     # k 典型 60
    两类修复手段完全不同（改检索 vs 改提示词/换模型），**不能定位就不能修**
 3. **"窗口有 1M 了，还要 RAG 吗？"（高频面试题）**：
    - 2023 年 RAG 的理由是"窗口不够"——今天这个理由弱了，但不是没有了
-   - 真正的理由：**成本**（每 query 只付相关 token，全量塞是 100× 费用 × 延迟）、**注意力质量**（harness 课的 context rot：token 越多回忆越差，噪声稀释信号）、**时效**（更新语料 = 重建索引，不动模型）、**权限**（只索引用户可见的部分，检索时过滤）
+   - 真正的理由：**成本**（每 query 只付相关 token，全量塞是 100× 费用 × 延迟）、**注意力质量**（harness 架构课的 context rot：token 越多回忆越差，噪声稀释信号）、**时效**（更新语料 = 重建索引，不动模型）、**权限**（只索引用户可见的部分，检索时过滤）
    - 小语料（< 窗口）+ 低 QPS + 低延迟不敏感 → 硬塞也合理，RAG 不是教条
 
 ---
@@ -164,7 +164,7 @@ score(d) = Σ over each list: 1 / (k + rank_i(d))     # k 典型 60
 
 | 方案 | 适用 | 不适用 |
 |---|---|---|
-| **Agentic 检索**（just-in-time）：给 agent grep/glob/read，让它自己探索文件系统（harness 课第五节：Claude Code 模式） | 语料是文件结构、问题需多步探索、agent 能自己验证读到的东西、延迟/成本可接受 | 高 QPS 低延迟、非文本语料、无法迭代探索 |
+| **Agentic 检索**（just-in-time）：给 agent grep/glob/read，让它自己探索文件系统（harness 架构课第五节：Claude Code 模式） | 语料是文件结构、问题需多步探索、agent 能自己验证读到的东西、延迟/成本可接受 | 高 QPS 低延迟、非文本语料、无法迭代探索 |
 | **长上下文硬塞** | 小语料、低 QPS、要求绝对完整 | 大语料、高成本敏感、注意力稀释 |
 | **微调**（把知识烘进权重） | 稳定、窄域、高频的知识 | 语料频繁更新（要重训）、长尾知识、需要溯源 |
 
@@ -213,7 +213,7 @@ corpus（几篇真实文档）
 ## 附：来源与锚点
 
 - 经典/稳定知识（无版本敏感）：HNSW/IVF、RRF（Cormack 2009, k=60）、BM25、bi/cross-encoder、recall@k/MRR/nDCG、RAGAS 式指标、HyDE（Gao et al. 2022）
-- 接回 harness 课：⑤ query 改写→agent 化光谱；⑦ 粗筛+精修模式；⑧ context rot；⑩ agentic 检索 = 第五节 just-in-time
+- 接回 harness 架构课：⑤ query 改写→agent 化光谱；⑦ 粗筛+精修模式；⑧ context rot；⑩ agentic 检索 = 第五节 just-in-time
 - 你的生产锚点：FinHot（Postgres→pgvector 选型故事；labeler→离线评测闭环故事）
 - 面试陷阱清单：embedding≠理解；ANN 近似可接受的原因；窗口大≠不用 RAG；RAG vs 微调的本质（知识外置）
 
@@ -246,5 +246,5 @@ npm run demo:rag        # S4 端到端（含生成，3 次 LLM 调用）
 npm run demo:eval       # S5 golden set + recall@k
 ```
 
-**计划里没做的 4 题**（③ ANN / ④ rechunk / ⑥ re-embed / ⑦ 增量索引）：全是规模化故事，留给 E 课 / 生产上下文。
+**计划里没做的 4 题**（③ ANN / ④ rechunk / ⑥ re-embed / ⑦ 增量索引）：全是规模化故事，留给 沙箱与凭据 / 生产上下文。
 **工程观察**：语料是 Obsidian 活文档（实操中文件被外部保存过两次），索引是快照、语料会漂移 → 生产的增量 re-embed 问题。

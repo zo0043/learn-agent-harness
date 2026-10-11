@@ -33,7 +33,7 @@ export interface RunConfig {
   approver: Approver;
   host: World;
   hostEnv: Record<string, string>;
-  sandbox: Sandbox | null; // null = 无沙箱层（E 课之前：动作面 = 本机 root）
+  sandbox: Sandbox | null; // null = 无沙箱层（沙箱与凭据之前：动作面 = 本机 root）
 }
 
 const MARK: Record<Status, string> = { ok: "✅", denied: "⛔", blocked: "🚫", error: "❌" };

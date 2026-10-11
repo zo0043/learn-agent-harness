@@ -15,7 +15,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── harness-demo ─────────────────────────────────── -->
   <section class="work" id="harness-demo">
     <h2>harness-demo · 从零手写 agent harness</h2>
-    <p class="work-tag">课程 A（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE）</p>
+    <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE）</p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
@@ -65,7 +65,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── rag-demo ─────────────────────────────────────── -->
   <section class="work" id="rag-demo">
     <h2>rag-demo · 零依赖 RAG</h2>
-    <p class="work-tag">课程 B（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑）</p>
+    <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑）</p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>词法检索只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
@@ -133,7 +133,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── sandbox-demo ──────────────────────────────────── -->
   <section class="work" id="sandbox-demo">
     <h2>sandbox-demo · 四通道 policy 引擎 + 幽灵事故重放</h2>
-    <p class="work-tag">课程 E（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟）</p>
+    <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟）</p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”（合法工具、合法命令），
@@ -171,7 +171,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── mcp-demo ────────────────────────────────────────── -->
   <section class="work" id="mcp-demo">
     <h2>mcp-demo · MCP 供应链投毒演示</h2>
-    <p class="work-tag">课程 I（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock）</p>
+    <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock）</p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——单层消融：仅 L1 输入消毒仍泄（输入层是软防线，挡不住不合规的模型），
@@ -205,7 +205,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── framework-demo ──────────────────────────────────── -->
   <section class="work" id="framework-demo">
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
-    <p class="work-tag">课程 M（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理</p>
+    <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理</p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——<code>allowedTools</code>
@@ -227,7 +227,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
       </table>
       <p>
         会话文件是 <code>~/.claude/projects/&lt;cwd slug&gt;/</code> 下的 JSONL（与 harness-demo 手写的 JSONL 同构）。
-        结论：SDK 把 A 课 6 个文件的“默认决策”全做了，代价是规则优先级、持久化位置、后台行为藏进 CLI 黑盒——
+        结论：SDK 把从零写 harness 的 6 个文件的“默认决策”全做了，代价是规则优先级、持久化位置、后台行为藏进 CLI 黑盒——
         这就是“选框架 = 选一组不用重新论证的决策”的活样本。
       </p>
 
@@ -260,17 +260,17 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     <div class="card work-card">
       <div class="roadmap-item">
         <span class="rm-name">双 agent demo</span>
-        <span class="rm-desc">双 agent 协作编排演示（编排 / 通信 / 失败隔离）· 课程 N S7（给 harness-demo 加子代理的设计练习已在笔记）</span>
+        <span class="rm-desc">双 agent 协作编排演示（编排 / 通信 / 失败隔离）· 多智能体编排 §S7（给 harness-demo 加子代理的设计练习已在笔记）</span>
         <span class="badge badge-dev">规划中</span>
       </div>
       <div class="roadmap-item">
         <span class="rm-name">OTLP 端到端</span>
-        <span class="rm-desc">harness-demo otel.ts 已 console 导出（demo:otel 实测 11 spans/1 trace）；下一步 OTEL_EXPORT_OTLP=1 接真实 collector，spans → OTLP → 可视化 · 课程 D</span>
+        <span class="rm-desc">harness-demo otel.ts 已 console 导出（demo:otel 实测 11 spans/1 trace）；下一步 OTEL_EXPORT_OTLP=1 接真实 collector，spans → OTLP → 可视化 · 可观测</span>
         <span class="badge badge-dev">规划中</span>
       </div>
       <div class="roadmap-item">
         <span class="rm-name">durable-execution demo</span>
-        <span class="rm-desc">长任务不丢不重：journal / checkpoint / 幂等——把 FinHot backfill（1645 行 / ~10% 失败 / 断点续跑）重建成可重放 demo · 课程 G</span>
+        <span class="rm-desc">长任务不丢不重：journal / checkpoint / 幂等——把 FinHot backfill（1645 行 / ~10% 失败 / 断点续跑）重建成可重放 demo · durable execution</span>
         <span class="badge badge-dev">规划中</span>
       </div>
       <div class="roadmap-item">

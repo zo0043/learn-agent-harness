@@ -1,4 +1,4 @@
-# harness-demo — 从零写最小 agent harness（课程 A 作品）
+# harness-demo — 从零写最小 agent harness（从零写 harness 作品）
 
 一个可运行的最小 agent harness，每个文件对应课程一节（见 `../notes/harness-from-scratch.md`）：
 
@@ -10,7 +10,7 @@ src/policy.ts    ⑤ 权限门：deny > approve > allow，默认 deny
 src/session.ts   ⑥ JSONL 轨迹日志 = 唯一事实源，上下文由日志派生
 src/context.ts   ⑧ token 估算 + 压缩（保头尾、中间 LLM 摘要）
 src/agent.ts     ②⑥⑦⑧ agent loop + guarded_tool_step（intent→执行→result）
-src/otel.ts      D课 S2 OTel GenAI 埋点（invoke_agent→chat/execute_tool span 树，console 导出，OTEL_EXPORT_OTLP=1 开 OTLP）
+src/otel.ts      可观测 §S2 OTel GenAI 埋点（invoke_agent→chat/execute_tool span 树，console 导出，OTEL_EXPORT_OTLP=1 开 OTLP）
 src/demo.ts      ⑨ demo 入口（五种模式）
 src/test-compact.ts  ⑧ 压缩逻辑的本地 mock 测试（不依赖外部代理）
 ```

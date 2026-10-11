@@ -15,7 +15,7 @@ export const GHOST_SCRIPT: ToolCall[] = [
   { id: "g4", tool: "check_container", args: { name: "finfo-worker", expectBuiltFrom: "work/ainews-new" }, note: "运维规则（事故后长出）：动生产容器前后核对构建来源/创建时间" },
 ];
 
-/** A⑤ 权限门 only（E 课之前的状态）：compose 是合法工具，每个动作都"能做" */
+/** A⑤ 权限门 only（沙箱与凭据之前的状态）：compose 是合法工具，每个动作都"能做" */
 export const GATE_ONLY_RULES: Rule[] = [
   { id: "g-deny-shell", channel: "deny", tools: ["run_shell"], note: "硬禁止（A⑤）" },
   { id: "g-approve-sideeffect", channel: "approve", tools: ["write_file", "net_fetch"], note: "副作用需审批（A⑤）" },

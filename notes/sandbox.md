@@ -1,8 +1,8 @@
-# E 课 · 沙箱与可复现性（coding agent P0）
+# 沙箱与凭据(可信执行环境与可复现性)
 
 > 开始：2026-10-11 · 状态：📖 讲义已展开、待提问演练
 > 教学素材：FinHot 2026-10-09 18:00 幽灵事故（并行会话污染 env/DB → 18:25 重建 worker/api）
-> 前置：harness 架构课 13 节 + 课程 A（harness-demo，含 policy.ts）+ 课程 B（rag-demo）
+> 前置：harness 架构课 13 节 + 从零写 harness（harness-demo，含 policy.ts）+ RAG 与检索（rag-demo）
 > 作品：`sandbox-demo/`（2026-10-11 已实现，src 600 行）——四通道 policy 引擎 + 幽灵事故重放（全离线确定性；A 组仅权限门 vs B 组四通道+沙箱；重放 3 次逐字节一致）
 
 ---
@@ -11,7 +11,7 @@
 
 普通程序的动作来自代码，agent 的动作来自**概率模型**——模型提出"行动请求"，真正落地的是执行层。这中间有一道许多团队会忽略的缝：**请求合法 ≠ 影响可控**。
 
-harness 课的第七节已经给了第一道门——权限（approval + scope）。但权限门回答的只是"**这个工具、这组参数，允不允许**"。它看不见执行时的**环境**：模型在哪个目录跑、容器里挂了什么、进程继承了谁的 env、出网有没有关。幽灵事故就是这条缝的教科书：`docker compose build+up` 是合法工具、命令完全合法，但它在**错误的目录树**里、用**错误的 compose 项目**、落在**没有命名空间隔离**的宿主上——于是生产容器被替换。
+harness 架构课的第七节已经给了第一道门——权限（approval + scope）。但权限门回答的只是"**这个工具、这组参数，允不允许**"。它看不见执行时的**环境**：模型在哪个目录跑、容器里挂了什么、进程继承了谁的 env、出网有没有关。幽灵事故就是这条缝的教科书：`docker compose build+up` 是合法工具、命令完全合法，但它在**错误的目录树**里、用**错误的 compose 项目**、落在**没有命名空间隔离**的宿主上——于是生产容器被替换。
 
 所以本课的第一命题从开篇就要立住：**权限门管意图，沙箱管执行环境；两者是两道独立的门，任何一层单独都不够。** 提示词（system prompt 里写"别动生产"）连第一道门都算不上，它是最不可靠的软约束，只能当第一道预警，不能当最后一道防线。
 
@@ -32,7 +32,7 @@ harness 课的第七节已经给了第一道门——权限（approval + scope�
 
 ## S1 地基：权限层 ≠ 沙箱（两道独立的门）
 
-**本课第一命题：harness 课第七节的"权限"管的是*意图*，沙箱管的是*执行环境*——任何一层单独都不够。**
+**本课第一命题：harness 架构课第七节的"权限"管的是*意图*，沙箱管的是*执行环境*——任何一层单独都不够。**
 
 ```
 模型决策 ──▶ [权限门 policy.ts] ──▶ [沙箱执行环境] ──▶ 真实世界
@@ -43,7 +43,7 @@ harness 课的第七节已经给了第一道门——权限（approval + scope�
 
 | 层 | 防什么 | 失效模式 |
 |---|---|---|
-| 权限门（A⑤） | 没被批准的动作 | 模型用**合法工具**做越界事（read 了敏感文件、write 到 scope 外的"合法路径"）；策略本身写错 |
+| 权限门（从零写 harness §⑤） | 没被批准的动作 | 模型用**合法工具**做越界事（read 了敏感文件、write 到 scope 外的"合法路径"）；策略本身写错 |
 | 沙箱 | 动作的**影响范围** | 边界配错（mount 错了目录、网络没关、env 泄漏） |
 | 提示词 | 意图 | 注入/模型犯错——最不可靠，**只能当第一道，不能当最后道** |
 
@@ -90,20 +90,20 @@ flowchart TD
 
 ## S2 四通道 policy 引擎（已实现，见 `sandbox-demo/`）
 
-按 package.json 的计划：**TS 迷你沙箱 = 四通道 policy 引擎 + 幽灵事故重放，全离线确定性**（不调模型——策略层是确定性代码，正好独立验证，呼应 A⑧ "mock 后每个控制层都能独立验证"）。
+按 package.json 的计划：**TS 迷你沙箱 = 四通道 policy 引擎 + 幽灵事故重放，全离线确定性**（不调模型——策略层是确定性代码，正好独立验证，呼应 从零写 harness §⑧ "mock 后每个控制层都能独立验证"）。
 
 四通道（每个工具调用落到且仅落到一个通道）：
 
-| 通道 | 语义 | 对应 A⑤ | 沙箱视角 |
+| 通道 | 语义 | 对应 从零写 harness §⑤ | 沙箱视角 |
 |---|---|---|---|
 | **allow** | 直接执行 | allow | 低风险面，边界内 |
 | **approve** | 挂起等人工批准 | approve | human-in-the-loop |
 | **deny** | 拒绝（结果回写） | deny | 高危面 |
-| **sandbox** | 在隔离环境内执行（容器/受限目录/无网络） | A 课没有的新通道 | 本课新增：动作合法但**需要关边界** |
+| **sandbox** | 在隔离环境内执行（容器/受限目录/无网络） | 从零写 harness 没有的新通道 | 本课新增：动作合法但**需要关边界** |
 
 **关键洞察：`sandbox` 不是第五个 `deny`。** `deny` 是"不做"，`sandbox` 是"照做但关进边界"：同一个 `docker compose up`，权限门完全允许，只是它只影响自己的命名空间。这个区别直接决定可观测性——`deny` 的执行结果是"没发生"，`sandbox` 的执行结果是"发生了，但在隔离世界里"，二者的审计与恢复语义不同（这也是 S2.5 要纠正的一处旧表述）。
 
-`Policy.decide` 的匹配规则是**确定性、可离线**的：按冲突优先级 `deny → approve → sandbox → allow` 逐通道扫规则，命中即返回；没有规则则落到 `fallback = deny`（安全默认，沿用 A⑤）。
+`Policy.decide` 的匹配规则是**确定性、可离线**的：按冲突优先级 `deny → approve → sandbox → allow` 逐通道扫规则，命中即返回；没有规则则落到 `fallback = deny`（安全默认，沿用 从零写 harness §⑤）。
 
 ```mermaid
 flowchart TD
@@ -137,7 +137,7 @@ flowchart TD
 | 工具执行器 | `src/tools.ts` | 8 个确定性 mock 工具：`read_file / write_file / print_env / net_fetch / run_shell / docker_compose_build / docker_compose_up / check_container`；`targetWorld`/`pth` 决定是否有沙箱边界 |
 | 剧本与策略 | `src/scenario.ts` | `GHOST_SCRIPT`（g1–g4）、`GATE_ONLY_RULES`（A 组仅权限门）、`POLICY_4CH_RULES`（B 组四通道）、`APPROVAL_TABLE`、`HOST_ENV`、`SESSION_WORKSPACE`、`ENV_WHITELIST` |
 | 重放引擎 | `src/replay.ts` | `runScript`（逐条判定+执行→转录 `StepTrace[]`）、`assertDeterministic`（golden diff + sha256）、逻辑时钟用步序号而非 `Date.now()` |
-| 入口 | `src/demo.ts` | ① 判定流 ② 三条边界 ③ 幽灵重放 A/B ④ 确定性验收（`times=3`） |
+| 入口 | `src/demo.ts` | ① 判定流 ② 三条边界 ③ 幽灵重放 A/B 4 确定性验收（`times=3`） |
 
 ### 验收标准（可自动断言）
 
@@ -152,7 +152,7 @@ flowchart TD
 ```bash
 cd sandbox-demo
 npm i                 # 本机 NODE_ENV=production 会跳过 devDeps，故 tsx/typescript 放在 dependencies
-npm run demo          # ① 判定流 ② 边界 ③ 幽灵重放 A/B ④ 确定性验收
+npm run demo          # ① 判定流 ② 边界 ③ 幽灵重放 A/B 4 确定性验收
 npm run typecheck     # tsc --noEmit（实测 exit 0）
 ```
 
@@ -278,7 +278,7 @@ FinHot 根目录 `.env` 就是生产配置（compose `env_file`）——**根目
 
 ## S5 行为漂移与审计：沙箱是边界，审计是边界上的摄像头
 
-- **工具调用日志=审计底账**：A⑥ 的 JSONL（`intent` 全量 / `exec` 结果截断 2000 字符，见下）不只是恢复用——它就是审计证据（谁在什么时候调了什么、参数是什么、结果是什么）。
+- **工具调用日志=审计底账**：从零写 harness §⑥ 的 JSONL（`intent` 全量 / `exec` 结果截断 2000 字符，见下）不只是恢复用——它就是审计证据（谁在什么时候调了什么、参数是什么、结果是什么）。
 - **漂移检测**（长期运行的 agent 会"学坏"或被慢慢注入）：
   - 模式异常：同一工具参数分布突变（突然大量 read 同一目录、突然 curl 新域名）。
   - 路径异常：越出常规工作目录的访问序列。
@@ -290,7 +290,7 @@ FinHot 根目录 `.env` 就是生产配置（compose `env_file`）——**根目
 
 - `harness-demo` 的 JSONL 事件类型：`init / model_response / tool_intent / tool_exec / compaction / final`，另有 demo 注入用的 `crash`——与 `notes/harness-from-scratch.md` ⑥ 列出的类型一致（多一个 demo-only 事件）。
 - OTel 埋点（`src/otel.ts` + `src/agent.ts`）：`invoke_agent` 为根 span，下挂 `chat`（每次 LLM 调用）与 `execute_tool`（每次工具调用）；属性用 `gen_ai.*` 族（`gen_ai.operation.name / gen_ai.system / gen_ai.request.model / gen_ai.usage.* / gen_ai.tool.name` 等）与 `harness.tool.status`——与 `notes/observability.md` S2/S3 的描述方向一致。
-- **需要指出的一处不一致（不改别的文件，仅记录）**：`sandbox.md` 旧文写"A⑥ 的 JSONL（intent/exec 全量）"，但 `harness-demo/src/agent.ts` 写 `tool_exec` 时执行了 `result.slice(0, 2000)`，OTel 的 `gen_ai.tool.call.arguments` 与 `gen_ai.tool.call.result` 也各 `slice(0, 500)`。所以严格说是 **intent 全量、exec/结果截断**。审计/回放要全量时，应调整截断阈值或把大 payload 落对象存储（这也呼应 `observability.md` S3 的"LLM span 记全 prompt 与响应"——实际 demo 的 `chat` span 并未记录 prompt/应答正文，只记了 model/usage/finish）。
+- **需要指出的一处不一致（不改别的文件，仅记录）**：`sandbox.md` 旧文写"从零写 harness §⑥ 的 JSONL（intent/exec 全量）"，但 `harness-demo/src/agent.ts` 写 `tool_exec` 时执行了 `result.slice(0, 2000)`，OTel 的 `gen_ai.tool.call.arguments` 与 `gen_ai.tool.call.result` 也各 `slice(0, 500)`。所以严格说是 **intent 全量、exec/结果截断**。审计/回放要全量时，应调整截断阈值或把大 payload 落对象存储（这也呼应 `observability.md` S3 的"LLM span 记全 prompt 与响应"——实际 demo 的 `chat` span 并未记录 prompt/应答正文，只记了 model/usage/finish）。
 
 ### S5 的失败模式
 
@@ -302,7 +302,7 @@ FinHot 根目录 `.env` 就是生产配置（compose `env_file`）——**根目
 
 ## S6 可复现性：agent 系统的"单元测试基础设施"
 
-**命题：agent 的输出非确定，但*系统行为*必须可复现——否则评测（H 课）和事故取证都无从谈起。**
+**命题：agent 的输出非确定，但*系统行为*必须可复现——否则评测（评测工程化）和事故取证都无从谈起。**
 
 三个层面：
 
@@ -310,11 +310,11 @@ FinHot 根目录 `.env` 就是生产配置（compose `env_file`）——**根目
 2. **环境固定**：镜像 pin、依赖 lock（sandbox-demo 的 `package-lock.json` 就是这个意思）、模型版本号 pin（模型会静默升级——gpt-load 模型轮换 `#41` 就是活例子：`qwen3.8-flash` 直接下架）。
 3. **事故重放**：幽灵事故剧本（S2）= 可复现的故障注入测试；**能重放事故的系统才能证明自己防得住**。
 
-验收指标：`run N 次 → diff 全空`；评测集结果跨天可复现（H 课 CI 门禁的前提）。`sandbox-demo` 的具体验收见 S2.5（A/B 各 3 次、sha256 golden diff）。
+验收指标：`run N 次 → diff 全空`；评测集结果跨天可复现（评测工程化 CI 门禁的前提）。`sandbox-demo` 的具体验收见 S2.5（A/B 各 3 次、sha256 golden diff）。
 
 ### S6.1 崩溃恢复窗口：写前 / 写后 / 提交中
 
-可复现的敌人之一，是"崩溃点不同导致状态不同"。把一次**写入型**工具调用拆成四个阶段，就有四个不同的崩溃窗口（呼应 harness 课程 A⑥⑦ 的 intent/exec 与 G 课 durable execution）：
+可复现的敌人之一,是"崩溃点不同导致状态不同"。把一次**写入型**工具调用拆成四个阶段,就有四个不同的崩溃窗口(呼应从零写 harness §6-7 的 intent/exec 与 durable execution):
 
 ```mermaid
 flowchart LR
@@ -329,7 +329,7 @@ flowchart LR
 
 - **崩溃点 A（写前）**：副作用未发生 → 重试安全。对应"未执行"。
 - **崩溃点 B（写后未提交）**：可能产生半截文件/毒快照。对策：先写临时文件再 `rename` 原子替换；快照要在 quiesce 或 COW 下取（S8 snapshot 一致性）。
-- **崩溃点 C（已提交未记录）**：就是 harness ⑦ 的"**结果未知**"——不能盲目重放，先核对现状；非只读/非幂等操作尤其危险（`docker compose up` 正是这类）。
+- **崩溃点 C（已提交未记录）**：就是 harness §7 的"**结果未知**"——不能盲目重放，先核对现状；非只读/非幂等操作尤其危险（`docker compose up` 正是这类）。
 - **崩溃点 D（已记录）**：事实已落日志，不重放，直接从记录恢复。
 
 幽灵事故的反面教材：`compose build+up` **非幂等且无 scope**，重放=再次污染生产。所以"可复现"不只指测试可复现，也指**恢复时不会把副作用重做一遍**。
@@ -463,4 +463,4 @@ flowchart LR
 - 教学素材：FinHot 幽灵事故（`#35` 记忆 + 事故后规则）、并行会话污染（`#36`）、`.env` 凭据面（`#4`）、模型静默下架（`#41`）。
 - 轨迹/审计对齐：`harness-demo/src/session.ts`（JSONL 事件）、`src/agent.ts`（intent/exec 与截断）、`src/otel.ts`（OTel GenAI span）；对照 `notes/harness-from-scratch.md` ⑥ 与 `notes/observability.md` S2/S3（发现 exec/结果截断的口径差异，见 S5.1，仅记录不改他文件）。
 - 待回填锚点（见开篇）：Claude Code 供应链事故 2025-07、rig-skill —— 已核实「查无公开一手源」，暂不作为教学例证，待作者回填内部来源后再启用。
-- 接回：A⑤（policy 三层）/ A⑥⑦（日志=审计底账）/ harness 课第七节（权限与信任）/ H 课（可复现=评测前提）/ G 课（durable execution=崩溃窗口的工程化）。
+- 接回：从零写 harness §⑤（policy 三层）/ 从零写 harness §⑥⑦（日志=审计底账）/ harness 架构课第七节（权限与信任）/ 评测工程化（可复现=评测前提）/ durable execution（durable execution=崩溃窗口的工程化）。

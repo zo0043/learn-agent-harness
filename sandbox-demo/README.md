@@ -1,4 +1,4 @@
-# sandbox-demo — E 课 S2 作品：四通道 policy 引擎 + 幽灵事故重放
+# sandbox-demo — 沙箱与凭据 §S2 作品：四通道 policy 引擎 + 幽灵事故重放
 
 全离线确定性的 TS 迷你沙箱：**不调模型、不联网、不碰真实 FS、不用墙钟**。
 把 FinHot 2026-10-09 幽灵事故重建成可重放剧本，用确定性问题证明"沙箱层的位置"，
@@ -16,7 +16,7 @@ npm run typecheck  # tsc --noEmit
 
 `npm run demo` 末尾的 `✅ 重放一致性断言通过` 即 S6 验收（同一剧本各跑 3 次，转录逐字节相同）。
 
-## 与 E 课（notes/sandbox.md）的对应
+## 与 沙箱与凭据（notes/sandbox.md）的对应
 
 | 课程 | 实现 |
 |---|---|

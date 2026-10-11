@@ -34,7 +34,7 @@ export interface AgentResult {
 export async function runAgent(o: AgentOpts): Promise<AgentResult> {
   const t0 = Date.now();
 
-  // —— D 课 S2 OTel GenAI：轨迹树根 span（1 trace = 1 任务/会话，见 notes/observability.md S3）——
+  // —— 可观测 §S2 OTel GenAI：轨迹树根 span（1 trace = 1 任务/会话，见 notes/observability.md S3）——
   const agentSpan = tracer.startSpan("invoke_agent", {
     attributes: {
       "gen_ai.operation.name": "invoke_agent",
@@ -88,7 +88,7 @@ export async function runAgent(o: AgentOpts): Promise<AgentResult> {
       }
 
       // —— ② 调用模型（流式，边生成边显示） ——
-      // —— D 课 S2：每次 LLM 调用 = 1 个 chat span（S3 树：挂在 invoke_agent 下）——
+      // —— 可观测 §S2：每次 LLM 调用 = 1 个 chat span（S3 树：挂在 invoke_agent 下）——
       const chatSpan = tracer.startSpan(
         "chat",
         {
@@ -158,7 +158,7 @@ export async function runAgent(o: AgentOpts): Promise<AgentResult> {
 async function guardedToolStep(o: AgentOpts, messages: Message[], tc: ToolCall, agentCtx: Context) {
   // 防御：部分代理返回的工具名带首尾空白（qwen3.8-flash 2026-10-10 实测），不 trim 会注册表查不到
   const name = tc.name.trim();
-  // —— D 课 S2：每次工具调用 = 1 个 execute_tool span（参数摘要先行，状态收尾）——
+  // —— 可观测 §S2：每次工具调用 = 1 个 execute_tool span（参数摘要先行，状态收尾）——
   const toolSpan = tracer.startSpan(
     "execute_tool",
     {
