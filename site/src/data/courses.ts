@@ -26,7 +26,7 @@ export interface CourseMeta {
   /** 知识域名 */
   domain: string;
   phase: 'P0' | 'P1' | 'P2' | '—';
-  status: '✅ 完成' | '🔄 进行中' | '⏳ 规划中';
+  status: '✅ 完成' | '🔄 进行中' | '🔄 讲义已展开' | '⏳ 规划中';
   /** 一句话导读（占位，可改） */
   intro: string;
   /** 面试视角：面试官为什么看这课（一句话 ≤25 字，提炼自 interview-bank.md 考点分布） */
@@ -191,7 +191,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── P2 ──────────────────────────────────────────────
   {
-    slug: 'observability', letter: 'D', domain: 'Agent 可观测', phase: 'P2', status: '⏳ 规划中',
+    slug: 'observability', letter: 'D', domain: 'Agent 可观测', phase: 'P2', status: '🔄 讲义已展开',
     intro: 'agent tracing 模型 + OTel GenAI 属性 + 成本归因；S2 埋点已在 harness-demo 实操（demo:otel）',
     interviewAngle: '“agent tracing+成本归因”考点，demo:otel 实操',
     relatedQuestions: [
@@ -201,7 +201,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'long-term-memory', letter: 'F', domain: '长期记忆', phase: 'P2', status: '⏳ 规划中',
+    slug: 'long-term-memory', letter: 'F', domain: '长期记忆', phase: 'P2', status: '🔄 讲义已展开',
     intro: '四类记忆：写 / 读 / 遗忘 / 安全；活锚点是日常在用的 pi Magic Context',
     interviewAngle: '记忆写/读/遗忘/安全四类 + 记忆投毒题',
     relatedQuestions: [
@@ -211,7 +211,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'model-basics', letter: 'L', domain: '模型基础', phase: 'P2', status: '⏳ 规划中',
+    slug: 'model-basics', letter: 'L', domain: '模型基础', phase: 'P2', status: '🔄 讲义已展开',
     intro: 'KV cache / 推理成本 / 微调意识 + S7 八股速查 16 题——够用不深挖',
     interviewAngle: '八股速查 16 题：KV cache/推理成本/微调',
     relatedQuestions: [
@@ -221,7 +221,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'framework-ecosystem', letter: 'M', domain: '框架生态', phase: 'P2', status: '⏳ 规划中',
+    slug: 'framework-ecosystem', letter: 'M', domain: '框架生态', phase: 'P2', status: '🔄 讲义已展开',
     intro: '框架给你什么 / 藏什么；framework-demo 四能力实操已跑通，实测 allowedTools 抢跑坑',
     interviewAngle: '“框架给你什么/藏什么”：allowedTools 抢跑实证',
     relatedQuestions: [

@@ -129,10 +129,10 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 8 | I MCP + 安全（`mcp.md`） | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo 实证 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 9 | J API + 路由（`api-engineering.md`） | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 10 | K 数据飞轮（`data-flywheel.md`） | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 实战走查（真实三轮指标已回填）/ S7 常见错误 / S8 故事打磨 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
-| 11 | D 可观测（`observability.md`） | S1 agent≠微服务 / S2 OTel GenAI / S3 span 建模 / S4 成本归因 / S5 回放对比 / S6 工具版图 | 📐 | 讲解 + 题库（+可选 OTel 埋点 demo） |
-| 12 | F 长期记忆（`long-term-memory.md`） | S1 四类记忆 / S2 写侧 / S3 读侧 / S4 遗忘巩固 / S5 记忆投毒 / S6 三家框架 / S7 设计题 | 📐 | 讲解 + 题库 8 题 |
-| 13 | L 模型基础（`model-basics.md`） | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 | 📐（深度=意识级） | 讲解 + 题库 + **🔶1 升"八股可答级"** |
-| 14 | M 框架生态（`framework-ecosystem.md`） | S1 三族 / S2 给什么藏什么 / S3 四家要点 / S4 pi 深潜 / S5 选型话术 | 📐 | 讲解 + 题库 8 题 |
+| 11 | D 可观测（`observability.md`） | S1 agent≠微服务 / S2 OTel GenAI / S3 span 建模 / S4 成本归因 / S5 回放对比 / S6 工具版图 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 12 | F 长期记忆（`long-term-memory.md`） | S1 四类记忆 / S2 三层生命周期 / S3 写侧 / S4 读侧 / S5 冲突消解与遗忘 / S6 评测 / S7 记忆投毒 / S8 框架与学术 / S9 设计题 / S10 实战走查 / S11 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 13 | L 模型基础（`model-basics.md`） | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 / S7 八股速查 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 14 | M 框架生态（`framework-ecosystem.md`） | S1 框架三族 / S2 框架版图 / S3 抽象泄漏 / S4 选型决策树 / S5 迁移路径 / S6 pi 深潜 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 15 | 面试结构（`interview-bank.md`） | 30 秒自我介绍 / 60 分钟模拟 / 5 组项目深挖追问链 / 10 道交叉题 / JD 覆盖矩阵 | 📐 | 2 场模拟通过 + 矩阵全 🟢 + 🔶5 STAR 模板 |
 | — | N 多智能体编排（`multi-agent.md`） | S1 何时多智能体 / S2 拓扑 / S3 orchestrator-worker / S4 单线程写 / S5 通信成本 / S6 调试 / S7 子代理设计 / S8 实战走查 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 12 题通过 |
 | — | 范围外：算法编码（LeetCode） | 英文面经确认仍考（medium） | ⚪ 不在教程范围 | 建议 ~50 道 medium，并行轨 |
@@ -155,6 +155,8 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 > **2026-10-11 讲义展开轮（本次）**：C / N / E / H 四门课已从"结构建成"展开为**开课版完整讲义**（每课：逐节讲解散文 + 4 张 mermaid + 实战走查节 + 常见错误/追问节 + 题库扩充）——C 14 题 / N 12 题 / E 16 题 / H 14 题（原各 4-10 题）。四课共 16 张 mermaid 已构建渲染为 SVG 验收通过。引用已一手源复核并修正 4 处：ToT 会议 ICLR'24→**NeurIPS 2023**、Self-Consistency arXiv 2210.17392→**2203.11171**、Codex Linux 沙箱 Landlock+seccomp→**bubblewrap+seccomp（Landlock legacy）**、A2A 补 **v1.0.1 + AAIF 8 家 TCC 名单**；E2B 的"~150ms/128MB"改为官方口径（未公开固定数值）。⚠️ 两条私有锚点（Claude Code 供应链事故 2025-07、rig-skill）**查无公开一手源**，已降级标注、待作者回填。开课 = 提问演练（另约时间）。
 >
 > **2026-10-11 Phase 2 讲义展开轮（本次）**：G / I / J / K 四门课同样展开为**开课版完整讲义**（各 4-5 张 mermaid，共 17 张；新增『实战走查』与『常见错误与面试官追问』节；题库各 8-10 → **14 题**）。引用一手源复核修正 8 处：MCP spec 版本线整段重写（**Streamable HTTP 与 OAuth 2.1 均为 2025-03-26 引入**、2025-06-18 加 elicitation/工具结构化输出、2025-11-25 加 OIDC 发现、2026-07-28 为去状态化+server/discover+订阅）、删掉**不存在的『OpenAI Registry/371 条目』**（URL 实测 404）、A2A TSC **8 席**（补 Cisco/ServiceNow）、生态规模数字改标『据媒体报道』、Anthropic **原生 structured outputs（`output_config.format`）+ strict tool use**（原写法已过时）、OpenAI 无 99.9% 遵循率官方数字、`effectively-once` 改用 Temporal/GCP 官方措辞、jitter 出处回填 AWS Architecture Blog (Marc Brooker, 2015)。**K 课实战走查回填了真实三轮评测数据**（FinHot `.data/eval/selection-all-200-*.json`，n=200/seed=7）：precision 0.256→**0.304**→0.272、accuracy 0.611→**0.676**→0.654（第二轮在 gold 重标后退步 → 提示词杠杆耗尽的实证）。四课共 17 张 mermaid 已渲染为 SVG 验收通过。
+>
+> **2026-10-11 Phase 3 讲义展开轮（本次）**：D / F / L / M 四课同样展开为**开课版完整讲义**（各 4 张 mermaid，共 16 张；新增『实战走查』与『常见错误与面试官追问』节；题库各 8-10 → **14 题**）。备课核对仓库真实资产：D 课对齐 harness-demo 的 `demo.jsonl` 实测事件分布（22 行：init×1 / model_response×6 / tool_intent×6 / tool_exec×8 / final×1；`compaction`/`crash` 仅 schema 定义未出现）；M 课对齐 framework-demo 的 10 条 `ok()` 断言（+1 整体判定=11/11）与 allowedTools 抢跑坑；F 课对齐 rag-demo 机制与指标（HashEmbedder FNV-1a 768 维 / BM25 k1=1.5,b=0.75 / RRF k=60 / 85 chunks / recall@3=1.00、@5=0.94、@10=1.00）。待核实项仅保留无法用仓库资料或确定常识确认的少量条目（量化收益差异、LangGraph/OpenAI 审批原语、A-MEM/Zep 论文出处、GenAI stable 时间线），未编造任何 arXiv 号/年份。
 
 | 阶段 | 内容 | 每课动作 | 出口判据 |
 |---|---|---|---|

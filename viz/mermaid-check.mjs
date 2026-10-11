@@ -7,7 +7,7 @@ import { join, extname } from 'node:path';
 
 const DIST = '/home/ubuntu/app/learn-agent-harness/site/dist';
 const BASE = '/learn-agent-harness';
-const SLUGS = ['system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel'];
+const SLUGS = ['system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel', 'observability', 'long-term-memory', 'model-basics', 'framework-ecosystem'];
 const PORT = 8099;
 
 const MIME = {
