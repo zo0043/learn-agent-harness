@@ -21,12 +21,12 @@ const rendered = entry ? await render(entry) : null;
             <span class="chip">结构 + 交叉题库 + JD 覆盖矩阵</span>
           </div>
           <nav class="crumbs" aria-label="面包屑">
-            <a href="/">首页</a> / <span>面试题库</span>
+            <a href={import.meta.env.BASE_URL + ""}>首页</a> / <span>面试题库</span>
           </nav>
         </header>
         <rendered.Content />
         <p style="margin-top: 28px; color: var(--text-faint); font-size: 0.9rem">
-          各课内部题库在课程文件末尾（<a href="/learn/">学习路线 →</a>），本页面管结构、交叉题、项目深挖、关键词覆盖。
+          各课内部题库在课程文件末尾（<a href={import.meta.env.BASE_URL + "learn/"}>学习路线 →</a>），本页面管结构、交叉题、项目深挖、关键词覆盖。
         </p>
       </article>
     ) : (

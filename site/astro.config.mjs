@@ -20,7 +20,8 @@ function remarkMermaid() {
 }
 
 export default defineConfig({
-  site: 'https://zo0043.github.io/learn-agent-harness/',
+  site: 'https://blog.zero43.top/learn-agent-harness/',
+  base: '/learn-agent-harness/',
   markdown: {
     remarkPlugins: [remarkGfm, remarkMath, remarkMermaid],
     rehypePlugins: [[rehypeKatex, { throwOnError: false, strict: false }]],

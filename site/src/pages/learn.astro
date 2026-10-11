@@ -48,7 +48,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                 const exists = slugSet.has(c.slug);
                 const isWhiteboard = c.slug === 'whiteboard';
                 return isWhiteboard ? (
-                  <a class="card domain-card" href="/works/#whiteboard">
+                  <a class="card domain-card" href={import.meta.env.BASE_URL + "works/#whiteboard"}>
                     <div class="dc-top">
                       <span class="dc-letter">{c.letter ?? '·'}</span>
                       <h3>{c.domain}</h3>
@@ -58,7 +58,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                     <p class="dc-foot">作品详解 →</p>
                   </a>
                 ) : exists ? (
-                  <a class="card domain-card" href={`/c/${c.slug}/`}>
+                  <a class="card domain-card" href={import.meta.env.BASE_URL + `c/${c.slug}/`}>
                     <div class="dc-top">
                       <span class="dc-letter">{c.letter ?? '·'}</span>
                       <h3>{c.domain}</h3>
@@ -100,7 +100,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
         理由：C 把 A/B 收口成“设计能力”；E 续进行中且 demo 骨架已备；H 是 P1 三课（G/I/K）的公共地基。
       </p>
       <p style="font-size: 0.9rem">
-        完整依赖图与横切知识点见 <a href="/map/">知识地图 →</a>
+        完整依赖图与横切知识点见 <a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a>
       </p>
     </div>
   </section>

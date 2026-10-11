@@ -26,7 +26,7 @@ const meta = courseMeta('llm-timeline');
             <StatusBadge status={meta.status} />
           </div>
           <nav class="crumbs" aria-label="面包屑">
-            <a href="/">首页</a> / <span>LLM 时间线</span>
+            <a href={import.meta.env.BASE_URL + ""}>首页</a> / <span>LLM 时间线</span>
           </nav>
         </header>
         <rendered.Content />
@@ -40,7 +40,7 @@ const meta = courseMeta('llm-timeline');
           尚未就位（并行内容 worker 正在写）。文件入仓后，本站下一次构建会自动渲染全文。
         </p>
         <p style="max-width: 34em; margin: 0 auto">
-          先看其他课程的进度：<a href="/learn/">学习路线 →</a>
+          先看其他课程的进度：<a href={import.meta.env.BASE_URL + "learn/"}>学习路线 →</a>
         </p>
       </div>
     )

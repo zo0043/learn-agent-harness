@@ -14,8 +14,8 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
       事故重放 3 次逐字节一致）——每节课的设计判断都<strong>长自真实事故</strong>，不是教程。
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/learn/">查看学习路线</a>
-      <a class="btn" href="/works/">看作品详解</a>
+      <a class="btn btn-primary" href={import.meta.env.BASE_URL + "learn/"}>查看学习路线</a>
+      <a class="btn" href={import.meta.env.BASE_URL + "works/"}>看作品详解</a>
       <a class="btn" href={repo} target="_blank" rel="noopener">GitHub 仓库 ↗</a>
     </div>
   </section>
@@ -37,7 +37,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </p>
         <p>
           长出的机制：权限（意图门）与沙箱（执行环境边界）拆成<strong>两道独立的门</strong>，
-          policy 增加第四通道 sandbox；<a href="/works/#sandbox-demo">sandbox-demo</a>
+          policy 增加第四通道 sandbox；<a href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>sandbox-demo</a>
           把事故重建成可重放剧本，3 次重放逐字节一致。
         </p>
       </div>
@@ -77,7 +77,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <section>
     <h2 class="page-title">五个作品</h2>
     <div class="cards">
-      <a class="card" href="/works/#harness-demo">
+      <a class="card" href={import.meta.env.BASE_URL + "works/#harness-demo"}>
         <h3>harness-demo</h3>
         <p><span class="chip chip-strong">课程 A</span></p>
         <p>
@@ -87,7 +87,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </p>
         <p class="work-lesson">一句话教训：<strong>错误恢复才是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，harness 的契约是 policy → intent → execute → result（结果必回写，拒绝也是结果）</p>
       </a>
-      <a class="card" href="/works/#rag-demo">
+      <a class="card" href={import.meta.env.BASE_URL + "works/#rag-demo"}>
         <h3>rag-demo</h3>
         <p><span class="chip chip-strong">课程 B</span></p>
         <p>
@@ -96,7 +96,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </p>
         <p class="work-lesson">一句话教训：<strong>词法检索只走表面形式重叠</strong>——BM25 修了定价，改不掉词法上限；这正是 embedding 路存在的理由</p>
       </a>
-      <a class="card" href="/works/#sandbox-demo">
+      <a class="card" href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>
         <h3>sandbox-demo</h3>
         <p><span class="chip chip-strong">课程 E</span></p>
         <p>
@@ -106,7 +106,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </p>
         <p class="work-lesson">一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”，照样炸了生产</p>
       </a>
-      <a class="card" href="/works/#mcp-demo">
+      <a class="card" href={import.meta.env.BASE_URL + "works/#mcp-demo"}>
         <h3>mcp-demo</h3>
         <p><span class="chip chip-strong">课程 I</span></p>
         <p>
@@ -116,7 +116,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </p>
         <p class="work-lesson">一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——消融证明确定性硬防线在 L2 policy 门 / L3 egress 白名单，互为独立 backstop</p>
       </a>
-      <a class="card" href="/works/#framework-demo">
+      <a class="card" href={import.meta.env.BASE_URL + "works/#framework-demo"}>
         <h3>framework-demo</h3>
         <p><span class="chip chip-strong">课程 M</span></p>
         <p>
@@ -150,9 +150,9 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
       </div>
     </div>
     <p style="margin-top: 6px">
-      学习路线：<a href="/learn/">P0 / P1 / P2 三段 × 知识域卡片 →</a> ·
-      知识依赖：<a href="/map/">知识地图 →</a> ·
-      模拟考卷：<a href="/interview/">面试题库 →</a>
+      学习路线：<a href={import.meta.env.BASE_URL + "learn/"}>P0 / P1 / P2 三段 × 知识域卡片 →</a> ·
+      知识依赖：<a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a> ·
+      模拟考卷：<a href={import.meta.env.BASE_URL + "interview/"}>面试题库 →</a>
     </p>
     <p class="snap-note">
       📸 <strong>本站为构建时快照</strong>——内容由 Astro 在构建期从仓库 <code>notes/</code>

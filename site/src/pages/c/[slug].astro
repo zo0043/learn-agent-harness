@@ -34,17 +34,17 @@ const toc = extractToc(entry.body ?? '');
           <StatusBadge status={meta.status} />
         </div>
         <nav class="crumbs" aria-label="面包屑">
-          <a href="/">首页</a> / <a href="/learn/">学习路线</a> / <span>{meta.domain}</span>
+          <a href={import.meta.env.BASE_URL + ""}>首页</a> / <a href={import.meta.env.BASE_URL + "learn/"}>学习路线</a> / <span>{meta.domain}</span>
         </nav>
       </header>
 
       <Content />
 
       <footer class="page-foot">
-        <a href="/map/">知识地图</a>
-        <a href="/interview/">面试题库</a>
-        <a href="/works/">作品详解</a>
-        <a href="/learn/">学习路线</a>
+        <a href={import.meta.env.BASE_URL + "map/"}>知识地图</a>
+        <a href={import.meta.env.BASE_URL + "interview/"}>面试题库</a>
+        <a href={import.meta.env.BASE_URL + "works/"}>作品详解</a>
+        <a href={import.meta.env.BASE_URL + "learn/"}>学习路线</a>
       </footer>
     </article>
 
