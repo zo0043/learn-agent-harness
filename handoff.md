@@ -125,10 +125,10 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 4 | C 系统设计（`system-design.md`） | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 5 | E 沙箱与凭据（`sandbox.md` + `sandbox-demo/`） | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（S2 demo src 待写） | 提问演练 + 题库 16 题通过 + **S2 demo src 写完并验收（N 次重放逐字节相同）** |
 | 6 | H 评测工程化（`evaluation.md`） | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
-| 7 | G durable execution（`durable-execution.md`） | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo | 📐 | 讲解 + 题库 8 题 |
-| 8 | I MCP + 安全（`mcp.md`） | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo | 📐 | 讲解 + 题库 + 🔶3 升"Agent 安全"总节 |
-| 9 | J API + 路由（`api-engineering.md`） | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 | 📐 | 讲解 + 题库 8 题 |
-| 10 | K 数据飞轮（`data-flywheel.md`） | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 故事打磨 | 📐 | 讲解 + 题库 8 题 |
+| 7 | G durable execution（`durable-execution.md`） | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo / S8 实战走查 / S9 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 + S7 demo 落地 |
+| 8 | I MCP + 安全（`mcp.md`） | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo 实证 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 9 | J API + 路由（`api-engineering.md`） | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 10 | K 数据飞轮（`data-flywheel.md`） | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 实战走查（真实三轮指标已回填）/ S7 常见错误 / S8 故事打磨 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 11 | D 可观测（`observability.md`） | S1 agent≠微服务 / S2 OTel GenAI / S3 span 建模 / S4 成本归因 / S5 回放对比 / S6 工具版图 | 📐 | 讲解 + 题库（+可选 OTel 埋点 demo） |
 | 12 | F 长期记忆（`long-term-memory.md`） | S1 四类记忆 / S2 写侧 / S3 读侧 / S4 遗忘巩固 / S5 记忆投毒 / S6 三家框架 / S7 设计题 | 📐 | 讲解 + 题库 8 题 |
 | 13 | L 模型基础（`model-basics.md`） | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 | 📐（深度=意识级） | 讲解 + 题库 + **🔶1 升"八股可答级"** |
@@ -153,6 +153,8 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 ### 4.3 学习顺序（分阶段，含每课动作与出口判据）
 
 > **2026-10-11 讲义展开轮（本次）**：C / N / E / H 四门课已从"结构建成"展开为**开课版完整讲义**（每课：逐节讲解散文 + 4 张 mermaid + 实战走查节 + 常见错误/追问节 + 题库扩充）——C 14 题 / N 12 题 / E 16 题 / H 14 题（原各 4-10 题）。四课共 16 张 mermaid 已构建渲染为 SVG 验收通过。引用已一手源复核并修正 4 处：ToT 会议 ICLR'24→**NeurIPS 2023**、Self-Consistency arXiv 2210.17392→**2203.11171**、Codex Linux 沙箱 Landlock+seccomp→**bubblewrap+seccomp（Landlock legacy）**、A2A 补 **v1.0.1 + AAIF 8 家 TCC 名单**；E2B 的"~150ms/128MB"改为官方口径（未公开固定数值）。⚠️ 两条私有锚点（Claude Code 供应链事故 2025-07、rig-skill）**查无公开一手源**，已降级标注、待作者回填。开课 = 提问演练（另约时间）。
+>
+> **2026-10-11 Phase 2 讲义展开轮（本次）**：G / I / J / K 四门课同样展开为**开课版完整讲义**（各 4-5 张 mermaid，共 17 张；新增『实战走查』与『常见错误与面试官追问』节；题库各 8-10 → **14 题**）。引用一手源复核修正 8 处：MCP spec 版本线整段重写（**Streamable HTTP 与 OAuth 2.1 均为 2025-03-26 引入**、2025-06-18 加 elicitation/工具结构化输出、2025-11-25 加 OIDC 发现、2026-07-28 为去状态化+server/discover+订阅）、删掉**不存在的『OpenAI Registry/371 条目』**（URL 实测 404）、A2A TSC **8 席**（补 Cisco/ServiceNow）、生态规模数字改标『据媒体报道』、Anthropic **原生 structured outputs（`output_config.format`）+ strict tool use**（原写法已过时）、OpenAI 无 99.9% 遵循率官方数字、`effectively-once` 改用 Temporal/GCP 官方措辞、jitter 出处回填 AWS Architecture Blog (Marc Brooker, 2015)。**K 课实战走查回填了真实三轮评测数据**（FinHot `.data/eval/selection-all-200-*.json`，n=200/seed=7）：precision 0.256→**0.304**→0.272、accuracy 0.611→**0.676**→0.654（第二轮在 gold 重标后退步 → 提示词杠杆耗尽的实证）。四课共 17 张 mermaid 已渲染为 SVG 验收通过。
 
 | 阶段 | 内容 | 每课动作 | 出口判据 |
 |---|---|---|---|

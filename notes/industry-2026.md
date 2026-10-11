@@ -18,7 +18,7 @@
 2. [2026现行] 规模（Wikipedia reportedly 口径，无官方一手数字）：2026 年中 1 万+ MCP server 跑在生产、官方 SDK 月下载 9700 万+；OpenAI/Google/Microsoft 全接入，Salesforce Agentforce 累计处理 450 万 MCP 调用。
 3. [2026现行] 官方 MCP Registry 仍在 preview（未 GA），Anthropic/GitHub/Microsoft/PulseMCP 背书，DNS 命名空间 + server.json + REST 发现——生态规范化真实但早期。https://modelcontextprotocol.io/registry
 4. [2026现行] "变味"信号是治理滞后而非路线失败：NSA 批评"扩散速度超出安全模型"（CVE-2025-6514 mcp-remote RCE/CVSS 9.6），spec 已补安全要求；协议三分：MCP=agent↔工具、A2A=agent↔agent、AG-UI=agent↔前端，MCP 定位收敛不再包打天下。
-5. [2026现行] A2A 同入 AAIF，TSC=AWS/Google/IBM/Microsoft/Salesforce/SAP 等七厂；官方明示"不规定子 agent 通信与工具调用"——企业互操作标准、采用慢，应用端"知道即可"。https://a2a-protocol.org/latest/
+5. [2026现行] A2A 同入 AAIF，**TSC 共 8 席**（Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM）；官方明示"不规定子 agent 通信与工具调用"——企业互操作标准、采用慢，应用端"知道即可"。https://a2a-protocol.org/latest/
 6. [2026现行] Claude Agent SDK=Claude Code harness 的产品化（loop 当库用：subagents/hooks/MCP/权限/sessions continue-resume-fork/会话外存）；2026 Claude Code 扩到 desktop/mobile/cloud/computer use，是目标岗最近的"参考实现+SDK"。https://code.claude.com/docs/en/agent-sdk/overview
 7. [2026现行] OpenAI Codex 由 CLI 转向 agent 基础设施：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；AgentKit 为低代码入口。https://developers.openai.com/codex
 8. [稳定历史] LangGraph 1.x 稳定（1.0.1），定位编排库（显式图+checkpoint+HITL，评测靠 LangSmith）；四框架收敛于同一问题集（会话持久化/子代理边界/工具标准化/权限护栏）——"框架收敛=行业问题定义收敛"是面试高分句。https://github.com/langchain-ai/langgraph

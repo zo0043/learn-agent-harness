@@ -17,11 +17,11 @@
 | D | Agent 可观测 | P2 | ⏳ | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因 |
 | E | 沙箱与凭据·可复现 | P0 | 📐（S2 demo src 待写） | `sandbox.md` | 讲清"权限层 ≠ 沙箱" + 隔离技术选型 + 幽灵事故完整故事 |
 | F | 长期记忆 | P2 | ⏳ | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全） |
-| G | durable execution | P1 | ⏳ | `durable-execution.md` | 讲清长任务不丢不重（journal/checkpoint/幂等） |
+| G | durable execution | P1 | 📐 | `durable-execution.md` | 讲清长任务不丢不重（journal/checkpoint/幂等） |
 | H | 评测工程化 | P0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
-| I | MCP 协议 + 供应链安全 | P1 | ⏳ | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
-| J | API 实操 + 多模型路由 | P1 | ⏳ | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
-| K | 数据飞轮 | P1 | ⏳ | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成"生产数据飞轮"故事 |
+| I | MCP 协议 + 供应链安全 | P1 | 📐 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
+| J | API 实操 + 多模型路由 | P1 | 📐 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
+| K | 数据飞轮 | P1 | 📐 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成"生产数据飞轮"故事 |
 | L | 模型基础 | P2 | ⏳ | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖 |
 | M | 框架生态 | P2 | ⏳ | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事 |
 | N | 多智能体编排 | P0 | 📐（2026-10-11 建结构） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
@@ -86,6 +86,7 @@ graph TD
 ## 未结事项（非课程，来自 handoff）
 
 - [x] 讲义展开（2026-10-11）：C/N/E/H 四课从"结构建成"→"开课版讲义"（各 4 张 mermaid、实战走查节、题库 12-16 题）；引用一手源复核修正 4 处
+- [x] 讲义展开（2026-10-11 Phase 2）：G/I/J/K 四课 →"开课版讲义"（各 4-5 张 mermaid、实战走查节、题库各 14 题）；引用一手源复核修正 8 处；K 课回填 FinHot 真实三轮评测指标
 - [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）
 - [ ] 项目打磨（sandbox-demo src 未写；harness-demo/rag-demo 可补 README 与运行说明）
 - [ ] 实操补强 ×4（sandbox-demo src / OTel 埋点 / MCP 投毒演示 / 框架实操）——2026-10-11 起执行中

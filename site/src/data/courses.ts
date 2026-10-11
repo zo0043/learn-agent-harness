@@ -146,7 +146,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── P1 ──────────────────────────────────────────────
   {
-    slug: 'durable-execution', letter: 'G', domain: 'Durable Execution', phase: 'P1', status: '⏳ 规划中',
+    slug: 'durable-execution', letter: 'G', domain: 'Durable Execution', phase: 'P1', status: '🔄 讲义已展开',
     intro: '长任务不丢不重：journal / checkpoint / 幂等；教学素材是 FinHot backfill 1645 行断点续跑',
     interviewAngle: '长任务不丢不重：backfill 断点续跑素材',
     relatedQuestions: [
@@ -157,7 +157,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'mcp', letter: 'I', domain: 'MCP 协议 + 供应链安全', phase: 'P1', status: '⏳ 规划中',
+    slug: 'mcp', letter: 'I', domain: 'MCP 协议 + 供应链安全', phase: 'P1', status: '🔄 讲义已展开',
     intro: 'MCP 架构 / 原语 / 认证 + Agent 安全全景；mcp-demo 投毒 + 四层防御实操已实现',
     interviewAngle: 'MCP 供应链投毒题素材：四层防御实操',
     relatedQuestions: [
@@ -167,7 +167,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'api-engineering', letter: 'J', domain: 'API 实操 + 多模型路由', phase: 'P1', status: '⏳ 规划中',
+    slug: 'api-engineering', letter: 'J', domain: 'API 实操 + 多模型路由', phase: 'P1', status: '🔄 讲义已展开',
     intro: '流式 / 结构化输出 / caching / 重试分类 / 路由 / 成本六模块，素材是代理 400 + 模型轮换实录',
     interviewAngle: '代理 400 + 模型轮换实录：重试分类/路由',
     relatedQuestions: [
@@ -179,8 +179,8 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'data-flywheel', letter: 'K', domain: '数据飞轮', phase: 'P1', status: '⏳ 规划中',
-    intro: '把 FinHot 台账 1830 行 + labeler 讲成“跑过一轮真实生产飞轮”的故事',
+    slug: 'data-flywheel', letter: 'K', domain: '数据飞轮', phase: 'P1', status: '🔄 讲义已展开',
+    intro: '把 FinHot 台账 1830 行 + labeler 讲成“跑过一轮真实生产飞轮”的故事（含三轮真实评测指标：precision 0.256→0.304→0.272）',
     interviewAngle: '飞轮=最强项：FinHot 台账+labeler 全故事',
     relatedQuestions: [
       { no: '§3.2-Q1', text: '为什么 T+5 而不是 T+1？（金融数据的噪声/交易日历）', anchor: BANK.s32 },
