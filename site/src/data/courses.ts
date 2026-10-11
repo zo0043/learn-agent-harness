@@ -115,7 +115,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'llm-timeline', domain: 'LLM 时间线', phase: 'P0', status: '⏳ 规划中',
+    slug: 'llm-timeline', domain: 'LLM 时间线', phase: 'P0', status: '✅ 完成',
     intro: '12 节点模型演化时间线（★5 个面试谈资），答“为什么当年这么设计 / 下一步往哪走”',
     interviewAngle: '“为什么当年这么设计/下一步往哪走”的谈资',
     relatedQuestions: [

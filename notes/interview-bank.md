@@ -83,24 +83,24 @@
 
 | JD 关键词（2026 调研） | 课程 | 我的证据 | 覆盖度 |
 |---|---|---|---|
-| agent 可观测 / OTel GenAI / 成本归因 | D | A⑥ JSONL（最小 trace）+ backfill 日志（手工版）；OTel 概念就绪 | 🟡 概念全，缺一个"接了 OTel"的项目动作（可在 D 课 demo 补：harness-demo 埋 OTel span 导出 Jaeger） |
-| 沙箱 / 凭据 / 行为漂移拦截 | E | 幽灵事故（真实）+ 四通道 policy demo（待写 src） | 🟡 故事满配，demo 差一步 |
+| agent 可观测 / OTel GenAI / 成本归因 | D | A⑥ JSONL（最小 trace）+ backfill 日志 + harness-demo `demo:otel`（11 spans/1 trace） | 🟢 概念 + 实操都有 |
+| 沙箱 / 凭据 / 行为漂移拦截 | E | 幽灵事故（真实）+ `sandbox-demo` 四通道 policy（3 次重放逐字节一致） | 🟢 故事 + demo 满配 |
 | 长期记忆 / 记忆检索 | F | pi Magic Context 日常（用过+接口级理解） | 🟡 有活系统，无自研 |
 | durable execution / stateful workflow / long-horizon | G | backfill 断点续跑（真实）+ session.ts（自研） | 🟢 故事+代码都有 |
 | 评测 CI / LLM-judge / pass@k / 轨迹评测 | H | labeler（生产）+ rag-demo golden set + harness-demo 四模式 | 🟢 最强项之一 |
-| MCP / 供应链安全 / 红队 | I | A③ 工具协议（机制同源）；MCP 协议+四攻击面知识结构就绪 | 🟡 概念全，缺实操（可补：本地 MCP server 投毒演示） |
+| MCP / 供应链安全 / 红队 | I | A③ 工具协议（机制同源）；MCP 协议+四攻击面 + `mcp-demo` 投毒/四层防御/消融 | 🟢 概念 + 实操都有 |
 | 多模型路由 / 成本工程 / caching | J | FinHot 6 次调用结构 + 代理故障四连（真实） | 🟢 故事满配 |
 | 数据飞轮 / 轨迹数据仓 / 自进化 | K | FinHot 全链路（台账+labeler+两轮消融） | 🟢 最强项（多数候选人没有生产实例） |
 | coding agent / SWE-bench / solve rate | C+A | harness-demo + whiteboard + C 课设计模板 | 🟢 |
 | RAG / 企业知识库 | B | rag-demo（含评测）+ B⑪ 设计骨架 | 🟢 |
-| 框架生态 | M | pi 源码级日常 + 四家定位 | 🟡 偏单家（pi），LangGraph 等只有定位级 |
+| 框架生态 | M | pi 源码级日常 + `framework-demo`（Claude Agent SDK，11/11 断言）+ 四家定位 | 🟡 有 SDK 实操，LangGraph 等仍只有定位级 |
 | A2A / agent 身份 | —（观察级） | 未排课 | ⚪ 按 roadmap 保持观察 |
 
 **补强优先级**（把 🟡 变 🟢 的最小动作）：
-1. E 课：写完 sandbox-demo src（四通道 policy+幽灵重放）——故事已满配，代码差一步
-2. D 课：harness-demo 加 OTel 埋点导出（~50 行，凑齐"接了 OTel"的动作）
-3. I 课：本地 MCP server 投毒演示（~1 小时，补"实操过 MCP 安全"）
-4. F 课：可选——用 pi 的记忆机制做一个"记忆投毒回归测试"脚本（联动 I）
+1. ~~E 课：写完 sandbox-demo src（四通道 policy+幽灵重放）~~ ✅ 已完成（2026-10-11，3 次重放逐字节一致）
+2. ~~D 课：harness-demo 加 OTel 埋点导出~~ ✅ 已完成（`demo:otel` 11 spans/1 trace）
+3. ~~I 课：本地 MCP server 投毒演示~~ ✅ 已完成（`mcp-demo` 投毒+四层防御+消融）
+4. F 课：可选——用 pi 的记忆机制做一个"记忆投毒回归测试"脚本（联动 I）——未做
 
 ## 7. 未结清单（非题库）
 

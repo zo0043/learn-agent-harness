@@ -240,7 +240,7 @@ flowchart LR
 | 层 | 关键词 | 机制 | 我的锚点 |
 |---|---|---|---|
 | 输入层 | 信任分级 / CDR | 所有 NL 输入（含取回内容）当不可信：用户>系统>外部内容；注入检测先于目标选择 | harness 课 7.1（工具结果≠指令） |
-| 执行层 | **Least-Agency** / **Intent Gate** / 沙箱+egress / JIT 凭据 / 工具预算 | **Least-Agency**=最小自主权（least privilege 的 agent 升级：能不自主就不自主，多余 autonomy=无价值回报的攻击面）；**Intent Gate**=执行前策略引擎（PEP/PDP），把 LLM 输出当**不可信输入**：校验 schema/限流/发短时效凭据/漂移即吊销；dry-run diff 预览；预算超限自动降权 | **A 课四通道 policy=Intent Gate 的自研版**（E 课 S2 待写 src） |
+| 执行层 | **Least-Agency** / **Intent Gate** / 沙箱+egress / JIT 凭据 / 工具预算 | **Least-Agency**=最小自主权（least privilege 的 agent 升级：能不自主就不自主，多余 autonomy=无价值回报的攻击面）；**Intent Gate**=执行前策略引擎（PEP/PDP），把 LLM 输出当**不可信输入**：校验 schema/限流/发短时效凭据/漂移即吊销；dry-run diff 预览；预算超限自动降权 | **A 课四通道 policy=Intent Gate 的自研版**（E 课 S2 已落地 `sandbox-demo`） |
 | 输出层 | 输出过滤 | PII/敏感数据检测；工具结果隔离渲染 | A 课 ⑤ |
 | 数据层 | 记忆投毒防御 / 供应链（AIBOM/版本 pin）/ **语义防火墙** | 记忆写入前过滤（F 课）；工具全限定名+版本 pin 防 typosquatting（"report" vs "report_finance" 解析歧义=OWASP 实列攻击） | A 课 ③（工具契约）；M 课 S3（registry≠安全） |
 
