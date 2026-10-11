@@ -3,13 +3,13 @@
 > 交接时间：2026-10-10 晚 · 上一会话内容：AI 学习系统搭建 → agent harness 架构课 → RAG 课 → 课程 A（从零写 harness）实操
 > 交接对象：下一个接手此项目的会话／人
 >
-> **2026-10-17 接手更新**：待办 1（demo:compact 活体）✅ 完成、待办 2（FinHot/.env）✅ 核对完整、待办 3（JD 数据）已从 /tmp 抢救到 `learn-agent-harness/jd-research/`。过程中发现并修复 5 个 bug（详见"三、待办"下的修复记录）。模型轮换：`qwen3.8-flash` 已从代理下架，现用 `qwen3.8-flash-next`（tool calling 已验）。
+> **2026-10-10 晚 接手更新**：待办 1（demo:compact 活体）✅ 完成、待办 2（FinHot/.env）✅ 核对完整、待办 3（JD 数据）已从 /tmp 抢救到 `learn-agent-harness/jd-research/`。过程中发现并修复 5 个 bug（详见"三、待办"下的修复记录）。模型轮换：`qwen3.8-flash` 已从代理下架，现用 `qwen3.8-flash-next`（tool calling 已验）。
 >
-> **2026-10-17 二次整理（本轮）**：B 课实操完成（rag-demo）；知识点完整性构建——新增 `notes/knowledge-map.md`（总索引）+ C/D/E/F/G/H/I/J/K/L/M 十课知识结构 + `notes/interview-bank.md`（面试结构/交叉题/JD 覆盖矩阵），时点事实（MCP spec/OTel/沙箱/记忆框架/caching 等）已核实回填。
+> **2026-10-10 深夜 / 10-11 凌晨 二次整理（本轮）**：B 课实操完成（rag-demo）；知识点完整性构建——新增 `notes/knowledge-map.md`（总索引）+ C/D/E/F/G/H/I/J/K/L/M 十课知识结构 + `notes/interview-bank.md`（面试结构/交叉题/JD 覆盖矩阵），时点事实（MCP spec/OTel/沙箱/记忆框架/caching 等）已核实回填。
 >
-> **2026-10-17 三次整理**：面经检索（中文面经站/英文系统设计/模型八股三路）→ 缺口清单入 §4.2；全量学习规划入 §四（学习总纲：15 个知识域状态 + 分阶段顺序 + 完成判据）。
+> **2026-10-11 三次整理**：面经检索（中文面经站/英文系统设计/模型八股三路）→ 缺口清单入 §4.2；全量学习规划入 §四（学习总纲：15 个知识域状态 + 分阶段顺序 + 完成判据）。
 >
-> **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——C-S8 范式速查 / H-S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ I-S4 升级为 Agent 安全全景 / L-S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → 当前 1.0.1）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "2026-10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
+> **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——C-S8 范式速查 / H-S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ I-S4 升级为 Agent 安全全景 / L-S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → 当前 1.0.1）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
 
 ---
 
@@ -48,9 +48,9 @@
 | 文件 | 内容 | 状态 |
 |---|---|---|
 | `notes/agent-harness.md` | **Harness 架构课**：13 节（地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
-| `notes/rag.md` | **RAG 课**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-17 实操：rag-demo 11 文件 + golden set recall@3=1.00） |
+| `notes/rag.md` | **RAG 课**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 11 文件 + golden set recall@3=1.00） |
 | `notes/harness-from-scratch.md` | **课程 A**：10 节，含真实实测输出、白板骨架、练习题、代理故障实录 | ✅ 完成 |
-| `notes/knowledge-map.md` + 十课文件 | **知识点完整性构建（2026-10-17）**：C 系统设计 / D 可观测 / E 沙箱 / F 长期记忆 / G durable execution / H 评测工程化 / I MCP+安全 / J API+路由 / K 数据飞轮 / L 模型基础 / M 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
+| `notes/knowledge-map.md` + 十课文件 | **知识点完整性构建（2026-10-10 深夜 / 10-11 凌晨）**：C 系统设计 / D 可观测 / E 沙箱 / F 长期记忆 / G durable execution / H 评测工程化 / I MCP+安全 / J API+路由 / K 数据飞轮 / L 模型基础 / M 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
 
 ### 3. 课程 A 作品代码（可运行）
 
@@ -71,13 +71,13 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | 正常路径 | `npm run demo -- --fresh` | ✅ 真实模型（含 run_shell 被拒后继续） |
 | 崩溃恢复 | `npm run demo:crash` → `npm run demo` | ✅ 真实模型（未知状态→先核对再重写） |
 | 审批拒绝 | `npm run demo:reject` | ✅ 真实模型（跳过、不重试、out/ 为空） |
-| 压缩 | `npm run demo:compact` | ✅ 活体验证（2026-10-17，qwen3.8-flash-next，`[压缩] 摘要 3 条，保留 9 条` 真实触发） |
+| 压缩 | `npm run demo:compact` | ✅ 活体验证（2026-10-10 晚，qwen3.8-flash-next，`[压缩] 摘要 3 条，保留 9 条` 真实触发） |
 
 ---
 
 ## 三、待办与风险
 
-### 待办 1（✅ 2026-10-17 完成）：`demo:compact` 活体验证
+### 待办 1（✅ 2026-10-10 晚 完成）：`demo:compact` 活体验证
 
 代理已恢复，但 **`qwen3.8-flash` 已从代理下架**（`/v1/models` 无此模型，qwen 系现剩 `qwen3.8-flash-next`/`qwen3.8-max`，两者 tool calling 均验过）。`harness-demo/.env` 当时是空的（URL/key 均未落盘，见待办 2），现已从 FinHot/.env 重建并设 `LLM_MODEL=qwen3.8-flash-next`。活体跑通：`[压缩] 摘要 3 条，保留 9 条`，全程 105s。
 
@@ -90,28 +90,28 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 
 另有小改进：`chatStream` 4xx 时现在读响应体报真实错误（原来只报"无 body"）。crash/reject 的活体回归已于同日补完（✅ 均通过：crash-resume 场景模型先只读核对再决定、未重复写入；reject 场景拒绝后不重试、out/ 为空）。
 
-### 待办 2（✅ 2026-10-17 已核）：FinHot/.env
+### 待办 2（✅ 2026-10-10 晚 已核）：FinHot/.env
 
 `FinHot/.env` 完整：LLM_BASE_URL / LLM_API_KEY / LLM_EXTRA_JSON / LLM_MODEL 四行均在（共 145 行），未被并行会话污染。真正的问题在 `harness-demo/.env`——BASE_URL/API_KEY 两行为空（10-10 重建时 pi-web 进程环境恰好没有这两个变量，写入了空值）。现已从 FinHot/.env 填入真实值，**demo 从此自包含，不再依赖 pi-web 进程环境**。
 
 ### 待办 3：JD 调研的证据盲区（数据已抢救，补盲仍待人工）
 
-JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾讯 339 / OpenAI 815 / Anthropic 645，2025-05~2026-10）。原始数据 **2026-10-17 已从 `/tmp/agent-jd-research/` 移到 `learn-agent-harness/jd-research/`（51MB，不再受 /tmp 清理威胁）**。字节/百度/蚂蚁/阿里/智谱/月之暗面/DeepSeek **被反爬拦截，无一手证据**。字节是国内 agent 岗大户 → 建议人工抽 20-30 条 JD 发我补盲。
+JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾讯 339 / OpenAI 815 / Anthropic 645，2025-05~2026-10）。原始数据 **2026-10-10 晚 已从 `/tmp/agent-jd-research/` 移到 `learn-agent-harness/jd-research/`（51MB，不再受 /tmp 清理威胁）**。字节/百度/蚂蚁/阿里/智谱/月之暗面/DeepSeek **被反爬拦截，无一手证据**。字节是国内 agent 岗大户 → 建议人工抽 20-30 条 JD 发我补盲。
 
-### 待办 4（🆕 2026-10-17，✅ 四次整理已写入）：缺口补强清单（面经检索所得）
+### 待办 4（🆕 2026-10-11，✅ 四次整理已写入）：缺口补强清单（面经检索所得）
 
 见 §4.2——**5/5 🔶 项已全部写入（2026-10-11 四次整理）**：🔶1 L-S7 八股速查表 / 🔶2 H-S8 指标四代+奖励模型意识 / 🔶3 I-S4.2-4.4 OWASP 2026 双清单+防御分层 / 🔶4 C-S8 范式速查 / 🔶5 interview §8 行为面 5 题。⚪ LeetCode 仍另轨。不单独排期，跟着开课顺序走。
 
-### 待办 5（🆕 2026-10-17）：安排模拟面试
+### 待办 5（🆕 2026-10-11）：安排模拟面试
 
 2 场 60 分钟模拟（`notes/interview-bank.md` §2 结构），建议 Phase 1（C/E/H）完成后排第一场的初验，全部完成后排终验。
 
 ---
 
-## 四、学习总纲（2026-10-17 规划）
+## 四、学习总纲（2026-10-11 规划）
 
 > 规范索引 = `notes/knowledge-map.md`（课程总表/依赖图/横切点/资产映射）；本节 = **学习状态 + 顺序 + 完成判据**，是开课与面试准备的单一事实源。
-> 状态记号：✅ 已完成（讲完+实操）/ 📐 结构建成未开（内容已写入，讲解与题库未做）/ 🔄 进行中 / 🔶 缺口补强（2026-10-17 面经检索，待写入）
+> 状态记号：✅ 已完成（讲完+实操）/ 📐 结构建成未开（内容已写入，讲解与题库未做）/ 🔄 进行中 / 🔶 缺口补强（2026-10-11 面经检索，待写入）
 
 ### 4.1 知识点总览（全部 15 个知识域）
 
@@ -134,7 +134,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 15 | 面试结构（`interview-bank.md`） | 30 秒自我介绍 / 60 分钟模拟 / 5 组项目深挖追问链 / 10 道交叉题 / JD 覆盖矩阵 | 📐 | 2 场模拟通过 + 矩阵全 🟢 + 🔶5 STAR 模板 |
 | — | 范围外：算法编码（LeetCode） | 英文面经确认仍考（medium） | ⚪ 不在教程范围 | 建议 ~50 道 medium，并行轨 |
 
-### 4.2 缺口补强清单（2026-10-17 面经检索：中文面经站 / 英文系统设计 / 模型八股 三路）
+### 4.2 缺口补强清单（2026-10-11 面经检索：中文面经站 / 英文系统设计 / 模型八股 三路）
 
 | # | 缺口 | 面经证据 | 写入位置 | 何时做 |
 |---|---|---|---|---|
@@ -173,13 +173,13 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
    `export PATH=~/.nvm/versions/node/v22.23.2/bin:$PATH`
    （`viz/render.mjs` 已内置 re-exec 自举，直接 `node viz/render.mjs` 可用）
 2. **gpt-load 代理的模型均不支持图像输入**（qwen3.8-27b、step-5-preview 实测），read 图片报 "model does not support images"。visualize skill 已内置降级：按 SVG 源码逐坐标核验并声明"按构造核验"。
-3. **模型 tool-calling 能力参差 + 模型列表会轮换**（2026-10-17 实测）：`qwen3.8-flash` 已下架 → `qwen3.8-flash-next` ✅（tools+SSE）；`qwen3.8-max` ✅；`step-5-preview` 仍在但 ❌ 不支持 tool calling。我用的 OpenAI 兼容代理（litellm 网关）的模型列表随时间变，**跑 demo 前先看 `GET /v1/models`**。
+3. **模型 tool-calling 能力参差 + 模型列表会轮换**（2026-10-10 晚 实测）：`qwen3.8-flash` 已下架 → `qwen3.8-flash-next` ✅（tools+SSE）；`qwen3.8-max` ✅；`step-5-preview` 仍在但 ❌ 不支持 tool calling。我用的 OpenAI 兼容代理（litellm 网关）的模型列表随时间变，**跑 demo 前先看 `GET /v1/models`**。
 4. playwright 浏览器在 `~/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome`（无需下载）。
 5. pi 1.1.0 与 0.85.1 两份安装在机器上共存，引用 pi 文档结论时**必须标版本**。
 
 ---
 
-## 六、接手建议（按优先级，2026-10-17 更新）
+## 六、接手建议（按优先级，2026-10-10 晚 更新）
 
 1. ~~核对 FinHot/.env~~ ✅、~~demo:compact 活体~~ ✅ —— 已完成，无需再动
 2. 出练习题：`notes/*.md` 里题库已扩充（原 16 题 + 十课各 8 题 + interview-bank 交叉 10 道）；本次修的 5 个 bug（见待办 1）本身就能出 2-3 道好题（import 提升、wire 格式）；提问另约时间（用户要求整理阶段不急着考）
@@ -194,4 +194,4 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 - `#38` learn-agent-harness 全局安装形态与适配决策
 - `#39` 机器环境两坑（node 12 / 无视觉模型）
 - 相关历史：`#34` FinHot 第三起外部破坏（幽灵事故）、`#36` 推演飞轮方案
-- `#41` gpt-load 代理模型轮换 + harness-demo/.env 自包含（2026-10-17）
+- `#41` gpt-load 代理模型轮换 + harness-demo/.env 自包含（2026-10-10 晚）

@@ -10,7 +10,7 @@
  *   两路都 >10                     → 表面形式盲区（paraphrase/同义）或切块/覆盖问题
  *   范围外题                        → 拒答轨（demo-rag 测），不进 recall 统计
  *
- * 注意：标注基于 2026-10-17 的 chunk 快照；语料若被重新切块，ids 需重核。
+ * 注意：标注基于 2026-10-10 的 chunk 快照；语料若被重新切块，ids 需重核。
  */
 
 import { loadCorpus } from "./corpus.js";

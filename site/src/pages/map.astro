@@ -1,0 +1,114 @@
+---
+import Base from '../layouts/Base.astro';
+import Mermaid from '../components/Mermaid.astro';
+
+/**
+ * 手绘自 notes/knowledge-map.md 的依赖结构。
+ * 16 个知识域节点（A–M 十三域 + 多智能体编排 / LLM 时间线 / 行业前线），节点色 = 状态。
+ * 实线 = 前置依赖，虚线 = 加深/派生线；多智能体 / 时间线 / 行业前线为新增域，
+ * 图中仅标注其与 A 的弱关系（源依赖图未覆盖，后续可改）。
+ */
+const chart = `graph TD
+  classDef done fill:#2ea043,stroke:#278038,color:#fff
+  classDef doing fill:#bb8009,stroke:#9a6700,color:#fff
+  classDef todo fill:#6e7681,stroke:#57606a,color:#fff
+  classDef hub fill:#0f766e,stroke:#0d5f59,color:#fff
+
+  A["✅ A 从零写 harness<br/>P0"]:::done
+  B["✅ B RAG 与检索<br/>P0"]:::done
+  C["⏳ C 系统设计模板<br/>P0"]:::todo
+  E["🔄 E 沙箱与凭据<br/>P0 · S1 进行中"]:::doing
+  H["⏳ H 评测工程化<br/>P0"]:::todo
+  G["⏳ G durable execution<br/>P1"]:::todo
+  I["⏳ I MCP + 供应链安全<br/>P1"]:::todo
+  J["⏳ J API + 多模型路由<br/>P1"]:::todo
+  K["⏳ K 数据飞轮<br/>P1"]:::todo
+  D["⏳ D 可观测<br/>P2"]:::todo
+  F["⏳ F 长期记忆<br/>P2"]:::todo
+  L["⏳ L 模型基础<br/>P2"]:::todo
+  M["⏳ M 框架生态<br/>P2"]:::todo
+  NA["⏳ 多智能体编排<br/>P0"]:::todo
+  TL["⏳ LLM 时间线<br/>P0"]:::todo
+  IND["✅ 行业前线<br/>2026 调研"]:::done
+  Z["🎯 面试演练<br/>P0 末"]:::hub
+
+  A --> C
+  B --> C
+  A --> E
+  B --> H
+  A --> G
+  H --> G
+  A --> I
+  A --> J
+  H --> K
+  C --> Z
+  E --> Z
+  H --> Z
+  G --> Z
+  I --> Z
+  J --> Z
+  K --> Z
+  D -.->|加深 H| Z
+  F -.->|进 C 设计题| Z
+  L -.-> Z
+  M -.-> Z
+  A -.->|编排地基| NA
+`;
+---
+
+<Base title="知识地图">
+  <h1 class="page-title">知识地图</h1>
+  <p class="page-lead">
+    16 个知识域 + 依赖结构（手绘自 <code>notes/knowledge-map.md</code>）。
+    实线 = 前置依赖，虚线 = 加深 / 派生线。
+  </p>
+
+  <div class="legend">
+    <span><i class="legend-dot ok"></i>✅ 已完成</span>
+    <span><i class="legend-dot doing"></i>🔄 进行中</span>
+    <span><i class="legend-dot todo"></i>⏳ 未开始（已建知识结构，待开课）</span>
+  </div>
+
+  <Mermaid chart={chart} title="知识域依赖图（16 域）：A/B 已完成 → C/E/H 为 P0 收口 → P1 三课（G/I/K）→ 面试演练" />
+
+  <section style="margin-top: 36px">
+    <h2 class="page-title" style="font-size: 1.35rem">横切知识点（多课重复出现，面试按“一个主题三个锚点”讲）</h2>
+    <div class="card" style="display: block">
+      <table class="file-table">
+        <thead>
+          <tr><th>横切主题</th><th>出现位置</th><th>三个锚点（证据链）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="sec">失败恢复</td><td>A⑥⑦、E、G</td><td>intent/exec 日志（harness-demo）→ 幽灵事故 scope 缺失（FinHot）→ durable journal（G 课 demo）</td></tr>
+          <tr><td class="sec">权限与信任</td><td>A⑤、E、I、F</td><td>三道门（harness-demo policy）→ 沙箱=执行环境层（E）→ MCP 不解决权限（I）→ 记忆投毒（F）</td></tr>
+          <tr><td class="sec">评测与验证</td><td>B⑨、H、K</td><td>golden set（rag-demo recall@3=1.00）→ CI 门禁（H）→ 飞轮迭代（K，FinHot 两轮降噪）</td></tr>
+          <tr><td class="sec">成本工程</td><td>A⑧、J、D</td><td>压缩（context.ts）→ 路由/caching（J）→ token 归因（D）</td></tr>
+          <tr><td class="sec">上下文工程</td><td>A⑧、B⑤⑧、F</td><td>压缩/预算 → query 侧分布差/窗口≠RAG → 跨会话记忆</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section style="margin-top: 36px">
+    <h2 class="page-title" style="font-size: 1.35rem">资产 ↔ 课程映射</h2>
+    <div class="card" style="display: block">
+      <table class="file-table">
+        <thead>
+          <tr><th>资产</th><th>证明的能力</th><th>被哪些课引用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="sec">harness-demo/</td><td>loop / 工具协议 / 流式 / 权限 / 恢复 / 压缩</td><td>C（coding agent 设计）、E（policy 层）、G（session.ts=最小 journal）、H（mock 评测）</td></tr>
+          <tr><td class="sec">whiteboard/</td><td>白板手写（~150 行）</td><td>C、面试演练</td></tr>
+          <tr><td class="sec">rag-demo/</td><td>检索全 pipeline + 评测</td><td>C（KB 设计题）、H（检索层评测）、K（指标驱动）</td></tr>
+          <tr><td class="sec">sandbox-demo/</td><td>四通道 policy + 事故重放</td><td>E 课 S2</td></tr>
+          <tr><td class="sec">FinHot（生产）</td><td>长任务 / 批量评测 / 事故 / 数据飞轮</td><td>E、G、H、J、K</td></tr>
+          <tr><td class="sec">pi + pi-agents-team</td><td>多 agent 编排 / 框架源码级</td><td>C、M</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p style="margin-top: 28px; color: var(--text-soft); font-size: 0.92rem">
+    完整总表、状态记号与未结事项见仓库 <a href="https://github.com/zo0043/learn-agent-harness/blob/main/notes/knowledge-map.md" target="_blank" rel="noopener">notes/knowledge-map.md ↗</a>
+  </p>
+</Base>

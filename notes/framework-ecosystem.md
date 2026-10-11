@@ -34,6 +34,10 @@
 | **Claude Agent SDK** | Claude Code 的编程化：把完整 harness 当库用（subagents/hooks/MCP/权限模式/skills/sessions） | **2025-09 由 Claude Code SDK 改名而来**（Python+TypeScript，Apache 2.0）；"Claude Code 的机制=官方参考实现"，SDK=机制的可编程面 |
 | **OpenAI Agents SDK** | **Swarm 的官方后继**（2025 GA，Apache 2.0）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（C 课 S3）；guardrails=I 课 Guardrails 的框架版 |
 | **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x，当前 1.0.1；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 C 课 S3 的 workflow 模式显式化；checkpoint=G 课 durable 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
+| **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF，A2A 同入（TSC=AWS/Google/IBM/Microsoft/Salesforce/SAP 等七厂） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
+| **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（I 课 S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
+| **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 面试谈资："GUI agent 不再是边角方向"；追问见 C 课 S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
+| **OpenAI Codex** [2026现行] | 由 CLI 转向 **agent 基础设施**：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；**AgentKit=低代码入口** | "OpenAI 在把 Codex 做成平台而不是产品"；https://developers.openai.com/codex |
 
 **共同点（比单家更值钱的面试点）**：四家都在解同一组问题——会话持久化（JSONL/checkpoint）、子代理边界（上下文隔离）、工具标准化（MCP）、权限/护栏（guardrails/hooks/policy）。**框架生态的收敛=行业问题定义的收敛**——我用 A 课从零写过这些层，所以能看出四家在做同一件事。
 
@@ -68,4 +72,6 @@
 
 - 各家现状：Claude Agent SDK（2025-09 改名，Python+TS）/ OpenAI Agents SDK（Swarm 后继，GA）已核实（Anthropic/OpenAI 官方博客+仓库）；LangGraph 1.0 已核实（2025-10 alpha → 稳定 1.0.x，GitHub releases + langchain 官方博客；2026-10-11 复核）——S3 已回填
 - 我的锚点：pi 1.1.0 日常（#38/#39 环境实践）、pi-agents-team 多 agent（orchestrator/worker/RPC，本会话正在用）、A 课（"框架藏什么"的实证）
+- 实操已落地：framework-demo/（Claude Agent SDK 冒烟+四能力：agent/subagent/权限/会话，指向本地双格式代理）——S3'框架给你什么/藏什么'的活样本
+- 对照 harness-demo 的踩坑实证见 framework-demo/README.md（2026-10-11：allowedTools 裸名会抢在 canUseTool 之前、子代理对话默认不出主流）
 - 接回：C（形态选型）、G（checkpoint）、D（可观测出口）、I（MCP 支持面）、F（Magic Context）

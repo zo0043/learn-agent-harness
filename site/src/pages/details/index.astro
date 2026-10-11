@@ -1,0 +1,46 @@
+---
+/**
+ * /details 列表页：notes/details/*.md（frontmatter 带 title/slug/domain/source/status）。
+ * 目录可能为空（并行 worker 正在新增）→ 显示空态。
+ */
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { getCollection } from 'astro:content';
+
+const items = await getCollection('details');
+---
+
+<Base title="详解">
+  <h1 class="page-title">详解</h1>
+  <p class="page-lead">
+    课程之外的延伸详解（<code>notes/details/</code>）：事故复盘、机制拆解、一手资料精读等。
+  </p>
+
+  {
+    items.length > 0 ? (
+      <div class="cards">
+        {
+          items.map((item) => (
+            <a class="card" href={`/details/${item.data.slug ?? item.id}/`}>
+              <h3>{item.data.title ?? item.id}</h3>
+              <div class="dc-top">
+                {item.data.domain && <span class="chip">{item.data.domain}</span>}
+                {item.data.source && <span class="chip">来源：{item.data.source}</span>}
+              </div>
+              {item.data.status && <StatusBadge status={item.data.status} />}
+            </a>
+          ))
+        }
+      </div>
+    ) : (
+      <div class="empty-state">
+        <p class="empty-icon">📂</p>
+        <p>
+          <strong>详解目录还是空的</strong> ——
+          <code>notes/details/</code> 尚未有文件（并行内容 worker 正在新增）。
+          文件入仓后，本页随下一次构建自动列出。
+        </p>
+      </div>
+    )
+  }
+</Base>

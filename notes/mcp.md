@@ -41,7 +41,7 @@ MCP:       host A ──MCP──▶ MCP server X   N+M
 
 **传输**：stdio（本地进程，最常见）/ **streamable HTTP**（远程，2025-06-18 引入并成为**唯一远程传输**，旧 HTTP+SSE 传输废弃）。
 
-**spec 版本线（2026-10 核实，面试要能报版本节奏）**：2024-11-05（初版）→ **2025-03-26**（tools/resources/prompts 定型 + sampling/elicitation 进入规范）→ **2025-06-18**（streamable HTTP + OAuth 2.1 授权框架）→ **2025-11-25**（elicitation 修订 + 工具结构化输出/annotations）。截至 2026-10 未见更新 revision——版本迭代在放缓、生态重心转向 registry 与 host 实现。
+**spec 版本线（2026-10 核实，面试要能报版本节奏）**：2024-11-05（初版）→ **2025-03-26**（tools/resources/prompts 定型 + sampling/elicitation 进入规范）→ **2025-06-18**（streamable HTTP + OAuth 2.1 授权框架）→ **2025-11-25**（elicitation 修订 + 工具结构化输出/annotations）→ **2026-07-28**（订阅/多轮请求/授权服务器发现，[2026现行] 协议仍在快速演进）。
 
 **与 harness 的接缝（面试核心图）**：
 ```
@@ -51,6 +51,15 @@ MCP:       host A ──MCP──▶ MCP server X   N+M
               └─▶ MCP server(本地 stdio) / 远程 HTTP
 ```
 **MCP 不解决：权限、沙箱、审计。** host 收到 MCP server 的工具列表后，照样过自己的 policy（harness 课 7.2：策略控制行为）。"接了 MCP 就安全了"= 最贵的一种误解。
+
+### S2.1 2026 更新 [2026现行]
+
+**治理**：2025.12 Anthropic 将 MCP 捐给 **Linux 基金会旗下 Agentic AI Foundation（AAIF）**——完成"事实标准→基金会治理"跃迁。
+**最新 spec**：**2026-07-28**（承接上文 2025-11-25 之后的版本线）：新增**订阅、多轮请求、授权服务器发现**等——协议仍在快速演进。https://modelcontextprotocol.io/specification/versioning
+**协议三分**（MCP 定位收敛，不再包打天下）：**MCP = agent↔工具、A2A = agent↔agent**（A2A 同入 AAIF，TSC=AWS/Google/IBM/Microsoft/Salesforce/SAP 等七厂）、**AG-UI = agent↔前端**。
+**标准成熟度曲线**（面试要能报）：2024.11 发布（Anthropic，"AI 的 USB-C"）→ 2025.3 OpenAI、Google 先后采纳（de facto 标准确立）→ 2025.12 捐给 AAIF（基金会治理）→ 2026.7 最新 spec 修订。
+**MCP Registry**：官方 registry 仍在 **preview**（未 GA），Anthropic/GitHub/Microsoft/PulseMCP 背书；机制=**DNS 命名空间 + server.json + REST 发现**——生态规范化真实但早期（勿与 S3 的 OpenAI Registry 混淆：那是社区提交+OpenAI 审核型）。https://modelcontextprotocol.io/registry
+**安全批评（NSA）**："扩散速度超出安全模型"——代表案例 **CVE-2025-6514**（mcp-remote RCE，CVSS 9.6）；spec 已补安全要求应对 → "变味"信号是**治理滞后，而非路线失败**。https://modelcontextprotocol.io/specification/versioning
 
 ## S3 认证与分发
 
@@ -140,6 +149,7 @@ server 请求 host 调模型（如"帮我总结这份文档"）——**信任方
 
 - 读一个真实 MCP server 源码（小体量，如 filesystem server）→ 对着 S2 的图讲：tools 定义、stdio 帧格式、host 怎么并入注册表
 - 投毒演示：本地起一个"查天气"server，description 藏注入 → host 接上 → 展示模型被带偏 → 再展示 host 侧 policy 如何挡住敏感动作（**MCP 管不到，policy 管得到**——E 课闭环）
+  - **已实现（2026-10-11）**：投毒演示已落地，见 `mcp-demo/`——本地 mock server 的 web_search 返回投毒（S4.1 第 4 行机制）+ 四层防御（输入消毒/policy 门/egress 断言/审计）对照 + 单层消融 + 确定性重放，全离线零 key，攻击路径 mermaid 与对照表见该目录 README
 - 可选：用 pi 的 MCP 支持实测一个 server（pi 文档有 mcp.md——M 课的资产联动）
 
 ## 练习题库（后续提问用）

@@ -1,11 +1,11 @@
 # 知识点总地图（面试导向：coding agent）
 
-> 建立：2026-10-17 · 依据：handoff.md 路线图（2026-10-10）+ 仓库最新实况（10-17）
+> 建立：2026-10-11 · 依据：handoff.md 路线图（2026-10-10）+ 仓库最新实况（10-11）
 > 用途：全部知识点的一次性盘点——每课的知识结构在各自课程文件里，本文件是**索引 + 状态 + 依赖**。
 > 状态记号：✅ 已完成 / 🔄 进行中 / ⏳ 未开始（已建知识结构，待开课）
 >
 > **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——C `system-design.md` S8 范式速查 / H `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ I `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ L `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。每课题库 +2 题（共 20 题）。
-> ⚠️ 日期口径：前两轮记录标为 "2026-10-17"，但机器时钟 = 2026-10-11（周日，星期自洽；rag-demo 文件 mtime=10-11 00:06）。本轮起用系统时钟，口径待用户确认。
+> ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
 
 ## 课程总表
 
@@ -15,7 +15,7 @@
 | B | RAG 与检索 | P0 | ✅ | `rag.md`（含 §13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 85-chunk 评测 |
 | C | Agent 系统设计模板 | P0 | ⏳ | `system-design.md` | 30 分钟结构化答"设计一个 X agent" |
 | D | Agent 可观测 | P2 | ⏳ | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因 |
-| E | 沙箱与凭据·可复现 | P0 | 🔄 S1 进行中 | `sandbox.md` | 讲清"权限层 ≠ 沙箱" + 隔离技术选型 + 幽灵事故完整故事 |
+| E | 沙箱与凭据·可复现 | P0 | 🔄 S1 进行中（S2 已实现 2026-10-11） | `sandbox.md` | 讲清"权限层 ≠ 沙箱" + 隔离技术选型 + 幽灵事故完整故事 |
 | F | 长期记忆 | P2 | ⏳ | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全） |
 | G | durable execution | P1 | ⏳ | `durable-execution.md` | 讲清长任务不丢不重（journal/checkpoint/幂等） |
 | H | 评测工程化 | P0 | ⏳ | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
@@ -24,8 +24,11 @@
 | K | 数据飞轮 | P1 | ⏳ | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成"生产数据飞轮"故事 |
 | L | 模型基础 | P2 | ⏳ | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖 |
 | M | 框架生态 | P2 | ⏳ | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事 |
+| N | 多智能体编排 | P0 | ⏳（2026-10-11 建结构） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
 
-横向资产：`interview-bank.md`（模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵）
+横向资产：`interview-bank.md`（模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵）· `llm-timeline.md`（LLM 演化时间线 12 节点）· `industry-2026.md`（2026-10 行业前线调研，I/M/C/N 课一手源）· `details/`（资深分水岭 8 细节页）
+
+> 2026-10-11 前线回填（industry-2026 → 课程）：I 课 S2.1（AAIF 治理/spec 2026-07-28/协议三分）· M 课 S3 表 +4 行 · C 课 S2 两个必答题模块 + 1 追问 · A 课 §8 → N 课入口。课程状态（⏳/）指"开课/实操"进度，不含内容回填。
 
 ## 依赖图（按 handoff 优先级）
 
@@ -38,6 +41,9 @@ graph TD
   A --> G["G durable execution (P1)"]
   H --> G
   A --> I["I MCP + 安全 (P1)"]
+  C --> N["N 多智能体编排 (P0)"]
+  H --> N
+  N --> Z
   A --> J["J API + 多模型路由 (P1)"]
   H --> K["K 数据飞轮 (P1)"]
   C --> Z["面试演练 (P0 末)"]
@@ -53,8 +59,8 @@ graph TD
   M["M 框架生态 (P2)"] -.-> Z
 ```
 
-**建议开课顺序**：C → E（续 S2）→ H → G → I → J → K →（P2 四课按目标岗位权重排）。
-理由：C 把 A/B 收口成"设计能力"；E 续进行中且 demo 骨架已备；H 是 P1 三课（G/I/K）的公共地基。
+**建议开课顺序**：C → N → E（续 S2）→ H → G → I → J → K →（P2 四课按目标岗位权重排）。
+理由：C 把 A/B 收口成"设计能力"；N 依赖 C 模板 + A 子代理概念，2026 行业实践已收敛（单线程写），开课成本低；E 续进行中且 demo 骨架已备；H 是 P1 三课（G/I/K）的公共地基。
 
 ## 横切知识点（多课重复出现，面试时按"一个主题三个锚点"讲）
 
@@ -70,7 +76,7 @@ graph TD
 
 | 资产 | 证明的能力 | 被哪些课引用 |
 |---|---|---|
-| `harness-demo/`（8 文件 + 4 运行模式实测） | loop/工具协议/流式/权限/恢复/压缩 | C（coding agent 设计）、E（policy 层）、G（session.ts=最小 journal）、H（mock 评测） |
+| `harness-demo/`（8 文件 + 4 运行模式实测） | loop/工具协议/流式/权限/恢复/压缩 | C（coding agent 设计）、E（policy 层）、G（session.ts=最小 journal）、H（mock 评测）、N（S7 子代理设计练习） |
 | `whiteboard/agent_whiteboard.py`（~150 行） | 白板手写 | C、面试演练 |
 | `rag-demo/`（11 文件 + golden set） | 检索全 pipeline + 评测 | C（KB 设计题）、H（检索层评测）、K（指标驱动） |
 | `sandbox-demo/`（package 已备，src 待写） | 四通道 policy + 事故重放 | E 课 S2 |
@@ -81,7 +87,9 @@ graph TD
 
 - [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）
 - [ ] 项目打磨（sandbox-demo src 未写；harness-demo/rag-demo 可补 README 与运行说明）
-- [ ] 日期口径确认：笔记中 "2026-10-17" 系 vs 机器时钟 2026-10-11（详见顶部四次整理注）
+- [ ] 实操补强 ×4（sandbox-demo src / OTel 埋点 / MCP 投毒演示 / 框架实操）——2026-10-11 起执行中
+- [x] 日期口径确认（2026-10-11）：归一到系统时钟，11 文件 27 行 28 处修正
+- [ ] 站点建设：Astro 站（site/ 子目录，7 板块）+ GitHub Pages 部署——进行中
 - [ ] JD 关键词覆盖：见 `interview-bank.md` 矩阵
 - [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过）
 - [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 P1/P2 权重

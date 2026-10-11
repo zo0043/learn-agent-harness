@@ -1,0 +1,25 @@
+{
+  "name": "learn-agent-harness-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "learn-agent-harness 学习站点（构建时快照）：课程笔记 / 学习路线 / 作品 / 知识地图 / 题库",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.18.2",
+    "katex": "^0.19.0",
+    "mermaid": "^12.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  }
+}

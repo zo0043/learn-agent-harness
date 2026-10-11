@@ -1,0 +1,70 @@
+---
+/**
+ * 课程页：notes/*.md 原样渲染（KaTeX + mermaid 由站点管线处理）。
+ * 顶部元信息条（域/阶段/状态，来自 src/data/courses.ts）+ 侧栏 TOC。
+ * 排除项（knowledge-map / interview-bank）各有独立页面（/map、/interview）。
+ */
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { getCollection, render } from 'astro:content';
+import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE } from '../../data/courses';
+import { extractToc } from '../../utils/toc';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('courses');
+  return entries
+    .filter((e) => !EXCLUDED_FROM_COURSE_ROUTE.has(e.id))
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const meta = courseMeta(entry.id);
+const toc = extractToc(entry.body ?? '');
+---
+
+<Base title={meta.domain}>
+  <div class="course-layout">
+    <article class="markdown">
+      <header class="course-meta-bar">
+        <div class="meta-row">
+          <span class="chip chip-strong">{meta.letter ? `课程 ${meta.letter}` : meta.domain}</span>
+          <span class="chip">{meta.domain}</span>
+          <span class="chip">{meta.phase === '—' ? '未分阶段' : meta.phase}</span>
+          <StatusBadge status={meta.status} />
+        </div>
+        <nav class="crumbs" aria-label="面包屑">
+          <a href="/">首页</a> / <a href="/learn/">学习路线</a> / <span>{meta.domain}</span>
+        </nav>
+      </header>
+
+      <Content />
+
+      <footer class="page-foot">
+        <a href="/map/">知识地图</a>
+        <a href="/interview/">面试题库</a>
+        <a href="/works/">作品详解</a>
+        <a href="/learn/">学习路线</a>
+      </footer>
+    </article>
+
+    {
+      toc.length > 0 && (
+        <aside class="toc" aria-label="本页目录">
+          <details open>
+            <summary>本页目录</summary>
+            <ul>
+              {
+                toc.map((t) => (
+                  <li class={t.depth === 3 ? 'toc-3' : 'toc-2'}>
+                    <a href={`#${t.id}`}>{t.text}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </details>
+        </aside>
+      )
+    }
+  </div>
+</Base>

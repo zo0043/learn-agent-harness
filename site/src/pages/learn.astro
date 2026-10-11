@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import { getCollection } from 'astro:content';
+import { COURSES, type CourseMeta } from '../data/courses';
+
+const entries = await getCollection('courses');
+const slugSet = new Set(entries.map((e) => e.id));
+
+const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
+  { phase: 'P0', desc: '核心段：白板 / 系统设计 / 项目深挖的硬通货' },
+  { phase: 'P1', desc: '扩展段：公共地基 + 追问深度' },
+  { phase: 'P2', desc: '区分度段：按目标岗位权重排' },
+  { phase: '—', desc: '横向素材：未分阶段' },
+];
+---
+
+<Base title="学习路线">
+  <h1 class="page-title">学习路线</h1>
+  <p class="page-lead">
+    P0 / P1 / P2 三段 × 知识域。卡片数据来自手写映射 <code>src/data/courses.ts</code>
+    （基线：notes/knowledge-map.md 课程总表）；点开进课程页。
+  </p>
+
+  {
+    PHASES.map(({ phase, desc }) => {
+      const list = COURSES.filter((c) => c.phase === phase);
+      return (
+        <section class="phase-section">
+          <div class="phase-head">
+            <h2>{phase === '—' ? '未分阶段' : phase}</h2>
+            <span class="phase-desc">{desc}</span>
+          </div>
+          <div class="cards">
+            {
+              list.map((c) => {
+                const exists = slugSet.has(c.slug);
+                return exists ? (
+                  <a class="card domain-card" href={`/c/${c.slug}/`}>
+                    <div class="dc-top">
+                      <span class="dc-letter">{c.letter ?? '·'}</span>
+                      <h3>{c.domain}</h3>
+                      <StatusBadge status={c.status} />
+                    </div>
+                    <p class="dc-intro">{c.intro}</p>
+                    <p class="dc-foot">进入课程 →</p>
+                  </a>
+                ) : (
+                  <div class="card domain-card soon" aria-label="撰写中">
+                    <div class="dc-top">
+                      <span class="dc-letter">{c.letter ?? '·'}</span>
+                      <h3>{c.domain}</h3>
+                      <StatusBadge status={c.status} />
+                    </div>
+                    <p class="dc-intro">{c.intro}</p>
+                    <p class="dc-foot">撰写中（文件未就位）</p>
+                  </div>
+                );
+              })
+            }
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <section class="phase-section">
+    <div class="phase-head">
+      <h2>建议开课顺序</h2>
+    </div>
+    <div class="card" style="display: block">
+      <p style="margin-top: 0">
+        <code>C 系统设计</code> → <code>E 沙箱（续 S2）</code> → <code>H 评测</code> →
+        <code>G durable execution</code> → <code>I MCP + 安全</code> → <code>J API + 路由</code> →
+        <code>K 数据飞轮</code> →（P2 四课按目标岗位权重排）
+      </p>
+      <p style="color: var(--text-soft); font-size: 0.92rem">
+        理由：C 把 A/B 收口成“设计能力”；E 续进行中且 demo 骨架已备；H 是 P1 三课（G/I/K）的公共地基。
+      </p>
+      <p style="font-size: 0.9rem">
+        完整依赖图与横切知识点见 <a href="/map/">知识地图 →</a>
+      </p>
+    </div>
+  </section>
+</Base>

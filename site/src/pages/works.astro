@@ -1,0 +1,177 @@
+---
+import Base from '../layouts/Base.astro';
+import TrajectoryTimeline from '../components/TrajectoryTimeline.astro';
+
+const repo = 'https://github.com/zo0043/learn-agent-harness';
+---
+
+<Base title="作品详解">
+  <h1 class="page-title">作品详解</h1>
+  <p class="page-lead">
+    每个作品都是课程的可运行证据：文件 ↔ 课程节一一对应，本地可跑、可复现。
+    源码见 <a href={repo} target="_blank" rel="noopener">仓库 ↗</a>。
+  </p>
+
+  <!-- ── harness-demo ─────────────────────────────────── -->
+  <section class="work" id="harness-demo">
+    <h2>harness-demo · 从零手写 agent harness</h2>
+    <p class="work-tag">课程 A（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE）</p>
+    <div class="card work-card" style="display: block">
+      <p class="work-lesson" style="margin-bottom: 10px">
+        一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
+        harness 的契约是 <code>policy → intent → execute → result</code>（结果必回写，拒绝也是结果）。
+      </p>
+
+      <h3>9 个文件 ↔ 9 节</h3>
+      <table class="file-table">
+        <thead>
+          <tr><th>文件</th><th>对应节</th><th>职责</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>types.ts</td><td class="sec">③ 工具协议</td><td>消息 / 工具调用 / 轨迹事件类型定义</td></tr>
+          <tr><td>tools.ts</td><td class="sec">③ 工具协议</td><td>工具注册表 + JSON schema 校验 + 执行（workspace 路径范围在这里落实）</td></tr>
+          <tr><td>llm.ts</td><td class="sec">②④ 单次调用 + SSE 流式</td><td>OpenAI 兼容协议：SSE 帧解析、tool_calls 片段拼接</td></tr>
+          <tr><td>agent.ts</td><td class="sec">②⑦ loop + 恢复</td><td>guarded_tool_step：policy → intent → execute → result</td></tr>
+          <tr><td>policy.ts</td><td class="sec">⑤ 权限门</td><td>deny &gt; approve &gt; allow，默认 deny；审批回调 human-in-the-loop</td></tr>
+          <tr><td>session.ts</td><td class="sec">⑥⑦ 会话持久化 + 恢复</td><td>JSONL 日志是唯一事实源；上下文由日志派生（可重建）；未知状态 = intent 已记、exec 缺失</td></tr>
+          <tr><td>context.ts</td><td class="sec">⑧ 预算 / 压缩</td><td>token 估算 + 教学压缩策略</td></tr>
+          <tr><td>demo.ts</td><td class="sec">⑨ 轨迹 / 演示</td><td>多步任务 + 四种运行模式</td></tr>
+          <tr><td>test-compact.ts</td><td class="sec">⑧ 压缩验证</td><td>本地 mock 模型单独验证压缩逻辑（不依赖外部代理）</td></tr>
+        </tbody>
+      </table>
+
+      <h3>4 种 demo 模式</h3>
+      <table class="file-table">
+        <thead>
+          <tr><th>模式</th><th>命令</th><th>验证点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="sec">正常</td><td><code>npm run demo</code></td><td>完整多步任务流（天气 / 读文档 / 写总结）</td></tr>
+          <tr><td class="sec">崩溃恢复</td><td><code>npm run demo:crash</code></td><td>write_file intent 后模拟崩溃 → 重启从 JSONL 恢复，处理“未知状态”</td></tr>
+          <tr><td class="sec">审批拒绝</td><td><code>npm run demo:reject</code></td><td>policy = approve 且用户拒绝的路径</td></tr>
+          <tr><td class="sec">压缩</td><td><code>npm run demo:compact</code></td><td>低预算阈值触发上下文压缩</td></tr>
+        </tbody>
+      </table>
+
+      <h3>跑法</h3>
+      <div class="runbox">
+        cd harness-demo<br />
+        npm i &amp;&amp; cp .env.example .env <span class="cmt"># 填自己的 OpenAI 兼容端点 + key</span><br />
+        npm run demo
+      </div>
+    </div>
+  </section>
+
+  <!-- ── rag-demo ─────────────────────────────────────── -->
+  <section class="work" id="rag-demo">
+    <h2>rag-demo · 零依赖 RAG</h2>
+    <p class="work-tag">课程 B（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑）</p>
+    <div class="card work-card" style="display: block">
+      <p class="work-lesson" style="margin-bottom: 10px">
+        一句话教训：<strong>词法只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
+        BM25 用价目表（IDF × tf 饱和 × 长度归一）修了定价，但词法的上限就是形式重叠 → 这正是 embedding 路存在的理由。
+      </p>
+
+      <h3>pipeline 七级</h3>
+      <div class="pipeline">
+        <span class="pipe-step"><b>① chunking</b>按节切分 · 85 chunks</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><b>② hash embedder</b>768 维 · 零依赖</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><b>③ 暴力余弦</b>语义路</span>
+        <span class="pipe-arrow">∥</span>
+        <span class="pipe-step"><b>④ BM25</b>词法路</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><b>⑤ RRF 融合</b>两路合并</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><b>⑥ 生成</b>强制引用 + 强制拒答</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><b>⑦ golden set</b>10 题评测</span>
+      </div>
+
+      <h3>golden 评测（10 题 · 85 chunks）</h3>
+      <div class="eval-stats">
+        <div class="eval-stat"><div class="num">1.00</div><div class="lbl">recall@3</div></div>
+        <div class="eval-stat"><div class="num">0.94</div><div class="lbl">recall@5</div></div>
+        <div class="eval-stat"><div class="num">1.00</div><div class="lbl">recall@10</div></div>
+      </div>
+
+      <h3>跑法</h3>
+      <div class="runbox">
+        cd rag-demo<br />
+        npm i<br />
+        npm run demo:eval <span class="cmt"># 其他入口：demo:retrieval / demo:bm25 / demo:rag</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── whiteboard ───────────────────────────────────── -->
+  <section class="work" id="whiteboard">
+    <h2>whiteboard · 白板版 agent（~150 行 Python）</h2>
+    <p class="work-tag">面试口述版 · 纯标准库 · 与 TS 版架构 1:1 对应</p>
+    <div class="card work-card" style="display: block">
+      <p style="margin-top: 0">
+        白板 20 分钟能写完、能边写边讲的版本。与 <code>harness-demo/src/</code> 一一对应：
+        <code>② loop</code> / <code>③ 工具协议</code> / <code>⑤ 权限门</code> /
+        <code>⑥⑦ 会话与恢复</code> / <code>⑧ 预算</code>（压缩留 stub，只报预算超限）。
+      </p>
+      <p style="color: var(--text-soft); font-size: 0.94rem">
+        简化取舍（白板上的说明）：非流式调用（生产换 SSE：解析 data: 帧 + 拼接 tool_calls 片段）；
+        压缩留 stub；schema 校验只查 required（完整版在 TS <code>validateArgs</code>）。
+      </p>
+      <h3>跑法 / 读法</h3>
+      <div class="runbox">
+        <span class="cmt"># 直接读源码（面试口述用）</span><br />
+        whiteboard/agent_whiteboard.py<br /><br />
+        <span class="cmt"># 想真跑（复用 harness-demo 的 .env）：</span><br />
+        set -a; . ../harness-demo/.env; set +a<br />
+        python3 whiteboard/agent_whiteboard.py
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 轨迹可视化 ───────────────────────────────────── -->
+  <section class="work" id="trajectory">
+    <h2>轨迹可视化 · harness-demo 真实 demo</h2>
+    <p class="work-tag">
+      数据源：<code>harness-demo/trajectories/demo.jsonl</code>（build 时静态导入）·
+      竖向事件流，按事件类型着色；tool_exec 标 ✅ / ⏸
+    </p>
+    <div class="card work-card">
+      <TrajectoryTimeline />
+    </div>
+  </section>
+
+  <!-- ── Roadmap ──────────────────────────────────────── -->
+  <section class="work" id="roadmap">
+    <h2>Roadmap</h2>
+    <p class="work-tag">计划中的作品 / 演示（均为开发中）</p>
+    <div class="card work-card">
+      <div class="roadmap-item">
+        <span class="rm-name">sandbox-demo 四通道 policy 引擎</span>
+        <span class="rm-desc">TS 迷你沙箱：四通道 policy 引擎 + 幽灵事故重放（全离线确定性，不调模型）· 课程 E</span>
+        <span class="badge badge-dev">开发中</span>
+      </div>
+      <div class="roadmap-item">
+        <span class="rm-name">OTel 埋点</span>
+        <span class="rm-desc">agent tracing 模型 + OTel GenAI 属性 + 成本归因 · 课程 D</span>
+        <span class="badge badge-dev">开发中</span>
+      </div>
+      <div class="roadmap-item">
+        <span class="rm-name">MCP 投毒演示</span>
+        <span class="rm-desc">供应链四类投毒攻击与防御实操（OWASP LLM/Agentic Top 10 对照）· 课程 I</span>
+        <span class="badge badge-dev">开发中</span>
+      </div>
+      <div class="roadmap-item">
+        <span class="rm-name">框架实操</span>
+        <span class="rm-desc">pi 源码级框架实操案例：框架给你什么 / 藏什么 · 课程 M</span>
+        <span class="badge badge-dev">开发中</span>
+      </div>
+      <div class="roadmap-item">
+        <span class="rm-name">双 agent demo</span>
+        <span class="rm-desc">双 agent 协作编排演示（编排 / 通信 / 失败隔离）</span>
+        <span class="badge badge-dev">开发中</span>
+      </div>
+    </div>
+  </section>
+</Base>

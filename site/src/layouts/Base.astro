@@ -1,0 +1,72 @@
+---
+import '../styles/global.css';
+import 'katex/dist/katex.min.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'learn-agent-harness —— coding agent 方向的公开学习记录：课程笔记、学习路线、可运行作品、知识地图与面试题库。本站为构建时快照。',
+} = Astro.props;
+const pageTitle = title ? `${title} · learn-agent-harness` : 'learn-agent-harness · coding agent 学习记录';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      // 首屏前定主题，避免闪烁
+      (function () {
+        try {
+          var t = localStorage.getItem('lah-theme');
+          if (t !== 'light' && t !== 'dark') {
+            t =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          }
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main class="wrap">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // 主题切换
+      const btn = document.querySelector('[data-theme-toggle]');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const next =
+            document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          try {
+            localStorage.setItem('lah-theme', next);
+          } catch (e) {}
+          document.dispatchEvent(new CustomEvent('lah:theme-change'));
+        });
+      }
+      // mermaid：仅当页面有图时才加载 bundle
+      if (document.querySelector('.mermaid')) {
+        import('../scripts/mermaid.ts').then((m) => m.renderAllMermaid());
+      }
+    </script>
+  </body>
+</html>

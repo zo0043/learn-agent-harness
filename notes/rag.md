@@ -219,7 +219,7 @@ corpus（几篇真实文档）
 
 ---
 
-## 13 · 实操复盘：从零写一个最小 RAG（2026-10-17）
+## 13 · 实操复盘：从零写一个最小 RAG（2026-10-10 深夜 / 10-11 凌晨）
 
 > §12 计划已执行。作品 = `learn-agent-harness/rag-demo/`（11 个 src 文件，零依赖，tsx 直跑）。
 > 语料 = 课程笔记自己（rag.md + agent-harness.md + handoff.md → 85 chunks）。

@@ -37,7 +37,7 @@ FinHot 锚点：analyzeArticle 的 understand/structure 输出都要落结构（
 
 **工程纪律（面试点：命中率的本质是"前缀稳定性"）**：
 1. **稳定内容前置**：system → 工具定义 → few-shot → 会话 → 当前消息。**把变化的东西（时间戳、随机 id、用户消息）全部放后面**——前面任何一个字节变了，整个 cache 断
-2. **反模式**：system prompt 里嵌 `current_time: 2026-10-17 14:32:11` → 每次请求全 miss
+2. **反模式**：system prompt 里嵌 `current_time: 2026-10-11 14:32:11` → 每次请求全 miss
 3. **命中率为一等指标**：按端点/模型统计（D 课归因）；cache 命中带来的 p50 延迟下降是**可量化的产品改进**
 4. **agent 场景特别值**：同一会话的 N 步循环，前 N-1 步全部是稳定前缀 → 步数越多命中收益越大（coding agent 长会话=天然高命中）
 

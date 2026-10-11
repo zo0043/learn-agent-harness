@@ -27,7 +27,7 @@ export const MODEL = process.env.LLM_MODEL ?? "qwen3.8-flash";
  * 历史里的 assistant.tool_calls 要按 OpenAI wire 协议回写：
  * 嵌套 {id, type:"function", function:{name, arguments}}，且 arguments 必须是
  * JSON **字符串**（本内部模型用扁平 {id,name,arguments:对象}，直接 stringify
- * 会被严格上游拒 400，2026-10-17 qwen3.8-flash-next 实测）。
+ * 会被严格上游拒 400，2026-10-10 qwen3.8-flash-next 实测）。
  */
 function toWireMessages(messages: unknown[]): unknown[] {
   return messages.map((m) => {
@@ -61,6 +61,7 @@ export interface ChatResult {
   assistant: AssistantMessage;
   finishReason: string;
   usage?: { prompt_tokens?: number; completion_tokens?: number };
+  responseModel?: string; // wire 实际返回的模型（span 的 gen_ai.response.model）
   ms: number;
 }
 
@@ -76,11 +77,13 @@ export async function chat(opts: ChatOpts): Promise<ChatResult> {
   const data = (await res.json()) as {
     choices: { message: { content: string | null; tool_calls?: ToolCall[] }; finish_reason: string }[];
     usage?: { prompt_tokens?: number; completion_tokens?: number };
+    model?: string;
   };
   return {
     assistant: { role: "assistant", content: data.choices[0].message.content, tool_calls: data.choices[0].message.tool_calls },
     finishReason: data.choices[0].finish_reason,
     usage: data.usage,
+    responseModel: data.model,
     ms: Date.now() - t0,
   };
 }
@@ -98,7 +101,7 @@ async function chatStream(opts: ChatOpts): Promise<ChatResult> {
   const res = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: MODEL, messages: toWireMessages(opts.messages), tools: opts.tools, stream: true }),
+    body: JSON.stringify({ model: MODEL, messages: toWireMessages(opts.messages), tools: opts.tools, stream: true, stream_options: { include_usage: true } }),
   });
   if (!res.ok) throw new Error(`LLM HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
   if (!res.body) throw new Error("LLM HTTP: 流式响应无 body");
@@ -108,6 +111,8 @@ async function chatStream(opts: ChatOpts): Promise<ChatResult> {
   let buf = "";
   let content = "";
   let finishReason = "";
+  let responseModel = "";
+  let usage: { prompt_tokens?: number; completion_tokens?: number } | undefined;
   const tcSlots = new Map<number, { id: string; name: string; argsStr: string }>();
 
   const handleFrame = (frame: string) => {
@@ -117,7 +122,12 @@ async function chatStream(opts: ChatOpts): Promise<ChatResult> {
       if (payload === "[DONE]") continue;
       const chunk = JSON.parse(payload) as {
         choices?: { delta?: { content?: string; tool_calls?: { index?: number; id?: string; function?: { name?: string; arguments?: string } }[] }; finish_reason?: string }[];
+        model?: string;
+        usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
+      // S2 埋点数据源：usage 帧（choices 为空）与 model 字段要在 continue 之前抓
+      if (chunk.model) responseModel = chunk.model;
+      if (chunk.usage) usage = chunk.usage;
       const choice = chunk.choices?.[0];
       if (!choice) continue;
       const delta = choice.delta ?? {};
@@ -156,6 +166,8 @@ async function chatStream(opts: ChatOpts): Promise<ChatResult> {
   return {
     assistant: { role: "assistant", content: content || null, tool_calls: tool_calls.length ? tool_calls : undefined },
     finishReason,
+    usage,
+    responseModel: responseModel || undefined,
     ms: Date.now() - t0,
   };
 }

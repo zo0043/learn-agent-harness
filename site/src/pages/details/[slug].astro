@@ -1,0 +1,45 @@
+---
+/**
+ * /details/[slug]：notes/details/*.md 原样渲染。
+ * frontmatter 约定：title / slug / domain / source / status（可缺省，兜底用文件名）。
+ * 路由 slug 优先用 frontmatter 的 slug 字段。
+ */
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const items = await getCollection('details');
+  return items.map((entry) => ({
+    params: { slug: entry.data.slug ?? entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const title = entry.data.title ?? entry.id;
+---
+
+<Base title={title}>
+  <article class="markdown">
+    <header class="course-meta-bar">
+      <div class="meta-row">
+        <span class="chip chip-strong">详解</span>
+        {entry.data.domain && <span class="chip">{entry.data.domain}</span>}
+        {entry.data.source && <span class="chip">来源：{entry.data.source}</span>}
+        {entry.data.status && <StatusBadge status={entry.data.status} />}
+      </div>
+      <nav class="crumbs" aria-label="面包屑">
+        <a href="/">首页</a> / <a href="/details/">详解</a> / <span>{title}</span>
+      </nav>
+    </header>
+
+    <Content />
+
+    <footer class="page-foot">
+      <a href="/details/">详解列表</a>
+      <a href="/learn/">学习路线</a>
+    </footer>
+  </article>
+</Base>

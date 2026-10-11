@@ -9,9 +9,6 @@ node_modules/
 # 抓取原始数据（本地留存，不进仓库；结论已沉淀进 notes/）
 jd-research/
 
-# 空壳作品（src 待写，见 notes/sandbox.md）
-sandbox-demo/
-
 # demo 运行产物（可再生）
 harness-demo/trajectories/
 harness-demo/workspace/out/

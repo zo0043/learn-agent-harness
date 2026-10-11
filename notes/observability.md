@@ -1,7 +1,7 @@
 # D 课 · Agent 可观测（tracing / OTel GenAI / 成本归因）
 
 > 优先级 P2（JD 显示是 2026 新热点，腾讯有专门岗——若目标平台向则提级）
-> 状态：⏳ 知识结构已建，待开课
+> 状态：🚧 知识结构已建；S2 OTel GenAI 埋点已在 harness-demo 实操（`npm run demo:otel`），其余待开课
 > 前置：A⑥（JSONL 日志=harness 内置的轨迹源）+ H 课（可观测=数据采集，评测=决策）
 > 定位句：**可观测是评测的数据管道**——没有轨迹采得全，golden set/judge/飞轮（K 课）全是无源之水
 
@@ -26,6 +26,8 @@ OpenTelemetry 为 GenAI 定义了语义约定（gen_ai.* 属性族）。
 - **span 命名/操作类型**（`gen_ai.operation.name` 取值，已核实）：`chat` / `text_completion` / `embeddings` / `execute_tool` / `create_agent` / `invoke_agent`
 - **关键属性**：`gen_ai.system`（provider：openai/anthropic/…）、`gen_ai.request.model` / `gen_ai.response.model`、`gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens`、`gen_ai.agent.name` / `gen_ai.agent.id` / `gen_ai.session.id`、`gen_ai.tool.name` + 工具参数摘要、温度等请求参数
 - **为什么重要（面试点）**：语义约定=**厂商中立的轨迹格式**——harness 按它埋点，后端接 Langfuse/Phoenix/Jaeger 任意一个，不用为每个平台重写。**"OTel 之于可观测，就是 MCP 之于工具接口"——都是把 N×M 降成 N+M**
+
+**实操锚（2026-10 已实现）**：`harness-demo/src/otel.ts`（SDK + console 导出，`OTEL_EXPORT_OTLP=1` 才开 OTLP）+ `src/agent.ts`（`invoke_agent`→`chat`/`execute_tool` span 树）+ `src/llm.ts`（流式 usage/model 回填）；harness-demo 里 `npm run demo:otel` 跑最小 agent 循环并打印 span 摘要（span 名 + `gen_ai.*` 关键属性）。
 
 ## S3 span 建模：一棵轨迹树
 

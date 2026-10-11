@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+
+const repo = 'https://github.com/zo0043/learn-agent-harness';
+---
+
+<Base>
+  <section class="hero">
+    <p class="hero-kicker">coding agent 方向 · 公开学习过程 + 面试备考 + 作品</p>
+    <h1>learn-agent-harness</h1>
+    <p class="hero-sub">
+      一个 coding agent 方向的公开学习记录：<strong>学习过程 + 面试备考 + 可运行作品</strong>
+      ——每节课对应一个零框架可运行作品，每个论断都带证据链。
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/learn/">查看学习路线</a>
+      <a class="btn" href="/works/">看作品详解</a>
+      <a class="btn" href={repo} target="_blank" rel="noopener">GitHub 仓库 ↗</a>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="page-title" style="margin-top: 44px">三个作品</h2>
+    <div class="cards">
+      <a class="card" href="/works/#harness-demo">
+        <h3>harness-demo</h3>
+        <p><span class="chip chip-strong">课程 A</span></p>
+        <p>从零手写 agent harness：9 个 TS 文件对应 9 节——loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/ JSONL 轨迹 + 崩溃恢复 / token 压缩，4 种 demo 模式实测。</p>
+        <p class="work-lesson">一句话教训：<strong>错误恢复是成功率的第一决定因素</strong></p>
+      </a>
+      <a class="card" href="/works/#rag-demo">
+        <h3>rag-demo</h3>
+        <p><span class="chip chip-strong">课程 B</span></p>
+        <p>零依赖 RAG：chunking → hash embedding → 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用/拒答生成 → 10 题 golden set 评测（85 chunks）。</p>
+        <p class="work-lesson">一句话教训：<strong>词法只走表面形式重叠</strong>——BM25 修了定价，改不掉词法上限</p>
+      </a>
+      <a class="card" href="/works/#whiteboard">
+        <h3>whiteboard</h3>
+        <p><span class="chip chip-strong">面试口述版</span></p>
+        <p>~150 行 Python 纯标准库最小 harness，与 TS 版架构 1:1 对应——白板 20 分钟能写完、能讲清三个关键设计的版本。</p>
+        <p class="work-lesson">一句话用途：<strong>面试白板题的骨架</strong>，直接读源码即可</p>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="page-title">进度总览</h2>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num">18</span>
+        <span class="stat-label">课程页</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">16</span>
+        <span class="stat-label">知识域</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">~152</span>
+        <span class="stat-label">题题库（各课末尾 + 交叉题）</span>
+      </div>
+    </div>
+    <p style="margin-top: 6px">
+      学习路线：<a href="/learn/">P0 / P1 / P2 三段 × 知识域卡片 →</a> ·
+      知识依赖：<a href="/map/">知识地图 →</a> ·
+      模拟考卷：<a href="/interview/">面试题库 →</a>
+    </p>
+    <p class="snap-note">
+      📸 <strong>本站为构建时快照</strong>——内容由 Astro 在构建期从仓库 <code>notes/</code>
+      渲染，不实时更新；仓库更新后随下一次构建（GitHub Actions）生效。
+    </p>
+  </section>
+</Base>

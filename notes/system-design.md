@@ -35,6 +35,10 @@
 
 **答题节奏**：1 澄清 → 2-3 形态（说清为什么不选另一种）→ 4-5 画一张图（拓扑：用户 → 编排 → 工具/检索 → 外部世界，标出权限边界）→ 6-7 评测与失败 → 最后主动给"如果规模 10× / 如果要求零幻觉 / 如果换模型"的演进路径。
 
+**2026 新主线 · 两个必答题模块 [2026现行]**（答题时主动带沙箱与评测闭环，比只画 loop 高半档）：
+- **沙箱隔离**：每会话独立沙箱/microVM——容器共享内核=安全威胁，云 agent 需 hypervisor 级隔离（整机快照应对 CI/评审的异步空档）；**凭据结构性不可触及**——凭据放 vault、agent 永不可触 token。参考实现：Cognition 云 agent（hypervisor 工程 1 年+）与 Anthropic Managed Agents（2026.4，把 session/harness/sandbox 像操作系统虚拟化硬件那样抽象成稳定接口）。https://cognition.ai/blog/what-we-learned-building-cloud-agents + https://www.anthropic.com/engineering/managed-agents
+- **评测闭环**：**逐轨迹 eval + 失败归因**——agent 成功率由错误恢复决定，迭代速度由失败归因能力决定；可重放事件日志 + 逐轨迹 eval + 控制台逐步观察=资深团队与 demo 团队的本质差距（来源：industry-2026.md §四"可观测→可改进闭环"，该条素材无外部 URL；内部锚点 H 课评测 / D 课可观测）
+
 ## S3 形态选型：五种规范模式（Anthropic "Building effective agents" 分类）
 
 | 模式 | 结构 | 适用 | 代价 |
@@ -119,6 +123,7 @@ B⑪ 已有完整骨架（澄清→摄入→检索→生成→权限→评测→
 | 零幻觉要求怎么答？ | 强制引用+拒答（B⑧）+ 生成后校验（结构化断言）+ 高风险动作走确定性规则不经模型 |
 | 多人/多租户？ | 权限=查询时过滤（B⑪）、会话隔离、沙箱池按租户、成本按租户归因（D） |
 | 实时要求（<2s）？ | 流式（A④）+ 小模型先行 + 预取；长任务转异步+进度通知 |
+| GUI agent（computer use）的权限与观察怎么处理？ [2026现行] | **观察**=截屏+可访问性树（像素级/语义级两通道，都会进上下文=都是注入通道）；**权限**=动作白名单+风险分级（与工具风险分级同一原则：只读/写、可逆性、财务影响，分级触发暂停/升级人工，I 课 S4.4 同构）；高风险动作必须过确定性门，不信任模型意图（来源：industry-2026.md §五 computer use 信号） |
 
 ## S8 推理范式速查（ReAct / Plan-and-Execute / Reflexion / Self-Consistency / ToT）
 

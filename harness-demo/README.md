@@ -10,7 +10,8 @@ src/policy.ts    ⑤ 权限门：deny > approve > allow，默认 deny
 src/session.ts   ⑥ JSONL 轨迹日志 = 唯一事实源，上下文由日志派生
 src/context.ts   ⑧ token 估算 + 压缩（保头尾、中间 LLM 摘要）
 src/agent.ts     ②⑥⑦⑧ agent loop + guarded_tool_step（intent→执行→result）
-src/demo.ts      ⑨ demo 入口（四种模式）
+src/otel.ts      D课 S2 OTel GenAI 埋点（invoke_agent→chat/execute_tool span 树，console 导出，OTEL_EXPORT_OTLP=1 开 OTLP）
+src/demo.ts      ⑨ demo 入口（五种模式）
 src/test-compact.ts  ⑧ 压缩逻辑的本地 mock 测试（不依赖外部代理）
 ```
 
@@ -30,6 +31,7 @@ npm run demo:crash      # 在 write_file 的 intent 后模拟崩溃（exit 137�
 npm run demo            # ← 紧接着再跑一次 = 自动恢复（未知状态 → 模型先核对再重写）
 npm run demo:reject     # 审批拒绝路径（模型跳过写入、不重试、如实报告）
 npm run demo:compact    # 低压缩阈值（600 tokens）演示压缩
+npm run demo:otel       # OTel GenAI 埋点：最小 agent 循环（真实代理），console 导出 span 并收尾打印摘要
 npx tsx src/test-compact.ts   # 压缩逻辑的 mock 测试（不依赖代理）
 ```
 

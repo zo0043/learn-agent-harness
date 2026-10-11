@@ -1,0 +1,40 @@
+---
+/**
+ * /interview：面试演练库（notes/interview-bank.md 原样渲染）。
+ * 导航“题库”。
+ */
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const entries = await getCollection('courses');
+const entry = entries.find((e) => e.id === 'interview-bank');
+const rendered = entry ? await render(entry) : null;
+---
+
+<Base title="面试题库">
+  {
+    rendered ? (
+      <article class="markdown">
+        <header class="course-meta-bar">
+          <div class="meta-row">
+            <span class="chip chip-strong">面试演练库</span>
+            <span class="chip">结构 + 交叉题库 + JD 覆盖矩阵</span>
+          </div>
+          <nav class="crumbs" aria-label="面包屑">
+            <a href="/">首页</a> / <span>面试题库</span>
+          </nav>
+        </header>
+        <rendered.Content />
+        <p style="margin-top: 28px; color: var(--text-faint); font-size: 0.9rem">
+          各课内部题库在课程文件末尾（<a href="/learn/">学习路线 →</a>），本页面管结构、交叉题、项目深挖、关键词覆盖。
+        </p>
+      </article>
+    ) : (
+      <div class="empty-state">
+        <p class="empty-icon">🚧</p>
+        <h1>面试题库</h1>
+        <p><code>notes/interview-bank.md</code> 未就位——文件入仓后随下一次构建自动渲染。</p>
+      </div>
+    )
+  }
+</Base>

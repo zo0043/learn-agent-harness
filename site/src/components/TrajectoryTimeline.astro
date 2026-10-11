@@ -1,0 +1,185 @@
+---
+/**
+ * 轨迹可视化：harness-demo/trajectories/demo.jsonl → 竖向事件流时间线。
+ * build 时静态导入（见 src/data/trajectory.ts），按 kind 着色：
+ * init / model_response / tool_intent / tool_exec / compaction / final；
+ * tool_exec 按 status 标 ✅（ok）/ ⏸（denied 等非 ok）。
+ */
+import { trajectory } from '../data/trajectory';
+import { esc, mdToHtml } from '../utils/md';
+
+const { events, available } = trajectory;
+
+interface Row {
+  cls: string;
+  kind: string;
+  head: string;
+  ms?: number;
+  bodyHtml: string;
+}
+
+const rows: Row[] = [];
+
+for (const ev of events) {
+  const kind = String(ev.kind ?? 'unknown');
+
+  if (kind === 'init') {
+    const system = String(ev.system ?? '');
+    const user = String(ev.user ?? '');
+    const userHtml = await mdToHtml(user);
+    const systemHtml = system
+      ? `<details class="ev-system"><summary>system 提示词</summary><div class="md-inline">${await mdToHtml(system)}</div></details>`
+      : '';
+    rows.push({
+      cls: 'ev-init',
+      kind,
+      head: '会话开始（多步任务）',
+      bodyHtml: `${systemHtml}<div class="md-inline">${userHtml}</div>`,
+    });
+  } else if (kind === 'model_response') {
+    const a = (ev.assistant ?? {}) as {
+      content?: string | null;
+      tool_calls?: { id?: string; name?: string; arguments?: unknown }[];
+    };
+    const finishReason = String(ev.finishReason ?? '');
+    const ms = typeof ev.ms === 'number' ? ev.ms : undefined;
+    const parts: string[] = [];
+    if (a.content) parts.push(`<div class="md-inline">${await mdToHtml(a.content)}</div>`);
+    if (a.tool_calls && a.tool_calls.length) {
+      const chips = a.tool_calls
+        .map((tc) => {
+          const args = tc.arguments === undefined ? '' : ` <code>${esc(JSON.stringify(tc.arguments))}</code>`;
+          return `<span class="chip chip-tool">→ <b>${esc(String(tc.name ?? '?'))}</b>${args}</span>`;
+        })
+        .join('');
+      parts.push(`<div class="chips">${chips}</div>`);
+    }
+    if (finishReason) parts.push(`<div class="chips"><span class="chip">finish: ${esc(finishReason)}</span></div>`);
+    rows.push({ cls: 'ev-model_response', kind, head: '模型响应', ms, bodyHtml: parts.join('') });
+  } else if (kind === 'tool_intent') {
+    const args = ev.args === undefined ? '' : ` <code>${esc(JSON.stringify(ev.args))}</code>`;
+    rows.push({
+      cls: 'ev-tool_intent',
+      kind,
+      head: `intent → ${String(ev.name ?? '?')}${args}`,
+      bodyHtml: '',
+    });
+  } else if (kind === 'tool_exec') {
+    const status = String(ev.status ?? 'unknown');
+    const ok = status === 'ok';
+    const ms = typeof ev.ms === 'number' ? ev.ms : undefined;
+    const result = ev.result == null ? '' : String(ev.result);
+    const resultHtml = result
+      ? `<div class="ev-result md-inline">${await mdToHtml(result)}</div>`
+      : '';
+    rows.push({
+      cls: `ev-tool_exec${ok ? '' : ' ev-deny'}`,
+      kind,
+      head: `exec → ${String(ev.name ?? '?')} <span class="exec-status ${ok ? 'ok' : 'deny'}">${ok ? '✅ ok' : `⏸ ${esc(status)}`}</span>`,
+      ms,
+      bodyHtml: resultHtml,
+    });
+  } else if (kind === 'compaction') {
+    const text = String(ev.content ?? ev.summary ?? ev.detail ?? JSON.stringify(ev));
+    rows.push({
+      cls: 'ev-compaction',
+      kind,
+      head: '上下文压缩',
+      bodyHtml: `<div class="md-inline">${await mdToHtml(text)}</div>`,
+    });
+  } else if (kind === 'final') {
+    const content = String(ev.content ?? '');
+    const totalMs = typeof ev.totalMs === 'number' ? ev.totalMs : undefined;
+    rows.push({
+      cls: 'ev-final',
+      kind,
+      head: '最终总结',
+      ms: totalMs,
+      bodyHtml: `<div class="md-inline">${await mdToHtml(content)}</div>`,
+    });
+  } else {
+    // 未知事件类型：兜底展示原始 JSON
+    rows.push({
+      cls: 'ev-init',
+      kind,
+      head: kind,
+      bodyHtml: `<div class="ev-result">${esc(JSON.stringify(ev, null, 2))}</div>`,
+    });
+  }
+}
+
+// 统计
+const totalMs = (() => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    if (events[i].kind === 'final' && typeof events[i].totalMs === 'number') {
+      return events[i].totalMs as number;
+    }
+  }
+  return undefined;
+})();
+const toolCalls = events.filter((e) => e.kind === 'tool_intent').length;
+const denied = events.filter((e) => e.kind === 'tool_exec' && e.status !== 'ok').length;
+
+function fmtMs(ms?: number): string {
+  if (ms == null) return '';
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+}
+---
+
+{
+  available && events.length > 0 ? (
+    <div>
+      <p class="traj-legend" aria-label="事件类型图例">
+        <span><i class="dot" style="background: var(--ev-init)"></i>init</span>
+        <span><i class="dot" style="background: var(--ev-model)"></i>model_response</span>
+        <span><i class="dot" style="background: var(--ev-intent)"></i>tool_intent</span>
+        <span><i class="dot" style="background: var(--ev-exec)"></i>tool_exec</span>
+        <span><i class="dot" style="background: var(--ev-compaction)"></i>compaction</span>
+        <span><i class="dot" style="background: var(--ev-final)"></i>final</span>
+        <span class="chip">tool_exec：✅ ok / ⏸ 被拒</span>
+      </p>
+      <div class="traj-stats">
+        <span class="chip chip-strong">{events.length} 个事件</span>
+        {
+          totalMs != null && (
+            <span class="chip chip-strong">总耗时 {fmtMs(totalMs)}</span>
+          )
+        }
+        <span class="chip">{toolCalls} 次工具调用</span>
+        {
+          denied > 0 && (
+            <span class="chip" style="color: var(--deny)">{denied} 次被拒（审批 / 策略）</span>
+          )
+        }
+      </div>
+      <ol class="timeline">
+        {
+          rows.map((r) => (
+            <li class={`ev ${r.cls}`}>
+              <span class="ev-dot" aria-hidden="true"></span>
+              <div class="ev-head">
+                <span class="ev-kind">{r.kind}</span>
+                <span>{r.head}</span>
+                {r.ms != null && <span class="ev-ms">{fmtMs(r.ms)}</span>}
+              </div>
+              {r.bodyHtml && <div class="ev-body" set:html={r.bodyHtml} />}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  ) : (
+    <div class="empty-state">
+      <p class="empty-icon">🗂️</p>
+      <p>
+        <strong>轨迹文件不在仓库中</strong>
+        —— <code>harness-demo/trajectories/demo.jsonl</code> 是 demo 运行产物（被 <code>.gitignore</code>
+        排除），CI 构建时不存在。
+      </p>
+      <p>
+        本地跑一次即可生成并在此看到完整事件流：<br />
+        <code>cd harness-demo && npm i && cp .env.example .env && npm run demo</code>
+      </p>
+    </div>
+  )
+}

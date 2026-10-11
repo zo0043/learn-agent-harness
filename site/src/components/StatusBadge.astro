@@ -1,0 +1,13 @@
+---
+interface Props {
+  status: string;
+}
+const { status } = Astro.props;
+const cls = status.includes('完成')
+  ? 'badge-ok'
+  : status.includes('进行')
+    ? 'badge-doing'
+    : 'badge-todo';
+---
+
+<span class={`badge ${cls}`}>{status}</span>
