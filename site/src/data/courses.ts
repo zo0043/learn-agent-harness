@@ -72,7 +72,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'system-design', letter: 'C', domain: 'Agent 系统设计模板', phase: 'P0', status: '⏳ 规划中',
+    slug: 'system-design', letter: 'C', domain: 'Agent 系统设计模板', phase: 'P0', status: '🔄 讲义已展开',
     intro: '30 分钟结构化答“设计一个 X agent”：七步骨架 / 五范式 / 三演练，收口 A/B 作品',
     interviewAngle: '“设计一个 coding agent”主场题的 30 分钟模板',
     relatedQuestions: [
@@ -82,7 +82,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'sandbox', letter: 'E', domain: '沙箱与凭据 · 可复现', phase: 'P0', status: '🔄 进行中',
+    slug: 'sandbox', letter: 'E', domain: '沙箱与凭据 · 可复现', phase: 'P0', status: '🔄 讲义已展开',
     intro: '权限门 ≠ 沙箱（两道独立的门）；S2 四通道 policy 已实现，sandbox-demo 幽灵重放逐字节可复现',
     interviewAngle: '幽灵事故=最稀缺故事：权限门≠沙箱两道门',
     relatedQuestions: [
@@ -94,7 +94,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'evaluation', letter: 'H', domain: '评测工程化', phase: 'P0', status: '⏳ 规划中',
+    slug: 'evaluation', letter: 'H', domain: '评测工程化', phase: 'P0', status: '🔄 讲义已展开',
     intro: '评测从 recall@k 升级成系统：judge 校准 / golden set 版本化 / CI 门禁，FinHot labeler + rag-demo 双证据链',
     interviewAngle: '评测=最强项：judge+golden set+CI 门禁',
     relatedQuestions: [
@@ -105,7 +105,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'multi-agent', domain: '多智能体编排', phase: 'P0', status: '⏳ 规划中',
+    slug: 'multi-agent', domain: '多智能体编排', phase: 'P0', status: '🔄 讲义已展开',
     intro: '何时多智能体（读多路、写单线程）；S7 练习是给 harness-demo 设计子代理方案',
     interviewAngle: '“读多路、写单线程”判断 + 子代理设计练习',
     relatedQuestions: [

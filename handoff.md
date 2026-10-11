@@ -122,9 +122,9 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 1 | Harness 架构课（`agent-harness.md`） | 13 节：地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考（存档，另约） |
 | 2 | A 从零写 harness（`harness-from-scratch.md` + `harness-demo/`） | 10 节：loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操（四模式实测） | 题库 8 题未考 |
 | 3 | B RAG（`rag.md` + `rag-demo/`） | 12 节理论 + §13 实操复盘：embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操（recall@3=1.00） | S1 五道确认题未考 |
-| 4 | C 系统设计（`system-design.md`） | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 coding agent 演练 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 | 📐 | 讲解 + 题库 8 题 + 🔶4 范式速查 |
-| 5 | E 沙箱与凭据（`sandbox.md` + `sandbox-demo/`） | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 | 🔄 S1 进行中 | 讲解 + 题库 + **S2 demo src 写完并验收（N 次重放逐字节相同）** |
-| 6 | H 评测工程化（`evaluation.md`） | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 | 📐 | 讲解 + 题库 8 题 + 🔶2 指标四代演进节 |
+| 4 | C 系统设计（`system-design.md`） | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
+| 5 | E 沙箱与凭据（`sandbox.md` + `sandbox-demo/`） | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开（S2 demo src 待写） | 提问演练 + 题库 16 题通过 + **S2 demo src 写完并验收（N 次重放逐字节相同）** |
+| 6 | H 评测工程化（`evaluation.md`） | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 14 题通过 |
 | 7 | G durable execution（`durable-execution.md`） | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo | 📐 | 讲解 + 题库 8 题 |
 | 8 | I MCP + 安全（`mcp.md`） | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo | 📐 | 讲解 + 题库 + 🔶3 升"Agent 安全"总节 |
 | 9 | J API + 路由（`api-engineering.md`） | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 | 📐 | 讲解 + 题库 8 题 |
@@ -134,6 +134,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 13 | L 模型基础（`model-basics.md`） | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 | 📐（深度=意识级） | 讲解 + 题库 + **🔶1 升"八股可答级"** |
 | 14 | M 框架生态（`framework-ecosystem.md`） | S1 三族 / S2 给什么藏什么 / S3 四家要点 / S4 pi 深潜 / S5 选型话术 | 📐 | 讲解 + 题库 8 题 |
 | 15 | 面试结构（`interview-bank.md`） | 30 秒自我介绍 / 60 分钟模拟 / 5 组项目深挖追问链 / 10 道交叉题 / JD 覆盖矩阵 | 📐 | 2 场模拟通过 + 矩阵全 🟢 + 🔶5 STAR 模板 |
+| — | N 多智能体编排（`multi-agent.md`） | S1 何时多智能体 / S2 拓扑 / S3 orchestrator-worker / S4 单线程写 / S5 通信成本 / S6 调试 / S7 子代理设计 / S8 实战走查 | 📐 讲义已展开（2026-10-11） | 提问演练 + 题库 12 题通过 |
 | — | 范围外：算法编码（LeetCode） | 英文面经确认仍考（medium） | ⚪ 不在教程范围 | 建议 ~50 道 medium，并行轨 |
 
 ### 4.2 缺口补强清单（2026-10-11 面经检索：中文面经站 / 英文系统设计 / 模型八股 三路）
@@ -150,6 +151,8 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 **面经趋势印证**（2026 版面经共识）："RAG 考频下降，Agent 工程（记忆/工具可靠性/恢复）+ 评测（judge/轨迹评测）成主航道"（真实公司面经占比：agent 架构 33% / 系统设计 22% / 工程实现 22% / RAG 18%）→ 我们 P0 选 C/E/H、强项押 F/G/H/K 的排序被印证，无需调权。
 
 ### 4.3 学习顺序（分阶段，含每课动作与出口判据）
+
+> **2026-10-11 讲义展开轮（本次）**：C / N / E / H 四门课已从"结构建成"展开为**开课版完整讲义**（每课：逐节讲解散文 + 4 张 mermaid + 实战走查节 + 常见错误/追问节 + 题库扩充）——C 14 题 / N 12 题 / E 16 题 / H 14 题（原各 4-10 题）。四课共 16 张 mermaid 已构建渲染为 SVG 验收通过。引用已一手源复核并修正 4 处：ToT 会议 ICLR'24→**NeurIPS 2023**、Self-Consistency arXiv 2210.17392→**2203.11171**、Codex Linux 沙箱 Landlock+seccomp→**bubblewrap+seccomp（Landlock legacy）**、A2A 补 **v1.0.1 + AAIF 8 家 TCC 名单**；E2B 的"~150ms/128MB"改为官方口径（未公开固定数值）。⚠️ 两条私有锚点（Claude Code 供应链事故 2025-07、rig-skill）**查无公开一手源**，已降级标注、待作者回填。开课 = 提问演练（另约时间）。
 
 | 阶段 | 内容 | 每课动作 | 出口判据 |
 |---|---|---|---|

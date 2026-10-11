@@ -2,7 +2,7 @@
 
 > 建立：2026-10-11 · 依据：handoff.md 路线图（2026-10-10）+ 仓库最新实况（10-11）
 > 用途：全部知识点的一次性盘点——每课的知识结构在各自课程文件里，本文件是**索引 + 状态 + 依赖**。
-> 状态记号：✅ 已完成 / 🔄 进行中 / ⏳ 未开始（已建知识结构，待开课）
+> 状态记号：✅ 已完成 / 🔄 进行中 / 📐 讲义已展开（待提问演练） / ⏳ 未开始（已建知识结构，待开课）
 >
 > **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——C `system-design.md` S8 范式速查 / H `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ I `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ L `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。每课题库 +2 题（共 20 题）。
 > ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
@@ -13,18 +13,18 @@
 |---|---|---|---|---|---|
 | A | 从零写最小 harness | P0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
 | B | RAG 与检索 | P0 | ✅ | `rag.md`（含 §13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 85-chunk 评测 |
-| C | Agent 系统设计模板 | P0 | ⏳ | `system-design.md` | 30 分钟结构化答"设计一个 X agent" |
+| C | Agent 系统设计模板 | P0 | 📐 | `system-design.md` | 30 分钟结构化答"设计一个 X agent" |
 | D | Agent 可观测 | P2 | ⏳ | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因 |
-| E | 沙箱与凭据·可复现 | P0 | 🔄 S1 进行中（S2 已实现 2026-10-11） | `sandbox.md` | 讲清"权限层 ≠ 沙箱" + 隔离技术选型 + 幽灵事故完整故事 |
+| E | 沙箱与凭据·可复现 | P0 | 📐（S2 demo src 待写） | `sandbox.md` | 讲清"权限层 ≠ 沙箱" + 隔离技术选型 + 幽灵事故完整故事 |
 | F | 长期记忆 | P2 | ⏳ | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全） |
 | G | durable execution | P1 | ⏳ | `durable-execution.md` | 讲清长任务不丢不重（journal/checkpoint/幂等） |
-| H | 评测工程化 | P0 | ⏳ | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
+| H | 评测工程化 | P0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
 | I | MCP 协议 + 供应链安全 | P1 | ⏳ | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
 | J | API 实操 + 多模型路由 | P1 | ⏳ | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
 | K | 数据飞轮 | P1 | ⏳ | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成"生产数据飞轮"故事 |
 | L | 模型基础 | P2 | ⏳ | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖 |
 | M | 框架生态 | P2 | ⏳ | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事 |
-| N | 多智能体编排 | P0 | ⏳（2026-10-11 建结构） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
+| N | 多智能体编排 | P0 | 📐（2026-10-11 建结构） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
 
 横向资产：`interview-bank.md`（模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵）· `llm-timeline.md`（LLM 演化时间线 12 节点）· `industry-2026.md`（2026-10 行业前线调研，I/M/C/N 课一手源）· `details/`（资深分水岭 8 细节页）
 
@@ -85,6 +85,7 @@ graph TD
 
 ## 未结事项（非课程，来自 handoff）
 
+- [x] 讲义展开（2026-10-11）：C/N/E/H 四课从"结构建成"→"开课版讲义"（各 4 张 mermaid、实战走查节、题库 12-16 题）；引用一手源复核修正 4 处
 - [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）
 - [ ] 项目打磨（sandbox-demo src 未写；harness-demo/rag-demo 可补 README 与运行说明）
 - [ ] 实操补强 ×4（sandbox-demo src / OTel 埋点 / MCP 投毒演示 / 框架实操）——2026-10-11 起执行中
