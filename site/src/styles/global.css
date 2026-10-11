@@ -209,6 +209,22 @@ main.wrap {
   background: var(--accent-soft);
   font-weight: 600;
 }
+/* 题库强调位（/interview 提到导航第二位，底色 + 字重区别于其他项） */
+.site-nav a.featured {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 72%, var(--accent) 12%);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.site-nav a.featured:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--accent) 22%);
+  text-decoration: none;
+}
+.site-nav a.featured.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
 
 .theme-toggle {
   display: inline-flex;
@@ -1104,6 +1120,100 @@ a.domain-card:hover .dc-foot {
 .legend-dot.ok { background: #2ea043; }
 .legend-dot.doing { background: #bb8009; }
 .legend-dot.todo { background: #6e7681; }
+
+/* ── 面试题库 /interview 复习主区 ──────────────────────────── */
+.review-zone {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin: 0 0 28px;
+  box-shadow: var(--shadow);
+}
+.review-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.review-zone .review-head h2 {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 1.3rem;
+}
+.review-head-note {
+  color: var(--text-faint);
+  font-size: 0.88rem;
+}
+.review-block {
+  margin-top: 22px;
+}
+.review-sec {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+.review-sec .sec-note {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+.review-group {
+  margin-top: 18px;
+}
+.review-group:first-child {
+  margin-top: 4px;
+}
+.review-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.q-card {
+  gap: 6px;
+}
+.q-num {
+  align-self: flex-start;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+.q-text {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.q-hint {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
+.q-foot {
+  margin-top: auto;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+/* 复习动线：pipe-step 可点击 */
+a.pipe-step {
+  color: inherit;
+}
+a.pipe-step:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
 
 /* ── 响应式 ───────────────────────────────────────────── */
 @media (max-width: 900px) {
