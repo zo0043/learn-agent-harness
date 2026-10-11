@@ -6,7 +6,8 @@
   "description": "learn-agent-harness 学习站点（构建时快照）：课程笔记 / 学习路线 / 作品 / 知识地图 / 题库",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "bash build.sh",
+    "build:fast": "astro build",
     "preview": "astro preview"
   },
   "dependencies": {
