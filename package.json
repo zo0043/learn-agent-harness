@@ -1,0 +1,13 @@
+{
+  "name": "learn-agent-harness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "pi-web adaptation of amosblomqvist/learn: teaching skill + graded quiz + md-log, with SVG→PNG render helper for Obsidian-embedded visuals.",
+  "type": "module",
+  "scripts": {
+    "render": "node viz/render.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.63.0"
+  }
+}
