@@ -7,6 +7,8 @@ status: "2026现行"
 kind: "cost-detail"
 ---
 
+# 资深分水岭 4:token 经济学与延迟预算
+
 ## 一句话定义
 
 agent 约消耗 chat 4 倍、多智能体约 15 倍的 token，且 token 用量解释约 80% 的性能方差——这组数字决定产品能否商业化，也决定"更大模型 vs 更多 agent"的架构选择。
@@ -21,7 +23,7 @@ Anthropic《How we built our multi-agent research system》：多智能体内部
 
 ## 本地映射
 
-- 已覆盖：从零写 harness §8（estimateTokens=JSON 长度/3.5，"预算检查用估算，精确计数只为计费"，预算与压缩机制已实现并经 mock 模型验证）；harness 架构课 §9.3（轮数/时间/费用上限是 harness 一等公民，预算耗尽保存状态、如实暂停，不包装成成功）；评测工程化 §S2 系统级指标（成本 $/任务、崩溃恢复成功率）+ S6（评测本身烧 token，judge 分层控成本）。
+- 已覆盖：从零写 harness §8（estimateTokens=JSON 长度/3.5，"预算检查用估算，精确计数只为计费"，预算与压缩机制已实现并经 mock 模型验证）；Harness 架构 §9.3（轮数/时间/费用上限是 harness 一等公民，预算耗尽保存状态、如实暂停，不包装成成功）；评测工程化 §S2 系统级指标（成本 $/任务、崩溃恢复成功率）+ S6（评测本身烧 token，judge 分层控成本）。
 - 未覆盖：没有 4x/15x 行业对比数字与"80% 方差"数据；课程有预算机制，但没有"用 token 账本做架构选择（更大模型 vs 更多 agent）"的行业数据支撑。
 
 ## 面试一句话

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "从零写最小 agent harness（课程 A 作品）：loop/工具协议/权限门/会话恢复/预算/流式",
+  "description": "从零写 harness（从零写 harness 实操作品）：loop/工具协议/权限门/会话恢复/预算/流式",
   "scripts": {
     "demo": "tsx src/demo.ts",
     "demo:crash": "tsx src/demo.ts --fresh --crash",

@@ -1,11 +1,11 @@
 # Handoff — learn-agent-harness 会话交接
 
-> 交接时间:2026-10-10 晚 · 上一会话内容:AI 学习系统搭建 → agent harness 架构课 → RAG 与检索 → 从零写 harness 实操
+> 交接时间:2026-10-10 晚 · 上一会话内容:AI 学习系统搭建 → agent Harness 架构 → RAG 与检索 → 从零写 harness 实操
 > 交接对象：下一个接手此项目的会话／人
 >
 > **2026-10-10 晚 接手更新**：待办 1（demo:compact 活体）✅ 完成、待办 2（FinHot/.env）✅ 核对完整、待办 3（JD 数据）已从 /tmp 抢救到 `learn-agent-harness/jd-research/`。过程中发现并修复 5 个 bug（详见"三、待办"下的修复记录）。模型轮换：`qwen3.8-flash` 已从代理下架，现用 `qwen3.8-flash-next`（tool calling 已验）。
 >
-> **2026-10-10 深夜 / 10-11 凌晨 二次整理（本轮）**：RAG 与检索实操完成（rag-demo）；知识点完整性构建——新增 `notes/knowledge-map.md`（总索引）+ 11 课知识结构(系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态) + `notes/interview-bank.md`（面试结构/交叉题/JD 覆盖矩阵），时点事实（MCP spec/OTel/沙箱/记忆框架/caching 等）已核实回填。
+> **2026-10-10 深夜 / 10-11 凌晨 二次整理（本轮）**：RAG 与检索实操完成（rag-demo）；知识点完整性构建——新增 `notes/knowledge-map.md`（总索引）+ 11 课知识结构(系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态) + `notes/interview-bank.md`（面试题库/交叉题/JD 覆盖矩阵），时点事实（MCP spec/OTel/沙箱/记忆框架/caching 等）已核实回填。
 >
 > **2026-10-11 三次整理**：面经检索（中文面经站/英文系统设计/模型八股三路）→ 缺口清单入 §4.2；全量学习规划入 §四（学习总纲：15 个知识域状态 + 分阶段顺序 + 完成判据）。
 >
@@ -49,7 +49,7 @@
 
 | 文件 | 内容 | 状态 |
 |---|---|---|
-| `notes/agent-harness.md` | **Harness 架构课**：13 节（地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
+| `notes/agent-harness.md` | **Harness 架构**：13 节（地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
 | `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 11 文件 + golden set recall@3=1.00） |
 | `notes/harness-from-scratch.md` | **从零写 harness**：10 节，含真实实测输出、白板骨架、练习题、代理故障实录 | ✅ 完成 |
 | `notes/knowledge-map.md` + 十三个编号课文件 | **知识点完整性构建（2026-10-10 深夜 / 10-11 凌晨）**：系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
@@ -121,7 +121,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 
 | # | 知识域(课 · 文件) | 范围(S 节概要) | 状态 | 完成判据 |
 |---|---|---|---|---|
-| 1 | Harness 架构课(`agent-harness.md`) | 13 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
+| 1 | Harness 架构(`agent-harness.md`) | 13 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
 | 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(四模式实测) | 题库 8 题未考 |
 | 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=1.00) | S1 五道确认题未考 |
 | 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |

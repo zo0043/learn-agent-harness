@@ -28,7 +28,7 @@
 
 | 族 | 代表 | 给的是什么 | 藏的是什么 |
 |---|---|---|---|
-| **Harness 级**（完整 agent 运行时） | pi、Claude Code（及其 SDK 化） | loop+工具+会话+权限+子代理+技能+TUI/RPC——**整个 harness 架构课第十节的现成实现** | 每层的默认选择（loop 形态/压缩策略/恢复规则）——用得不深=知其然 |
+| **Harness 级**（完整 agent 运行时） | pi、Claude Code（及其 SDK 化） | loop+工具+会话+权限+子代理+技能+TUI/RPC——**整个 Harness 架构 §10的现成实现** | 每层的默认选择（loop 形态/压缩策略/恢复规则）——用得不深=知其然 |
 | **编排库**（代码里组装 agent） | LangGraph（图/状态/checkpoint）、OpenAI Agents SDK（handoffs/guardrails/sessions）、Claude Agent SDK | 原语：状态机/节点/边、agent 交接、会话持久化 | 抽象层的默认假设（状态怎么序列化、恢复语义）——图模型不是万能的 |
 | **平台**（低代码/托管） | Dify/Coze/n8n 等 | 拖拽流程+托管 | 几乎全部（自定义 loop 行为难） |
 
@@ -233,13 +233,13 @@ flowchart LR
 - 会话=JSONL 事件日志，上下文由日志确定性重建（=从零写 harness §⑥ 的设计，harness-demo 是我按它复现的）
 - 扩展系统：TS 扩展直接进运行时（quiz/md-log 扩展是我装过的）；skill=按需加载的指令包
 - **RPC 模式**：pi-agents-team 的 worker 就是 `pi --mode rpc` 子进程——我跑过 orchestrator+7 类 profile 的多 agent 编排（路径范围/final_answer 契约/relay 问答）
-- Magic Context：压缩/归档/检索的上下文工程实装（harness 架构课第五节的活教材，长期记忆系统的活教材）"
+- Magic Context：压缩/归档/检索的上下文工程实装（Harness 架构 §5的活教材，长期记忆系统的活教材）"
 
 **失败模式**：把 pi 当成"一个 CLI"讲——面试官听不出你和普通用户的差别。正确的讲法是**每句话都落到从零写 harness 的某一层**：JSONL=会话层、扩展=定制资源层、RPC=宿主接口层、Magic Context=上下文工程层。
 
-**这个故事的面试价值**：把"框架使用者"升级成"harness 机制的活样本"——每个框架话题都能落回自己的日常实操。.pi-agents-team 里 orchestrator+workers 的路径范围、`<final_answer>` 摘要、relay 问答，正好对应 系统设计 §S3 的 orchestrator-workers 与 harness 架构课 §8 的上下文隔离（多智能体编排 §S6 框架对照可交叉引用）。
+**这个故事的面试价值**：把"框架使用者"升级成"harness 机制的活样本"——每个框架话题都能落回自己的日常实操。.pi-agents-team 里 orchestrator+workers 的路径范围、`<final_answer>` 摘要、relay 问答，正好对应 系统设计 §S3 的 orchestrator-workers 与 Harness 架构 §8 的上下文隔离（多智能体编排 §S6 框架对照可交叉引用）。
 
-**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（harness 架构课第十二节）。
+**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（Harness 架构 §12）。
 
 ---
 

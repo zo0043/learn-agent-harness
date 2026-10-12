@@ -2,13 +2,13 @@
 
 AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 
-核心思路：用 AI 教 AI（pi-web 学习系统）的同时，把每节课的知识点落成**零框架可运行作品**——从零手写的最小 agent harness、零依赖 RAG pipeline、白板版……作品里每个文件对应课程一节，配套完整课程笔记与面试题库。
+核心思路：用 AI 教 AI（pi-web 学习系统）的同时，把每节课的知识点落成**零框架可运行作品**——从零写 harness、零依赖 RAG pipeline、白板版……作品里每个文件对应课程一节，配套完整课程笔记与面试题库。
 
 ## 作品
 
 | 目录 | 内容 | 跑法 |
 |---|---|---|
-| [`harness-demo/`](harness-demo/) | **从零写 harness**：从零写最小 agent harness——agent loop / SSE 流式 / JSON schema 校验 / 权限门（deny>approve>allow，默认 deny）/ JSONL 轨迹 + 崩溃恢复 / token 压缩。9 个文件对应 9 节，4 种 demo 模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩） | `cd harness-demo && npm i && cp .env.example .env`（填自己的 key）→ `npm run demo` |
+| [`harness-demo/`](harness-demo/) | **从零写 harness**：从零写 harness——agent loop / SSE 流式 / JSON schema 校验 / 权限门（deny>approve>allow，默认 deny）/ JSONL 轨迹 + 崩溃恢复 / token 压缩。9 个文件对应 9 节，4 种 demo 模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩） | `cd harness-demo && npm i && cp .env.example .env`（填自己的 key）→ `npm run demo` |
 | [`rag-demo/`](rag-demo/) | **RAG 与检索**：从零写最小 RAG——chunker → hash embedder（768 维）→ 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用 + 强制拒答生成 → 10 题 golden set 评测（recall@3=1.00）。零依赖 tsx | `cd rag-demo && npm i` → `npm run demo:eval` |
 | [`whiteboard/`](whiteboard/) | 白板版 agent（~150 行 Python，面试口述用） | 直接读源码 |
 | [`viz/render.mjs`](viz/render.mjs) | SVG→PNG 渲染器（node12 re-exec 自举 + playwright-core，复用本机 Chromium 零下载） | `node viz/render.mjs x.svg` |

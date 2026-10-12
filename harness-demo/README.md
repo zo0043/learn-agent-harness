@@ -1,4 +1,4 @@
-# harness-demo — 从零写最小 agent harness（从零写 harness 作品）
+# harness-demo — 从零写 harness（从零写 harness 作品）
 
 一个可运行的最小 agent harness，每个文件对应课程一节（见 `../notes/harness-from-scratch.md`）：
 

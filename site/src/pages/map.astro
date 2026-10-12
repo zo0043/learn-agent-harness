@@ -4,8 +4,8 @@ import Mermaid from '../components/Mermaid.astro';
 
 /**
  * 手绘自 notes/knowledge-map.md 的依赖结构。
- * 16 个知识域节点(13 个编号课程域 + 多智能体编排 / LLM 时间线 / 行业前线),节点色 = 状态。
- * 实线 = 前置依赖，虚线 = 加深/派生线；多智能体 / 时间线 / 行业前线为新增域，
+ * 16 个知识域节点(13 个编号课程域 + 多智能体编排 / LLM 时间线 / 行业前线调研),节点色 = 状态。
+ * 实线 = 前置依赖，虚线 = 加深/派生线；多智能体 / 时间线 / 行业前线调研为新增域，
  * 图中仅标注其与「从零写 harness」的弱关系（源依赖图未覆盖，后续可改）。
  */
 const chart = `graph TD
@@ -29,7 +29,7 @@ const chart = `graph TD
   FRAMEWORK["🔄 框架生态<br/>P2 · 讲义已展开 + SDK 实操已落地"]:::doing
   MULTIAGENT["🔄 多智能体编排<br/>P0 · 讲义已展开"]:::doing
   TIMELINE["✅ LLM 时间线<br/>P0"]:::done
-  INDUSTRY["✅ 行业前线<br/>2026 调研"]:::done
+  INDUSTRY["✅ 行业前线调研<br/>2026 调研"]:::done
   INTERVIEW["🎯 面试演练<br/>P0 末"]:::hub
 
   HARNESS --> SYSDESIGN

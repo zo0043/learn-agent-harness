@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "框架实操（M 课 P2.4）：Claude Agent SDK 最小实操——subagent + 权限 + 会话，指向本地双格式代理",
+  "description": "框架实操（框架生态 P2.4）：Claude Agent SDK 最小实操——subagent + 权限 + 会话，指向本地双格式代理",
   "scripts": {
     "smoke": "tsx src/smoke.ts",
     "demo": "tsx src/demo.ts"

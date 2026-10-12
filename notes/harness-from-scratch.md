@@ -1,4 +1,4 @@
-# 从零写最小 Agent Harness：完整教程
+# 从零写 harness(最小 Agent Harness 完整教程)
 
 > 课程日志 · 2026-10-10 开课 · 从零写 harness（面试导向：coding agent 方向）
 > 目标：把"会讲架构"变成"能写出来"——手写一个可运行的最小 harness + 20 分钟白板版
@@ -39,7 +39,7 @@ while True:
         messages.append(execute(tc))   # 结果必须回写
 ```
 
-三处要害：`call_model`（模型只出请求）、`execute`（程序落实动作）、`append`（把刚发生的事交给下一次调用）。**loop 正常结束 ≠ 任务正确**（harness 架构课第九节）。
+三处要害：`call_model`（模型只出请求）、`execute`（程序落实动作）、`append`（把刚发生的事交给下一次调用）。**loop 正常结束 ≠ 任务正确**（Harness 架构 §9）。
 
 ## ③ 工具协议：注册表 + 校验 + 执行（`src/tools.ts`）
 
@@ -86,7 +86,7 @@ data: [DONE]
 decide(tool) → 优先级 deny > approve > allow；fallback = "deny"
 ```
 
-**默认 deny**（没写规则的工具一律不放行——安全默认，面试点）。检查发生在**执行路径上**，不在提示词里（harness 架构课第七节）。demo 策略：`run_shell`→deny、`write_file`→approve（human-in-the-loop）、只读→allow。
+**默认 deny**（没写规则的工具一律不放行——安全默认，面试点）。检查发生在**执行路径上**，不在提示词里（Harness 架构 §7）。demo 策略：`run_shell`→deny、`write_file`→approve（human-in-the-loop）、只读→allow。
 
 ## ⑥ 会话持久化（`src/session.ts`）
 
@@ -95,7 +95,7 @@ append(ev)  // 同步 appendFileSync：kill -9 时已写的行不丢
 // JSONL 一行一条：init / model_response / tool_intent / tool_exec / compaction / final
 ```
 
-**日志是唯一事实源，上下文由日志确定性派生**（可重复 rebuild）。日志 ≠ 上下文（harness 架构课第五节）。
+**日志是唯一事实源，上下文由日志确定性派生**（可重复 rebuild）。日志 ≠ 上下文（Harness 架构 §5）。
 
 ## ⑦ 恢复与未知状态（`src/agent.ts` 的 guarded_tool_step）
 
@@ -160,12 +160,12 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 | 3 | policy 默认 allow 会怎样？举一个"默认 allow + 模型被注入"的事故链 | ⑤ |
 | 4 | 压缩后模型忘了最初目标的约束（"不许改生产目录"），会发生什么？压缩策略怎么改？ | ⑧ |
 | 5 | 日志里有 3 条 tool_intent 都没有 exec，其中 2 个是只读工具。恢复流程具体怎么走？ | ⑥⑦ |
-| 6 | 为什么"loop 正常结束"不能当验收？你 demo 里的 final 消息证明了什么、没证明什么？ | ⑨（harness 架构课） |
+| 6 | 为什么"loop 正常结束"不能当验收？你 demo 里的 final 消息证明了什么、没证明什么？ | ⑨（Harness 架构） |
 | 7 | 模型连续 3 次调用同一被拒工具，harness 该在哪一层拦？ | ⑤ |
 | 8 | 白板 20 分钟版你会砍掉哪三样、保留哪三样？为什么？ | 综合 |
 
 ## 来源
 
 - 实测环境：某 OpenAI 兼容代理（qwen3.8-flash 支持 tools+SSE；step-5-preview 不支持 tools）
-- 接回 harness 架构课：③=第三节工具协议、⑤=第七节权限、⑥⑦=第五六节会话与恢复、⑧=第五节上下文工程、⑨=第九节验证
+- 接回 Harness 架构：③=第三节工具协议、⑤=第七节权限、⑥⑦=第五六节会话与恢复、⑧=第五节上下文工程、⑨=第九节验证
 - FinHot 生产事故（幽灵事故=scope 缺失；本 demo 崩溃恢复=recovery 缺失）是同一个主题的两半

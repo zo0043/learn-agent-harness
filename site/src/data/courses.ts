@@ -1,7 +1,7 @@
 /**
  * 课程元数据（手写映射）。
  * 基线：notes/knowledge-map.md 的课程总表（15 域 + 阶段 + 状态），
- * 并行新增：multi-agent=多智能体编排/P0、llm-timeline=LLM 时间线/P0、industry-2026=行业前线/—。
+ * 并行新增：multi-agent=多智能体编排/P0、llm-timeline=LLM 时间线/P0、industry-2026=行业前线调研/—。
  * 一句话导读：各课 notes/*.md 开头提炼（这节讲什么 + 对应哪个作品/节）。
  * 面试视角 interviewAngle：面试官为什么看这课（一句话 ≤25 字，从 notes/interview-bank.md 考点分布提炼）。
  * 相关面试题 relatedQuestions：题库真实题目（题号 no + 题目原文 text + 题库页内锚点 anchor）。
@@ -47,7 +47,7 @@ const BANK = {
 export const COURSES: CourseMeta[] = [
   // ── P0 ──────────────────────────────────────────────
   {
-    slug: 'harness-from-scratch', domain: '从零写最小 harness', phase: 'P0', status: '✅ 完成',
+    slug: 'harness-from-scratch', domain: '从零写 harness', phase: 'P0', status: '✅ 完成',
     intro: '10 节逐节长出最小 agent loop（权限门 / 崩溃恢复 / 压缩），作品 harness-demo + 白板版',
     interviewAngle: 'loop/权限/恢复三大主考点的实现级素材',
     relatedQuestions: [
@@ -70,7 +70,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'system-design', domain: 'Agent 系统设计模板', phase: 'P0', status: '🔄 讲义已展开',
+    slug: 'system-design', domain: '系统设计', phase: 'P0', status: '🔄 讲义已展开',
     intro: '30 分钟结构化答“设计一个 X agent”：七步骨架 / 五范式 / 三演练，收口「从零写 harness / RAG 与检索」作品',
     interviewAngle: '“设计一个 coding agent”主场题的 30 分钟模板',
     relatedQuestions: [
@@ -80,7 +80,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'sandbox', domain: '沙箱与凭据 · 可复现', phase: 'P0', status: '🔄 讲义已展开',
+    slug: 'sandbox', domain: '沙箱与凭据', phase: 'P0', status: '🔄 讲义已展开',
     intro: '权限门 ≠ 沙箱（两道独立的门）；S2 四通道 policy 已实现，sandbox-demo 幽灵重放逐字节可复现',
     interviewAngle: '幽灵事故=最稀缺故事：权限门≠沙箱两道门',
     relatedQuestions: [
@@ -123,7 +123,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'agent-harness', domain: 'Agent Harness 架构', phase: 'P0', status: '✅ 完成',
+    slug: 'agent-harness', domain: 'Harness 架构', phase: 'P0', status: '✅ 完成',
     intro: '13 节完整教程：harness 分层与每层解决什么问题，FinHot 幽灵事故是现成案例',
     interviewAngle: 'harness 分层与每层职责，幽灵事故现成案例',
     relatedQuestions: [
@@ -133,7 +133,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'whiteboard', domain: '从零写最小 harness', phase: 'P0', status: '✅ 完成',
+    slug: 'whiteboard', domain: '从零写 harness', phase: 'P0', status: '✅ 完成',
     intro: '~150 行纯标准库 Python 白板版 agent，与 harness-demo 1:1 对应，20 分钟白板题骨架',
     interviewAngle: '20 分钟白板题：边写边讲三个关键设计',
     relatedQuestions: [
@@ -144,7 +144,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── P1 ──────────────────────────────────────────────
   {
-    slug: 'durable-execution', domain: 'Durable Execution', phase: 'P1', status: '🔄 讲义已展开',
+    slug: 'durable-execution', domain: 'durable execution', phase: 'P1', status: '🔄 讲义已展开',
     intro: '长任务不丢不重：journal / checkpoint / 幂等；教学素材是 FinHot backfill 1645 行断点续跑',
     interviewAngle: '长任务不丢不重：backfill 断点续跑素材',
     relatedQuestions: [
@@ -155,7 +155,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'mcp', domain: 'MCP 协议 + 供应链安全', phase: 'P1', status: '🔄 讲义已展开',
+    slug: 'mcp', domain: 'MCP 与供应链安全', phase: 'P1', status: '🔄 讲义已展开',
     intro: 'MCP 架构 / 原语 / 认证 + Agent 安全全景；mcp-demo 投毒 + 四层防御实操已实现',
     interviewAngle: 'MCP 供应链投毒题素材：四层防御实操',
     relatedQuestions: [
@@ -165,7 +165,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'api-engineering', domain: 'API 实操 + 多模型路由', phase: 'P1', status: '🔄 讲义已展开',
+    slug: 'api-engineering', domain: 'API 与多模型路由', phase: 'P1', status: '🔄 讲义已展开',
     intro: '流式 / 结构化输出 / caching / 重试分类 / 路由 / 成本六模块，素材是代理 400 + 模型轮换实录',
     interviewAngle: '代理 400 + 模型轮换实录：重试分类/路由',
     relatedQuestions: [
@@ -189,7 +189,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── P2 ──────────────────────────────────────────────
   {
-    slug: 'observability', domain: 'Agent 可观测', phase: 'P2', status: '🔄 讲义已展开',
+    slug: 'observability', domain: '可观测', phase: 'P2', status: '🔄 讲义已展开',
     intro: 'agent tracing 模型 + OTel GenAI 属性 + 成本归因；S2 埋点已在 harness-demo 实操（demo:otel）',
     interviewAngle: '“agent tracing+成本归因”考点，demo:otel 实操',
     relatedQuestions: [
@@ -230,7 +230,7 @@ export const COURSES: CourseMeta[] = [
   },
   // ── 未分阶段（横向素材）──────────────────────────────
   {
-    slug: 'industry-2026', domain: '行业前线', phase: '—', status: '✅ 完成',
+    slug: 'industry-2026', domain: '行业前线调研', phase: '—', status: '✅ 完成',
     intro: '两轮外部调研，核心论断均实抓官方一手源；分水岭 8 细节是“资深分水岭”板块底稿',
     interviewAngle: '8 分水岭细节一手源实证，资深判断题素材',
     relatedQuestions: [

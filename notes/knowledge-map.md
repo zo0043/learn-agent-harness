@@ -1,4 +1,4 @@
-# 知识点总地图（面试导向：coding agent）
+# 知识点总地图(面试导向:coding agent)
 
 > 建立：2026-10-11 · 依据：handoff.md 路线图（2026-10-10）+ 仓库最新实况（10-11）
 > 用途:全部知识点的一次性盘点——每课的知识结构在各自课程文件里,本文件是**索引 + 状态 + 依赖**。
@@ -8,11 +8,41 @@
 > **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。每课题库 +2 题（共 20 题）。
 > ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
 
+## 命名总表(唯一真源)
+
+> 规则(2026-10-11 起):
+> ① 每份材料只有一个**规范名**,所有交叉引用 / 站点卡片 / handoff / demo 注释一律用它;
+> ② 规范名**不带「课」字后缀**,不写 A–N 字母代号;
+> ③ 节号引用写作 `§Sn`(如 `沙箱与凭据 §S2`)。
+
+| 规范名 | 文件 | 类别 |
+|---|---|---|
+| Harness 架构 | `agent-harness.md` | 主线 |
+| 从零写 harness | `harness-from-scratch.md`(`harness-demo/`) | 编号课 |
+| RAG 与检索 | `rag.md`(`rag-demo/`) | 编号课 |
+| 系统设计 | `system-design.md` | 编号课 |
+| 沙箱与凭据 | `sandbox.md`(`sandbox-demo/`) | 编号课 |
+| 评测工程化 | `evaluation.md` | 编号课 |
+| durable execution | `durable-execution.md` | 编号课 |
+| MCP 与供应链安全 | `mcp.md`(`mcp-demo/`) | 编号课 |
+| API 与多模型路由 | `api-engineering.md` | 编号课 |
+| 数据飞轮 | `data-flywheel.md` | 编号课 |
+| 可观测 | `observability.md` | 编号课 |
+| 长期记忆 | `long-term-memory.md` | 编号课 |
+| 模型基础 | `model-basics.md` | 编号课 |
+| 框架生态 | `framework-ecosystem.md`(`framework-demo/`) | 编号课 |
+| 多智能体编排 | `multi-agent.md` | 编号课 |
+| 面试题库 | `interview-bank.md` | 横向资产 |
+| LLM 时间线 | `llm-timeline.md` | 横向资产 |
+| 行业前线调研 | `industry-2026.md` | 横向资产 |
+| 资深分水岭 1–8 | `details/*.md` | 横向资产 |
+| 知识点总地图 | `knowledge-map.md` | 索引 |
+
 ## 课程总表
 
 | 主题 | 优先级 | 状态 | 课程文件 | 完成后你能做到 |
 |---|---|---|---|---|
-| 从零写最小 harness | P0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
+| 从零写 harness | P0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
 | RAG 与检索 | P0 | ✅ | `rag.md`（含 §13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 85-chunk 评测 |
 | Agent 系统设计模板 | P0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
 | Agent 可观测 | P2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：提问演练 + 题库 14 题通过） |
@@ -27,7 +57,7 @@
 | 框架生态 | P2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：提问演练 + 题库 14 题通过） |
 | 多智能体编排 | P0 | 📐 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
 
-横向资产:`interview-bank.md`(模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵)· `llm-timeline.md`(LLM 演化时间线 12 节点)· `industry-2026.md`(2026-10 行业前线调研,MCP 与供应链安全 / 框架生态 / 系统设计 / 多智能体编排 一手源)· `details/`(资深分水岭 8 细节页)
+横向资产:`interview-bank.md`(模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵)· `llm-timeline.md`(LLM 时间线 12 节点)· `industry-2026.md`(2026-10 行业前线调研,MCP 与供应链安全 / 框架生态 / 系统设计 / 多智能体编排 一手源)· `details/`(资深分水岭 8 细节页)
 
 > 2026-10-11 前线回填（industry-2026 → 课程）：MCP 与供应链安全 §S2.1（AAIF 治理/spec 2026-07-28/协议三分）· 框架生态 §S3 表 +4 行 · 系统设计 §S2 两个必答题模块 + 1 追问 · 从零写 harness §8 → 多智能体编排入口。课程状态(⏳/📐/✅)指"开课/实操"进度，不含内容回填。
 
@@ -35,7 +65,7 @@
 
 ```mermaid
 graph TD
-  A["✅ 从零写最小 harness"] --> C["Agent 系统设计模板 (P0)"]
+  A["✅ 从零写 harness"] --> C["Agent 系统设计模板 (P0)"]
   B["✅ RAG 与检索"] --> C
   A --> E["沙箱与凭据 (P0, 讲义已展开)"]
   B --> H["评测工程化 (P0)"]

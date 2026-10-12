@@ -1,4 +1,4 @@
-# Agent Harness 架构：完整教程
+# Harness 架构(完整教程)
 
 > 课程日志 · 2026-10-10 开课 · 完整教程版（先讲完，后续再练习提问）
 > 目标：**能清晰解释 agent harness 的架构**——分层、每层解决什么问题、设计取舍
@@ -372,7 +372,7 @@ graph TD
 
 | 能力 | 证据 | 面试可用性 |
 |---|---|---|
-| harness 架构心智模型 | 本课程第1-10节 | 高——大部分候选人的盲区 |
+| Harness 架构心智模型 | 本课程第1-10节 | 高——大部分候选人的盲区 |
 | 生产级 LLM 批处理流水线 | FinHot：台账1830行、回刷脚本、失败率~10%治理、labeler T+5 异步评测 | 高——"长任务+失败恢复+批量评测"故事 |
 | 多 agent 编排实操 | pi-agents-team orchestrator+workers、路径范围、final_answer 摘要 | 中高 |
 | 真实生产事故 | FinHot 幽灵事故（2026-10-09）：错误目录 build 换掉生产容器 24min | 高——安全/权限/事故响应故事，稀缺 |
@@ -395,7 +395,7 @@ graph TD
 
 ```mermaid
 graph TD
-  H["✅ 已完成:harness 架构"] --> A["动手:从零写最小 harness<br/>loop+工具协议+权限门+日志"]
+  H["✅ 已完成:Harness 架构"] --> A["动手:从零写 harness<br/>loop+工具协议+权限门+日志"]
   H --> B["RAG:embedding→chunk→检索→rerank→生成<br/>→ 混合检索/RAG 评测"]
   H --> F["API 实操:SSE/结构化输出/caching/重试"]
   B --> E["评测:golden set/LLM-judge/轨迹评测<br/>(嫁接 FinHot labeler 经验)"]
@@ -430,7 +430,7 @@ graph TD
 | **agent 可观测**：OTel GenAI 语义约定、Span 建模、成本/token 归因、trace 回放调试 | 腾讯有专门岗（Agent 可观测研发工程师，2026-10） | 新热点 | ❌ 最大缺口：课程只有"离线评测闭环"，无 tracing/OTel |
 | **沙箱与凭据**：容器/microVM 隔离、凭据注入、行为漂移拦截、工具调用审计 | OpenAI Codex/Anthropic Runtime 均为一等公民；腾讯云 AgentRuntime 沙箱专门岗 | 新热点 | ❌ 缺口：课程"权限与 injection"≠执行环境隔离 |
 | **长期记忆**：跨会话 memory、记忆检索与遗忘 | 腾讯 2 个专门 JD（企微记忆系统、小微记忆方向） | 新热点 | ❌ 缺口 |
-| **durable execution**：checkpoint/快照恢复、long-horizon（稀疏反馈防能力衰减） | 腾讯 Harness 岗、OpenAI stateful workflows | 新热点 | ⚠️ 部分：harness 架构课第六节有恢复与重试，未延伸到 long-horizon |
+| **durable execution**：checkpoint/快照恢复、long-horizon（稀疏反馈防能力衰减） | 腾讯 Harness 岗、OpenAI stateful workflows | 新热点 | ⚠️ 部分：Harness 架构 §6有恢复与重试，未延伸到 long-horizon |
 | **评测 CI 化**：LLM-judge 设计、pass@k、轨迹级评分、评测集版本+CI 门禁 | 腾讯 Harness 岗、OpenAI Codex evals | 新热点 | ⚠️ 部分：有指标体系，缺 judge 校准/轨迹级/CI 门禁 |
 | **MCP 供应链安全**：工具投毒、跨源权限提升、运行时 Guardrails、红队 | 腾讯 Agent 安全专家岗（2026-09） | 新热点 | ⚠️ MCP 已计划，安全视角未列 |
 | **多模型路由/成本归因**：路由策略、token 预算、caching 命中率 | 腾讯 24/122 提成本/路由；OpenAI performance envelope | 主流 | ⚠️ 并入已计划的 API 实操课 |
@@ -451,9 +451,9 @@ graph TD
 > 注:以下是 2026-10-10 的规划快照(按当时 JD 调研排)。此后课程体系已重排为 `knowledge-map.md` 的**课程总表**(16 域),以那份为准;这里的字母不再代表课程编号。
 
 ```
-P0(地基,不变):从零写最小 harness → RAG 实操 → 系统设计模板
+P0(地基,不变):从零写 harness → RAG 实操 → 系统设计模板
 P0(新):可观测(OTel GenAI/tracing/成本归因)
-         沙箱与凭据安全(接 harness 架构课第七节,FinHot 幽灵事故=现成故事)
+         沙箱与凭据安全(接 Harness 架构 §7,FinHot 幽灵事故=现成故事)
          长期记忆(跨会话 memory 设计)
 P1:durable execution/long-horizon(第六节延伸)
     评测 CI 化(judge 校准/pass@k/轨迹级/CI 门禁;FinHot labeler 故事嫁接)

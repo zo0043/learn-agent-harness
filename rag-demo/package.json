@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "从零写最小 RAG pipeline（课程 B 实操作品）：chunker/hash embedder/暴力余弦 → BM25 → RRF → 生成 → golden set",
+  "description": "从零写最小 RAG pipeline（RAG 与检索 实操作品）：chunker/hash embedder/暴力余弦 → BM25 → RRF → 生成 → golden set",
   "scripts": {
     "demo:retrieval": "tsx src/demo-retrieval.ts",
     "demo:bm25": "tsx src/demo-bm25.ts",

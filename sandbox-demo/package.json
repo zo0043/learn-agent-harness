@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "E 课 S2 作品：TS 迷你沙箱——四通道 policy 引擎 + 幽灵事故重放（全离线确定性）",
+  "description": "沙箱与凭据 §S2 作品：TS 迷你沙箱——四通道 policy 引擎 + 幽灵事故重放（全离线确定性）",
   "scripts": {
     "demo": "tsx src/demo.ts",
     "typecheck": "tsc --noEmit"

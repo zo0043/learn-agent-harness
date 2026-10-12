@@ -7,6 +7,8 @@ status: "稳定历史"
 kind: "interview-question"
 ---
 
+# 资深分水岭 3:错误路径优先于快乐路径
+
 ## 一句话定义
 
 agent 的成功率由错误恢复能力决定，而不是快乐路径的完成度——失败时停机并把控制权交还用户；容器/harness 崩溃应被当作"可重试的工具错误"处理，会话日志支持冷启动恢复。
@@ -21,7 +23,7 @@ OpenAI《A Practical Guide to Building Agents》：失败时必须停机并把�
 
 ## 本地映射
 
-- 已覆盖：从零写 harness §7（先记 tool_intent 再执行；intent 在、exec 不在=结果未知；非只读不盲目重放、先摆状态让模型用 read_file 核对——真实崩溃 exit 137 + 真实恢复的实测输出）；harness 架构课 §6.1 三状态表 + §6.2 guarded_tool_step 契约；§9.1"loop 正常结束 ≠ 正确"；从零写 harness §9 四种 demo 模式，崩溃恢复模式全实测通过。
+- 已覆盖：从零写 harness §7（先记 tool_intent 再执行；intent 在、exec 不在=结果未知；非只读不盲目重放、先摆状态让模型用 read_file 核对——真实崩溃 exit 137 + 真实恢复的实测输出）；Harness 架构 §6.1 三状态表 + §6.2 guarded_tool_step 契约；§9.1"loop 正常结束 ≠ 正确"；从零写 harness §9 四种 demo 模式，崩溃恢复模式全实测通过。
 - 未覆盖：没有行业一手数字；本地恢复是"日志重建"路径，没有"session API 级冷启动"（wake+getSession）的对应物——那是产品化 SDK 的形态，本地课程未涉及。
 
 ## 面试一句话

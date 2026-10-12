@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "MCP 供应链投毒演示（I 课 S4 实操）：mock server 投毒 + 四层防御对照 + 确定性重放，全离线零 key",
+  "description": "MCP 供应链投毒演示（MCP 与供应链安全 §S4 实操）：mock server 投毒 + 四层防御对照 + 确定性重放，全离线零 key",
   "scripts": {
     "demo": "tsx src/demo.ts"
   },
