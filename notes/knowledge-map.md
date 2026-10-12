@@ -67,29 +67,52 @@
 
 ```mermaid
 graph TD
-  从零写harness["✅ 从零写 harness"] --> 系统设计["Agent 系统设计模板 (P0)"]
-  RAG与检索["✅ RAG 与检索"] --> 系统设计
-  从零写harness --> 沙箱与凭据["沙箱与凭据 (P0, 讲义已展开)"]
-  RAG与检索 --> 评测工程化["评测工程化 (P0)"]
-  从零写harness --> durableexecution["durable execution (P1)"]
-  评测工程化 --> durableexecution
-  从零写harness --> MCP与供应链安全["MCP + 安全 (P1)"]
-  系统设计 --> 多智能体编排["多智能体编排 (P0)"]
-  评测工程化 --> 多智能体编排
-  多智能体编排 --> 面试演练
-  从零写harness --> API与多模型路由["API + 多模型路由 (P1)"]
-  评测工程化 --> 数据飞轮["数据飞轮 (P1)"]
-  系统设计 --> 面试演练["面试演练 (P0 末)"]
-  沙箱与凭据 --> 面试演练
-  评测工程化 --> 面试演练
-  durableexecution --> 面试演练
-  MCP与供应链安全 --> 面试演练
-  API与多模型路由 --> 面试演练
-  数据飞轮 --> 面试演练
-  可观测["可观测 (P2)"] -.->|加深 评测工程化| 面试演练
-  长期记忆["长期记忆 (P2)"] -.->|进 系统设计 设计题| 面试演练
-  模型基础["模型基础 (P2)"] -.-> 面试演练
-  框架生态["框架生态 (P2)"] -.-> 面试演练
+  classDef done fill:#2ea043,stroke:#278038,color:#fff
+  classDef doing fill:#bb8009,stroke:#9a6700,color:#fff
+  classDef todo fill:#6e7681,stroke:#57606a,color:#fff
+  classDef hub fill:#0f766e,stroke:#0d5f59,color:#fff
+
+  HARNESS["✅ 从零写 harness · P0"]:::done
+  RAG["✅ RAG 与检索 · P0"]:::done
+  SYSDESIGN["📐 系统设计 · P0"]:::doing
+  SANDBOX["📐 沙箱与凭据 · P0"]:::doing
+  EVAL["📐 评测工程化 · P0"]:::doing
+  DURABLE["📐 durable execution · P1"]:::doing
+  MCP["📐 MCP 与供应链安全 · P1"]:::doing
+  API["📐 API 与多模型路由 · P1"]:::doing
+  FLYWHEEL["📐 数据飞轮 · P1"]:::doing
+  OBS["📐 可观测 · P2"]:::doing
+  MEMORY["📐 长期记忆 · P2"]:::doing
+  MODEL["📐 模型基础 · P2"]:::doing
+  FRAMEWORK["📐 框架生态 · P2"]:::doing
+  MULTIAGENT["📐 多智能体编排 · P0"]:::doing
+  TIMELINE["✅ LLM 时间线 · 横向资产"]:::done
+  INDUSTRY["✅ 行业前线调研 · 横向资产"]:::done
+  INTERVIEW["🎯 面试演练 · P0 末"]:::hub
+
+  HARNESS --> SYSDESIGN
+  RAG --> SYSDESIGN
+  HARNESS --> SANDBOX
+  RAG --> EVAL
+  HARNESS --> DURABLE
+  EVAL --> DURABLE
+  HARNESS --> MCP
+  SYSDESIGN --> MULTIAGENT
+  EVAL --> MULTIAGENT
+  MULTIAGENT --> INTERVIEW
+  HARNESS --> API
+  EVAL --> FLYWHEEL
+  SYSDESIGN --> INTERVIEW
+  SANDBOX --> INTERVIEW
+  EVAL --> INTERVIEW
+  DURABLE --> INTERVIEW
+  MCP --> INTERVIEW
+  API --> INTERVIEW
+  FLYWHEEL --> INTERVIEW
+  OBS -.->|加深 评测工程化| INTERVIEW
+  MEMORY -.->|进 系统设计 设计题| INTERVIEW
+  MODEL -.-> INTERVIEW
+  FRAMEWORK -.-> INTERVIEW
 ```
 
 **建议开课顺序**:系统设计 → 多智能体编排 → 沙箱与凭据(续 §S2)→ 评测工程化 → durable execution → MCP 与供应链安全 → API 与多模型路由 → 数据飞轮 →(P2 四课按目标岗位权重排)。

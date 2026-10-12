@@ -1,115 +1,75 @@
 ---
-import Base from '../layouts/Base.astro';
-import Mermaid from '../components/Mermaid.astro';
-
 /**
- * 手绘自 notes/knowledge-map.md 的依赖结构。
- * 节点覆盖 14 个编号课 + LLM 时间线 / 行业前线调研两个横向资产节点，节点色 = 状态；
- * 知识域规范口径以 notes/knowledge-map.md 为准（课程总表 14 编号课 + 主线 agent-harness.md = 15 域）。
- * 实线 = 前置依赖，虚线 = 加深/派生线；多智能体 / 时间线 / 行业前线调研为新增域，
- * 图中仅标注其与「从零写 harness」的弱关系（源依赖图未覆盖，后续可改）。
+ * /map：知识地图 = notes/knowledge-map.md 原文渲染（单一真源，2026-10-12 起）。
+ * 此前是手绘副本（mermaid 依赖图 + 横切表 + 资产表），与 canonical 反复漂移；
+ * 现改为与 /interview 同模式：从 courses 集合 render knowledge-map.md，
+ * 笔记改动即同步。图内 mermaid 由 markdown 管线转 .mermaid div、客户端渲染
+ * （viz/mermaid-check.mjs 覆盖本页，语法错会 FAIL）。
  */
-const chart = `graph TD
-  classDef done fill:#2ea043,stroke:#278038,color:#fff
-  classDef doing fill:#bb8009,stroke:#9a6700,color:#fff
-  classDef todo fill:#6e7681,stroke:#57606a,color:#fff
-  classDef hub fill:#0f766e,stroke:#0d5f59,color:#fff
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { extractToc } from '../utils/toc';
 
-  HARNESS["✅ 从零写 harness<br/>P0"]:::done
-  RAG["✅ RAG 与检索<br/>P0"]:::done
-  SYSDESIGN["🔄 系统设计模板<br/>P0 · 讲义已展开"]:::doing
-  SANDBOX["🔄 沙箱与凭据<br/>P0 · 讲义已展开 + demo 已实现"]:::doing
-  EVAL["🔄 评测工程化<br/>P0 · 讲义已展开"]:::doing
-  DURABLE["🔄 durable execution<br/>P1 · 讲义已展开"]:::doing
-  MCP["🔄 MCP + 供应链安全<br/>P1 · 讲义已展开 + 投毒 demo 已实现"]:::doing
-  API["🔄 API + 多模型路由<br/>P1 · 讲义已展开"]:::doing
-  FLYWHEEL["🔄 数据飞轮<br/>P1 · 讲义已展开"]:::doing
-  OBS["🔄 可观测<br/>P2 · 讲义已展开 + 埋点已实测"]:::doing
-  MEMORY["🔄 长期记忆<br/>P2 · 讲义已展开"]:::doing
-  MODEL["🔄 模型基础<br/>P2 · 讲义已展开"]:::doing
-  FRAMEWORK["🔄 框架生态<br/>P2 · 讲义已展开 + SDK 实操已落地"]:::doing
-  MULTIAGENT["🔄 多智能体编排<br/>P0 · 讲义已展开"]:::doing
-  TIMELINE["✅ LLM 时间线<br/>P0"]:::done
-  INDUSTRY["✅ 行业前线调研<br/>2026 调研"]:::done
-  INTERVIEW["🎯 面试演练<br/>P0 末"]:::hub
-
-  HARNESS --> SYSDESIGN
-  RAG --> SYSDESIGN
-  HARNESS --> SANDBOX
-  RAG --> EVAL
-  HARNESS --> DURABLE
-  EVAL --> DURABLE
-  HARNESS --> MCP
-  HARNESS --> API
-  EVAL --> FLYWHEEL
-  SYSDESIGN --> INTERVIEW
-  SANDBOX --> INTERVIEW
-  EVAL --> INTERVIEW
-  DURABLE --> INTERVIEW
-  MCP --> INTERVIEW
-  API --> INTERVIEW
-  FLYWHEEL --> INTERVIEW
-  OBS -.->|加深 评测工程化| INTERVIEW
-  MEMORY -.->|进 系统设计 设计题| INTERVIEW
-  MODEL -.-> INTERVIEW
-  FRAMEWORK -.-> INTERVIEW
-  HARNESS -.->|编排地基| MULTIAGENT
-`;
+const entries = await getCollection('courses');
+const entry = entries.find((e) => e.id === 'knowledge-map');
+const rendered = entry ? await render(entry) : null;
+const toc = entry ? extractToc(entry.body ?? '') : [];
+const base = import.meta.env.BASE_URL;
 ---
 
 <Base title="知识地图">
-  <h1 class="page-title">知识地图</h1>
-  <p class="page-lead">
-    15 个知识域 + 依赖结构（手绘自 <code>notes/knowledge-map.md</code>；图中另含 LLM 时间线 / 行业前线调研两个横向资产节点）。
-    实线 = 前置依赖，虚线 = 加深 / 派生线。
-  </p>
+  {
+    rendered ? (
+      <div class="course-layout">
+        <article class="markdown">
+          <header class="course-meta-bar">
+            <div class="meta-row">
+              <span class="chip chip-strong">知识地图</span>
+              <span class="chip">索引 + 状态 + 依赖</span>
+              <span class="chip">笔记原文渲染</span>
+            </div>
+            <nav class="crumbs" aria-label="面包屑">
+              <a href={base}>首页</a> / <a href={base + 'learn/'}>学习路线</a> / <span>知识地图</span>
+            </nav>
+          </header>
 
-  <div class="legend">
-    <span><i class="legend-dot ok"></i>✅ 已完成</span>
-    <span><i class="legend-dot doing"></i>🔄 进行中</span>
-    <span><i class="legend-dot todo"></i>⏳ 未开始（已建知识结构，待开课）</span>
-  </div>
+          <rendered.Content />
 
-  <Mermaid chart={chart} title="知识域依赖图:从零写 harness / RAG 与检索 已完成 → 系统设计 / 沙箱与凭据 / 评测工程化 为 P0 收口 → P1 三课(durable execution / MCP 与供应链安全 / 数据飞轮)→ 面试演练" />
+          <footer class="page-foot">
+            <a href={base + 'learn/'}>学习路线</a>
+            <a href={base + 'interview/'}>面试题库</a>
+            <a href={base + 'works/'}>作品详解</a>
+          </footer>
+          <p style="margin-top: 14px; color: var(--text-faint); font-size: 0.9rem">
+            本页由 <code>notes/knowledge-map.md</code> 自动渲染——改笔记即同步，不再维护站点侧副本。
+          </p>
+        </article>
 
-  <section style="margin-top: 36px">
-    <h2 class="page-title" style="font-size: 1.35rem">横切知识点（多课重复出现，面试按“一个主题三个锚点”讲）</h2>
-    <div class="card" style="display: block">
-      <table class="file-table">
-        <thead>
-          <tr><th>横切主题</th><th>出现位置</th><th>三个锚点（证据链）</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="sec">失败恢复</td><td>从零写 harness §⑥-⑦、沙箱与凭据、durable execution</td><td>intent/exec 日志(harness-demo)→ 幽灵事故 scope 缺失(FinHot)→ durable journal(durable execution demo)</td></tr>
-          <tr><td class="sec">权限与信任</td><td>从零写 harness §⑤、沙箱与凭据、MCP 与供应链安全、长期记忆</td><td>三道门（harness-demo policy）→ 沙箱=执行环境层（沙箱与凭据）→ MCP 不解决权限（MCP 与供应链安全）→ 记忆投毒（长期记忆）</td></tr>
-          <tr><td class="sec">评测与验证</td><td>RAG 与检索 §⑨、评测工程化、数据飞轮</td><td>golden set（rag-demo recall@3=1.00）→ CI 门禁（评测工程化）→ 飞轮迭代（数据飞轮，FinHot 两轮降噪）</td></tr>
-          <tr><td class="sec">成本工程</td><td>从零写 harness §⑧、API 与多模型路由、可观测</td><td>压缩（context.ts）→ 路由/caching（API 与多模型路由）→ token 归因（可观测）</td></tr>
-          <tr><td class="sec">上下文工程</td><td>从零写 harness §⑧、RAG 与检索 §⑤-⑧、长期记忆</td><td>压缩/预算 → query 侧分布差/窗口≠RAG → 跨会话记忆</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section style="margin-top: 36px">
-    <h2 class="page-title" style="font-size: 1.35rem">资产 ↔ 课程映射</h2>
-    <div class="card" style="display: block">
-      <table class="file-table">
-        <thead>
-          <tr><th>资产</th><th>证明的能力</th><th>被哪些课引用</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="sec">harness-demo/</td><td>loop / 工具协议 / 流式 / 权限 / 恢复 / 压缩</td><td>系统设计（coding agent 设计）、沙箱与凭据（policy 层）、durable execution（session.ts=最小 journal）、评测工程化（mock 评测）</td></tr>
-          <tr><td class="sec">whiteboard/</td><td>白板手写（~150 行）</td><td>系统设计、面试演练</td></tr>
-          <tr><td class="sec">rag-demo/</td><td>检索全 pipeline + 评测</td><td>系统设计（KB 设计题）、评测工程化（检索层评测）、数据飞轮（指标驱动）</td></tr>
-          <tr><td class="sec">sandbox-demo/</td><td>四通道 policy + 事故重放</td><td>沙箱与凭据 §S2</td></tr>
-          <tr><td class="sec">FinHot（生产）</td><td>长任务 / 批量评测 / 事故 / 数据飞轮</td><td>沙箱与凭据、durable execution、评测工程化、API 与多模型路由、数据飞轮</td></tr>
-          <tr><td class="sec">pi + pi-agents-team</td><td>多 agent 编排 / 框架源码级</td><td>系统设计、框架生态</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <p style="margin-top: 28px; color: var(--text-soft); font-size: 0.92rem">
-    完整总表、状态记号与未结事项见仓库 <a href="https://github.com/zo0043/learn-agent-harness/blob/main/notes/knowledge-map.md" target="_blank" rel="noopener">notes/knowledge-map.md ↗</a>
-  </p>
+        {
+          toc.length > 0 && (
+            <aside class="toc" aria-label="本页目录">
+              <details open>
+                <summary>本页目录</summary>
+                <ul>
+                  {
+                    toc.map((t) => (
+                      <li class={t.depth === 3 ? 'toc-3' : 'toc-2'}>
+                        <a href={`#${t.id}`}>{t.text}</a>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </details>
+            </aside>
+          )
+        }
+      </div>
+    ) : (
+      <div class="empty-state">
+        <p class="empty-icon">🚧</p>
+        <h1>知识地图</h1>
+        <p><code>notes/knowledge-map.md</code> 未就位——文件入仓后随下一次构建自动渲染。</p>
+      </div>
+    )
+  }
 </Base>

@@ -8,6 +8,8 @@ import { join, extname } from 'node:path';
 const DIST = '/home/ubuntu/app/learn-agent-harness/site/dist';
 const BASE = '/learn-agent-harness';
 const SLUGS = ['system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel', 'observability', 'long-term-memory', 'model-basics', 'framework-ecosystem'];
+// '/map' 自 2026-10-12 起为 notes/knowledge-map.md 原文渲染（mermaid 依赖图来自笔记，不再是手绘副本）
+const PAGES = [...SLUGS, '/map'];
 const PORT = 8099;
 
 const MIME = {
@@ -42,8 +44,8 @@ page.on('console', (m) => { if (m.type() === 'error') bad.push(`console: ${m.tex
 page.on('pageerror', (e) => bad.push(`pageerror: ${e.message}`));
 
 const rows = [];
-for (const slug of SLUGS) {
-  const url = `http://localhost:${PORT}${BASE}/c/${slug}/`;
+for (const slug of PAGES) {
+  const url = `http://localhost:${PORT}${BASE}${slug.startsWith('/') ? slug : `/c/${slug}`}/`;
   await page.goto(url, { waitUntil: 'load' });
   // 等 mermaid 客户端渲染（最多 8s）
   let rendered = 0, total = 0, errText = '';
