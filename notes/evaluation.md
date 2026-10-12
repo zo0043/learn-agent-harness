@@ -461,7 +461,7 @@ judge 校准报告
 - judge 偏差一手引用（2026-10-11 已核实回填）：位置/冗长/自我强化 = Zheng et al. 2023《Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena》(NeurIPS'23)；位置偏差系统研究 = Shi et al. 2025《Judging the Judges》(IJCNLP-AACL'25：15 个 judge/15 万实例，三指标 Repetition Stability/Position Consistency/Preference Fairness；结论：偏差非随机、强相关答案质量差、弱相关长度)；自我偏好 = Panickssery et al. 2024 (arXiv:2410.21819：评估器能识别并偏爱自家输出)；G-Eval = Liu et al. 2023
 - 指标四代经典引用：BLEU = Papineni et al. 2002；ROUGE = Lin 2004；BERTScore = Zhang et al. 2020；METEOR 为 Gen2 家族（年份未在正文断言）；RLHF/奖励模型链 = Ouyang et al. 2022 (InstructGPT)
 - 新增方法学引用（待核实项已在正文标 TODO）：Cohen's Kappa 定义（Cohen 1960）与 Landis & Koch 解释区间；pass@k 无偏估计量（Chen et al. 2021）
-- 我的证据：FinHot labeler（#35：T+5 状态机、858 skipped、baseline n≈60）、rag-demo golden set（recall@3=1.00，10 题含 2 范围外）、harness-demo 四模式
+- 我的证据：FinHot labeler（#35：T+5 状态机、858 skipped、baseline n≈60）、rag-demo golden set（recall@3=1.00，10 题含 2 范围外）、harness-demo 五模式
 - 接回：RAG 与检索 §⑨（指标层）、从零写 harness §⑨（mock 验证）、沙箱与凭据(可复现=评测前提)、数据飞轮(飞轮的评测环节)
 
 ### 引用核实清单（2026-10-11 一手源复核）

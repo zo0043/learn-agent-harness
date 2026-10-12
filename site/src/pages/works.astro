@@ -22,7 +22,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         harness 的契约是 <code>policy → intent → execute → result</code>（结果必回写，拒绝也是结果）。
       </p>
 
-      <h3>9 个文件 ↔ 9 节</h3>
+      <h3>9 个文件 ↔ ①-⑩ 十节（下表按主要落点）</h3>
       <table class="file-table">
         <thead>
           <tr><th>文件</th><th>对应节</th><th>职责</th></tr>
@@ -40,7 +40,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         </tbody>
       </table>
 
-      <h3>4 种 demo 模式</h3>
+      <h3>5 种 demo 模式</h3>
       <table class="file-table">
         <thead>
           <tr><th>模式</th><th>命令</th><th>验证点</th></tr>
@@ -50,6 +50,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
           <tr><td class="sec">崩溃恢复</td><td><code>npm run demo:crash</code></td><td>write_file intent 后模拟崩溃 → 重启从 JSONL 恢复，处理“未知状态”</td></tr>
           <tr><td class="sec">审批拒绝</td><td><code>npm run demo:reject</code></td><td>policy = approve 且用户拒绝的路径</td></tr>
           <tr><td class="sec">压缩</td><td><code>npm run demo:compact</code></td><td>低预算阈值触发上下文压缩</td></tr>
+          <tr><td class="sec">OTel 埋点</td><td><code>npm run demo:otel</code></td><td>OTel GenAI span 实测 11 spans / 1 trace</td></tr>
         </tbody>
       </table>
 

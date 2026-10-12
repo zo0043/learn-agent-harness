@@ -124,7 +124,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'agent-harness', domain: 'Harness 架构', phase: 'P0', status: '✅ 完成',
-    intro: '13 节完整教程：harness 分层与每层解决什么问题，FinHot 幽灵事故是现成案例',
+    intro: '15 节完整教程：harness 分层与每层解决什么问题，FinHot 幽灵事故是现成案例',
     interviewAngle: 'harness 分层与每层职责，幽灵事故现成案例',
     relatedQuestions: [
       { no: '§3.4-Q1', text: '四种运行模式各证明了什么？crash 模式怎么注入的？', anchor: BANK.s34 },

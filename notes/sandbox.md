@@ -2,7 +2,7 @@
 
 > 开始：2026-10-11 · 状态：📖 讲义已展开、待提问演练
 > 教学素材：FinHot 2026-10-09 18:00 幽灵事故（并行会话污染 env/DB → 18:25 重建 worker/api）
-> 前置：Harness 架构 13 节 + 从零写 harness（harness-demo，含 policy.ts）+ RAG 与检索（rag-demo）
+> 前置：Harness 架构 15 节 + 从零写 harness（harness-demo，含 policy.ts）+ RAG 与检索（rag-demo）
 > 作品：`sandbox-demo/`（2026-10-11 已实现，src 600 行）——四通道 policy 引擎 + 幽灵事故重放（全离线确定性；A 组仅权限门 vs B 组四通道+沙箱；重放 3 次逐字节一致）
 
 ---

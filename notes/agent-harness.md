@@ -395,16 +395,16 @@ graph TD
 
 ```mermaid
 graph TD
-  H["✅ 已完成:Harness 架构"] --> A["动手:从零写 harness<br/>loop+工具协议+权限门+日志"]
-  H --> B["RAG:embedding→chunk→检索→rerank→生成<br/>→ 混合检索/RAG 评测"]
-  H --> F["API 实操:SSE/结构化输出/caching/重试"]
-  B --> E["评测:golden set/LLM-judge/轨迹评测<br/>(嫁接 FinHot labeler 经验)"]
-  A --> C["系统设计模板:拆解→选模式→上下文策略→权限→评测→失败处理"]
-  E --> C
-  F --> C
-  A --> M["MCP 协议"]
-  C --> Z["面试演练:模拟题+项目故事打磨"]
-  M --> Z
+  Harness架构["✅ 已完成:Harness 架构"] --> 从零写harness["动手:从零写 harness<br/>loop+工具协议+权限门+日志"]
+  Harness架构 --> RAG与检索["RAG:embedding→chunk→检索→rerank→生成<br/>→ 混合检索/RAG 评测"]
+  Harness架构 --> API与多模型路由["API 实操:SSE/结构化输出/caching/重试"]
+  RAG与检索 --> 评测工程化["评测:golden set/LLM-judge/轨迹评测<br/>(嫁接 FinHot labeler 经验)"]
+  从零写harness --> 系统设计["系统设计模板:拆解→选模式→上下文策略→权限→评测→失败处理"]
+  评测工程化 --> 系统设计
+  API与多模型路由 --> 系统设计
+  从零写harness --> MCP与供应链安全["MCP 协议"]
+  系统设计 --> 面试演练["面试演练:模拟题+项目故事打磨"]
+  MCP与供应链安全 --> 面试演练
 ```
 
 ## FinHot 项目面试故事映射
@@ -440,6 +440,8 @@ graph TD
 | 生成式 UI/端侧推理 | 腾讯小程序/混元应用岗 | 新热点 | ❌ 方向性，仅对应目标岗才学 |
 | deep research | 仅 4/122 弱命中 | 证据不足 | 不排期 |
 
+> 快照注：本表为 2026-10-10 快照，已被 `knowledge-map.md` 课程总表取代（agent 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测 CI 化 五课均已 📐 讲义已展开），以课程总表为准。
+
 ## 岗位方向侧重（JD 归纳）
 
 - **Coding agent**（OpenAI Codex Core、Anthropic Claude Code、腾讯 CodeBuddy/WorkBuddy）：执行 loop+沙箱+可复现性、SWE-bench/solve rate、harness×prompt×模型 ablation
@@ -448,7 +450,7 @@ graph TD
 
 ## 更新后的学习顺序(替换第十四节顺序)
 
-> 注:以下是 2026-10-10 的规划快照(按当时 JD 调研排)。此后课程体系已重排为 `knowledge-map.md` 的**课程总表**(16 域),以那份为准;这里的字母不再代表课程编号。
+> 注:以下是 2026-10-10 的规划快照(按当时 JD 调研排)。此后课程体系已重排为 `knowledge-map.md` 的**课程总表**(15 域),以那份为准;这里的字母不再代表课程编号。
 
 ```
 P0(地基,不变):从零写 harness → RAG 实操 → 系统设计模板

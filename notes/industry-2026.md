@@ -62,7 +62,7 @@
 
 1. 主战场核心 = "设计一个 coding agent"（与 interview-bank §2 一致）；2026 新主线 = agent 基础设施（沙箱隔离 + 评测闭环，OpenAI 连 Context/Computer Use 都设了专职研究岗）→ 答题时主动带沙箱与评测闭环，比只画 loop 高半档。
 2. OpenAI 2026 岗位拆分 = 追问方向的直接证据：Codex Core Agents（harness）、Computer Use Research、Context Research、Agent Post-Training、Agent Security、Agent Infrastructure。
-3. 实操题典型 = 20 分钟白板最小 agent + 崩溃/恢复模式讲解（本地 whiteboard/ + harness-demo 四模式已备）。
+3. 实操题典型 = 20 分钟白板最小 agent + 崩溃/恢复模式讲解（本地 whiteboard/ + harness-demo 五模式已备）。
 4. 行为题考"可预测处事方式"：Action="我"+决策链、Result 带数字、Learn 出可迁移规则；真实生产事故→机制的故事是市场顶配（幽灵事故）。
 5. 英文面经三件套：系统设计 + pair coding + 快问快答；agent 系统设计核心考点="为什么是 agent 不是 workflow"+ 评测设计取舍。
 6. 新面经边际收益低 → 时间投题库 §6 四个 🟡：sandbox-demo 源码 / OTel 埋点 / MCP 投毒演示 / 框架实操。

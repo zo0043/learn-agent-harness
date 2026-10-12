@@ -11,7 +11,7 @@
 >
 > **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 §S4 升级为 Agent 安全全景 / 模型基础 §S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → 当前 1.0.1）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
 >
-> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 实测 11 spans/1 trace）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（8 页面，GitHub Actions→Pages，build 零错误，9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
+> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 实测 11 spans/1 trace）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（GitHub Actions→Pages，build 零错误，上线时 9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
 
 ---
 
@@ -49,8 +49,8 @@
 
 | 文件 | 内容 | 状态 |
 |---|---|---|
-| `notes/agent-harness.md` | **Harness 架构**：13 节（地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
-| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 11 文件 + golden set recall@3=1.00） |
+| `notes/agent-harness.md` | **Harness 架构**：15 节（第 1-2 节回顾；地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
+| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 15 文件 + golden set recall@3=1.00） |
 | `notes/harness-from-scratch.md` | **从零写 harness**：10 节，含真实实测输出、白板骨架、练习题、代理故障实录 | ✅ 完成 |
 | `notes/knowledge-map.md` + 十三个编号课文件 | **知识点完整性构建（2026-10-10 深夜 / 10-11 凌晨）**：系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
 
@@ -115,14 +115,14 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 > 规范索引 = `notes/knowledge-map.md`（课程总表/依赖图/横切点/资产映射）；本节 = **学习状态 + 顺序 + 完成判据**，是开课与面试准备的单一事实源。
 > 状态记号：✅ 已完成（讲完+实操）/ 📐 结构建成未开（内容已写入，讲解与题库未做）/ 🔄 进行中 / 🔶 缺口补强（2026-10-11 面经检索，待写入）
 
-### 4.1 知识点总览(全部 16 个知识域)
+### 4.1 知识点总览(15 个知识域 + 面试结构)
 
 > 命名:课程一律以知识域名引用(2026-10-11 起弃用 A–N 字母代号);节号引用写作 `§Sn`(如 `沙箱与凭据 §S2`)。
 
 | # | 知识域(课 · 文件) | 范围(S 节概要) | 状态 | 完成判据 |
 |---|---|---|---|---|
-| 1 | Harness 架构(`agent-harness.md`) | 13 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
-| 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(四模式实测) | 题库 8 题未考 |
+| 1 | Harness 架构(`agent-harness.md`) | 15 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
+| 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(五模式实测) | 题库 8 题未考 |
 | 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=1.00) | S1 五道确认题未考 |
 | 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 5 | 沙箱与凭据(`sandbox.md` + `sandbox-demo/`) | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(demo 已落地 2026-10-11) | 提问演练 + 题库 16 题通过(S2 demo 已验收:3 次重放逐字节一致) |

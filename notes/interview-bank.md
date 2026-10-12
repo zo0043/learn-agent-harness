@@ -87,7 +87,7 @@
 | 沙箱 / 凭据 / 行为漂移拦截 | 沙箱与凭据 | 幽灵事故（真实）+ `sandbox-demo` 四通道 policy（3 次重放逐字节一致） | 🟢 故事 + demo 满配 |
 | 长期记忆 / 记忆检索 | 长期记忆 | pi Magic Context 日常（用过+接口级理解） | 🟡 有活系统，无自研 |
 | durable execution / stateful workflow / long-horizon | durable execution | backfill 断点续跑（真实）+ session.ts（自研） | 🟢 故事+代码都有 |
-| 评测 CI / LLM-judge / pass@k / 轨迹评测 | 评测工程化 | labeler（生产）+ rag-demo golden set + harness-demo 四模式 | 🟢 最强项之一 |
+| 评测 CI / LLM-judge / pass@k / 轨迹评测 | 评测工程化 | labeler（生产）+ rag-demo golden set + harness-demo 五模式 | 🟢 最强项之一 |
 | MCP / 供应链安全 / 红队 | MCP 与供应链安全 | 从零写 harness §③ 工具协议（机制同源）；MCP 协议+四攻击面 + `mcp-demo` 投毒/四层防御/消融 | 🟢 概念 + 实操都有 |
 | 多模型路由 / 成本工程 / caching | API 与多模型路由 | FinHot 6 次调用结构 + 代理故障四连（真实） | 🟢 故事满配 |
 | 数据飞轮 / 轨迹数据仓 / 自进化 | 数据飞轮 | FinHot 全链路（台账+labeler+两轮消融） | 🟢 最强项（多数候选人没有生产实例） |

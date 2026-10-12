@@ -1,6 +1,6 @@
 # 多智能体编排
 
-> P2 · 📖 讲义已展开、待提问演练（2026-10-11）· 前置：系统设计 §S3 + Harness 架构 §8 + 从零写 harness §⑥⑧
+> P0 · 📖 讲义已展开、待提问演练（2026-10-11）· 前置：系统设计 §S3 + Harness 架构 §8 + 从零写 harness §⑥⑧
 > 定位：一等知识域；标注 [稳定历史]/[2026现行]，URL 见文末
 
 ---
@@ -122,7 +122,7 @@ agent 之间的"通信"有两种形态：**传上下文**（把别的 agent 的�
 > "通信"默认传**产物**，不传上下文。
 
 - **下行（委派）**：只传契约三要素——**目标 / 输出格式 / 边界**（S2 教委派）。不传父的全量轨迹。
-- **上行（返回）**：传**约束摘要**（约 1-2k token），不是工作日志；子 agent 的完整轨迹落独立文件供审计（S7、从零写 harness §⑦）。
+- **上行（返回）**：传**约束摘要**（约 1-2k token），不是工作日志；子 agent 的完整轨迹落独立文件供审计（S7、从零写 harness §⑥）。
 
 **失败模式**：
 
@@ -206,7 +206,7 @@ flowchart TD
 
 1. **loop 嵌套 vs 新进程**：首选**进程内嵌套**（独立上下文，复用 从零写 harness §⑥ 会话机制——每个子代理有自己的 JSONL）；要权限隔离/独立崩溃域才升级新进程（pi RPC 模式，框架生态 §S4）。
 
-2. **轨迹记录**：复用 demo.jsonl 事件类型（`init / model_response / tool_intent / tool_exec / compaction / final / crash`），子段加 `subagentId`；父进程只记"委派请求 + 摘要返回"（1-2k token），完整子轨迹落独立文件（从零写 harness §⑦）。这样父轨迹保持小、子轨迹可审计。
+2. **轨迹记录**：复用 demo.jsonl 事件类型（`init / model_response / tool_intent / tool_exec / compaction / final / crash`），子段加 `subagentId`；父进程只记"委派请求 + 摘要返回"（1-2k token），完整子轨迹落独立文件（从零写 harness §⑥）。这样父轨迹保持小、子轨迹可审计。
 
 3. **权限继承**：子 policy ⊆ 父 policy——**父为上界，只允许收紧**（如 researcher 只读工具）；policy 是进程级门（Harness 架构 §7），子代理不豁免。这点在 S8 走查里会具体体现（worker 只读、写由父单线程做）。
 
