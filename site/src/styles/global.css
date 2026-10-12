@@ -485,7 +485,22 @@ a.card:hover {
   font-size: 0.86em;
 }
 
-/* shiki 代码块（双主题变量由 Astro 注入，随 data-theme 切换） */
+/* shiki 代码块：Astro 内联注入双主题变量（shiki 3 defaultColor:'light'）——
+ * <pre class="astro-code astro-code-themes" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8">
+ * 亮色值是**内联 style 声明**，优先级高于任何普通作者规则；暗色值只以自定义属性存在。
+ * 所以光写 `background-color: var(--shiki-dark-bg)` 无效——已用 playwright 实测确认
+ * （computed background-color 仍是 rgb(255,255,255)）。必须 !important 才能压过内联声明，
+ * 这是在不动 astro.config.mjs（shiki defaultColor）前提下唯一的 CSS 侧解法。
+ * 作用域沿用本站暗色规则 convention：:root[data-theme='dark']（见 :33 / :68）。
+ * ⚠️ span 也要声明：shiki 给每个 token 也内联了亮色 color，同样只能靠 !important 覆盖。
+ */
+:root[data-theme='dark'] pre.astro-code {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+:root[data-theme='dark'] pre.astro-code span {
+  color: var(--shiki-dark) !important;
+}
 .markdown pre.astro-code,
 pre.astro-code {
   border: 1px solid var(--border);

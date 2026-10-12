@@ -21,6 +21,23 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const meta = courseMeta(entry.id);
 const toc = extractToc(entry.body ?? '');
+
+// 相关面试题锚点：构建期从 notes/interview-bank.md 的 TOC 按 anchorPrefix 解析出真实 heading id
+// （与 interview.astro 的 idOf 同机制、同 slug 算法）——题库标题一变锚点随动；
+// 前缀解析不到即构建失败（fail-fast），不再线上静默失效。
+// 题库文件整体缺失时（与 /interview 的 GROUPS 同样处理）不渲染相关题区。
+const bankEntry = (await getCollection('courses')).find((e) => e.id === 'interview-bank');
+const bankToc = bankEntry ? extractToc(bankEntry.body ?? '') : [];
+function bankAnchor(prefix: string): string {
+  const hit = bankToc.find((t) => t.text.startsWith(prefix));
+  if (!hit) {
+    throw new Error(`c/[slug]：面试题锚点找不到小节 "${prefix}"——notes/interview-bank.md 章节变动后需同步 courses.ts 的 anchorPrefix`);
+  }
+  return hit.id;
+}
+const relatedQuestions = bankEntry
+  ? meta.relatedQuestions.map((q) => ({ ...q, anchor: bankAnchor(q.anchorPrefix) }))
+  : [];
 ---
 
 <Base title={meta.domain}>
@@ -29,7 +46,7 @@ const toc = extractToc(entry.body ?? '');
       <header class="course-meta-bar">
         <div class="meta-row">
           <span class="chip chip-strong">{meta.domain}</span>
-          <span class="chip">{meta.domain}</span>
+          <span class="chip">notes/{entry.id}.md</span>
           <span class="chip">{meta.phase === '—' ? '未分阶段' : meta.phase}</span>
           <StatusBadge status={meta.status} />
         </div>
@@ -41,7 +58,7 @@ const toc = extractToc(entry.body ?? '');
       <Content />
 
       {
-        meta.relatedQuestions.length > 0 && (
+        relatedQuestions.length > 0 && (
           <section class="related-questions" aria-label="相关面试题">
             <h3>相关面试题</h3>
             <p class="rq-note">
@@ -49,7 +66,7 @@ const toc = extractToc(entry.body ?? '');
             </p>
             <ul class="rq-list">
               {
-                meta.relatedQuestions.map((q) => (
+                relatedQuestions.map((q) => (
                   <li>
                     <a href={`${import.meta.env.BASE_URL}interview/#${encodeURIComponent(q.anchor)}`}>
                       <span class="rq-no">{q.no}</span>

@@ -142,7 +142,7 @@ const GROUPS: Group[] = entry
                               <span class="q-num">{q.num}</span>
                               <p class="q-text">{q.q}</p>
                               <p class="q-hint">要点：{q.hint}</p>
-                              <a class="q-foot" href={`#${q.anchor}`}>在下方全文中查看 →</a>
+                              <a class="q-foot" href={`#${encodeURIComponent(q.anchor)}`}>在下方全文中查看 →</a>
                             </div>
                           ))
                         }

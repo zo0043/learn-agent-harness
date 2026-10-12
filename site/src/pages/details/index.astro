@@ -20,9 +20,13 @@ const kindOf = (item: (typeof items)[number]) =>
 
 /** 面试最常考 top3（C2b 指定：context-rot / tool-granularity / harness-rot） */
 const TOP3_SLUGS = ['01-context-rot', '02-tool-granularity', '07-harness-rot'];
+const TOP3_SET = new Set(TOP3_SLUGS);
 const top3 = TOP3_SLUGS.map(
   (slug) => items.find((i) => (i.data.slug ?? i.id) === slug),
 ).filter((i): i is (typeof items)[number] => Boolean(i));
+
+/** 其余详解 = 全部条目去掉 top3 三篇（top3 已在上方单列，避免同页双渲染） */
+const rest = items.filter((i) => !TOP3_SET.has(i.data.slug ?? i.id));
 
 /** 取正文“## 一句话定义”下第一段作为卡片摘要 */
 function oneLiner(body: string | undefined): string {
@@ -71,12 +75,12 @@ function oneLiner(body: string | undefined): string {
     )
   }
 
-  <h2 class="page-title" style="margin-top: 34px">全部详解</h2>
+  <h2 class="page-title" style="margin-top: 34px">其余 {rest.length} 篇</h2>
   {
-    items.length > 0 ? (
+    rest.length > 0 ? (
       <div class="cards">
         {
-          items.map((item) => {
+          rest.map((item) => {
             const kind = kindOf(item);
             return (
               <a class="card" href={import.meta.env.BASE_URL + `details/${item.data.slug ?? item.id}/`}>
@@ -86,6 +90,7 @@ function oneLiner(body: string | undefined): string {
                   {item.data.domain && <span class="chip">{item.data.domain}</span>}
                   {item.data.source && <span class="chip">来源：{item.data.source}</span>}
                 </div>
+                {oneLiner(item.body) && <p class="dc-intro">{oneLiner(item.body)}</p>}
                 {item.data.status && <StatusBadge status={item.data.status} />}
               </a>
             );
