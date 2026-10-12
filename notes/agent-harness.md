@@ -127,6 +127,23 @@ while True:
 - 所以"每次调用都重发全部历史"是不准确的表述：pi 的上下文经过活动分支选择与压缩，不是原始历史的逐字重发
 - 持久化的价值：审计、恢复、**分支**（条目是树，不是列表）
 
+## 5.4 每轮上下文装配的数据流
+
+```mermaid
+flowchart TD
+  LOG["事件日志（JSONL 条目树，全量留存）"] --> SEL["按活动分支选择 + 压缩结果重建"]
+  SEL --> ASM["装配 messages<br/>system + 历史 + tool results"]
+  ASM --> BUD{"预算检查<br/>token 估算超阈值？"}
+  BUD -->|"否"| CALL["调用模型（无状态 API）"]
+  BUD -->|"是"| COMP["压缩：旧消息摘要替换<br/>保 head + 尾 keepTail"]
+  COMP --> ASM
+  CALL --> OUT["模型响应（原始条目仍写入日志）"]
+  NOTE["结构化笔记（窗口外文件）"] -.按需读回.-> ASM
+  JIT["即时检索（轻量标识符按需拉取）"] -.按需读回.-> ASM
+```
+
+日志 ≠ 上下文：**完整留存在日志里，受控的是每轮真正送进模型的 token 集合**。
+
 ---
 
 # 第六节 恢复与重试："它到底执行了没有？"
@@ -229,6 +246,27 @@ Anthropic 的 **orchestrator-workers** 模式：中央 LLM 动态分解任务（
 - 写入路径范围（`pathScopeRoots`）、profile 角色、`<final_answer>` 浓缩返回——正好对应：上下文隔离 + 路径范围 + 摘要回传
 - 本教程第三节到第八节写作时派出的两个后台工人（架构审校 + pi 文档核验），就是 orchestrator-workers 的一次真实演示：两个独立任务并行，各带 1-2k 摘要回来，主会话汇总
 - **注意边界**：pi-agents-team 是第三方扩展机制，不是 pi 核心默认；pi 核心默认不提供 sub-agent
+
+## 8.4 orchestrator-workers 编排数据流
+
+```mermaid
+flowchart TD
+  U["用户任务"] --> ORCH["orchestrator（主会话）<br/>动态分解任务（子任务不可预定义）"]
+  ORCH -->|"子任务 1"| W1["worker A<br/>独立上下文，可烧上万 token"]
+  ORCH -->|"子任务 2"| W2["worker B<br/>独立上下文"]
+  W1 --> S1["浓缩摘要回传（1-2k token）"]
+  W2 --> S2["浓缩摘要回传（1-2k token）"]
+  S1 --> AGG["主代理汇总结果"]
+  S2 --> AGG
+  AGG --> OUT["最终回复 / 下一步行动"]
+  W1 -.共享同一文件系统.-> FS["工作区"]
+  W2 -.共享同一文件系统.-> FS
+  FS --> WR{"并行写同一工作区？"}
+  WR -->|"是（写操作）"| WT["写操作单线程<br/>worktree 隔离或串行合并"]
+  WR -->|"否（只读）"| OK["可并行"]
+```
+
+买的是**上下文隔离 + 并行**，不是"更聪明"；协调有成本，预算是共享的。
 
 ---
 

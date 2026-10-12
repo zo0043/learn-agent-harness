@@ -29,6 +29,26 @@ query → embedding → 与所有向量算余弦 → top-1 → 塞进提示词 �
 
 **它在小语料上真的能用。** 后面每一节都是它的一个死法长出来的一层。
 
+先把全貌立在这儿——后面每一节都是往这条链上补一层（括号编号 = 本文节号）；naive 版只有 文档 → 整篇 embedding → 暴力余弦 → LLM 这一条。
+
+```mermaid
+flowchart TD
+  CORPUS["语料文档"] --> CHUNKER["按标题/结构切块 chunking + 元数据（④）"]
+  CHUNKER --> EMBEDDER["embedding 模型编码（①）"]
+  EMBEDDER --> VSTORE["向量索引 + 全文索引（③）"]
+  QUERY["用户 query"] --> QREWRITE["query 改写 / 多查询（⑤）"]
+  QREWRITE --> RETRIEVE["混合召回：ANN 余弦 ∥ BM25 → RRF 融合（③⑥）"]
+  VSTORE --> RETRIEVE
+  RETRIEVE --> RERANK["rerank 精排 → top-3~5（⑦）"]
+  RERANK --> PROMPT["拼 prompt：材料编号 + 引用/拒答指令（⑧）"]
+  PROMPT --> LLM["LLM 生成"]
+  LLM --> ENOUGH{"材料里有答案吗？"}
+  ENOUGH -->|"有"| ANSWER["答案 + 强制引用来源"]
+  ENOUGH -->|"没有"| REFUSE["明确拒答：资料中没有"]
+  ANSWER --> EVAL["评测回归：recall@k / faithfulness（⑨）"]
+  REFUSE --> EVAL
+```
+
 ---
 
 ## ③ 规模之死：O(N) → ANN 索引
@@ -43,6 +63,19 @@ query → embedding → 与所有向量算余弦 → top-1 → 塞进提示词 �
 | **IVF** | 先聚簇（Voronoi 划分），查询只搜最近的 nprobe 个簇 | 可量化/落盘，省内存，调参多 |
 
 **为什么"近似"可以接受**：recall@1 从 0.99 掉到 0.95，你交给 LLM 的那条 top-1 几乎不变；而且 LLM 对检索的小扰动有鲁棒性。这就是 ANN 的核心交易：**用可证明的微小召回损失换数量级的延迟下降。**
+
+```mermaid
+flowchart TD
+  QUERY["query 向量（与文档同一模型编码）"] --> SIZE{"语料规模 N"}
+  SIZE -->|"N 小 · 要精确"| BRUTE["暴力扫描：与全部 N 个向量算余弦，O(N)"]
+  SIZE -->|"N 大 · 百万~亿级"| ANN["ANN 索引：HNSW 分层图 / IVF 聚簇 nprobe"]
+  BRUTE --> EXACT["精确 top-1 · 延迟随 N 线性涨"]
+  ANN --> APPROX["近似 top-1 · 只访问少量候选，延迟近对数"]
+  EXACT --> TRADE{"recall 掉一点能接受吗？"}
+  APPROX --> TRADE
+  TRADE -->|"能：LLM 对小扰动鲁棒"| USE_ANN["用 ANN：微小召回损失换数量级延迟下降"]
+  TRADE -->|"不能：需精确复现"| USE_BRUTE["留暴力：小语料 / 可复现诉求"]
+```
 
 面试点：HNSW 参数（M=每节点边数、efConstruction=建图时搜索宽度、efSearch=查询时搜索宽度——recall/速度旋钮）；量化（PQ/SQ，每维存更少 bit 换内存）；"你的向量库选型"——**pgvector（Postgres 内建 HNSW/IVFFlat）是你的锚点：FinHot 生产就是 Postgres，pgvector 等于同一套基础设施加向量能力**，中小规模完全够用，不必上专用向量库。
 
@@ -91,6 +124,17 @@ query → embedding → 与所有向量算余弦 → top-1 → 塞进提示词 �
 score(d) = Σ over each list: 1 / (k + rank_i(d))     # k 典型 60
 ```
 
+```mermaid
+flowchart TD
+  QUERY["query（过同一个 embedding 模型）"] --> DENSE["余弦向量路：语义分，有界 -1~1"]
+  QUERY --> LEX["BM25 词面路：idf × tf 饱和 × 长度归一，无上界"]
+  DENSE --> RANKS_DENSE["按各自分数排出 rank_i(d)"]
+  LEX --> RANKS_LEX["按各自分数排出 rank_i(d)"]
+  RANKS_DENSE --> RRF["RRF 融合：score(d) = Σ 1/(k + rank_i(d))，k=60"]
+  RANKS_LEX --> RRF
+  RRF --> TOPK["top-k 粗召回 → 交 rerank 精排（⑦）"]
+```
+
 **Reciprocal Rank Fusion** 只用排名不用分数——天然免疫"余弦 ∈ [-1,1] 和 BM25 无界"的量纲问题。简单、稳健、是工业默认基线（Elasticsearch/OpenSearch 的原生玩法；Postgres 里 tsvector + pgvector 也能做）。
 
 面试点："什么时候只用一条路？"——开放语义问答偏 dense；目录/ID/错误码查询偏 lexical；拿不准就 RRF。
@@ -133,6 +177,20 @@ score(d) = Σ over each list: 1 / (k + rank_i(d))     # k 典型 60
    - 2023 年 RAG 的理由是"窗口不够"——今天这个理由弱了，但不是没有了
    - 真正的理由：**成本**（每 query 只付相关 token，全量塞是 100× 费用 × 延迟）、**注意力质量**（Harness 架构的 context rot：token 越多回忆越差，噪声稀释信号）、**时效**（更新语料 = 重建索引，不动模型）、**权限**（只索引用户可见的部分，检索时过滤）
    - 小语料（< 窗口）+ 低 QPS + 低延迟不敏感 → 硬塞也合理，RAG 不是教条
+
+```mermaid
+flowchart TD
+  QUERY["用户 query"] --> CTX["检索上下文：top-3~5 chunk 编号 + 元数据（引用用）"]
+  CTX --> PROMPT["prompt：仅根据以下材料回答 · 引用来源 · 材料不足须明说"]
+  PROMPT --> LLM["LLM 生成"]
+  LLM --> ENOUGH{"材料里有答案吗？"}
+  ENOUGH -->|"有"| CITE["答案逐句带引用"]
+  ENOUGH -->|"没有"| REFUSE["拒答：资料中没有 → 记语料缺口，运营补料"]
+  CITE --> CLASSIFY{"答错时先分类（⑨）"}
+  REFUSE --> CLASSIFY
+  CLASSIFY -->|"检索错：正确段落没进 top-k"| FIX_R["改 chunk / 索引 / 加混合 / 改 query 策略"]
+  CLASSIFY -->|"生成错：材料里有却没用好"| FIX_G["改提示词 / 换模型 / 调 top-k"]
+```
 
 ---
 
@@ -248,3 +306,29 @@ npm run demo:eval       # S5 golden set + recall@k
 
 **计划里没做的 4 题**（③ ANN / ④ rechunk / ⑥ re-embed / ⑦ 增量索引）：全是规模化故事，留给 沙箱与凭据 / 生产上下文。
 **工程观察**：语料是 Obsidian 活文档（实操中文件被外部保存过两次），索引是快照、语料会漂移 → 生产的增量 re-embed 问题。
+
+---
+
+## S1 五道确认题（课后自测）
+
+> 用途：S1（① 语义几何 / ② naive RAG / ③ ANN）学完后的**自学核查**——先合上讲义自己讲一遍，再对照标准答案；讲不全或讲错的回到括号里的小节重读。5 题覆盖：embedding 语义 / ANN 近似 / 维度 / 相似度 / 为什么不能只用关键词。这是确认题不是面试题，答到"能讲清为什么"即通过。
+
+**Q1 embedding 模型"理解"语义吗？它和关键词匹配的本质差别是什么？**
+
+不理解——它是**相似度的几何近似**，不是理解。训练是对比式的：大量"文本-相似文本"正对拉近、"文本-无关文本"负对推远，学出一个"语义近 = 距离近"的空间；这个几何是学出来的，不是数学恒等式。所以它只会判"近不近"，不会判"对不对"：罕见术语、新造概念、特定代码库这类训练没覆盖的域会退化，多语言还要模型支持该语言对。（①）
+
+**Q2 ANN 为什么敢用"近似"？损失了什么、换来了什么？**
+
+损失可量化：recall@1 从 0.99 掉到 0.95（HNSW/IVF 都是近似结构，查询只访问少量候选，不做全量比对）。换来的是延迟从 O(N) 掉到近对数级，语料到 10⁶~10⁸ 才可查。可接受的理由有两条：交给 LLM 的 top-1 几乎不变；LLM 对检索的小扰动有鲁棒性。核心交易一句话：**用可证明的微小召回损失换数量级的延迟下降**。旋钮在 efSearch / nprobe——开大召回升、延迟升。（③）
+
+**Q3 "固定长度的向量"里的维度是什么？为什么同一模型的输出必须同维？**
+
+维度 = 这个向量空间的一组方向，每一维是一个学出来的特征（不可逐维解读，不存在"第 37 维 = 语法"这种对应）。维度数由模型架构定死（768 / 1536 / 3072），所有文本都投到同一维度，这才有"距离"可算——维度不一致的两个向量根本不在同一个空间里。工程侧：维度越高表达力越强，但内存与计算同步涨，所以有 PQ/SQ 量化（每维存更少 bit 换内存）。demo 锚点：HashEmbedder 用 FNV-1a → 768 维 → L2 归一，向量可打印、同义盲区变实证。（①③）
+
+**Q4 为什么用余弦相似度而不是欧氏距离？**
+
+余弦只看方向不看长度（`cos = (a·b)/(|a||b|)`）：embedding 空间里方向编码语义，长度里掺的是文本长短、词频这类噪声。还有一个常被漏掉的前提——**query 和文档必须过同一个 embedding 模型**，否则两个空间不可比；"怎么回滚 git 提交"和文档 "reverting a commit" 零词汇重叠也能落得近，靠的就是同一模型投进同一空间。（①⑤）
+
+**Q5 为什么不能只用关键词匹配做检索？**
+
+死法在同义改写："怎么撤销提交" vs 文档 "reverting a commit"——词汇重叠低，关键词打不出分，而这正是语义检索的主场。反向的死法在精确词：`Error 0x80070005`、零件号、内部代号这类罕见 token，embedding 几何没学好，向量路会漏——这是 BM25 的主场。所以没有一条路全面占优：demo 实证 Q1（噪声词重灾）BM25 赢、Q3（话题聚簇）cosine 赢 → 混合检索 + RRF 按 rank 融合是工业默认基线。（①⑥）

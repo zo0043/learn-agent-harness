@@ -203,6 +203,40 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     </div>
   </section>
 
+  <!-- ── durable-execution-demo ───────────────────────── -->
+  <section class="work" id="durable-execution-demo">
+    <h2>durable-execution-demo · 长任务崩溃恢复实操</h2>
+    <p class="work-tag">durable execution（P1 · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线</p>
+    <div class="card work-card">
+      <p class="work-lesson" style="margin-bottom: 10px">
+        一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——intent 在、exec 不在的未知态，先只读问外部服务「这个幂等 key 送达过吗」再决定执行还是跳过；盲目重放会双发，盲目跳过可能漏发。
+      </p>
+      <h3>3 种崩溃点 × 真实 SIGKILL × 各 3 次</h3>
+      <table class="file-table">
+        <thead>
+          <tr><th>崩溃点</th><th>journal 状态</th><th>恢复处置</th><th>副作用计数</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="sec">A · intent 前</td><td>两步锚点都无</td><td>replay（幂等存储兜底）</td><td>=1</td></tr>
+          <tr><td class="sec">B · intent 后 exec 前</td><td>intent 在、exec 不在</td><td>unknown→confirm：问 mock 未送达 → 执行</td><td>=1</td></tr>
+          <tr><td class="sec">C · exec 后</td><td>两步锚点齐</td><td>skip（不重放）</td><td>=1</td></tr>
+        </tbody>
+      </table>
+      <p>
+        任务 = 只读 ×2 + 幂等写 ×1 + 非幂等「发消息」×1（mock 外部服务只认幂等 key 送达状态）；每步先写
+        journal 的 intent 锚点再执行、执行完补 exec 锚点，配 checkpoint 原子写（临时文件 + rename，防毒快照）与持久幂等存储。
+        子进程用 SIGKILL 真实自杀，恢复进程读 journal + checkpoint + 幂等存储 rebuild 后按 <code>durable-execution.md</code> §S8.2
+        判定表逐步处置。验收 = 3 崩溃点 × 各 3 次：副作用计数恒=1、恢复报告逐字节一致；负向测试把 mock 服务改成会超时的故障实现，断言照样失败——证明断言有牙。
+      </p>
+      <h3>跑法</h3>
+      <div class="runbox">
+        cd durable-execution-demo<br />
+        npm i <span class="cmt"># 零配置：无 .env、无 key、不联网、不调模型</span><br />
+        npm run demo <span class="cmt"># 3 崩溃点 × 3 次 + 负向测试</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ── framework-demo ──────────────────────────────────── -->
   <section class="work" id="framework-demo">
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
@@ -257,7 +291,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <!-- ── Roadmap ──────────────────────────────────────── -->
   <section class="work" id="roadmap">
     <h2>Roadmap</h2>
-    <p class="work-tag">计划中的作品 / 演示（P1/P2 段；sandbox-demo / MCP 投毒 / 框架实操 / OTel console 埋点已移入上方作品）</p>
+    <p class="work-tag">计划中的作品 / 演示（P1/P2 段；sandbox-demo / MCP 投毒 / 框架实操 / OTel console 埋点 / durable 崩溃恢复已移入上方作品）</p>
     <div class="card work-card">
       <div class="roadmap-item">
         <span class="rm-name">双 agent demo</span>
@@ -267,11 +301,6 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
       <div class="roadmap-item">
         <span class="rm-name">OTLP 端到端</span>
         <span class="rm-desc">harness-demo otel.ts 已 console 导出（demo:otel 实测 11 spans/1 trace）；下一步 OTEL_EXPORT_OTLP=1 接真实 collector，spans → OTLP → 可视化 · 可观测</span>
-        <span class="badge badge-dev">规划中</span>
-      </div>
-      <div class="roadmap-item">
-        <span class="rm-name">durable-execution demo</span>
-        <span class="rm-desc">长任务不丢不重：journal / checkpoint / 幂等——把 FinHot backfill（1645 行 / ~10% 失败 / 断点续跑）重建成可重放 demo · durable execution</span>
         <span class="badge badge-dev">规划中</span>
       </div>
       <div class="roadmap-item">

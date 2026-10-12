@@ -12,5 +12,6 @@ jd-research/
 # demo 运行产物（可再生）
 harness-demo/trajectories/
 harness-demo/workspace/out/
+durable-execution-demo/.state/
 
 *.log

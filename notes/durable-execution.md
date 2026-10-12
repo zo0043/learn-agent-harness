@@ -5,7 +5,7 @@
 > 教学素材：FinHot backfill（1645 行、~10% 失败、断点续跑到次日凌晨）+ labeler（跨天异步）
 > 目标：把 从零写 harness"会话恢复"升级为"任务级 durable execution"，能答"设计一个跑 8 小时的 agent 任务，随时可能崩"
 
-**本课怎么读**：S1 先把"长任务的三个随时"定义清楚（为什么 naive 重跑会同时丢和重）；S2 是三个核心机制的地图——journal / checkpoint / 幂等，各自防什么、代价是什么；S3 是全课最深的洞察——**LLM 调用是昂贵、非确定、无幂等的外部副作用，重放时必须当数据读、不能当计算跑**；S4 把幂等从概念落成"工具三分法"的工程规范；S5 讲持久化之上的第二层——long-horizon（不死之后的"长跑不烂"）；S6 给 2026-10 的框架版图与选型句；S7 是待做的 demo 架构；**S8 是一次完整的实战走查**——把 FinHot backfill 的断点续跑逐层摊开，看清每一层在什么时刻起作用；**S9 是常见错误与面试官追问清单**。读完要能回答一句话：*durable execution 不是"能恢复"，是"恢复后副作用不多不少发生一次"。*
+**本课怎么读**：S1 先把"长任务的三个随时"定义清楚（为什么 naive 重跑会同时丢和重）；S2 是三个核心机制的地图——journal / checkpoint / 幂等，各自防什么、代价是什么；S3 是全课最深的洞察——**LLM 调用是昂贵、非确定、无幂等的外部副作用，重放时必须当数据读、不能当计算跑**；S4 把幂等从概念落成"工具三分法"的工程规范；S5 讲持久化之上的第二层——long-horizon（不死之后的"长跑不烂"）；S6 给 2026-10 的框架版图与选型句；S7 是已落地的 demo 实录（`durable-execution-demo/`，2026-10-12）；**S8 是一次完整的实战走查**——把 FinHot backfill 的断点续跑逐层摊开，看清每一层在什么时刻起作用；**S9 是常见错误与面试官追问清单**。读完要能回答一句话：*durable execution 不是"能恢复"，是"恢复后副作用不多不少发生一次"。*
 
 ---
 
@@ -190,11 +190,11 @@ FinHot 映射：backfill 1645 行跑一夜=long-horizon 批处理（日志 /tmp/
 
 ---
 
-## S7 demo 计划（待开课）
+## S7 demo 实录（已落地）
 
 **这一节解决什么问题**：把 S2-S4 的机制落成一个可运行的最小 runner，用"三种崩溃点 × 各跑 3 次、副作用计数恒=1"这个可证伪的验收标准来证明自己真懂。这张架构图也是面试时可以画的"我手写过"证据。
 
-durable 任务 runner（扩展 harness-demo，~200 行）：
+durable 任务 runner（设计规格，2026-10-12 已按此落地为 `durable-execution-demo/`，src 821 行）：
 1. 任务=多步混合（只读×2 + 幂等写×1 + 非幂等"发消息"×1，mock 外部服务）
 2. 中途 `kill -9`（三种注入点：intent 前 / intent 后 exec 前 / exec 后）→ 重启
 3. 验证：只读步重放、幂等步重放无副作用、非幂等步**不重放**（摆状态/mock 人工确认）、消息只发一遍（idempotency key）
@@ -221,6 +221,71 @@ flowchart TD
 ```
 
 **这张图怎么讲**：重点不是"我写了 200 行"，而是"我把每个机制的**失败模式**都设计成了可注入、可观测、可计数的实验"——崩溃注入器对应三类崩溃点，恢复报告对应"每一步到底走了 replay 还是 skip"，副作用计数对应"不多不少一次"这个验收句。这套设计是 从零写 harness §⑦ `demo:crash` 思路的放大版。
+
+### 7.1 跑法（`durable-execution-demo/`）
+
+```bash
+cd durable-execution-demo
+npm i            # 本机 NODE_ENV=production 会让 npm 跳过 devDeps，tsx/typescript 放 dependencies
+npm run demo     # 验收矩阵：3 崩溃点 × 各 3 次（每次清 .state：先崩溃运行 → 再 resume 运行）
+npm run typecheck
+```
+
+末尾 `✅ durable 验收通过：3 崩溃点 × 各 3 次，副作用计数恒=1` 即本节验收；断言失败退出码为 1（可进 CI）。崩溃/resume 也可手工分步复现：`npx tsx src/worker.ts --mode=crash --crash=C` → `npx tsx src/worker.ts --mode=resume`。运行产物全在 `.state/`（journal JSONL / checkpoint / 幂等存储 / mock 服务 ledger），`rm -rf .state` 即可重来。
+
+### 7.2 src 文件清单（821 行，全离线确定性：mock 外部服务 + 逻辑时钟，不调模型 / 不联网 / 不用墙钟）
+
+| 文件 | 行数 | 职责 |
+|---|---|---|
+| `src/types.ts` | 85 | 工具三分法 / CrashPoint / Disposition 类型 + JournalEvent + Checkpoint + RecoveryReport |
+| `src/state.ts` | 112 | 持久层：journal 同步 append（撕裂行容错）+ checkpoint 原子写与校验和 + 幂等存储 + canonical JSON/sha256 |
+| `src/external.ts` | 98 | mock 外部世界：消息队列（账本 / deliver / 只读 lookup）+ 业务库（upsert / get） |
+| `src/plan.ts` | 38 | 4 步混合任务计划（只读×2 + 幂等写×1 + 非幂等发消息×1）+ 三种崩溃点定义与预期处置 |
+| `src/runner.ts` | 81 | DurableRunner：正常运行 intent→exec→每 2 步 checkpoint + 崩溃注入器 `injectCrash`（SIGKILL 真实自杀） |
+| `src/recover.ts` | 128 | 恢复器：`analyze` 纯判定表（S8.2 那张表就是它的实现）+ `runRecovery` 按判定执行并产出恢复报告 |
+| `src/selftest.ts` | 107 | 处置规则自检：合成 journal 状态，把 S3 决策树全分支（含只读 replay / 幂等写 replay）都跑到 |
+| `src/worker.ts` | 39 | 单次运行子进程入口（`--mode=crash --crash=A|B|C` / `--mode=resume`） |
+| `src/demo.ts` | 133 | 入口：任务计划 + 崩溃点 + 规则自检 + 3×3 验收矩阵 + 断言 |
+
+### 7.3 崩溃点 × 预期处置对照表（2026-10-12 实测）
+
+| 崩溃点 | 注入位置 | send 步的 journal 状态 | 恢复处置 | 副作用计数 |
+|---|---|---|---|---|
+| **A** | intent 前 | 无 intent（从未开始） | **replay**：正常执行，补记 intent→exec | 崩溃前 0 + resume 1 = **1** |
+| **B** | intent 后 exec 前 | intent 在、exec 缺 → 未知 | **unknown→confirm→exec**：只读问 mock 服务回报"未送达"→ 才执行 | 崩溃前 0 + resume 1 = **1** |
+| **C** | exec 后未落盘 | intent 在、exec 缺 → 未知 | **unknown→confirm→skip**：只读问 mock 服务回报"已送达(msg-0001)"→ 不重放 | 崩溃前 1 + resume 0 = **1** |
+
+（只读×2 + 幂等写×1 三步在三个崩溃点下都走 **skip**：exec 已在 checkpoint / journal，读历史结果不重做。）
+
+### 7.4 验收输出（真实跑出来的，非示意）
+
+每个崩溃点各跑 3 次，每次清 `.state/` 重来：先崩溃运行（子进程 `process.kill(process.pid,'SIGKILL')` 真实自杀，父进程收到 `signal=SIGKILL`），再 resume 运行。
+
+```
+[A] run 1/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 replay | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=675c17a5cc32
+[A] run 2/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 replay | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=675c17a5cc32
+[A] run 3/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 replay | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=675c17a5cc32
+[A] 小结 ✅：副作用计数恒=1 ✅ / send 步处置恒=replay（无 intent → 正常执行） ✅ / 真实 SIGKILL ✅ / 恢复报告 3 次逐字节一致 ✅
+[B] run 1/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→exec | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=7bd8f27afdb6
+[B] run 2/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→exec | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=7bd8f27afdb6
+[B] run 3/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→exec | 副作用: 崩溃前 0 + resume 1 = 1 ✅ | 报告 sha256=7bd8f27afdb6
+[B] 小结 ✅：副作用计数恒=1 ✅ / send 步处置恒=unknown→confirm→exec（mock 回报未送达） ✅ / 真实 SIGKILL ✅ / 恢复报告 3 次逐字节一致 ✅
+[C] run 1/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→skip | 副作用: 崩溃前 1 + resume 0 = 1 ✅ | 报告 sha256=ee239f775d7a
+[C] run 2/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→skip | 副作用: 崩溃前 1 + resume 0 = 1 ✅ | 报告 sha256=ee239f775d7a
+[C] run 3/3 自杀=signal=SIGKILL | 处置: 1 skip | 2 skip | 3 skip | 4 unknown→confirm→skip | 副作用: 崩溃前 1 + resume 0 = 1 ✅ | 报告 sha256=ee239f775d7a
+[C] 小结 ✅：副作用计数恒=1 ✅ / send 步处置恒=unknown→confirm→skip（mock 回报已送达） ✅ / 真实 SIGKILL ✅ / 恢复报告 3 次逐字节一致 ✅
+✅ durable 验收通过：3 崩溃点 × 各 3 次，副作用计数恒=1
+```
+
+恢复报告 = 每步处置 + 副作用计数；同一崩溃点 3 次的报告 sha256 相同，两次独立 `npm run demo` 的整段输出也逐字节一致（报告里没有任何时间戳 / pid / 随机量：逻辑时钟 = 步序号 + journal seq，消息 id 由账本行号派生 `msg-0001`）。
+
+**这条验收为什么不是恒真的**：mock 消息服务**刻意不去重**（真实队列的 at-least-once 语义，服务端按原样落账本）。把 `recover.ts` 的 confirm 改成盲重放（= S9.1 #7 那条错误实现），崩溃点 C 立刻变成 `副作用: 崩溃前 1 + resume 1 = 2 ❌`、处置不符预期、退出码 1——实测过，所以上面的 ✅ 是有牙齿的。
+
+### 7.5 落地时踩到的坑
+
+1. **`console.log` + SIGKILL 会吞日志**：stdout 走管道时是异步的，`process.kill(SIGKILL)` 之前 print 的崩溃行可能整段消失。改成 `writeSync(1, …)` 同步写才拿到"崩溃前最后一行"。
+2. **tsx CLI 会中转信号**：用 `node node_modules/tsx/dist/cli.mjs worker.ts` 起子进程时，SIGKILL 打死在 tsx 再包一层的 node 上，父进程只看到 `exit=137`。改成 `node --import tsx worker.ts`，`process.pid` 就是 worker 自己，父进程直接收到 `signal=SIGKILL`。
+3. **恢复报告想逐字节一致，就不能带任何墙钟量**：第一版报告里放了 `Date.now()` 和 pid，跨次 sha256 必然不同。逻辑时钟（步序号）+ 派生 id（账本行号）之后才成立。
 
 ---
 
@@ -331,9 +396,9 @@ flowchart TD
 - 我的证据：harness-demo session.ts（从零写 harness §⑥⑦）、FinHot backfill（1645 行/~10% 失败/断点续跑，#35）、labeler T+5 状态机、幽灵事故=非幂等无 scope 的代价
 - 接回：从零写 harness §⑥⑦（journal/未知状态）、沙箱与凭据(可复现)、评测工程化(轨迹评测)
 
-### 待办核实清单（demo 未落地，实现后回填）
+### 待办核实清单（S7 demo 已于 2026-10-12 落地）
 
 - （注：原始 /tmp 日志已随临时目录清理不可取得；讲义中的行号 / ETA / 失败串为示意值，**不可当作逐字证据引用**）
 - 「at-least-once + 幂等 = 业务上恰好一次效果」是业界面试口径，但**不是任何官方文档的原词**。引用时用官方措辞更稳：**Temporal**——Activity 可能被多次执行，但 Temporal 保证它**「被观察为恰好完成一次」（observed as completed exactly once）**，因此要求 Activity 幂等（docs.temporal.io/activity-definition#activity-retry-policy）；**Google Cloud Dataflow**——记录**「至少处理一次，结果恰好提交一次」**（cloud.google.com/dataflow/docs/concepts/exactly-once）。若用 “effectively-once”，须标注为业界口语。
 - 已核实（2026-10）：术语无厂商一手源，按上述官方措辞引用
-- `<!-- TODO 核实: S7 durable runner 尚未实现，S7 架构图为设计稿；实现后需回填实测轨迹与"3 崩溃点 × 3 次、计数恒=1"的验收输出 -->`
+- S7 demo 已落地（2026-10-12）：`durable-execution-demo/`（src 821 行），3 崩溃点 × 各 3 次真实 SIGKILL 恢复，副作用计数恒=1、恢复报告跨次逐字节一致；本节 S7 已从设计稿改写为实录（含跑法 / 文件清单 / 实测输出 / 崩溃点对照表）

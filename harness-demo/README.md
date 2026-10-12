@@ -24,7 +24,7 @@ export PATH=~/.nvm/versions/node/v22.23.2/bin:$PATH
 npm install
 
 # 配置（harness-demo/.env；若全局环境已有 LLM_BASE_URL/LLM_API_KEY 可省）
-printf 'LLM_BASE_URL=%s\nLLM_API_KEY=%s\nLLM_MODEL=qwen3.8-flash\n' "$LLM_BASE_URL" "$LLM_API_KEY" > .env
+printf 'LLM_BASE_URL=%s\nLLM_API_KEY=%s\nLLM_MODEL=qwen3.8-flash-next\n' "$LLM_BASE_URL" "$LLM_API_KEY" > .env
 
 npm run demo            # 正常跑
 npm run demo:crash      # 在 write_file 的 intent 后模拟崩溃（exit 137）
@@ -35,7 +35,7 @@ npm run demo:otel       # OTel GenAI 埋点：最小 agent 循环（真实代理
 npx tsx src/test-compact.ts   # 压缩逻辑的 mock 测试（不依赖代理）
 ```
 
-模型要求：**必须支持 OpenAI tools + SSE 流式**。实测某 OpenAI 兼容代理的 `qwen3.8-flash` ✅；`step-5-preview` ❌（不支持 tool calling）。
+模型要求：**必须支持 OpenAI tools + SSE 流式**。实测某 OpenAI 兼容代理的 `qwen3.8-flash-next` ✅；`step-5-preview` ❌（不支持 tool calling）。
 
 ## 轨迹日志
 

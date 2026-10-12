@@ -1,0 +1,17 @@
+{
+  "name": "durable-execution-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "durable execution §S7 作品：durable 任务 runner —— 3 种崩溃点 × 各 3 次、副作用计数恒=1（全离线确定性，mock 外部服务）",
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "demo:one": "tsx src/demo.ts --crash=B --runs=1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.6.0"
+  }
+}

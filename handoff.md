@@ -66,7 +66,7 @@ whiteboard/agent_whiteboard.py      ~150 行纯标准库白板版（面试现场
 viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core）
 ```
 
-四种模式实测：
+五种模式实测：
 
 | 模式 | 命令 | 状态 |
 |---|---|---|
@@ -74,6 +74,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | 崩溃恢复 | `npm run demo:crash` → `npm run demo` | ✅ 真实模型（未知状态→先核对再重写） |
 | 审批拒绝 | `npm run demo:reject` | ✅ 真实模型（跳过、不重试、out/ 为空） |
 | 压缩 | `npm run demo:compact` | ✅ 活体验证（2026-10-10 晚，qwen3.8-flash-next，`[压缩] 摘要 3 条，保留 9 条` 真实触发） |
+| OTel 埋点 | `npm run demo:otel` | ✅ 实测 11 spans / 1 trace |
 
 ---
 
@@ -123,11 +124,11 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 |---|---|---|---|---|
 | 1 | Harness 架构(`agent-harness.md`) | 15 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
 | 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(五模式实测) | 题库 8 题未考 |
-| 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=1.00) | S1 五道确认题未考 |
+| 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=1.00) | S1 五道确认题已写入 rag.md 文末(存档待自测) |
 | 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 5 | 沙箱与凭据(`sandbox.md` + `sandbox-demo/`) | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(demo 已落地 2026-10-11) | 提问演练 + 题库 16 题通过(S2 demo 已验收:3 次重放逐字节一致) |
 | 6 | 评测工程化(`evaluation.md`) | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
-| 7 | durable execution(`durable-execution.md`) | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 + S7 demo 落地 |
+| 7 | durable execution(`durable-execution.md` + `durable-execution-demo/`) | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo 实录 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 + S7 demo 已落地(2026-10-12,3 崩溃点×3 次验收) |
 | 8 | MCP 与供应链安全(`mcp.md`) | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo 实证 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 9 | API 与多模型路由(`api-engineering.md`) | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 10 | 数据飞轮(`data-flywheel.md`) | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 实战走查(真实三轮指标已回填)/ S7 常见错误 / S8 故事打磨 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
@@ -136,7 +137,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 | 13 | 模型基础(`model-basics.md`) | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 / S7 八股速查 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 14 | 框架生态(`framework-ecosystem.md`) | S1 框架三族 / S2 框架版图 / S3 抽象泄漏 / S4 选型决策树 / S5 迁移路径 / S6 pi 深潜 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 16 | 面试结构(`interview-bank.md`) | 30 秒自我介绍 / 60 分钟模拟 / 5 组项目深挖追问链 / 10 道交叉题 / JD 覆盖矩阵 | 📐 | 2 场模拟通过 + 矩阵全 🟢 + 🔶5 STAR 模板 |
-| 15 | 多智能体编排(`multi-agent.md`) | S1 何时多智能体 / S2 拓扑 / S3 orchestrator-worker / S4 单线程写 / S5 通信成本 / S6 调试 / S7 子代理设计 / S8 实战走查 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 12 题通过 |
+| 15 | 多智能体编排(`multi-agent.md`) | S1 何时多智能体 / S2 架构模式 / S3 通信与上下文隔离 / S4 单线程写 / S5 成本与评测 / S6 框架对照 / S7 子代理设计 / S8 实战走查 / S9 什么时候不要用多智能体 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 12 题通过 |
 | — | 范围外：算法编码（LeetCode） | 英文面经确认仍考（medium） | ⚪ 不在教程范围 | 建议 ~50 道 medium，并行轨 |
 
 ### 4.2 缺口补强清单（2026-10-11 面经检索：中文面经站 / 英文系统设计 / 模型八股 三路）

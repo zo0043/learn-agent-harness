@@ -10,8 +10,8 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     <h1>learn-agent-harness</h1>
     <p class="hero-sub">
       备考 <strong>coding agent 工程师</strong>的公开学习记录：<strong>17 课 × 15 知识域</strong>、
-      精选题库 37 题（全课内嵌约 237 题）、<strong>5 个可运行作品</strong>（sandbox-demo / mcp-demo 全离线零 key，
-      事故重放 3 次逐字节一致）——每节课的设计判断都<strong>长自真实事故</strong>，不是教程。
+      精选题库 37 题（全课内嵌约 237 题）、<strong>6 个可运行作品</strong>（sandbox-demo / mcp-demo / durable-execution-demo 全离线零 key，
+      事故重放与 SIGKILL 崩溃恢复均逐字节可复现）——每节课的设计判断都<strong>长自真实事故</strong>，不是教程。
     </p>
     <div class="hero-actions">
       <a class="btn btn-primary" href={import.meta.env.BASE_URL + "learn/"}>查看学习路线</a>
@@ -62,6 +62,15 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
           四层防御（消毒 / policy 门 / egress 白名单 / 审计）✅ 拦截，单层消融 + 确定性重放。
         </p>
         <p class="work-lesson">一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——消融证明确定性硬防线在 L2 policy 门 / L3 egress 白名单，互为独立 backstop</p>
+      </a>
+      <a class="card" href={import.meta.env.BASE_URL + "works/#durable-execution-demo"}>
+        <h3>durable-execution-demo</h3>
+        <p><span class="chip chip-strong">durable execution</span></p>
+        <p>
+          journal 双锚点 + checkpoint 原子写 + 幂等存储；3 种崩溃点真实 SIGKILL 自杀重启，
+          恢复按判定表逐步 replay / skip / unknown→confirm——副作用计数恒=1、恢复报告逐字节一致（含负向测试）。全离线。
+        </p>
+        <p class="work-lesson">一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——未知态先只读问外部，绝不盲放</p>
       </a>
       <a class="card" href={import.meta.env.BASE_URL + "works/#framework-demo"}>
         <h3>framework-demo</h3>

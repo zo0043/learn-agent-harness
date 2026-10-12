@@ -7,7 +7,7 @@ import { join, extname } from 'node:path';
 
 const DIST = '/home/ubuntu/app/learn-agent-harness/site/dist';
 const BASE = '/learn-agent-harness';
-const SLUGS = ['system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel', 'observability', 'long-term-memory', 'model-basics', 'framework-ecosystem'];
+const SLUGS = ['agent-harness', 'harness-from-scratch', 'rag', 'system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel', 'observability', 'long-term-memory', 'model-basics', 'framework-ecosystem'];
 // '/map' 自 2026-10-12 起为 notes/knowledge-map.md 原文渲染（mermaid 依赖图来自笔记，不再是手绘副本）
 const PAGES = [...SLUGS, '/map'];
 const PORT = 8099;

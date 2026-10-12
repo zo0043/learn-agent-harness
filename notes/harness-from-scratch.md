@@ -41,6 +41,20 @@ while True:
 
 三处要害：`call_model`（模型只出请求）、`execute`（程序落实动作）、`append`（把刚发生的事交给下一次调用）。**loop 正常结束 ≠ 任务正确**（Harness 架构 §9）。
 
+主循环流程：
+
+```mermaid
+flowchart TD
+  START["读入 messages<br/>system + user + 历史"] --> CALL["call_model(messages)<br/>模型只出请求"]
+  CALL --> CHK{"有 tool_calls？"}
+  CHK -->|"否"| FINAL["final：展示给用户，本轮结束"]
+  CHK -->|"是"| DISPATCH["逐个分发工具调用"]
+  DISPATCH --> EXEC["execute(tc)<br/>程序落实动作"]
+  EXEC --> APPEND["结果回写 messages<br/>（拒绝/错误也是合法结果）"]
+  APPEND --> CALL
+  FINAL --> NOTE["loop 结束 ≠ 任务正确<br/>验收靠可复查产物"]
+```
+
 ## ③ 工具协议：注册表 + 校验 + 执行（`src/tools.ts`）
 
 ```ts
@@ -80,6 +94,27 @@ data: [DONE]
 2. content 碎片边收边拼（`onDelta` 回调实时显示）
 3. **tool_calls 也是碎片**：首块带 id+name，后续块带 arguments 的**不完整 JSON 片段**——按 index 拼接、流结束后整体 `JSON.parse`（绝不能对单片段 parse）
 
+流式全过程（client → server → model，含轨迹事件）：
+
+```mermaid
+sequenceDiagram
+  participant U as 用户
+  participant H as harness
+  participant M as 模型 API
+  U->>H: 任务请求
+  H->>M: messages + 工具 schema（stream 开启）
+  loop 每个 SSE 帧（空行分隔）
+    M-->>H: delta.content 碎片（onDelta 边收边显示）
+    M-->>H: delta.tool_calls 碎片（首块带 id+name，后续带 arguments 片段）
+  end
+  M-->>H: 结束帧 data [DONE]
+  H->>H: 按 index 拼接后整体 JSON.parse（禁止逐片段 parse）
+  H->>H: 记 tool_intent → policy 检查 → 执行 → 记 tool_exec（结果回写）
+  H->>M: 下一轮请求（messages 含工具结果）
+  M-->>H: 不再请求工具 → final
+  H->>U: 展示 final
+```
+
 ## ⑤ 权限门（`src/policy.ts`）
 
 ```ts
@@ -87,6 +122,22 @@ decide(tool) → 优先级 deny > approve > allow；fallback = "deny"
 ```
 
 **默认 deny**（没写规则的工具一律不放行——安全默认，面试点）。检查发生在**执行路径上**，不在提示词里（Harness 架构 §7）。demo 策略：`run_shell`→deny、`write_file`→approve（human-in-the-loop）、只读→allow。
+
+权限门判定流程（对照 `src/policy.ts`）：
+
+```mermaid
+flowchart TD
+  TC["模型工具调用请求"] --> V{"校验<br/>名称已注册？参数合法？"}
+  V -->|"否"| ERR1["抛错 → 转成回写的错误结果"]
+  V -->|"是"| P{"policy.decide<br/>优先级 deny > approve > allow<br/>fallback = deny"}
+  P -->|"deny（如 run_shell）"| D["策略拒绝 → 结果回写<br/>（拒绝也是合法结果）"]
+  P -->|"approve（如 write_file）"| A{"人工审批<br/>human-in-the-loop"}
+  A -->|"未批准"| D
+  A -->|"批准"| I["记 tool_intent<br/>（先记 intent 再执行）"]
+  P -->|"allow（只读）"| I
+  I --> E["执行工具（限定路径范围内）"]
+  E --> WB["记 tool_exec + 结果回写 messages<br/>（执行异常也回写）"]
+```
 
 ## ⑥ 会话持久化（`src/session.ts`）
 
@@ -106,6 +157,22 @@ append(ev)  // 同步 appendFileSync：kill -9 时已写的行不丢
 崩溃点落在两步之间 = **intent 在、exec 不在 = 结果未知**。恢复策略（不盲目重放）：
 - **只读工具**（`readonly: true`）→ 安全重放
 - **非只读** → 把状态摆给模型：`[未知状态] 执行结果未知，先用只读工具核对现状再决定` → **模型自己用 read_file 核对**
+
+崩溃恢复流程：
+
+```mermaid
+flowchart TD
+  CRASH["进程崩溃<br/>（intent 已记、exec 缺失）"] --> LOAD["重启：读 JSONL 轨迹<br/>loadAll + rebuild"]
+  LOAD --> SCAN{"逐条配对<br/>intent 有、exec 无？"}
+  SCAN -->|"无未知状态"| GO["直接重建上下文，继续 loop"]
+  SCAN -->|"有"| RO{"工具 readonly？"}
+  RO -->|"是（只读）"| REPLAY["安全重放<br/>补记 tool_exec"]
+  RO -->|"否（有副作用）"| UNKNOWN["把状态摆给模型<br/>[未知状态] 先用只读工具核对现状"]
+  UNKNOWN --> MODEL["模型 read_file / list_dir 核对"]
+  MODEL --> DECIDE["模型决定是否重写<br/>（不盲目重放）"]
+  REPLAY --> GO
+  DECIDE --> GO
+```
 
 **实测输出（真实崩溃 + 真实恢复）**：
 ```
