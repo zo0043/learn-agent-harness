@@ -58,7 +58,7 @@ export const COURSES: CourseMeta[] = [
     interviewAngle: '检索每层为何存在 + 评测实操证据（recall@3=0.31，锚点式复测）',
     relatedQuestions: [
       { no: '§3.5-Q1', text: '为什么用 hash embedding 不用语义模型？（代理 503 + 可复现/可打印的教学价值——要敢承认局限）', anchorPrefix: '3.5 rag-demo' },
-      { no: '§3.5-Q2', text: 'recall@5 唯一漏题错在哪？（paraphrase 探针=词法路极限）', anchorPrefix: '3.5 rag-demo' },
+      { no: '§3.5-Q2', text: '10 题 golden set 5 题 FAIL，逐题机制归因是什么？（语料缺口 / 检索短板 / 表面形式盲区）', anchorPrefix: '3.5 rag-demo' },
       { no: '§3.5-Q3', text: 'BM25 的 IDF 定价怎么解释“什么”这种高频词？（rag.md §13 发现 1）', anchorPrefix: '3.5 rag-demo' },
       { no: '§3.5-Q4', text: '换真 embedding 模型要改几行？为什么架构不用动？（Embedder 接口）', anchorPrefix: '3.5 rag-demo' },
     ],
