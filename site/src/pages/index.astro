@@ -1,7 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { COURSE_COUNT, DOMAIN_COUNT, WORK_COUNT } from '../data/courses';
+import { parseRagStats } from '../utils/ragStats';
 
 const repo = 'https://github.com/zo0043/learn-agent-harness';
+
+// rag-demo 评测数字构建期从 notes/rag.md §13 解析（唯一真源），解析失败即构建失败、不静默回退。
+const ragEntry = (await getCollection('courses')).find((e) => e.id === 'rag');
+const rag = parseRagStats(ragEntry?.body ?? '');
+
+// 题目计数口径见 notes/knowledge-map.md 头部「计数口径」块（课内嵌 205 + 面试题库精选 37）。
+const Q_IN_LESSON = 205;
+const Q_BANK = 37;
 ---
 
 <Base>
@@ -9,8 +20,8 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     <p class="hero-kicker">coding agent 工程师方向 · 公开学习过程 · 面试备考</p>
     <h1>learn-agent-harness</h1>
     <p class="hero-sub">
-      备考 <strong>coding agent 工程师</strong>的公开学习记录：<strong>17 课 × 15 知识域</strong>、
-      精选题库 37 题（全课内嵌约 237 题）、<strong>6 个可运行作品</strong>（sandbox-demo / mcp-demo / durable-execution-demo 全离线零 key，
+      备考 <strong>coding agent 工程师</strong>的公开学习记录：<strong>{COURSE_COUNT} 课 × {DOMAIN_COUNT} 知识域</strong>、
+      课内嵌 {Q_IN_LESSON} 题 + 面试题库精选 {Q_BANK} 题、<strong>{WORK_COUNT} 个可运行作品</strong>（sandbox-demo / mcp-demo / durable-execution-demo 全离线零 key，
       事故重放与 SIGKILL 崩溃恢复均逐字节可复现）——每节课的设计判断都<strong>长自真实事故</strong>，不是教程。
     </p>
     <div class="hero-actions">
@@ -20,9 +31,9 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     </div>
   </section>
 
-  <!-- ── 作品（5 个可运行 demo）───────────────────────── -->
+  <!-- ── 作品（6 个可运行 demo）───────────────────────── -->
   <section>
-    <h2 class="page-title">五个作品</h2>
+    <h2 class="page-title">六个作品</h2>
     <div class="cards">
       <a class="card" href={import.meta.env.BASE_URL + "works/#harness-demo"}>
         <h3>harness-demo</h3>
@@ -30,7 +41,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         <p>
           从零手写最小 agent harness：9 个 TS 文件 ↔ ①-⑩ 十节——loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/
           JSONL 轨迹 + 崩溃恢复 / token 压缩；5 种 demo 模式实测 + OTel 埋点（11 spans/1 trace）。
-          白板面试版：<code>whiteboard/</code>（~150 行纯标准库，1:1 对应）。
+          白板面试版：<code>whiteboard/</code>（~180 行纯标准库，1:1 对应）。
         </p>
         <p class="work-lesson">一句话教训：<strong>错误恢复才是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，harness 的契约是 policy → intent → execute → result（结果必回写，拒绝也是结果）</p>
       </a>
@@ -39,7 +50,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         <p><span class="chip chip-strong">RAG 与检索</span></p>
         <p>
           零依赖 RAG：chunking → hash embedding → 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用 / 强制拒答生成 →
-          10 题 golden set 评测（85 chunks，recall@3=1.00）。
+          10 题 golden set 评测（{rag.chunks} chunks，recall@3={rag.recall3} / @5={rag.recall5} / @10={rag.recall10}，PASS {rag.pass}）。
         </p>
         <p class="work-lesson">一句话教训：<strong>词法检索只走表面形式重叠</strong>——BM25 修了定价，改不掉词法上限；这正是 embedding 路存在的理由</p>
       </a>
@@ -84,7 +95,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
       </a>
     </div>
     <p class="works-note">
-      <a href={import.meta.env.BASE_URL + "works/#whiteboard"}>whiteboard/</a>：150 行 Python 面试口述版（见仓库）
+      <a href={import.meta.env.BASE_URL + "works/#whiteboard"}>whiteboard/</a>：180 行 Python 面试口述版（见仓库）
     </p>
   </section>
 
@@ -162,19 +173,23 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
     <h2 class="page-title">进度总览</h2>
     <div class="stats">
       <div class="stat">
-        <span class="stat-num">17</span>
+        <span class="stat-num">{COURSE_COUNT}</span>
         <span class="stat-label">课程页</span>
       </div>
       <div class="stat">
-        <span class="stat-num">15</span>
+        <span class="stat-num">{DOMAIN_COUNT}</span>
         <span class="stat-label">知识域</span>
       </div>
       <div class="stat">
-        <span class="stat-num">~237</span>
-        <span class="stat-label">题题库（各课末尾 + 交叉题）</span>
+        <span class="stat-num">{Q_IN_LESSON}</span>
+        <span class="stat-label">课内嵌练习题</span>
       </div>
       <div class="stat">
-        <span class="stat-num">5</span>
+        <span class="stat-num">{Q_BANK}</span>
+        <span class="stat-label">面试题库精选</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">{WORK_COUNT}</span>
         <span class="stat-label">可运行作品</span>
       </div>
     </div>

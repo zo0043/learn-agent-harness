@@ -2,16 +2,14 @@
 import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import { getCollection } from 'astro:content';
-import { COURSES, type CourseMeta } from '../data/courses';
+import { COURSES, CARD_COUNT, COURSE_COUNT, DOMAIN_COUNT, STATUS_COUNTS, type CourseMeta } from '../data/courses';
 
 const entries = await getCollection('courses');
 const slugSet = new Set(entries.map((e) => e.id));
 
-// 总进度：全部从 courses.ts 算（“15 域”= notes/knowledge-map.md 口径：课程总表 14 编号课 + 主线 agent-harness.md，见 /map/）
-const total = COURSES.length;
-const done = COURSES.filter((c) => c.status.startsWith('✅')).length;
-const doing = COURSES.filter((c) => c.status.startsWith('🔄') || c.status.startsWith('🚧')).length;
-const planned = COURSES.filter((c) => c.status.startsWith('⏳')).length;
+// 总进度全部取自 courses.ts 派生量（口径块见 notes/knowledge-map.md 头部「计数口径」：
+// 课程卡 18 = 全部条目含 whiteboard 白板卡；知识域 15 = 14 编号课 + Harness 架构主线）。
+const { done, doing, planned } = STATUS_COUNTS;
 
 const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
   { phase: 'P0', desc: '核心段：白板 / 系统设计 / 项目深挖的硬通货' },
@@ -24,13 +22,19 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
 <Base title="学习路线">
   <h1 class="page-title">学习路线</h1>
   <p class="page-lead">
-    总进度：<strong>{total} 课</strong> · 15 域 ·
-    ✅ 完成 {done} / 🔄 进行中 {doing} / ⏳ 规划 {planned}
-    （状态实时取自 <code>src/data/courses.ts</code>）
+    总进度：<strong>{CARD_COUNT} 张课程卡</strong> · {DOMAIN_COUNT} 知识域 ·
+    ✅ 完成 {done} / 🔄 讲义已展开 {doing} / ⏳ 规划 {planned}
+    （状态实时取自 <code>src/data/courses.ts</code> 派生量）
   </p>
   <p class="page-lead">
     P0 / P1 / P2 三段 × 知识域。卡片数据来自手写映射 <code>src/data/courses.ts</code>
     （基线：notes/knowledge-map.md 课程总表）；点开进课程页。
+    <br />
+    <span style="color: var(--text-soft); font-size: 0.94rem">
+      计数口径：{CARD_COUNT} 张课程卡 = courses.ts 全部条目（含 <code>whiteboard</code> 白板卡，
+      无独立课程页、链向 /works/#whiteboard，故比 {COURSE_COUNT} 个课程页多 1）；
+      {DOMAIN_COUNT} 知识域 = 14 编号课 + Harness 架构主线，不含 LLM 时间线 / 行业前线调研等横向资产。
+    </span>
   </p>
 
   {

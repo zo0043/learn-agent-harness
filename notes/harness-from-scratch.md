@@ -193,7 +193,7 @@ estimateTokens = JSON长度 / 3.5   // 预算检查用估算；精确计数只�
 compactIfNeeded: 保 head(system+首user) + 尾 keepTail 条，中间 LLM 摘要替换
 ```
 
-mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：mock provider 后每个控制层都能独立验证**）：`压缩前 tokens≈2423 → 摘要 4 条 → 压缩后 5 条，tokens≈871` ✅。日志永远保留全量，压缩只改"送模型的视图"。
+mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：mock provider 后每个控制层都能独立验证**）：`压缩前 tokens≈1378 → 摘要 3 条 → 压缩后 5 条，tokens≈426` ✅（2026-10-12 复跑值；更早测试版本的数字与当前断言矛盾、已废，修正经过见 handoff.md）。日志永远保留全量，压缩只改"送模型的视图"。
 
 ## ⑨ 完整 demo（`src/demo.ts`，真实模型 qwen3.8-flash）
 

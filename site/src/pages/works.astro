@@ -1,8 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import TrajectoryTimeline from '../components/TrajectoryTimeline.astro';
+import { getCollection } from 'astro:content';
+import { parseRagStats } from '../utils/ragStats';
+import { WORK_COUNT } from '../data/courses';
 
 const repo = 'https://github.com/zo0043/learn-agent-harness';
+
+// rag-demo 评测数字构建期从 notes/rag.md §13 解析（唯一真源）：解析失败即构建失败，
+// 不静默回退到任何硬编码数字——那正是 W0 止血前「站点数字与笔记漂移」复发的方式。
+const ragEntry = (await getCollection('courses')).find((e) => e.id === 'rag');
+const rag = parseRagStats(ragEntry?.body ?? '');
 ---
 
 <Base title="作品详解">
@@ -10,6 +18,12 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
   <p class="page-lead">
     每个作品都是课程的可运行证据：文件 ↔ 课程节一一对应，本地可跑、可复现。
     源码见 <a href={repo} target="_blank" rel="noopener">仓库 ↗</a>。
+    <br />
+    <span style="color: var(--text-soft); font-size: 0.94rem">
+      计数口径：本页共 <strong>{WORK_COUNT} 个可运行 demo 作品</strong>（= 有 <code>npm run demo</code>
+      的目录：harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo /
+      framework-demo）；另有 <code>whiteboard/</code>（Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
+    </span>
   </p>
 
   <!-- ── harness-demo ─────────────────────────────────── -->
@@ -75,7 +89,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
 
       <h3>pipeline 七级</h3>
       <div class="pipeline">
-        <span class="pipe-step"><b>① chunking</b>按节切分 · 85 chunks</span>
+        <span class="pipe-step"><b>① chunking</b>按节切分 · {rag.chunks} chunks</span>
         <span class="pipe-arrow">→</span>
         <span class="pipe-step"><b>② hash embedder</b>768 维 · 零依赖</span>
         <span class="pipe-arrow">→</span>
@@ -90,12 +104,19 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
         <span class="pipe-step"><b>⑦ golden set</b>10 题评测</span>
       </div>
 
-      <h3>golden 评测（10 题 · 85 chunks）</h3>
+      <h3>golden 评测（10 题 · {rag.chunks} chunks）</h3>
       <div class="eval-stats">
-        <div class="eval-stat"><div class="num">1.00</div><div class="lbl">recall@3</div></div>
-        <div class="eval-stat"><div class="num">0.94</div><div class="lbl">recall@5</div></div>
-        <div class="eval-stat"><div class="num">1.00</div><div class="lbl">recall@10</div></div>
+        <div class="eval-stat"><div class="num">{rag.recall3}</div><div class="lbl">recall@3</div></div>
+        <div class="eval-stat"><div class="num">{rag.recall5}</div><div class="lbl">recall@5</div></div>
+        <div class="eval-stat"><div class="num">{rag.recall10}</div><div class="lbl">recall@10</div></div>
       </div>
+      <p style="color: var(--text-soft); font-size: 0.9rem">
+        口径：{rag.date} 锚点式 golden set 复测（<code>npm run demo:eval</code> 实跑），PASS {rag.pass}。
+        <strong>数字随 <code>notes/rag.md</code> §13 自动派生</strong>（构建期 <code>parseRagStats</code>，
+        解析失败即构建失败，不静默回退硬编码）。
+        早期「行号指针」期 gold set 得出的三项高值（当时 @3 宣称满分）已废，详见
+        <code>notes/rag.md</code> §13 口径注。
+      </p>
 
       <h3>跑法</h3>
       <div class="runbox">
@@ -108,7 +129,7 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
 
   <!-- ── whiteboard ───────────────────────────────────── -->
   <section class="work" id="whiteboard">
-    <h2>whiteboard · 白板版 agent（~150 行 Python）</h2>
+    <h2>whiteboard · 白板版 agent（~180 行 Python）</h2>
     <p class="work-tag">面试口述版 · 纯标准库 · 与 TS 版架构 1:1 对应</p>
     <div class="card work-card" style="display: block">
       <p style="margin-top: 0">

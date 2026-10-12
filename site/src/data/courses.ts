@@ -60,8 +60,8 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'rag', domain: 'RAG 与检索', phase: 'P0', status: '✅ 完成',
-    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=1.00',
-    interviewAngle: '检索每层为何存在 + 评测实操证据（recall@3=1.00）',
+    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=0.31（132 chunks，PASS 3/8）',
+    interviewAngle: '检索每层为何存在 + 评测实操证据（recall@3=0.31，锚点式复测）',
     relatedQuestions: [
       { no: '§3.5-Q1', text: '为什么用 hash embedding 不用语义模型？（代理 503 + 可复现/可打印的教学价值——要敢承认局限）', anchor: BANK.s35 },
       { no: '§3.5-Q2', text: 'recall@5 唯一漏题错在哪？（paraphrase 探针=词法路极限）', anchor: BANK.s35 },
@@ -113,7 +113,7 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'llm-timeline', domain: 'LLM 时间线', phase: 'P0', status: '✅ 完成',
+    slug: 'llm-timeline', domain: 'LLM 时间线', phase: '—', status: '✅ 完成',
     intro: '12 节点模型演化时间线（★5 个面试谈资），答“为什么当年这么设计 / 下一步往哪走”',
     interviewAngle: '“为什么当年这么设计/下一步往哪走”的谈资',
     relatedQuestions: [
@@ -133,8 +133,8 @@ export const COURSES: CourseMeta[] = [
     ],
   },
   {
-    slug: 'whiteboard', domain: '从零写 harness', phase: 'P0', status: '✅ 完成',
-    intro: '~150 行纯标准库 Python 白板版 agent，与 harness-demo 1:1 对应，20 分钟白板题骨架',
+    slug: 'whiteboard', domain: '从零写 harness（白板版）', phase: 'P0', status: '✅ 完成',
+    intro: '~180 行纯标准库 Python 白板版 agent，与 harness-demo 1:1 对应，20 分钟白板题骨架',
     interviewAngle: '20 分钟白板题：边写边讲三个关键设计',
     relatedQuestions: [
       { no: '§3.4-Q1', text: '四种运行模式各证明了什么？crash 模式怎么注入的？', anchor: BANK.s34 },
@@ -242,6 +242,57 @@ export const COURSES: CourseMeta[] = [
 ];
 
 const COURSE_MAP = new Map(COURSES.map((c) => [c.slug, c]));
+
+/* ──────────────────────────────────────────────────────────────
+ * 派生计数（单一数据源 · 2026-10-12 W1-A 起）
+ *
+ * 口径唯一参照：notes/knowledge-map.md 头部「计数口径（2026-10-12 冻结，全仓唯一参照）」块。
+ * 全站页面只引用下面这些常量，不再手抄数字；要改口径先改该块、再改这里，别处只引用不改写。
+ *
+ * ⚠️ DOMAIN_COUNT 不是朴素的 new Set(domain).size（那会得出 17，与冻结的 15 冲突）：
+ *    必须同时排除 ① whiteboard 课程卡（无独立 notes 文件，不算知识域）
+ *    ② phase === '—' 的横向资产（llm-timeline / industry-2026，knowledge-map 明令不计入门数）。
+ * ────────────────────────────────────────────────────────────── */
+
+/** 课程卡中无独立 notes 文件、也无 /c/<slug>/ 课程页的条目（白板作品卡，链向 /works/#whiteboard）。 */
+const NON_COURSE_CARD_SLUG = 'whiteboard';
+/** 横向资产阶段标记：interview-bank / llm-timeline / industry-2026 不计入知识域门数。 */
+const HORIZONTAL_PHASE = '—' as const;
+
+/** 课程页口径：站点 /c/<slug>/ 实生成路由数（notes 顶层 19 − knowledge-map − interview-bank）= 17 */
+export const COURSE_COUNT = COURSES.filter((c) => c.slug !== NON_COURSE_CARD_SLUG).length;
+
+/** 课程卡口径：courses.ts 全部条目数（含 whiteboard 白板卡，故比课程页多 1）= 18 */
+export const CARD_COUNT = COURSES.length;
+
+/**
+ * 知识域口径：14 编号课 + Harness 架构主线 = 15。
+ * 排除 whiteboard 卡与 phase='—' 横向资产后按 domain 去重。
+ */
+export const DOMAIN_COUNT = new Set(
+  COURSES.filter((c) => c.slug !== NON_COURSE_CARD_SLUG && c.phase !== HORIZONTAL_PHASE).map(
+    (c) => c.domain,
+  ),
+).size;
+
+/** 可运行 demo 作品口径：有 `npm run demo` 的目录数 = 6（whiteboard / viz / site 为配套资产，不计入）。 */
+export const WORK_COUNT = 6;
+
+/** 按阶段分组的课程卡数（P0 / P1 / P2 / 横向），与 /learn 的 phase-section 一一对应。 */
+export const PHASE_COUNTS: Record<string, number> = COURSES.reduce<Record<string, number>>(
+  (acc, c) => {
+    acc[c.phase] = (acc[c.phase] ?? 0) + 1;
+    return acc;
+  },
+  {},
+);
+
+/** 按状态分组的课程卡数（从 learn.astro 原有逻辑抽出共享）。 */
+export const STATUS_COUNTS = {
+  done: COURSES.filter((c) => c.status.startsWith('✅')).length,
+  doing: COURSES.filter((c) => c.status.startsWith('🔄') || c.status.startsWith('🚧')).length,
+  planned: COURSES.filter((c) => c.status.startsWith('⏳')).length,
+};
 
 export const DEFAULT_META: CourseMeta = {
   slug: '',

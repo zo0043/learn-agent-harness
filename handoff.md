@@ -188,6 +188,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 3. **模型 tool-calling 能力参差 + 模型列表会轮换**（2026-10-10 晚 实测）：`qwen3.8-flash` 已下架 → `qwen3.8-flash-next` ✅（tools+SSE）；`qwen3.8-max` ✅；`step-5-preview` 仍在但 ❌ 不支持 tool calling。我用的 OpenAI 兼容代理（litellm 网关）的模型列表随时间变，**跑 demo 前先看 `GET /v1/models`**。
 4. playwright 浏览器在 `~/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome`（无需下载）。
 5. pi 1.1.0 与 0.85.1 两份安装在机器上共存，引用 pi 文档结论时**必须标版本**。
+6. **数字引用规范（2026-10-12 立）**：评测数字只认实跑输出，其余位置一律抄录不另起数（附复跑命令与日期）；六个口径（15 域/17 页/18 卡/6 作品/205+37 题）以 knowledge-map 头部口径块为唯一参照、别处只引用不改写；rag.md 是 demo:eval 语料成员，划改后必须重跑核对（详见 rag.md §13 耦合警告）。
 
 ---
 

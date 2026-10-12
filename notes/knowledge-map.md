@@ -7,6 +7,14 @@
 >
 > **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。每课题库 +2 题（共 20 题）。
 > ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
+>
+> **计数口径（2026-10-12 冻结，全仓唯一参照，其余位置只引用本块、不另起数）**：
+> · **知识域 15** = 课程总表 14 编号课 + Harness 架构主线 `agent-harness.md`；`interview-bank` / `llm-timeline` / `industry-2026` / `details/` 为横向资产，不计入门数。
+> · **课程页 17** = 站点 `/c/<slug>/` 实生成路由数（notes 顶层 19 − knowledge-map − interview-bank）。
+> · **课程卡 18** = `site/src/data/courses.ts` 全部条目；含 `whiteboard` 白板卡（无独立 notes 文件与课程页，链向 /works/#whiteboard），故课程卡比课程页多 1。
+> · **可运行 demo 作品 6** = harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo（有 `npm run demo` 的目录）；whiteboard / viz / site 为配套资产，不计入。
+> · **题目**：课内嵌 **205** 题（13 课练习题库 176 + agent-harness §13 八题 + rag S1 五题 + model-basics S7 十六题）+ 面试题库精选 **37** 题（interview-bank §3 22 + §4 10 + §8 5）。
+> · **rag-demo 评测口径**（2026-10-12 锚点式 golden set 复测，以 `notes/rag.md §13` 为唯一数字源）：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50，PASS 3/8，语料 132 chunks；旧值 recall@3=1.00 / @5=0.94 出自已废止的「行号指针」golden set（旧语料口径同时作废，全仓禁用旧值）。
 
 ## 命名总表(唯一真源)
 
@@ -43,7 +51,7 @@
 | 主题 | 优先级 | 状态 | 课程文件 | 完成后你能做到 |
 |---|---|---|---|---|
 | 从零写 harness | P0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
-| RAG 与检索 | P0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 85-chunk 评测 |
+| RAG 与检索 | P0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 132-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
 | Agent 系统设计模板 | P0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
 | Agent 可观测 | P2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：提问演练 + 题库 14 题通过） |
 | 沙箱与凭据·可复现 | P0 | 📐 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
@@ -133,9 +141,9 @@ graph TD
 | 资产 | 证明的能力 | 被哪些课引用 |
 |---|---|---|
 | `harness-demo/`(9 源文件 + trajectories 落盘，覆盖 harness-from-scratch ①-⑩ 十节；5 种运行模式实测) | loop/工具协议/流式/权限/恢复/压缩 | 系统设计(coding agent 设计)、沙箱与凭据(policy 层)、durable execution(session.ts=最小 journal)、评测工程化(mock 评测)、多智能体编排(§S7 子代理设计练习) |
-| `whiteboard/agent_whiteboard.py`(~150 行) | 白板手写 | 系统设计、面试演练 |
+| `whiteboard/agent_whiteboard.py`(~180 行) | 白板手写 | 系统设计、面试演练 |
 | `rag-demo/`(15 文件 + golden set) | 检索全 pipeline + 评测 | 系统设计(KB 设计题)、评测工程化(检索层评测)、数据飞轮(指标驱动) |
-| `durable-execution-demo/`(13 文件/src 821 行,3 崩溃点×各 3 次真实 SIGKILL 恢复:副作用恒=1、恢复报告逐字节一致,含负向测试) | journal/checkpoint/幂等三机制 + 未知态处置实操 | durable execution §S7、沙箱与凭据(崩溃恢复)、系统设计(长任务设计题) |
+| `durable-execution-demo/`(9 src 文件/821 行,3 崩溃点×各 3 次真实 SIGKILL 恢复:副作用恒=1、恢复报告逐字节一致,含负向测试) | journal/checkpoint/幂等三机制 + 未知态处置实操 | durable execution §S7、沙箱与凭据(崩溃恢复)、系统设计(长任务设计题) |
 | `sandbox-demo/`(7 个 src 文件 + README,3 次重放逐字节一致) | 四通道 policy + 事故重放 | 沙箱与凭据 §S2 |
 | FinHot(生产) | 长任务/批量评测/事故/数据飞轮 | 沙箱与凭据、durable execution、评测工程化、API 与多模型路由、数据飞轮 |
 | pi + pi-agents-team(日常在用) | 多 agent 编排/框架源码级 | 系统设计、框架生态 |

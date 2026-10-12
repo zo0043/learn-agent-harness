@@ -9,6 +9,7 @@
 import Base from '../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
 import { extractToc } from '../utils/toc';
+import { COURSE_COUNT, WORK_COUNT } from '../data/courses';
 
 const entries = await getCollection('courses');
 const entry = entries.find((e) => e.id === 'interview-bank');
@@ -107,12 +108,12 @@ const GROUPS: Group[] = entry
                 <div class="pipeline">
                   <a class="pipe-step" href={base + 'works/'}>
                     <b>第 1 步 · 作品</b>
-                    /works/ 看 5 个作品——120 秒建立整体印象
+                    /works/ 看 {WORK_COUNT} 个作品——120 秒建立整体印象
                   </a>
                   <span class="pipe-arrow" aria-hidden="true">→</span>
                   <a class="pipe-step" href={base + 'learn/'}>
                     <b>第 2 步 · 课程</b>
-                    /learn/ 按 17 课过一遍（正文带面试视角批注）
+                    /learn/ 按 {COURSE_COUNT} 课过一遍（正文带面试视角批注）
                   </a>
                   <span class="pipe-arrow" aria-hidden="true">→</span>
                   <div class="pipe-step">

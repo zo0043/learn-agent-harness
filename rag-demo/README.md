@@ -55,15 +55,17 @@ npm run demo:eval       # S5 golden set + recall@k
 golden set 10 题：8 道范围内 + 2 道范围外（走拒答轨，不进 recall 统计）。
 recall@k = |top-k ∩ relevant| / |relevant|（分母 = 相关集，不是 k）；系统分 = 各题平均。
 
-golden set 快照值（照抄 `notes/rag.md` §13 与 `src/evaluate.ts`，基于 2026-10-10 的 chunk 快照）：
+golden set 复测值（照抄 `notes/rag.md` §13 与 `src/evaluate.ts`，2026-10-12 锚点式 golden set 复跑口径）：
 
 | 指标 | 值 |
 | --- | --- |
-| recall@3 | 1.00 |
-| recall@5 | 0.94 |
-| recall@10 | 1.00 |
+| recall@3 | 0.31 |
+| recall@5 | 0.44 |
+| recall@10 | 0.50 |
 
-唯一漏题 = paraphrase 探针"系统怎么防止上下文溢出？"差 1 名出 top-5：错误归因为词法路只能走表面形式重叠，完全 paraphrase = 完全漏——这就是语义模型存在的理由。
+PASS 3/8（判据：全部 gold chunk 进 top-10），语料 132 chunks。旧宣称值 recall@3=1.00 / @5=0.94 / @10=1.00（85 chunks）出自 2026-10-10 的「行号指针」golden set，指针漂移后静默打 0.00、且与 recall@k 单调性矛盾，**已废**；2026-10-12 起 gold 改为文本锚点（任一锚点匹配不到即 FAIL 退出）。完整口径说明见 `notes/rag.md` §13「数字口径」。
+
+5 题 FAIL 的机制归因：Q2（IDF 对数）= 语料缺口（语料没有 IDF/对数的解释段）；Q7、Q8（compact / paraphrase）= compact 段检索短板；Q1（k1 饱和）= 排序短板；Q3（headingPath）= 两路极端分裂（bm25 #1 vs cosine #54-60）。共同根因：词法路只能走表面形式重叠——完全 paraphrase = 完全漏，这就是语义模型存在的理由。
 拒答轨："苹果的 CEO 是谁？" → 模型输出"材料不足" ✓。
 
 ## 已知边界（教学刻意不做 / 留给后续课程）
@@ -72,4 +74,4 @@ golden set 快照值（照抄 `notes/rag.md` §13 与 `src/evaluate.ts`，基于
 - 暴力 O(N)，无 ANN——几十个 chunk 时可见、可插桩、无近似。
 - Reranker 是直通插槽，未接真 rerank 模型。
 - 分词是表面形式（拉丁整词 + CJK bigram），非 jieba 类正规分词器。
-- 注：recall@3 与 recall@5 的口径存在待第二档修订的争议；上表按 §13 快照原样引用，未改数字。
+- 注：上表为 2026-10-12 锚点式复跑口径；如与更早文档看到的 1.00/0.94 不一致，以 `notes/rag.md` §13「数字口径」为准（旧值已废）。
