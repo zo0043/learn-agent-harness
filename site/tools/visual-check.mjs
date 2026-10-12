@@ -136,7 +136,29 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true 
     }));
     const ovPass = ov.scrollWidth <= ov.clientWidth + TOLERANCE;
     details.overflow = { scrollWidth: ov.scrollWidth, clientWidth: ov.clientWidth, tolerance: TOLERANCE, pass: ovPass };
-    if (!ovPass) failures.push(`横向溢出：scrollWidth ${ov.scrollWidth} > clientWidth ${ov.clientWidth} + ${TOLERANCE}px`);
+    if (!ovPass) {
+      failures.push(`横向溢出：scrollWidth ${ov.scrollWidth} > clientWidth ${ov.clientWidth} + ${TOLERANCE}px`);
+      // 诊断（不改判据）：列出最外层 5 个真正伸出文档的元素（跳过被横向滚动容器裁剪的——那是容器自身滚动，不算文档溢出）
+      details.overflow.offenders = await page.evaluate((TOL) => {
+        const cw = document.documentElement.clientWidth;
+        const out = [];
+        for (const el of document.querySelectorAll('*')) {
+          const r = el.getBoundingClientRect();
+          if (r.right <= cw + TOL || r.width === 0) continue;
+          let clipped = false;
+          for (let a = el.parentElement; a; a = a.parentElement) {
+            const ox = getComputedStyle(a).overflowX;
+            if (/(auto|scroll|hidden)/.test(ox) && a.scrollWidth > a.clientWidth) { clipped = true; break; }
+          }
+          if (clipped) continue;
+          const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
+          out.push({ selector: el.tagName.toLowerCase() + cls, right: Math.round(r.right), width: Math.round(r.width), text: (el.textContent || '').trim().slice(0, 60) });
+        }
+        out.sort((a, b) => b.width - a.width);
+        return out.slice(0, 5);
+      }, TOLERANCE);
+      console.log(`[visual-check]   ↳ 溢出源（top）：${(details.overflow.offenders || []).map((o) => `<${o.selector}> w=${o.width} "${o.text.slice(0, 30)}"`).join(' | ')}`);
+    }
 
     // ② 关键元素可见
     const vis = async (sel) => {
