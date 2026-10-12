@@ -99,7 +99,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 
 ### 待办 3：JD 调研的证据盲区（数据已抢救，补盲仍待人工）
 
-JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾讯 339 / OpenAI 815 / Anthropic 645，2025-05~2026-10）。原始数据 **2026-10-10 晚 已从 `/tmp/agent-jd-research/` 移到 `learn-agent-harness/jd-research/`（51MB，不再受 /tmp 清理威胁）**。字节/百度/蚂蚁/阿里/智谱/月之暗面/DeepSeek **被反爬拦截，无一手证据**。字节是国内 agent 岗大户 → 建议人工抽 20-30 条 JD 发我补盲。
+→ 待办已合并至 `notes/knowledge-map.md`「未结事项」唯一清单（2026-10-12）。语境速览：一手 JD 1799 条（腾讯 339 / OpenAI 815 / Anthropic 645）已从 /tmp 抢救到 `jd-research/`（51MB）；字节/百度/蚂蚁/阿里/智谱/月之暗面/DeepSeek 被反爬拦截无一手证据——字节是国内 agent 岗大户，人工补盲 20-30 条仍待做（清单条目含判据）。
 
 ### 待办 4（🆕 2026-10-11，✅ 四次整理已写入）：缺口补强清单（面经检索所得）
 
@@ -107,7 +107,7 @@ JD 调研（`notes/agent-harness.md` 第 15 节）抓到一手 JD 1799 条（腾
 
 ### 待办 5（🆕 2026-10-11）：安排模拟面试
 
-2 场 60 分钟模拟（`notes/interview-bank.md` §2 结构），建议 Phase 1（系统设计 / 沙箱与凭据 / 评测工程化）完成后排第一场的初验，全部完成后排终验。
+→ 待办已合并至 `notes/knowledge-map.md`「未结事项」唯一清单（2026-10-12）。语境速览：2 场 60 分钟模拟（结构见 `notes/interview-bank.md` §2），建议 Phase 1（系统设计 / 沙箱与凭据 / 评测工程化）完成后排第一场初验、全部完成后排终验。本节（§三）自 2026-10-12 起只保留已完成记录（待办 1/2/4）与未结项的一行引用——改待办只改 knowledge-map 那一处，勿在此处另起数。
 
 ---
 

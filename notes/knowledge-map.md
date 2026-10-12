@@ -150,14 +150,19 @@ graph TD
 
 ## 未结事项（非课程，来自 handoff）
 
+> **本清单是全站待办的唯一事实源**（2026-10-12 合并）：原散在三处的待办——`handoff.md` §三 待办 3/5、`interview-bank.md` §7 未结清单——已全部并入此处，另两处只保留一行引用。带 [interview-bank] / [handoff] 标注的条目是合并时带入；同事项不同表述的已归并（面试模拟、JD 补盲、岗位方向三处重复各留一条）。完成判据与口径块同源，改待办只改这一节。
+
 - [x] 讲义展开（2026-10-11）：系统设计 / 多智能体编排 / 沙箱与凭据 / 评测工程化 四课从"结构建成"→"开课版讲义"（各 4 张 mermaid、实战走查节、题库 12-16 题）；引用一手源复核修正 4 处
 - [x] 讲义展开（2026-10-11 Phase 2）：durable execution / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 四课 →"开课版讲义"（各 4-5 张 mermaid、实战走查节、题库各 14 题）；引用一手源复核修正 8 处；数据飞轮回填 FinHot 真实三轮评测指标
 - [x] 讲义展开（2026-10-11 Phase 3）：可观测 / 长期记忆 / 模型基础 / 框架生态 四课 →"开课版讲义"（各 4 张 mermaid、实战走查节、题库扩充）
-- [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）
+- [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）；[handoff 待办 5 并入] 2 场 60 分钟模拟：Phase 1 完成后排初验、全部完成后排终验
+- [ ] [interview-bank §7 并入] 开课顺序确认（当前建议：系统设计 → 沙箱与凭据（续 S2）→ 评测工程化 → durable execution → MCP 与供应链安全 → API 与多模型路由 → 数据飞轮 → P2 四课按目标岗位权重排）
+- [ ] [interview-bank §7 并入] 旧课遗留确认题自测（不混入新课，另约时间；题已存档）：从零写 harness 练习题库 8 题 / 从零写 harness §S2-S4+白板题 / RAG S1 五道确认题（2026-10-12 已写入 `rag.md` 文末题库节）
 - [x] 项目打磨（2026-10-12）：rag-demo / harness-demo README 补齐（harness-demo 模型名同步为 qwen3.8-flash-next）；durable-execution S7 demo 落地（durable-execution-demo/，3 崩溃点×3 次真实 SIGKILL 验收）
 - [x] 实操补强 ×4（2026-10-11 完成）：sandbox-demo 四通道 policy+幽灵重放（600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 11 spans/1 trace）/ mcp-demo 投毒+四层防御+消融 / framework-demo Claude Agent SDK（11/11 断言）
+- [x] 记忆投毒红队回归（2026-10-12）：`memory-redteam/` 零依赖可执行套件——11 条探针全部守住、10/10 对防线敏感（消融自检），编码自长期记忆 §S7 四道防线与 §S10 步骤 6-7；首次运行即抓出"scope 缺省字段按 `undefined` 比较致冲突检测静默失效"的真 bug。原 interview-bank 补强项 4「未做」已闭环
 - [x] 日期口径确认（2026-10-11）：归一到系统时钟，11 文件 27 行 28 处修正
 - [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 https://blog.zero43.top/learn-agent-harness/（32 个 html）
-- [ ] JD 关键词覆盖：见 `interview-bank.md` 矩阵
-- [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过）
-- [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 P1/P2 权重
+- [ ] JD 关键词覆盖：见 `interview-bank.md` 矩阵（目标全 🟢）
+- [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过；一手数据已在 `jd-research/`，其余六家已抓 1799 条）[handoff 待办 3 / interview-bank §7 并入]
+- [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 P1/P2 权重 [interview-bank §7 并入]

@@ -1,0 +1,11 @@
+{
+  "name": "memory-redteam",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "跨会话记忆的投毒红队回归（长期记忆 §S7/S10 可执行化）——零依赖，node 原生 ESM，无需 npm install",
+  "scripts": {
+    "test": "node test.mjs",
+    "test:ablate": "node test.mjs --ablate"
+  }
+}
