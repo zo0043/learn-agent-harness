@@ -61,11 +61,13 @@ jobs:
 
       # 本机 OOM 事故的 CI 免疫：dist 必须真的产出了 HTML（本机曾留下 85 文件/0 HTML 的残骸，
       # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
+      # 下限 31 = 6 静态页（index/learn/works/interview/map/details 首页）+ 17 课程页 + 8 专题页
+      # —— 实构建物里没有 404.html（knowledge-map「站点 html 32」口径含概念 404，构建产物以 CI 为准）。
       - name: Build sanity (dist must contain real HTML)
         run: |
           count=$(find site/dist -name '*.html' | wc -l)
-          echo "dist HTML 文件数 = $count（下限 32 = 6 静态 + 17 课程页 + 8 专题页 + 404）"
-          test "$count" -ge 32
+          echo "dist HTML 文件数 = $count（下限 31 = 6 静态 + 17 课程页 + 8 专题页；构建产物不含 404.html）"
+          test "$count" -ge 31
 
       - name: Install headless browser (Chromium)
         working-directory: site
