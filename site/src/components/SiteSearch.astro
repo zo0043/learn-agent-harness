@@ -51,20 +51,20 @@ const base = import.meta.env.BASE_URL;
     Vite 无法静态分析 → 按 Astro 规则自动按 inline 处理；显式写出来意图更清晰，
     也让 BASE 变量由 define:vars 原样注入而非被打包器改写。 */}
 <script is:inline define:vars={{ base }}>
-  const BASE: string = base;
-  const trigger = document.querySelector<HTMLButtonElement>('[data-search-open]');
-  const dialog = document.querySelector<HTMLDialogElement>('[data-search-dialog]');
-  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
-  const results = document.querySelector<HTMLDivElement>('[data-search-results]');
+  const BASE = base;
+  const trigger = document.querySelector('[data-search-open]');
+  const dialog = document.querySelector('[data-search-dialog]');
+  const input = document.querySelector('[data-search-input]');
+  const results = document.querySelector('[data-search-results]');
   if (!trigger || !dialog || !input || !results) throw new Error('SiteSearch: 找不到必要节点');
 
   // pagefind 索引分片体积不小，懒加载：首次打开搜索框时才拉 pagefind.js。
-  let pagefind: typeof import('/pagefind/pagefind.js') | null = null;
-  let loading: Promise<typeof import('/pagefind/pagefind.js')> | null = null;
+  let pagefind = null;
+  let loading = null;
   async function loadPagefind() {
     if (pagefind) return pagefind;
     if (!loading) {
-      loading = import(/* @vite-ignore */ `${BASE}pagefind/pagefind.js`).then((m: any) => {
+      loading = import(/* @vite-ignore */ `${BASE}pagefind/pagefind.js`).then((m) => {
         pagefind = m;
         return m;
       });
@@ -72,15 +72,15 @@ const base = import.meta.env.BASE_URL;
     return loading;
   }
 
-  let debounce: number | undefined;
+  let debounce;
   /** pagefind 的 url 相对 dist 根（如 /learn/），本站有 base（/learn-agent-harness/）需拼接；
    *  已含 base 时不重复拼——防御 pagefind 版本间「是否回填 base」的行为差异。 */
-  function hitUrl(url: string): string {
+  function hitUrl(url) {
     const b = BASE.replace(/\/$/, '');
     if (url.startsWith(`${b}/`)) return url;
     return b + (url.startsWith('/') ? url : `/${url}`);
   }
-  async function run(q: string) {
+  async function run(q) {
     const query = q.trim();
     if (!query) {
       results.innerHTML = '<p class="search-hint">输入关键词开始检索；索引覆盖全部笔记正文。</p>';
@@ -96,9 +96,9 @@ const base = import.meta.env.BASE_URL;
         return;
       }
       const shown = s.results.slice(0, 10);
-      const data = await Promise.all(shown.map((r: any) => r.data()));
+      const data = await Promise.all(shown.map((r) => r.data()));
       results.innerHTML = data
-        .map((d: any) => {
+        .map((d) => {
           const title = d.meta?.title ?? d.url;
           return `<a class="search-hit" href="${hitUrl(d.url)}">
             <span class="search-hit-title">${title}</span>
@@ -136,7 +136,7 @@ const base = import.meta.env.BASE_URL;
 
   // `/` 快捷键聚焦：输入框/可编辑区里不劫持（否则没法正常打字）
   document.addEventListener('keydown', (e) => {
-    const t = e.target as HTMLElement | null;
+    const t = e.target;
     const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
     if (e.key === '/' && !typing && !dialog.open) {
       e.preventDefault();

@@ -47,7 +47,7 @@ function arg(name, def = null) {
 const HAS_SELFTEST = argv.includes('--selftest');
 const BASE = arg('base', 'http://127.0.0.1:4173/learn-agent-harness/');
 const OUT = arg('out', path.join(__dirname, 'out'));
-const FAULT = arg('fault', 'none'); // none | overflow | missing-element
+const FAULT = arg('fault', process.env.VISUAL_FAULT || 'none'); // none | overflow | missing-element
 const TOLERANCE = Number(arg('tolerance', '4')); // px
 
 if (FAULT !== 'none' && FAULT !== 'overflow' && FAULT !== 'missing-element') {
@@ -193,6 +193,32 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true 
     await elem('页标题', pageDef.title);
     await elem(pageDef.course ? '课程正文' : '卡片容器', pageDef.container, { min: pageDef.cardsMin });
     if (pageDef.course) await elem('课程 meta 栏', 'header.course-meta-bar');
+
+    // ②b 搜索入口交互（强于「无 console error」：证明 SiteSearch 脚本真的初始化成功）
+    // 触发按钮可见 → 点击 → dialog 打开（showModal）且输入框可见 → Esc 关闭还原现场。
+    // fixture 页（selftest）无搜索入口时跳过，不影响自检预期。
+    const searchTriggerVisible = await vis('[data-search-open]');
+    if (searchTriggerVisible) {
+      await page.click('[data-search-open]');
+      await page.waitForTimeout(150);
+      const s = await page.evaluate(() => {
+        const d = document.querySelector('[data-search-dialog]');
+        const i = document.querySelector('[data-search-input]');
+        const r = i ? i.getBoundingClientRect() : null;
+        return {
+          dialogOpen: d ? d.open : null,
+          inputVisible: r ? r.width > 0 && r.height > 0 : null,
+          inputWidth: r ? Math.round(r.width) : 0,
+        };
+      });
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+      const sOk = s.dialogOpen === true && s.inputVisible === true;
+      details.search = { ...s, ok: sOk };
+      if (!sOk) failures.push(`搜索初始化失败（dialog.open=${s.dialogOpen}，input 可见=${s.inputVisible}）`);
+    } else {
+      details.search = { applicable: false };
+    }
 
     // ③ 无 console error / 无 4xx-5xx
     if (consoleErrors.length > 0) failures.push(`console error ×${consoleErrors.length}：${consoleErrors.slice(0, 3).join(' | ')}${consoleErrors.length > 3 ? ` …（共 ${consoleErrors.length}）` : ''}`);
