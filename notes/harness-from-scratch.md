@@ -199,7 +199,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 
 任务：查北京天气 → 列 docs → 读 README → 写 out/summary.md（需审批）→ 试 run_shell（会被拒）→ 总结。
 
-**四种运行模式全部实测通过**：
+**五种运行模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩 / 可观测）**：
 
 | 模式 | 命令 | 验证的机制 | 结果 |
 |---|---|---|---|
@@ -207,6 +207,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 | 崩溃恢复 | `demo:crash` → `npm run demo` | ⑥⑦ intent/exec/未知状态 | ✅ 恢复后模型先 read 核对再重写 |
 | 审批拒绝 | `demo:reject` | ⑤ approve 路径 + 拒绝也是结果 | ✅ 跳过写入、不重试、如实报告（out/ 空） |
 | 压缩 | `demo:compact` | ⑧ 预算/摘要 | ✅ mock 验证（代理故障期） |
+| 可观测 | `demo:otel` | OTel GenAI span 树（invoke_agent → chat / execute_tool，可观测 §S2 埋点） | ✅ console 导出可用；span 计数「11 spans / 1 trace」为**报告值**（仓内无回放日志，**未验证**——需活端点复跑） |
 
 **代理不稳定实录（真实可靠性故事）**：19:25-19:33 全部正常，19:33 起该代理持续 400（`"functions parameter of the code model must be provided"`——代理把请求路由到了要求旧版 functions 格式的 code 模型后端）；期间还出现工具名带不可见字符（`unknown tool: get_weather` 假错）→ 加了一行防御 `tc.name.trim()`。**面试点：provider 也是不可靠组件；重试/降级/防御性解析属于 API 层职责。**
 

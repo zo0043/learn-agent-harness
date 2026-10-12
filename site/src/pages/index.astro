@@ -39,7 +39,7 @@ const Q_BANK = 37;
         <h3>harness-demo</h3>
         <p><span class="chip chip-strong">从零写 harness</span></p>
         <p>
-          从零手写最小 agent harness：9 个 TS 文件 ↔ ①-⑩ 十节——loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/
+          从零手写最小 agent harness：10 个 src 文件（9 运行时 + 1 压缩自测）↔ ①-⑩ 十节——loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/
           JSONL 轨迹 + 崩溃恢复 / token 压缩；5 种 demo 模式实测 + OTel 埋点（11 spans/1 trace）。
           白板面试版：<code>whiteboard/</code>（~180 行纯标准库，1:1 对应）。
         </p>
@@ -118,7 +118,7 @@ const Q_BANK = 37;
 
   <!-- ── 事故驱动 ─────────────────────────────────────── -->
   <section>
-    <h2 class="page-title" style="margin-top: 44px">事故驱动</h2>
+    <h2 class="page-title section-gap">事故驱动</h2>
     <p class="page-lead">
       这个仓库的每个设计判断都来自真实事故，而非教程。三起事故、三套机制：
     </p>
@@ -163,7 +163,7 @@ const Q_BANK = 37;
         </p>
       </div>
     </div>
-    <p style="margin-top: 14px; color: var(--text-soft); font-size: 0.92rem">
+    <p class="soft-md spaced">
       完整时间线与修复记录见仓库 <a href={repo + '/notes'} target="_blank" rel="noopener">notes/ ↗</a>
       （harness-from-scratch §⑨ 代理实录 / sandbox S1 / api-engineering S4）。
     </p>
@@ -193,7 +193,7 @@ const Q_BANK = 37;
         <span class="stat-label">可运行作品</span>
       </div>
     </div>
-    <p style="margin-top: 6px">
+    <p class="tight">
       学习路线：<a href={import.meta.env.BASE_URL + "learn/"}>P0 / P1 / P2 三段 × 知识域卡片 →</a> ·
       知识依赖：<a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a> ·
       模拟考卷：<a href={import.meta.env.BASE_URL + "interview/"}>面试题库 →</a>
@@ -204,3 +204,11 @@ const Q_BANK = 37;
     </p>
   </section>
 </Base>
+
+<style>
+  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。 */
+  .section-gap { margin-top: 44px; }
+  .soft-md { color: var(--text-soft); font-size: 0.92rem; }
+  .spaced { margin-top: 14px; }
+  .tight { margin-top: 6px; }
+</style>

@@ -130,12 +130,12 @@ function fmtMs(ms?: number): string {
   available && events.length > 0 ? (
     <div>
       <p class="traj-legend" aria-label="事件类型图例">
-        <span><i class="dot" style="background: var(--ev-init)"></i>init</span>
-        <span><i class="dot" style="background: var(--ev-model)"></i>model_response</span>
-        <span><i class="dot" style="background: var(--ev-intent)"></i>tool_intent</span>
-        <span><i class="dot" style="background: var(--ev-exec)"></i>tool_exec</span>
-        <span><i class="dot" style="background: var(--ev-compaction)"></i>compaction</span>
-        <span><i class="dot" style="background: var(--ev-final)"></i>final</span>
+        <span><i class="dot ev-init"></i>init</span>
+        <span><i class="dot ev-model"></i>model_response</span>
+        <span><i class="dot ev-intent"></i>tool_intent</span>
+        <span><i class="dot ev-exec"></i>tool_exec</span>
+        <span><i class="dot ev-compaction"></i>compaction</span>
+        <span><i class="dot ev-final"></i>final</span>
         <span class="chip">tool_exec：✅ ok / ⏸ 被拒</span>
       </p>
       <div class="traj-stats">
@@ -148,7 +148,7 @@ function fmtMs(ms?: number): string {
         <span class="chip">{toolCalls} 次工具调用</span>
         {
           denied > 0 && (
-            <span class="chip" style="color: var(--deny)">{denied} 次被拒（审批 / 策略）</span>
+            <span class="chip chip-deny">{denied} 次被拒（审批 / 策略）</span>
           )
         }
       </div>
@@ -183,3 +183,16 @@ function fmtMs(ms?: number): string {
     </div>
   )
 }
+
+<style>
+  /* U-36 收敛：图例点色与拒绝计数色的内联样式提为组件级类（视觉零变化）。
+     .ev-* 只声明 background，与 global.css 的 .traj-legend .dot（尺寸/圆角，无 background）不冲突；
+     .chip-deny 用双类声明（0,2,0）确定性胜过 .chip 的 color，不依赖样式注入顺序。 */
+  .ev-init { background: var(--ev-init); }
+  .ev-model { background: var(--ev-model); }
+  .ev-intent { background: var(--ev-intent); }
+  .ev-exec { background: var(--ev-exec); }
+  .ev-compaction { background: var(--ev-compaction); }
+  .ev-final { background: var(--ev-final); }
+  .chip.chip-deny { color: var(--deny); }
+</style>

@@ -45,7 +45,7 @@ const STATUS_FILTERS = (() => {
     P0 / P1 / P2 三段 × 知识域。卡片数据来自手写映射 <code>src/data/courses.ts</code>
     （基线：notes/knowledge-map.md 课程总表）；点开进课程页。
     <br />
-    <span style="color: var(--text-soft); font-size: 0.94rem">
+    <span class="lf-count-note">
       计数口径：{CARD_COUNT} 张课程卡 = courses.ts 全部条目（含 <code>whiteboard</code> 白板卡，
       无独立课程页、链向 /works/#whiteboard，故比 {COURSE_COUNT} 个课程页多 1）；
       {DOMAIN_COUNT} 知识域 = 14 编号课 + Harness 架构主线，不含 LLM 时间线 / 行业前线调研等横向资产。
@@ -138,15 +138,15 @@ const STATUS_FILTERS = (() => {
       <h2>建议开课顺序</h2>
     </div>
     <div class="card card-block">
-      <p style="margin-top: 0">
+      <p class="order-first">
         <code>系统设计</code> → <code>沙箱与凭据（续 S2）</code> → <code>评测工程化</code> →
         <code>durable execution</code> → <code>MCP 与供应链安全</code> → <code>API 与多模型路由</code> →
         <code>数据飞轮</code> →（P2 四课按目标岗位权重排）
       </p>
-      <p style="color: var(--text-soft); font-size: 0.92rem">
+      <p class="order-reason">
         理由:系统设计把「从零写 harness / RAG 与检索」收口成“设计能力”;沙箱与凭据讲义已展开且 demo 已落地;评测工程化是 P1 三课(durable execution / MCP 与供应链安全 / 数据飞轮)的公共地基。
       </p>
-      <p style="font-size: 0.9rem">
+      <p class="order-more">
         完整依赖图与横切知识点见 <a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a>
       </p>
     </div>
@@ -202,3 +202,12 @@ const STATUS_FILTERS = (() => {
     apply();
   }
 </script>
+
+<style>
+  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。
+     .order-first 的 margin-top:0 与 .card p{margin:0} 同值，保留显式声明以免依赖全局规则。 */
+  .lf-count-note { color: var(--text-soft); font-size: 0.94rem; }
+  .order-first { margin-top: 0; }
+  .order-reason { color: var(--text-soft); font-size: 0.92rem; }
+  .order-more { font-size: 0.9rem; }
+</style>

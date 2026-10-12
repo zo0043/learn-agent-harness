@@ -50,7 +50,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     每个作品都是课程的可运行证据：文件 ↔ 课程节一一对应，本地可跑、可复现。
     源码见 <a href={repo} target="_blank" rel="noopener">仓库 ↗</a>。
     <br />
-    <span style="color: var(--text-soft); font-size: 0.94rem">
+    <span class="work-soft">
       计数口径：本页共 <strong>{WORK_COUNT} 个可运行 demo 作品</strong>（= 有 <code>npm run demo</code>
       的目录：harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo /
       framework-demo）；另有 <code>whiteboard/</code>（Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
@@ -70,12 +70,12 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>harness-demo · 从零手写 agent harness</h2>
     <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['harness-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['harness-demo']].label}</span></p>
     <div class="card card-block work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
         harness 的契约是 <code>policy → intent → execute → result</code>（结果必回写，拒绝也是结果）。
       </p>
 
-      <h3>9 个文件 ↔ ①-⑩ 十节（下表按主要落点）</h3>
+      <h3>10 个 src 文件（9 运行时 + 1 压缩自测）↔ ①-⑩ 十节（下表按主要落点）</h3>
       <table class="file-table">
         <thead>
           <tr><th>文件</th><th>对应节</th><th>职责</th></tr>
@@ -88,7 +88,8 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
           <tr><td>policy.ts</td><td class="sec">⑤ 权限门</td><td>deny &gt; approve &gt; allow，默认 deny；审批回调 human-in-the-loop</td></tr>
           <tr><td>session.ts</td><td class="sec">⑥⑦ 会话持久化 + 恢复</td><td>JSONL 日志是唯一事实源；上下文由日志派生（可重建）；未知状态 = intent 已记、exec 缺失</td></tr>
           <tr><td>context.ts</td><td class="sec">⑧ 预算 / 压缩</td><td>token 估算 + 教学压缩策略</td></tr>
-          <tr><td>demo.ts</td><td class="sec">⑨ 轨迹 / 演示</td><td>多步任务 + 四种运行模式</td></tr>
+          <tr><td>demo.ts</td><td class="sec">⑨ 轨迹 / 演示</td><td>多步任务 + 五种运行模式</td></tr>
+          <tr><td>otel.ts</td><td class="sec">⑨ 轨迹 / 演示 · 可观测 §S2</td><td>OTel GenAI span 树（invoke_agent → chat / execute_tool）+ console 导出；<code>OTEL_EXPORT_OTLP=1</code> 时追加 OTLP/HTTP</td></tr>
           <tr><td>test-compact.ts</td><td class="sec">⑧ 压缩验证</td><td>本地 mock 模型单独验证压缩逻辑（不依赖外部代理）</td></tr>
         </tbody>
       </table>
@@ -121,7 +122,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>rag-demo · 零依赖 RAG</h2>
     <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['rag-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['rag-demo']].label}</span></p>
     <div class="card card-block work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>词法检索只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
         BM25 用价目表（IDF × tf 饱和 × 长度归一）修了定价，但 BM25 改不掉词法上限——这正是 embedding 路存在的理由。
       </p>
@@ -149,7 +150,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
         <div class="eval-stat"><div class="num">{rag.recall5}</div><div class="lbl">recall@5</div></div>
         <div class="eval-stat"><div class="num">{rag.recall10}</div><div class="lbl">recall@10</div></div>
       </div>
-      <p style="color: var(--text-soft); font-size: 0.9rem">
+      <p class="work-note">
         口径：{rag.date} 锚点式 golden set 复测（<code>npm run demo:eval</code> 实跑），PASS {rag.pass}。
         <strong>数字随 <code>notes/rag.md</code> §13 自动派生</strong>（构建期 <code>parseRagStats</code>，
         解析失败即构建失败，不静默回退硬编码）。
@@ -171,12 +172,12 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>whiteboard · 白板版 agent（~180 行 Python）</h2>
     <p class="work-tag">面试口述版 · 纯标准库 · 与 TS 版架构 1:1 对应</p>
     <div class="card card-block work-card">
-      <p style="margin-top: 0">
+      <p>
         白板 20 分钟能写完、能边写边讲的版本。与 <code>harness-demo/src/</code> 一一对应：
         <code>② loop</code> / <code>③ 工具协议</code> / <code>⑤ 权限门</code> /
         <code>⑥⑦ 会话与恢复</code> / <code>⑧ 预算</code>（压缩留 stub，只报预算超限）。
       </p>
-      <p style="color: var(--text-soft); font-size: 0.94rem">
+      <p class="work-soft">
         简化取舍（白板上的说明）：非流式调用（生产换 SSE：解析 data: 帧 + 拼接 tool_calls 片段）；
         压缩留 stub；schema 校验只查 required（完整版在 TS <code>validateArgs</code>）。
       </p>
@@ -196,7 +197,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>sandbox-demo · 四通道 policy 引擎 + 幽灵事故重放</h2>
     <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].label}</span></p>
     <div class="card card-block work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”（合法工具、合法命令），
         照样炸了生产：缺的是执行环境边界（哪个 compose 项目 / 目录树 / 命名空间）。
       </p>
@@ -234,7 +235,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>mcp-demo · MCP 供应链投毒演示</h2>
     <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['mcp-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['mcp-demo']].label}</span></p>
     <div class="card card-block work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——单层消融：仅 L1 输入消毒仍泄（输入层是软防线，挡不住不合规的模型），
         确定性硬防线在 L2 policy 门 / L3 egress 白名单，互为独立 backstop（审批会被磨穿，egress 不会）。
       </p>
@@ -268,7 +269,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>durable-execution-demo · 长任务崩溃恢复实操</h2>
     <p class="work-tag">durable execution（P1 · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].label}</span></p>
     <div class="card work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——intent 在、exec 不在的未知态，先只读问外部服务「这个幂等 key 送达过吗」再决定执行还是跳过；盲目重放会双发，盲目跳过可能漏发。
       </p>
       <h3>3 种崩溃点 × 真实 SIGKILL × 各 3 次</h3>
@@ -302,7 +303,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
     <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['framework-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['framework-demo']].label}</span></p>
     <div class="card card-block work-card">
-      <p class="work-lesson" style="margin-bottom: 10px">
+      <p class="work-lesson">
         一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——<code>allowedTools</code>
         裸名会抢在 <code>canUseTool</code> 之前 auto-approve 整个工具，回调根本不触发（SDK 警告
         <code>CLAUDE_SDK_CAN_USE_TOOL_SHADOWED</code>）；要逐调用过权限，就别把该工具放进 allowedTools。
@@ -374,3 +375,17 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     </div>
   </section>
 </Base>
+
+<style>
+  /* U-36 收敛：本页高频内联样式提为页面级类（声明与原子内联逐字一致，视觉零变化）。
+     global.css 是样式体系、本波不改，故用 Astro 页面级 style 承载本页专属规则。
+     - .work-lesson 的 margin-bottom：6 处「一句话教训」段原 style="margin-bottom: 10px"
+       （.card p 的 margin:0 保留不动，bottom 间距仍由本规则给出）
+     - .work-soft：2 处 soft 色小字原 style="color: var(--text-soft); font-size: 0.94rem"
+       （页首计数口径说明 / 白板简化取舍段）
+     - .work-note：1 处 soft 色小字原 style="color: var(--text-soft); font-size: 0.9rem"
+       （RAG 评测口径说明段；与 .work-soft 仅字号差 0.04rem，故分列两规则不合并） */
+  .work-lesson { margin-bottom: 10px; }
+  .work-soft { color: var(--text-soft); font-size: 0.94rem; }
+  .work-note { color: var(--text-soft); font-size: 0.9rem; }
+</style>

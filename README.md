@@ -10,7 +10,7 @@ AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 
 | 目录 | 内容 | 跑法 |
 |---|---|---|
-| [`harness-demo/`](harness-demo/) | **从零写 harness**：从零写 harness——agent loop / SSE 流式 / JSON schema 校验 / 权限门（deny>approve>allow，默认 deny）/ JSONL 轨迹 + 崩溃恢复 / token 压缩。9 个源文件 + trajectories 落盘，覆盖 harness-from-scratch ①-⑩ 十节；5 种 demo 模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩 / OTel 埋点） | `cd harness-demo && npm i && cp .env.example .env`（填自己的 key）→ `npm run demo` |
+| [`harness-demo/`](harness-demo/) | **从零写 harness**：从零写 harness——agent loop / SSE 流式 / JSON schema 校验 / 权限门（deny>approve>allow，默认 deny）/ JSONL 轨迹 + 崩溃恢复 / token 压缩。10 个源文件（9 运行时 + 1 压缩自测）+ trajectories 落盘，覆盖 harness-from-scratch ①-⑩ 十节；5 种 demo 模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩 / OTel 埋点） | `cd harness-demo && npm i && cp .env.example .env`（填自己的 key）→ `npm run demo` |
 | [`rag-demo/`](rag-demo/) | **RAG 与检索**：从零写最小 RAG——chunker → hash embedder（768 维）→ 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用 + 强制拒答生成 → 10 题 golden set 评测（recall@3=0.31 / @5=0.44 / @10=0.50，PASS 3/8，132 chunks；旧值 recall@3=1.00 出行号指针期 gold set、**已废**，口径见 [notes/rag.md](notes/rag.md) §13「数字口径」）。零依赖 tsx | `cd rag-demo && npm i` → `npm run demo:eval` |
 | [`sandbox-demo/`](sandbox-demo/) | **沙箱与凭据**：TS 迷你沙箱——四通道 policy 引擎（allow/deny/approve/sandbox，deny 优先）+ FinHot 幽灵事故重放剧本（"权限门≠沙箱"：step 3 的 docker_compose_up 动作合法但被沙箱通道关进隔离命名空间）+ 确定性重放验收（3 次逐字节一致）。全离线零依赖 | `cd sandbox-demo && npm i` → `npm run demo` |
 | [`mcp-demo/`](mcp-demo/) | **MCP 与供应链安全**：MCP 供应链投毒演示——对照组（注入指令劫持 send_email ❌）vs 四层防御（消毒/policy 门/沙箱断言/审计 ✅）+ 消融实验（L1 单独挡不住）+ 同进程两次重放逐字节一致。全离线 | `cd mcp-demo && npm i` → `npm run demo` |

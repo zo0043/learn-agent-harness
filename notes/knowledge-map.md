@@ -5,7 +5,7 @@
 > 命名(2026-10-11 起):课程一律以**知识域名**引用,弃用 A–N 字母代号与课程顺序编号(历史文档已批量改齐)。
 > 状态记号：✅ 已完成 / 🔄 进行中 / 📐 讲义已展开（待提问演练） / ⏳ 未开始（已建知识结构，待开课）
 >
-> **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。每课题库 +2 题（共 20 题）。
+> **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。各课题库同步补题（现行题量见下方计数口径「题目」条，按块内规则不另起数）。
 > ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
 >
 > **计数口径（2026-10-12 冻结，全仓唯一参照，其余位置只引用本块、不另起数）**：
@@ -14,6 +14,7 @@
 > · **课程卡 18** = `site/src/data/courses.ts` 全部条目；含 `whiteboard` 白板卡（无独立 notes 文件与课程页，链向 /works/#whiteboard），故课程卡比课程页多 1。
 > · **可运行 demo 作品 6** = harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo（有 `npm run demo` 的目录）；whiteboard / viz / site 为配套资产，不计入。
 > · **题目**：课内嵌 **205** 题（13 课练习题库 176 + agent-harness §13 八题 + rag S1 五题 + model-basics S7 十六题）+ 面试题库精选 **37** 题（interview-bank §3 22 + §4 10 + §8 5）。
+> · **站点 html 32** = 6 静态页（index / learn / works / map / interview / details）+ 17 课程页（见上条）+ 8 专题页（details/）+ 404.html；构建产物数以 CI 为准。
 > · **rag-demo 评测口径**（2026-10-12 锚点式 golden set 复测，以 `notes/rag.md §13` 为唯一数字源）：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50，PASS 3/8，语料 132 chunks；旧值 recall@3=1.00 / @5=0.94 出自已废止的「行号指针」golden set（旧语料口径同时作废，全仓禁用旧值）。
 
 ## 命名总表(唯一真源)
@@ -162,7 +163,7 @@ graph TD
 - [x] 实操补强 ×4（2026-10-11 完成）：sandbox-demo 四通道 policy+幽灵重放（600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 11 spans/1 trace）/ mcp-demo 投毒+四层防御+消融 / framework-demo Claude Agent SDK（11/11 断言）
 - [x] 记忆投毒红队回归（2026-10-12）：`memory-redteam/` 零依赖可执行套件——11 条探针全部守住、10/10 对防线敏感（消融自检），编码自长期记忆 §S7 四道防线与 §S10 步骤 6-7；首次运行即抓出"scope 缺省字段按 `undefined` 比较致冲突检测静默失效"的真 bug。原 interview-bank 补强项 4「未做」已闭环
 - [x] 日期口径确认（2026-10-11）：归一到系统时钟，11 文件 27 行 28 处修正
-- [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 https://blog.zero43.top/learn-agent-harness/（32 个 html）
+- [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 https://blog.zero43.top/learn-agent-harness/（32 个 html，构成见上方计数口径「站点 html 32」条）
 - [ ] JD 关键词覆盖：见 `interview-bank.md` 矩阵（目标全 🟢）
 - [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过；一手数据已在 `jd-research/`，其余六家已抓 1799 条）[handoff 待办 3 / interview-bank §7 并入]
 - [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 P1/P2 权重 [interview-bank §7 并入]

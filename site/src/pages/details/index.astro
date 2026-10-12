@@ -75,7 +75,7 @@ function oneLiner(body: string | undefined): string {
     )
   }
 
-  <h2 class="page-title" style="margin-top: 34px">其余 {rest.length} 篇</h2>
+  <h2 class="page-title section-gap">其余 {rest.length} 篇</h2>
   {
     rest.length > 0 ? (
       <div class="cards">
@@ -109,3 +109,8 @@ function oneLiner(body: string | undefined): string {
     )
   }
 </Base>
+
+<style>
+  /* U-36 收敛：本页标题间距内联样式提为页面级类（视觉零变化）。 */
+  .section-gap { margin-top: 34px; }
+</style>

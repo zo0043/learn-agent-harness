@@ -47,7 +47,7 @@ const base = import.meta.env.BASE_URL;
 
       <rendered.Content />
 
-      <p slot="note" style="margin-top: 14px; color: var(--text-faint); font-size: 0.9rem">
+      <p slot="note" class="note-tail">
         本页由 <code>notes/knowledge-map.md</code> 自动渲染——改笔记即同步，不再维护站点侧副本。
       </p>
     </NotePageLayout>
@@ -59,3 +59,8 @@ const base = import.meta.env.BASE_URL;
     </div>
   )
 }
+
+<style>
+  /* U-36 收敛：note 尾注内联样式提为页面级类（视觉零变化）。 */
+  .note-tail { margin-top: 14px; color: var(--text-faint); font-size: 0.9rem; }
+</style>
