@@ -18,6 +18,8 @@ export const TRUST = Object.freeze({
 
 /** S10 步骤 4.5：注入阈值（confidence ≥ 0.8 才进 system） */
 export const INJECT_CONFIDENCE = 0.8;
+/** 确定性基准时钟：S10 走查的场景时间（2026-10-12）。回归输出必须可逐字节复现 */
+export const FIXED_NOW = '2026-10-12T12:00:00+08:00';
 /** S7 防御 3：高危事实（要执行 / 要凭据 / 要外发）= 程序记忆级管控 */
 export const HIGH_RISK_CATEGORIES = Object.freeze(new Set(['PROCEDURE', 'CREDENTIALS', 'EGRESS']));
 
@@ -43,14 +45,18 @@ const DEFENSE_KEYS = Object.freeze([
 export function createStore(overrides = {}) {
   const defenses = Object.fromEntries(DEFENSE_KEYS.map((k) => [k, true]));
   for (const [k, v] of Object.entries(overrides)) {
+    if (k === 'clock') continue; // 时钟不是防线
     if (!DEFENSE_KEYS.includes(k)) throw new Error(`未知防线: ${k}`);
     defenses[k] = v;
   }
+  // 确定性要求（合约 W5-B）：时钟由调用方注入，缺省用固定基准时间——
+  // 否则 new Date() 会让同一回归两次运行输出不同（墓碑时间戳漂移）。
   let seq = 0;
   return {
     defenses,
     items: [],
     audit: [],
+    clock: overrides.clock ?? (() => FIXED_NOW),
     nextId: () => `mem#${100 + ++seq * 74}`, // 走查里的 mem#248 / mem#301 量级
   };
 }
@@ -214,7 +220,7 @@ export function forget(store, id, reason = 'user_request') {
   target.content = null;
   target.embedding = null;
   target.status = 'deleted';
-  target.deleted_at = new Date().toISOString();
+  target.deleted_at = store.clock();
   target.deletion_reason = reason;
 
   // 传播：derived_from 指向本条（或指向本条祖先）的派生物必须重生成/删除

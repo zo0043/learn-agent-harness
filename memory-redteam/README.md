@@ -12,9 +12,12 @@ node test.mjs              # 正跑：11 条探针全部守住 → 退出码 0
 node test.mjs --ablate     # 消融自检：逐条关掉对应防线，探针必须失败 → 证明探针有效
 node test.mjs --only R3    # 只跑一条
 npm test                   # 等价于 node test.mjs
+npx tsx src/index.ts       # 等价入口（转发到 test.mjs，输出逐字节一致）
 ```
 
-要求 node ≥ 18（原生 ESM，无第三方依赖，无构建步骤）。
+要求 node ≥ 18（原生 ESM，无第三方依赖，无构建步骤；`src/index.ts` 是纯 JS 语法的转发入口，`tsx` 非必需）。
+
+**确定性**：时钟由 `createStore()` 注入，缺省固定为 `FIXED_NOW`（§S10 走查基准时间）。同一命令连续两次运行输出逐字节一致（`diff` 为空）——回归报告里不含墙钟时间戳。
 
 当前状态（2026-10-12）：
 
@@ -51,6 +54,7 @@ npm test                   # 等价于 node test.mjs
 memory-redteam/
 ├── package.json     零依赖，scripts: test / test:ablate
 ├── test.mjs         runner（正跑 + 消融）
+├── src/index.ts     等价入口（转发 test.mjs；对齐合约 verify#3 的 npx tsx 跑法）
 ├── src/memory.mjs   写/读路径参考实现（每道防线可在 createStore() 里单独开关）
 └── src/redteam.mjs  11 条探针：断言 + 来源引用 + 消融映射
 ```
