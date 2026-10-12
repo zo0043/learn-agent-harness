@@ -73,9 +73,14 @@ jobs:
         working-directory: site
         run: npx playwright install --with-deps chromium
 
+      # 站点以 base=/learn-agent-harness/ 构建（astro 只改 URL 前缀，dist 仍是平铺结构），
+      # 线上由反代把 /learn-agent-harness/ 前缀映射到 Pages 内容根。这里用符号链接目录
+      # 1:1 复刻该语义：/learn-agent-harness/<path> → site/dist/<path>。
       - name: Serve dist (static server)
         run: |
-          python3 -m http.server 4173 --bind 127.0.0.1 --directory site/dist > /tmp/httpd.log 2>&1 &
+          mkdir -p /tmp/serve-root
+          ln -s "$(pwd)/site/dist" /tmp/serve-root/learn-agent-harness
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory /tmp/serve-root > /tmp/httpd.log 2>&1 &
           echo $! > /tmp/httpd.pid
           for i in $(seq 1 30); do
             if curl -sf http://127.0.0.1:4173/learn-agent-harness/ > /dev/null; then
