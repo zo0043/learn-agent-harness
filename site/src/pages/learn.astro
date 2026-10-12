@@ -17,6 +17,21 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
   { phase: 'P2', desc: '区分度段：按目标岗位权重排' },
   { phase: '—', desc: '横向素材：未分阶段' },
 ];
+
+/** 状态徽章文本 → 稳定 key（与 STATUS_COUNTS 的判定规则一致：取 emoji 前缀） */
+function statusKey(status: CourseMeta['status']): string {
+  if (status.startsWith('✅')) return 'done';
+  if (status.startsWith('🔄') || status.startsWith('🚧')) return 'doing';
+  if (status.startsWith('⏳')) return 'planned';
+  return 'other';
+}
+
+// 筛选 chip 的状态维度：从 COURSES 实际出现的状态派生（不手抄，避免与数据漂移）
+const STATUS_FILTERS = (() => {
+  const seen = new Map<string, string>();
+  for (const c of COURSES) seen.set(statusKey(c.status), c.status);
+  return [...seen.entries()].map(([key, label]) => ({ key, label }));
+})();
 ---
 
 <Base title="学习路线">
@@ -37,11 +52,35 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
     </span>
   </p>
 
+  <!-- ── 筛选（P-12 · W4-A）──────────────────────────────
+       渐进增强：静态 HTML 里没有任何 hidden 属性 → 无 JS 时全部卡片可见；
+       筛选条本身由 CSS 默认隐藏，脚本就绪后才显示（否则会给读者一堆按了没反应的按钮）。
+       维度：阶段（隐藏整个 phase-section）+ 状态（隐藏单张卡片）。 -->
+  <div class="learn-filters" data-learn-filters>
+    <div class="lf-group" role="group" aria-label="按阶段筛选">
+      <span class="lf-label">阶段</span>
+      <button type="button" class="chip lf-chip is-on" data-lf-phase="">全部</button>
+      {PHASES.map(({ phase }) => (
+        <button type="button" class="chip lf-chip" data-lf-phase={phase}>
+          {phase === '—' ? '未分阶段' : phase}
+        </button>
+      ))}
+    </div>
+    <div class="lf-group" role="group" aria-label="按状态筛选">
+      <span class="lf-label">状态</span>
+      <button type="button" class="chip lf-chip is-on" data-lf-status="">全部</button>
+      {STATUS_FILTERS.map(({ key, label }) => (
+        <button type="button" class="chip lf-chip" data-lf-status={key}>{label}</button>
+      ))}
+    </div>
+    <span class="lf-count" data-lf-count aria-live="polite"></span>
+  </div>
+
   {
     PHASES.map(({ phase, desc }) => {
       const list = COURSES.filter((c) => c.phase === phase);
       return (
-        <section class="phase-section">
+        <section class="phase-section" data-lf-section data-phase={phase}>
           <div class="phase-head">
             <h2>{phase === '—' ? '未分阶段' : phase}</h2>
             <span class="phase-desc">{desc}</span>
@@ -52,7 +91,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                 const exists = slugSet.has(c.slug);
                 const isWhiteboard = c.slug === 'whiteboard';
                 return isWhiteboard ? (
-                  <a class="card domain-card" href={import.meta.env.BASE_URL + "works/#whiteboard"}>
+                  <a class="card domain-card" href={import.meta.env.BASE_URL + "works/#whiteboard"} data-lf-card data-status={statusKey(c.status)}>
                     <div class="dc-top">
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
@@ -62,7 +101,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                     <p class="dc-foot">作品详解 →</p>
                   </a>
                 ) : exists ? (
-                  <a class="card domain-card" href={import.meta.env.BASE_URL + `c/${c.slug}/`}>
+                  <a class="card domain-card" href={import.meta.env.BASE_URL + `c/${c.slug}/`} data-lf-card data-status={statusKey(c.status)}>
                     <div class="dc-top">
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
@@ -72,7 +111,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
                     <p class="dc-foot">进入课程 →</p>
                   </a>
                 ) : (
-                  <div class="card domain-card soon" aria-label="撰写中">
+                  <div class="card domain-card soon" aria-label="撰写中" data-lf-card data-status={statusKey(c.status)}>
                     <div class="dc-top">
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
@@ -85,6 +124,7 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
               })
             }
           </div>
+          <p class="lf-empty" data-lf-empty hidden>该阶段没有符合当前状态的卡片。</p>
         </section>
       );
     })
@@ -109,3 +149,53 @@ const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
     </div>
   </section>
 </Base>
+
+{/* 筛选逻辑（vanilla JS，无第三方库）。
+    无 JS 时：静态 HTML 无任何 hidden → 18 张卡片全部可见，筛选条被 CSS 藏住。
+    有 JS 时：脚本先摘掉隐藏再绑定，chip 点击改 hidden 属性（不碰内联 style）。 */}
+<script>
+  const bar = document.querySelector<HTMLDivElement>('[data-learn-filters]');
+  if (bar) {
+    bar.setAttribute('data-ready', '');
+    const sections = [...document.querySelectorAll<HTMLElement>('[data-lf-section]')];
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-lf-card]')];
+    const count = bar.querySelector<HTMLElement>('[data-lf-count]');
+    const phaseChips = [...bar.querySelectorAll<HTMLButtonElement>('[data-lf-phase]')];
+    const statusChips = [...bar.querySelectorAll<HTMLButtonElement>('[data-lf-status]')];
+
+    let phase = '';
+    let status = '';
+
+    function apply() {
+      let shown = 0;
+      for (const sec of sections) {
+        const phaseOk = !phase || sec.dataset.phase === phase;
+        let secShown = 0;
+        for (const card of cards.filter((c) => c.closest('[data-lf-section]') === sec)) {
+          const statusOk = !status || card.dataset.status === status;
+          const show = phaseOk && statusOk;
+          card.hidden = !show;
+          if (show) secShown += 1;
+        }
+        sec.hidden = !phaseOk || secShown === 0;
+        const empty = sec.querySelector<HTMLElement>('[data-lf-empty]');
+        if (empty) empty.hidden = sec.hidden || secShown > 0;
+        shown += secShown;
+      }
+      if (count) count.textContent = `显示 ${shown} / ${cards.length} 张`;
+    }
+
+    function bind(chips: HTMLButtonElement[], set: (v: string) => void) {
+      for (const chip of chips) {
+        chip.addEventListener('click', () => {
+          set(chip.dataset.lfPhase ?? chip.dataset.lfStatus ?? '');
+          for (const c of chips) c.classList.toggle('is-on', c === chip);
+          apply();
+        });
+      }
+    }
+    bind(phaseChips, (v) => (phase = v));
+    bind(statusChips, (v) => (status = v));
+    apply();
+  }
+</script>

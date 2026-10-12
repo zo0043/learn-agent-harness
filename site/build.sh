@@ -29,13 +29,17 @@ ASTRO=./node_modules/.bin/astro
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=${BUILD_MAX_OLD_SPACE:-1024}"
 
 if command -v capped >/dev/null 2>&1; then
-  # 实测：一旦 node_modules/.vite 依赖预构建缓存被清掉（换依赖、`rm -rf node_modules/.vite`、
-  # 或者上一次构建被中途杀掉），vite 的 transform 阶段内存峰值会明显超过 1.5G——在默认
-  # 的 1500M 硬上限下会被直接杀掉（日志停在 "building client (vite) / [vite] transforming..."，
-  # 进程收到 SIGTERM 后消失，看起来像"莫名构建失败"）。1500M 只在热缓存下够用。
-  # 因此默认把硬上限抬到 1800M（仍受 capped.slice 的 MemorySwapMax=0 约束：撞顶时被杀的是
-  # 构建自己，不会把整机拖进 swap/reclaim）。
   export CAPPED_MEMORY_MAX="${CAPPED_MEMORY_MAX:-1800M}"
-  exec capped "$ASTRO" build "$@"
+  capped "$ASTRO" build "$@"
+else
+  "$ASTRO" build "$@"
 fi
-exec "$ASTRO" build "$@"
+
+# ── pagefind：构建期全文索引（零服务端依赖）────────────────────
+# 只在 astro build 成功后执行：上面任一支非 0 退出都会被 set -e 拦下，脚本直接终止，
+# 不会走到这里——即「build 失败则不跑 pagefind」，不会给半成品 dist 盖一层索引。
+# 产物落在 dist/pagefind/，随 CI 的 upload-pages-artifact（path: site/dist）整目录上传，
+# 浏览器端 pagefind.js 按需拉取索引分片，无需任何服务端搜索组件。
+# 用 npx 而不是写死 node_modules/.bin/pagefind：CI 上 npm ci 已装好（npx 直接命中本地），
+# 万一本地 node_modules 不新鲜，npx 还能按需取一次，不会让构建卡在"找不到二进制"。
+npx pagefind --site dist

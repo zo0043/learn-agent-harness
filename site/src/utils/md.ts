@@ -15,11 +15,27 @@ function captionOf(src: string): string | null {
 }
 
 /**
- * 与站点主管线（astro.config.mjs 的 remarkMermaid）对齐：mermaid 围栏 →
- * <figure class="mermaid-figure">（让 global.css 的 .mermaid-figure 规则生效），
- * figcaption 取源码首行 %% caption: 注释，否则按页内序号自动编号『图 N』。
- * figure 内联 <noscript> 兜底：无 JS 时（客户端脚本不执行）div 里显示的是
- * 图表源码，noscript 给读者一句人话说明。
+ * 与站点主管线（astro.config.mjs 的 markdown 配置）的关系——**已逐项实测比对**（W4-A）：
+ * 同一份 markdown 过两条管线，9 个样本里 8 个输出逐字节相同
+ * （公式 / 表格 / 脚注 / 删除线 / 内嵌 HTML / 任务列表 / 代码块 / 标题锚点）。
+ *
+ * 唯一分歧是 mermaid 围栏的输出形态，且这是**有意的双路径**，不是漏对齐：
+ *   - astro.config.mjs（主管线）：只产裸 `<div class="mermaid">`，figure 外壳由
+ *     `src/scripts/mermaid.ts` 的 ensureFigure() 在**浏览器渲染时**补；
+ *   - 本文件（mdToHtml，服务端直出 HTML）：构建期直接产完整
+ *     `<figure class="mermaid-figure">…<figcaption>…</figcaption><noscript>…</noscript></figure>`，
+ *     因为服务端没有客户端脚本可依赖，noscript 兜底只能在构建期写好。
+ * 两条路径产出的 figure 结构同构，global.css 的 .mermaid-figure 规则因此都生效。
+ *
+ * 为何不抽成共享模块一次对齐：astro.config.mjs 不在 W4-A 的 inScope 内
+ * （改它要动 shiki/base 等全局配置，属 W4-B/W4-C 范围），本文件在 scope 内却改不动
+ * 主管线——硬抽只会得到"一份没人用的共享模块 + 主管线仍手抄"。故此处把差异写明，
+ * 待 astro.config.mjs 解禁后可抽 `utils/remarkMermaid.ts` 供两边 import 收口。
+ *
+ * allowDangerousHtml 两侧都必须开：remarkMermaid 产出的 html 节点默认会被
+ * remark-rehype 丢弃；Astro 主管线内部对 remarkRehype/rehypeStringify 默认就是
+ * allowDangerousHtml:true，这里与它对齐（实测：不开则内嵌 HTML 与 mermaid 全被吞）。
+ * footnotes:false：轨迹片段是局部渲染，不需要文末脚注区（主管线整页渲染才需要）。
  */
 function remarkMermaid() {
   return (tree: any) => {

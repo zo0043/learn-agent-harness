@@ -1,4 +1,6 @@
 ---
+import SiteSearch from './SiteSearch.astro';
+
 const base = import.meta.env.BASE_URL;
 const nav = [
   { href: '/', label: '首页', start: true },
@@ -39,6 +41,7 @@ function isActive(item: (typeof nav)[number]): boolean {
         ))
       }
     </nav>
+    <SiteSearch />
     <button
       class="theme-toggle"
       data-theme-toggle

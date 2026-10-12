@@ -1,0 +1,146 @@
+---
+/**
+ * SiteSearch：全站搜索入口（P-04）。
+ *
+ * 索引由 pagefind 在**构建期**生成（site/build.sh 在 astro build 成功后追加
+ * `pagefind --site dist`），产物落在 dist/pagefind/，随 CI 的
+ * upload-pages-artifact（path: site/dist）整目录部署。浏览器端按需拉取索引分片，
+ * 零服务端依赖、零运行时 API——GitHub Pages 纯静态托管即可。
+ *
+ * 渐进增强：无 JS 时本组件只渲染一个不可用的按钮形态（页面其余内容完全可读），
+ * 搜索能力整体消失但不破坏阅读。dev 模式（astro dev）没有 dist/pagefind，
+ * 懒加载会失败——此时按钮给出「搜索索引未生成」的人话提示，不抛未捕获异常。
+ */
+const base = import.meta.env.BASE_URL;
+---
+
+<button class="search-trigger" type="button" data-search-open aria-label="搜索全站（快捷键 /）" title="搜索全站（快捷键 /）">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7"></circle>
+    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+  </svg>
+  <span class="search-trigger-label">搜索</span>
+  <kbd class="search-kbd" aria-hidden="true">/</kbd>
+</button>
+
+<dialog class="search-dialog" data-search-dialog aria-label="全站搜索">
+  <div class="search-panel">
+    <div class="search-head">
+      <svg class="search-head-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+      </svg>
+      <input
+        class="search-input"
+        type="search"
+        placeholder="搜索课程 / 作品 / 题库 / 详解…"
+        autocomplete="off"
+        spellcheck="false"
+        data-search-input
+        aria-controls="site-search-results"
+      />
+      <kbd class="search-kbd" data-search-close aria-hidden="true">Esc</kbd>
+    </div>
+    <div class="search-results" id="site-search-results" data-search-results role="region" aria-live="polite">
+      <p class="search-hint">输入关键词开始检索；索引覆盖全部笔记正文。</p>
+    </div>
+  </div>
+</dialog>
+
+{/* is:inline：脚本含运行期才能确定的动态 import()（pagefind 索引路径依赖 base），
+    Vite 无法静态分析 → 按 Astro 规则自动按 inline 处理；显式写出来意图更清晰，
+    也让 BASE 变量由 define:vars 原样注入而非被打包器改写。 */}
+<script is:inline define:vars={{ base }}>
+  const BASE: string = base;
+  const trigger = document.querySelector<HTMLButtonElement>('[data-search-open]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-search-dialog]');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const results = document.querySelector<HTMLDivElement>('[data-search-results]');
+  if (!trigger || !dialog || !input || !results) throw new Error('SiteSearch: 找不到必要节点');
+
+  // pagefind 索引分片体积不小，懒加载：首次打开搜索框时才拉 pagefind.js。
+  let pagefind: typeof import('/pagefind/pagefind.js') | null = null;
+  let loading: Promise<typeof import('/pagefind/pagefind.js')> | null = null;
+  async function loadPagefind() {
+    if (pagefind) return pagefind;
+    if (!loading) {
+      loading = import(/* @vite-ignore */ `${BASE}pagefind/pagefind.js`).then((m: any) => {
+        pagefind = m;
+        return m;
+      });
+    }
+    return loading;
+  }
+
+  let debounce: number | undefined;
+  /** pagefind 的 url 相对 dist 根（如 /learn/），本站有 base（/learn-agent-harness/）需拼接；
+   *  已含 base 时不重复拼——防御 pagefind 版本间「是否回填 base」的行为差异。 */
+  function hitUrl(url: string): string {
+    const b = BASE.replace(/\/$/, '');
+    if (url.startsWith(`${b}/`)) return url;
+    return b + (url.startsWith('/') ? url : `/${url}`);
+  }
+  async function run(q: string) {
+    const query = q.trim();
+    if (!query) {
+      results.innerHTML = '<p class="search-hint">输入关键词开始检索；索引覆盖全部笔记正文。</p>';
+      return;
+    }
+    results.innerHTML = '<p class="search-hint">检索中…</p>';
+    try {
+      const pf = await loadPagefind();
+      await pf.options({ excerptLength: 18 });
+      const s = await pf.search(query);
+      if (s.results.length === 0) {
+        results.innerHTML = '<p class="search-hint">没有匹配结果——换个关键词试试（支持中英文）。</p>';
+        return;
+      }
+      const shown = s.results.slice(0, 10);
+      const data = await Promise.all(shown.map((r: any) => r.data()));
+      results.innerHTML = data
+        .map((d: any) => {
+          const title = d.meta?.title ?? d.url;
+          return `<a class="search-hit" href="${hitUrl(d.url)}">
+            <span class="search-hit-title">${title}</span>
+            <span class="search-hit-excerpt">${d.excerpt}</span>
+          </a>`;
+        })
+        .join('');
+      const more = s.results.length - shown.length;
+      if (more > 0) {
+        results.insertAdjacentHTML('beforeend', `<p class="search-hint">另有 ${more} 条匹配，继续输入以收窄。</p>`);
+      }
+    } catch {
+      results.innerHTML =
+        '<p class="search-hint">搜索索引未生成——<code>astro build</code> 后由 pagefind 产出（dev 模式下不可用）。</p>';
+    }
+  }
+
+  function open() {
+    dialog.showModal();
+    input.focus();
+    input.select();
+  }
+
+  trigger.addEventListener('click', open);
+  dialog.addEventListener('click', (e) => {
+    // 点遮布关闭：点到的就是 dialog 本身（而非面板内部）
+    if (e.target === dialog) dialog.close();
+  });
+  dialog.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
+
+  input.addEventListener('input', () => {
+    window.clearTimeout(debounce);
+    debounce = window.setTimeout(() => void run(input.value), 160);
+  });
+
+  // `/` 快捷键聚焦：输入框/可编辑区里不劫持（否则没法正常打字）
+  document.addEventListener('keydown', (e) => {
+    const t = e.target as HTMLElement | null;
+    const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+    if (e.key === '/' && !typing && !dialog.open) {
+      e.preventDefault();
+      open();
+    }
+  });
+</script>

@@ -10,7 +10,11 @@ node_modules/
 jd-research/
 
 # demo 运行产物（可再生）
-harness-demo/trajectories/
+# 注意：必须是「文件级」harness-demo/trajectories/* 而不能写 trajectories/ ——
+# 目录级排除会让 git 根本不 descend 进该目录，下面的 negation 永不生效
+# （已实测：`sub/` + `!sub/keep.jsonl` 仍忽略 keep.jsonl；`sub/*` + negation 才放行）。
+harness-demo/trajectories/*
+!harness-demo/trajectories/demo.example.jsonl
 harness-demo/workspace/out/
 durable-execution-demo/.state/
 

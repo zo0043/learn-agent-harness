@@ -4,6 +4,7 @@ import TrajectoryTimeline from '../components/TrajectoryTimeline.astro';
 import { getCollection } from 'astro:content';
 import { parseRagStats } from '../utils/ragStats';
 import { WORK_COUNT } from '../data/courses';
+import { trajectory } from '../data/trajectory';
 
 const repo = 'https://github.com/zo0043/learn-agent-harness';
 
@@ -11,6 +12,32 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
 // 不静默回退到任何硬编码数字——那正是 W0 止血前「站点数字与笔记漂移」复发的方式。
 const ragEntry = (await getCollection('courses')).find((e) => e.id === 'rag');
 const rag = parseRagStats(ragEntry?.body ?? '');
+
+/**
+ * 实跑前提维度（P-12）：每个 demo 节一个 chip，说明「要什么才能跑起来」。
+ * 依据 = 各 demo README 的实跑前提（W4-A 逐份核实，非按名字猜）：
+ *   offline —— 全离线零 key：sandbox-demo / mcp-demo / durable-execution-demo
+ *              （README 明写"不调模型、不联网、不用墙钟"/"零网络、零 key"）
+ *   endpoint —— 需 LLM 端点：harness-demo（.env 填 LLM_BASE_URL/LLM_API_KEY）、
+ *              framework-demo（.env 自包含，同一本地双格式代理）
+ *   mixed   —— 仅部分入口需端点：rag-demo（README:35「仅 demo:rag 需要 LLM（3 次调用）；
+ *              retrieval / bm25 / eval 全离线、可不配」——本页引用的数字来自 demo:eval，是离线路径）
+ * 三分而非简单的"离线/需端点"两分：rag-demo 的评测路径（本页唯一引用其数字的入口）
+ * 确实零 key，标成"需端点"会误导读者不去跑它。
+ */
+const RUN_MODES = {
+  offline: { label: '离线可跑 · 零 key', cls: 'run-offline' },
+  endpoint: { label: '需 LLM 端点', cls: 'run-endpoint' },
+  mixed: { label: '评测离线 · 生成需端点', cls: 'run-mixed' },
+} as const;
+const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
+  'harness-demo': 'endpoint',
+  'rag-demo': 'mixed',
+  'sandbox-demo': 'offline',
+  'mcp-demo': 'offline',
+  'durable-execution-demo': 'offline',
+  'framework-demo': 'endpoint',
+};
 ---
 
 <Base title="作品详解">
@@ -29,7 +56,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── harness-demo ─────────────────────────────────── -->
   <section class="work" id="harness-demo">
     <h2>harness-demo · 从零手写 agent harness</h2>
-    <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE）</p>
+    <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['harness-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['harness-demo']].label}</span></p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
@@ -80,7 +107,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── rag-demo ─────────────────────────────────────── -->
   <section class="work" id="rag-demo">
     <h2>rag-demo · 零依赖 RAG</h2>
-    <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑）</p>
+    <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['rag-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['rag-demo']].label}</span></p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>词法检索只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
@@ -155,7 +182,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── sandbox-demo ──────────────────────────────────── -->
   <section class="work" id="sandbox-demo">
     <h2>sandbox-demo · 四通道 policy 引擎 + 幽灵事故重放</h2>
-    <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟）</p>
+    <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].label}</span></p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”（合法工具、合法命令），
@@ -193,7 +220,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── mcp-demo ────────────────────────────────────────── -->
   <section class="work" id="mcp-demo">
     <h2>mcp-demo · MCP 供应链投毒演示</h2>
-    <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock）</p>
+    <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['mcp-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['mcp-demo']].label}</span></p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——单层消融：仅 L1 输入消毒仍泄（输入层是软防线，挡不住不合规的模型），
@@ -227,7 +254,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── durable-execution-demo ───────────────────────── -->
   <section class="work" id="durable-execution-demo">
     <h2>durable-execution-demo · 长任务崩溃恢复实操</h2>
-    <p class="work-tag">durable execution（P1 · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线</p>
+    <p class="work-tag">durable execution（P1 · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].label}</span></p>
     <div class="card work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——intent 在、exec 不在的未知态，先只读问外部服务「这个幂等 key 送达过吗」再决定执行还是跳过；盲目重放会双发，盲目跳过可能漏发。
@@ -261,7 +288,7 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <!-- ── framework-demo ──────────────────────────────────── -->
   <section class="work" id="framework-demo">
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
-    <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理</p>
+    <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['framework-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['framework-demo']].label}</span></p>
     <div class="card work-card" style="display: block">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——<code>allowedTools</code>
@@ -301,7 +328,10 @@ const rag = parseRagStats(ragEntry?.body ?? '');
   <section class="work" id="trajectory">
     <h2>轨迹可视化 · harness-demo 真实 demo</h2>
     <p class="work-tag">
-      数据源：<code>harness-demo/trajectories/demo.jsonl</code>（build 时静态导入）·
+      数据源：<code>{trajectory.file}</code>（build 时静态导入）·
+      {trajectory.source === 'example'
+        ? '脱敏样例（本地跑过 npm run demo 后自动换真实产物）· '
+        : '本地真实产物 · '}
       竖向事件流，按事件类型着色；tool_exec 标 ✅ / ⏸
     </p>
     <div class="card work-card">

@@ -1367,6 +1367,203 @@ a.pipe-step:hover {
   text-decoration: none;
 }
 
+/* 实跑前提维度 chip（P-12 · W4-A）：与 .work-tag 同行，说明"要什么才能跑起来"。
+   配色借既有语义变量：offline 用 doing 色（绿灯语义）/ endpoint 用 accent（需配置）/
+   mixed 用 text-soft（中性，细节在 title 与 demo README）。 */
+.chip.run-chip {
+  margin-left: 6px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+.chip.run-offline {
+  color: var(--doing);
+  border-color: color-mix(in srgb, var(--doing) 40%, var(--border));
+  background: var(--doing-bg);
+}
+.chip.run-endpoint {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-soft);
+}
+.chip.run-mixed {
+  color: var(--text-soft);
+  border-color: var(--border-strong);
+}
+
+/* ── 学习路线筛选（P-12 · W4-A）────────────────────────────
+   渐进增强：默认 display:none —— 无 JS 时整条不存在，18 张卡片全可见；
+   脚本就绪后给容器加 [data-ready] 才显示（避免出现"按了没反应"的按钮）。 */
+.learn-filters {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+.learn-filters[data-ready] {
+  display: flex;
+}
+.lf-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lf-label {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  margin-right: 2px;
+}
+.lf-chip {
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+}
+.lf-chip.is-on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.lf-count {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.lf-empty {
+  margin: 10px 0 0;
+  color: var(--text-faint);
+  font-size: 0.86rem;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ── 全站搜索（P-04 · W4-A：SiteSearch / pagefind）────────────── */
+.search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-card);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.search-trigger:hover {
+  color: var(--accent);
+  border-color: var(--border-strong);
+}
+.search-trigger svg {
+  width: 15px;
+  height: 15px;
+}
+.search-kbd {
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-soft);
+  color: var(--text-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.search-dialog {
+  width: min(620px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.search-dialog::backdrop {
+  background: color-mix(in srgb, var(--bg) 62%, #000 38%);
+  backdrop-filter: blur(2px);
+}
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 560px);
+}
+.search-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.search-head-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-faint);
+  flex: none;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+.search-input::placeholder {
+  color: var(--text-faint);
+}
+.search-results {
+  overflow-y: auto;
+  padding: 8px;
+}
+.search-hint {
+  margin: 0;
+  padding: 14px 8px;
+  color: var(--text-faint);
+  font-size: 0.88rem;
+  text-align: center;
+}
+.search-hit {
+  display: block;
+  padding: 9px 11px;
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+.search-hit:hover,
+.search-hit:focus-visible {
+  background: var(--bg-soft);
+}
+.search-hit-title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--accent);
+}
+.search-hit-excerpt {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.search-hit-excerpt mark {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
 /* ── 响应式 ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .course-layout {
@@ -1400,6 +1597,14 @@ a.pipe-step:hover {
   .site-nav a {
     padding: 4px 8px;
     font-size: 0.86rem;
+  }
+  /* 窄屏隐藏「搜索」文字与 / 键提示，只留放大镜图标（省 60px 导航宽度） */
+  .search-trigger-label,
+  .search-trigger .search-kbd {
+    display: none;
+  }
+  .search-trigger {
+    padding: 0 8px;
   }
   .ev-ms {
     display: none;
