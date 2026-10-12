@@ -38,6 +38,10 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   'durable-execution-demo': 'offline',
   'framework-demo': 'endpoint',
 };
+
+// P-08 works sticky 标签栏：六个 demo 锚点从 DEMO_RUN_MODE 派生（插入序 = 页面 section 序），
+// 不另起一份手抄列表；纯 HTML/CSS（sticky + 锚点），零 JS——禁用脚本时标签照样能点。
+const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
 ---
 
 <Base title="作品详解">
@@ -53,11 +57,19 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
     </span>
   </p>
 
+  {/* P-08 sticky 标签栏：贴在小顶栏下方，六个 demo 锚点横跳（窄屏可横滑）。
+      .work 的 scroll-margin-top 已按「小顶栏 + 本栏高度」加高，锚点跳转不被遮挡。 */}
+  <nav class="work-tabs" aria-label="作品快速导航">
+    {DEMO_ANCHORS.map((id) => (
+      <a href={`#${id}`}>{id}</a>
+    ))}
+  </nav>
+
   <!-- ── harness-demo ─────────────────────────────────── -->
   <section class="work" id="harness-demo">
     <h2>harness-demo · 从零手写 agent harness</h2>
     <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['harness-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['harness-demo']].label}</span></p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
         harness 的契约是 <code>policy → intent → execute → result</code>（结果必回写，拒绝也是结果）。
@@ -108,7 +120,7 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   <section class="work" id="rag-demo">
     <h2>rag-demo · 零依赖 RAG</h2>
     <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['rag-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['rag-demo']].label}</span></p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>词法检索只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
         BM25 用价目表（IDF × tf 饱和 × 长度归一）修了定价，但 BM25 改不掉词法上限——这正是 embedding 路存在的理由。
@@ -158,7 +170,7 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   <section class="work" id="whiteboard">
     <h2>whiteboard · 白板版 agent（~180 行 Python）</h2>
     <p class="work-tag">面试口述版 · 纯标准库 · 与 TS 版架构 1:1 对应</p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p style="margin-top: 0">
         白板 20 分钟能写完、能边写边讲的版本。与 <code>harness-demo/src/</code> 一一对应：
         <code>② loop</code> / <code>③ 工具协议</code> / <code>⑤ 权限门</code> /
@@ -183,7 +195,7 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   <section class="work" id="sandbox-demo">
     <h2>sandbox-demo · 四通道 policy 引擎 + 幽灵事故重放</h2>
     <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].label}</span></p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”（合法工具、合法命令），
         照样炸了生产：缺的是执行环境边界（哪个 compose 项目 / 目录树 / 命名空间）。
@@ -221,7 +233,7 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   <section class="work" id="mcp-demo">
     <h2>mcp-demo · MCP 供应链投毒演示</h2>
     <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['mcp-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['mcp-demo']].label}</span></p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——单层消融：仅 L1 输入消毒仍泄（输入层是软防线，挡不住不合规的模型），
         确定性硬防线在 L2 policy 门 / L3 egress 白名单，互为独立 backstop（审批会被磨穿，egress 不会）。
@@ -289,7 +301,7 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
   <section class="work" id="framework-demo">
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
     <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['framework-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['framework-demo']].label}</span></p>
-    <div class="card work-card" style="display: block">
+    <div class="card card-block work-card">
       <p class="work-lesson" style="margin-bottom: 10px">
         一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——<code>allowedTools</code>
         裸名会抢在 <code>canUseTool</code> 之前 auto-approve 整个工具，回调根本不触发（SDK 警告

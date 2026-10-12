@@ -12,7 +12,11 @@
   --bg-code: #f4f1ec;
   --text: #24292f;
   --text-soft: #5b6470;
-  --text-faint: #8b949e;
+  /* P-11 对比度修复（W4-C）：旧值最差 2.72:1（bg-soft 上）不达 AA；
+     新值 #5f6b7a 对四个浅色背景最差 4.80:1（node 实算，见交付说明）。
+     代价：浅色主题下 faint 与 soft（#5b6470）色相接近——AA 达标与「faint 必须
+     浅于 soft」不可兼得（越浅对比度越低），层级改由字号/上下文承担。 */
+  --text-faint: #5f6b7a;
   --border: #e4dfd3;
   --border-strong: #cfc8b8;
   --accent: #0f766e;
@@ -37,7 +41,9 @@
   --bg-code: #1e252d;
   --text: #e6edf3;
   --text-soft: #9aa7b3;
-  --text-faint: #6e7a86;
+  /* P-11 对比度修复（W4-C）：旧值最差 3.53:1（bg-code 上）不达 AA；
+     新值 #8b98a5 对四个深色背景最差 5.25:1（node 实算，见交付说明）。 */
+  --text-faint: #8b98a5;
   --border: #2a323b;
   --border-strong: #3b4550;
   --accent: #2dd4bf;
@@ -55,6 +61,35 @@
   color-scheme: dark;
 }
 
+/* ── 可访问性基础（P-11 · W4-C）─────────────────────────
+   全局键盘焦点样式 + skip-link。:focus-visible 只在键盘导航时出现
+   （鼠标点击不显示，避免视觉噪音）；outline 不占布局、不被 overflow 裁剪，
+   优于改 border/box-shadow。链接、按钮、输入框全部覆盖。 */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* skip-link：Body 内第一个可聚焦元素，键盘第一个 Tab 即现身。
+   fixed 定位 + 负 top 藏到视口外，聚焦时滑回；z-index 高于 sticky 顶栏(50)
+   与阅读进度条(60)。无 JS 也生效（纯 CSS :focus）。 */
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: -48px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
 /* 轨迹事件类型色（明暗共用，按对比度微调） */
 :root {
   --ev-init: #64748b;
@@ -64,6 +99,11 @@
   --ev-exec-deny: #d29922;
   --ev-compaction: #d16ba5;
   --ev-final: #2dd4bf;
+  /* W4-B 布局常量：--header-offset = sticky 小顶栏高度（无 JS 兜底值 76px，
+     与站内既有 scroll-margin 约定一致；works 页脚本会按实测高度覆写）。
+     --work-tabs-h = /works sticky 标签栏高度（固定值，供锚点 offset 计算）。 */
+  --header-offset: 76px;
+  --work-tabs-h: 45px;
 }
 :root[data-theme='dark'] {
   --ev-init: #8fa3bd;
@@ -151,6 +191,9 @@ main.wrap {
   padding-top: 28px;
   padding-bottom: 56px;
   min-height: calc(100vh - 140px);
+  /* skip-link 的跳转目标（#main）：与 h2/h3/.dm-group/.work 同口径，
+     不被 sticky 小顶栏盖住（W4-C：随 --header-offset 实测定高）。 */
+  scroll-margin-top: calc(var(--header-offset) + 8px);
 }
 
 /* ── 页头 / 导航 ──────────────────────────────────────── */
@@ -303,6 +346,11 @@ main.wrap {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+/* U-31：卡片当块级容器（整卡是一个链接、内部多段平铺）时的收敛类，
+   取代散落各页的内联 style="display: block"——样式与结构分离，可被 grep 审计。 */
+.card-block {
+  display: block;
 }
 a.card:hover {
   border-color: var(--accent);
@@ -898,7 +946,8 @@ a.domain-card:hover .dc-foot {
 /* ── 作品详解 /works ──────────────────────────────────── */
 .work {
   margin-top: 40px;
-  scroll-margin-top: 76px;
+  /* W4-B：/works 顶部有 sticky 标签栏（贴小顶栏下方），锚点跳转要同时避开两者 */
+  scroll-margin-top: calc(var(--header-offset) + var(--work-tabs-h) + 8px);
 }
 .work > h2 {
   font-size: 1.4rem;
@@ -1256,7 +1305,7 @@ a.domain-card:hover .dc-foot {
 .dm-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
 .dm-nav a { text-decoration: none; }
 .dm-nav a:hover { border-color: var(--accent); color: var(--accent); }
-.dm-group { scroll-margin-top: 76px; }
+.dm-group { scroll-margin-top: calc(var(--header-offset) + 8px); }
 .dm-status {
   display: inline-flex;
   align-items: center;
@@ -1615,5 +1664,204 @@ a.pipe-step:hover {
   }
   .roadmap-item .rm-name {
     min-width: 0;
+  }
+}
+
+/* ── W4-B：移动端汉堡 / 阅读进度 / 上下篇 / works 标签栏 / measure 收口 ───────── */
+
+/* P-08 阅读进度条：2px 贴顶，宽度随进度（JS 写 --reading-progress）。
+   平滑仅 0.1s 宽度过渡；prefers-reduced-motion 时整条禁用过渡（见文件末）。 */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  height: 2px;
+  width: var(--reading-progress, 0%);
+  background: var(--accent);
+  transition: width 0.1s linear;
+}
+
+/* P-07 汉堡按钮：桌面隐藏（≥721px 导航原样横排） */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.nav-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.nav-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+.nav-toggle .icon-close {
+  display: none;
+}
+.nav-toggle[aria-expanded='true'] .icon-open {
+  display: none;
+}
+.nav-toggle[aria-expanded='true'] .icon-close {
+  display: block;
+}
+
+/* ≤720px：七个导航项收进浮层，主题/搜索留在同行 */
+@media (max-width: 720px) {
+  .brand {
+    margin-right: auto; /* 导航绝对定位后接管右侧推力，brand 自己推 */
+  }
+  .nav-toggle {
+    display: inline-flex;
+  }
+  .site-nav {
+    display: none; /* 关闭态：移出布局与 tab 序列 */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    margin-left: 0;
+    padding: 10px 16px 14px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .site-nav.open {
+    display: flex;
+  }
+  .site-nav a {
+    padding: 10px 12px;
+    font-size: 0.98rem;
+  }
+}
+
+/* P-08 课程上下篇（page-foot 左侧）+ 站内链接组（右侧） */
+.prev-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-right: auto; /* 把 .foot-links 推到右侧 */
+}
+.pn-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 240px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  text-decoration: none;
+}
+.pn-link:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.pn-next {
+  text-align: right;
+  align-items: flex-end;
+}
+.pn-dir {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+.pn-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pn-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.page-foot .foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+/* P-08 /works sticky 标签栏：贴小顶栏下方，六个 demo 锚点横跳（窄屏横滑）。
+   零 JS——禁用脚本时锚点链接照常可用；--header-offset 由 Base 的脚本按实测高度覆写
+   （全站共用：汉堡浮层贴靠、.work 与 h2/h3 的 scroll-margin 都消费它）。 */
+.work-tabs {
+  position: sticky;
+  top: var(--header-offset);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--work-tabs-h);
+  margin-bottom: 4px;
+  overflow-x: auto;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.work-tabs a {
+  flex: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.work-tabs a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+/* P-10 measure 收口：正文行宽 40em，表格/代码/图/公式豁免。
+   注意 table 不写 max-width:none——.markdown table 已有 max-width:100% +
+   overflow-x:auto 的宽表横滚约束，写 none 会让宽表撑破正文容器；
+   「不受 measure 影响」对 table 已由该约束满足，这里只补 li 内嵌表格的越界豁免。 */
+.markdown p,
+.markdown li {
+  max-width: 40em;
+}
+.markdown pre,
+.markdown figure,
+.markdown .mermaid,
+.markdown .katex-display,
+.markdown li > table {
+  max-width: none;
+}
+
+/* P-10 锚点偏移：h2/h3 跳转不被 sticky 小顶栏遮挡（与 .work/.dm-group 同机制） */
+.markdown h2,
+.markdown h3 {
+  scroll-margin-top: calc(var(--header-offset) + 8px);
+}
+
+/* prefers-reduced-motion：进度条禁用平滑；锚点跳转的平滑滚动（html 级，既有规则）
+   在全站禁用——只禁 .work-tabs 没用（它不是页面滚动容器）。 */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress {
+    transition: none;
+  }
+  /* W4-C：skip-link 的滑入也禁过渡（与全站 reduce 口径一致）。 */
+  .skip-link {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }

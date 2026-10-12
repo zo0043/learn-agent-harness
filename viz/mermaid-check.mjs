@@ -3,11 +3,23 @@
 import { chromium } from 'playwright-core';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { join, extname } from 'node:path';
 
 const DIST = '/home/ubuntu/app/learn-agent-harness/site/dist';
 const BASE = '/learn-agent-harness';
-const SLUGS = ['agent-harness', 'harness-from-scratch', 'rag', 'system-design', 'multi-agent', 'sandbox', 'evaluation', 'durable-execution', 'mcp', 'api-engineering', 'data-flywheel', 'observability', 'long-term-memory', 'model-basics', 'framework-ecosystem'];
+// P-14：/c/ 路由清单从 notes/ 动态生成（增删笔记零维护）。
+// 旧版是 15 条手抄 SLUGS——新增 llm-timeline / industry-2026 两篇时即已漏收，
+// 且此后每加一篇课都要手动同步。规则与 courses.ts 的 EXCLUDED_FROM_COURSE_ROUTE
+// 一致：notes 顶层 md 去掉两个独立页面（knowledge-map→/map、interview-bank→/interview）。
+const NOTES_DIR = fileURLToPath(new URL('../notes/', import.meta.url));
+const EXCLUDED = new Set(['knowledge-map', 'interview-bank']);
+const SLUGS = readdirSync(NOTES_DIR)
+  .filter((f) => f.endsWith('.md'))
+  .map((f) => f.slice(0, -3))
+  .filter((s) => !EXCLUDED.has(s))
+  .sort();
 // '/map' 自 2026-10-12 起为 notes/knowledge-map.md 原文渲染（mermaid 依赖图来自笔记，不再是手绘副本）
 const PAGES = [...SLUGS, '/map'];
 const PORT = 8099;

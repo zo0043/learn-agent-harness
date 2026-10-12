@@ -7,7 +7,7 @@
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import { getCollection, render } from 'astro:content';
-import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE } from '../../data/courses';
+import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE, COURSES } from '../../data/courses';
 import { extractToc } from '../../utils/toc';
 
 export async function getStaticPaths() {
@@ -38,6 +38,31 @@ function bankAnchor(prefix: string): string {
 const relatedQuestions = bankEntry
   ? meta.relatedQuestions.map((q) => ({ ...q, anchor: bankAnchor(q.anchorPrefix) }))
   : [];
+
+// P-08 课程上下篇：顺序 = COURSES 数组序。只取真实存在 /c/ 路由的条目——
+// whiteboard 在 COURSES 里但没有 notes 文件（无 /c/whiteboard/ 路由），链过去即 404；
+// 路由集合从 content collection 派生（glob 驱动，新增笔记自动出现），不手抄 slug。
+const routedSlugs = new Set(
+  (await getCollection('courses'))
+    .filter((e) => !EXCLUDED_FROM_COURSE_ROUTE.has(e.id))
+    .map((e) => e.id),
+);
+const sequence = COURSES.filter((c) => routedSlugs.has(c.slug));
+
+/** 上下篇邻接计算（纯函数，node 抽取验证用）：首篇 prev=null、尾篇 next=null（对应方向禁用）；
+ *  slug 不在序列中（DEFAULT_META 兜底的新笔记）时 index=-1、两者皆 null（不渲染上下篇）。 */
+function prevNext<T extends { slug: string }>(
+  seq: T[],
+  slug: string,
+): { index: number; prev: T | null; next: T | null } {
+  const index = seq.findIndex((c) => c.slug === slug);
+  return {
+    index,
+    prev: index > 0 ? seq[index - 1] : null,
+    next: index >= 0 && index < seq.length - 1 ? seq[index + 1] : null,
+  };
+}
+const pn = prevNext(sequence, entry.id);
 ---
 
 <Base title={meta.domain}>
@@ -91,10 +116,42 @@ const relatedQuestions = bankEntry
       }
 
       <footer class="page-foot">
-        <a href={import.meta.env.BASE_URL + "map/"}>知识地图</a>
-        <a href={import.meta.env.BASE_URL + "interview/"}>面试题库</a>
-        <a href={import.meta.env.BASE_URL + "works/"}>作品详解</a>
-        <a href={import.meta.env.BASE_URL + "learn/"}>学习路线</a>
+        {
+          /* P-08 上下篇：左侧（margin-right:auto 推开右侧站内链接）。
+             首/尾篇对应方向渲染为 aria-disabled 的 span——不是点了 404 的链接。 */
+          pn.index >= 0 && (
+            <nav class="prev-next" aria-label="课程上下篇">
+              {pn.prev ? (
+                <a class="pn-link pn-prev" rel="prev" href={import.meta.env.BASE_URL + 'c/' + pn.prev.slug + '/'}>
+                  <span class="pn-dir">← 上一篇</span>
+                  <span class="pn-title">{pn.prev.domain}</span>
+                </a>
+              ) : (
+                <span class="pn-link pn-prev pn-disabled" aria-disabled="true">
+                  <span class="pn-dir">← 上一篇</span>
+                  <span class="pn-title">已是第一篇</span>
+                </span>
+              )}
+              {pn.next ? (
+                <a class="pn-link pn-next" rel="next" href={import.meta.env.BASE_URL + 'c/' + pn.next.slug + '/'}>
+                  <span class="pn-dir">下一篇 →</span>
+                  <span class="pn-title">{pn.next.domain}</span>
+                </a>
+              ) : (
+                <span class="pn-link pn-next pn-disabled" aria-disabled="true">
+                  <span class="pn-dir">下一篇 →</span>
+                  <span class="pn-title">已是最后一篇</span>
+                </span>
+              )}
+            </nav>
+          )
+        }
+        <div class="foot-links">
+          <a href={import.meta.env.BASE_URL + "map/"}>知识地图</a>
+          <a href={import.meta.env.BASE_URL + "interview/"}>面试题库</a>
+          <a href={import.meta.env.BASE_URL + "works/"}>作品详解</a>
+          <a href={import.meta.env.BASE_URL + "learn/"}>学习路线</a>
+        </div>
       </footer>
     </article>
 

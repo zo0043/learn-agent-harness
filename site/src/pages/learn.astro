@@ -111,7 +111,10 @@ const STATUS_FILTERS = (() => {
                     <p class="dc-foot">进入课程 →</p>
                   </a>
                 ) : (
-                  <div class="card domain-card soon" aria-label="撰写中" data-lf-card data-status={statusKey(c.status)}>
+                  /* aria-label 从无 role 的 div 上移除（U-31/P-14：div 上挂 aria-label 是
+                     无效 ARIA，且会与卡片内可见文字（域名/intro/状态/撰写中提示）竞争）；
+                     「撰写中」由 .dc-foot 可见文字与 StatusBadge 承担，信息不丢失。 */
+                  <div class="card domain-card soon" data-lf-card data-status={statusKey(c.status)}>
                     <div class="dc-top">
                       <h3>{c.domain}</h3>
                       <StatusBadge status={c.status} />
@@ -134,7 +137,7 @@ const STATUS_FILTERS = (() => {
     <div class="phase-head">
       <h2>建议开课顺序</h2>
     </div>
-    <div class="card" style="display: block">
+    <div class="card card-block">
       <p style="margin-top: 0">
         <code>系统设计</code> → <code>沙箱与凭据（续 S2）</code> → <code>评测工程化</code> →
         <code>durable execution</code> → <code>MCP 与供应链安全</code> → <code>API 与多模型路由</code> →

@@ -28,7 +28,7 @@ function isActive(item: (typeof nav)[number]): boolean {
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href={import.meta.env.BASE_URL + ""}>learn<span class="brand-accent">-agent</span>-harness</a>
-    <nav class="site-nav" aria-label="主导航">
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
       {
         nav.map((item) => (
           <a
@@ -41,6 +41,27 @@ function isActive(item: (typeof nav)[number]): boolean {
         ))
       }
     </nav>
+    {/* P-07：≤720px 七个导航项 + 主题按钮 + 搜索入口同行挤压——收进汉堡浮层。
+        桌面（≥721px）按钮隐藏、导航原样横排；浮层内 Tab 循环、Esc/点外部关闭。 */}
+    <button
+      class="nav-toggle"
+      data-nav-toggle
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label="打开导航菜单"
+      title="导航菜单"
+    >
+      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="5" x2="19" y2="19"></line>
+        <line x1="19" y1="5" x2="5" y2="19"></line>
+      </svg>
+    </button>
     <SiteSearch />
     <button
       class="theme-toggle"
@@ -66,3 +87,81 @@ function isActive(item: (typeof nav)[number]): boolean {
     </button>
   </div>
 </header>
+
+<script>
+  /**
+   * 焦点陷阱（P-07）：浮层内 Tab / Shift+Tab 循环。抽成纯函数便于 node 等效验证
+   * （见交付说明的抽取测试）；activeIndex = -1 表示焦点不在浮层内（如汉堡按钮上），
+   * 落首项（Tab）/ 末项（Shift+Tab）。
+   */
+  export function nextFocusIndex(count: number, activeIndex: number, shift: boolean): number {
+    if (count <= 0) return -1;
+    if (activeIndex < 0) return shift ? count - 1 : 0;
+    if (shift) return activeIndex <= 0 ? count - 1 : activeIndex - 1;
+    return activeIndex >= count - 1 ? 0 : activeIndex + 1;
+  }
+
+  function initNavToggle(): void {
+    const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+    const panel = document.querySelector<HTMLElement>('#site-nav');
+    if (!toggle || !panel) return;
+    const links = () => Array.from(panel.querySelectorAll<HTMLAnchorElement>('a[href]'));
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? '关闭导航菜单' : '打开导航菜单');
+      panel.classList.toggle('open', open);
+      if (open) links()[0]?.focus();
+    };
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+    // 焦点陷阱补口：浮层展开时焦点在汉堡按钮上按 Tab 会溜进右侧搜索/主题按钮，
+    // 这里把按钮也纳入循环（activeIndex=-1 → 首/末项，与浮层内同一纯函数）。
+    toggle.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !isOpen()) return;
+      const items = links();
+      const next = nextFocusIndex(items.length, -1, e.shiftKey);
+      if (next >= 0) {
+        e.preventDefault();
+        items[next]?.focus();
+      }
+    });
+
+    // Esc 关闭并把焦点还给按钮（键盘用户不丢焦点）
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen()) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // 焦点陷阱：Tab 在浮层内循环（仅浮层展开时生效）
+    panel.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !isOpen()) return;
+      const items = links();
+      const activeIndex = items.indexOf(document.activeElement as HTMLAnchorElement);
+      const next = nextFocusIndex(items.length, activeIndex, e.shiftKey);
+      if (next >= 0) {
+        e.preventDefault();
+        items[next]?.focus();
+      }
+    });
+
+    // 点浮层外部关闭（pointerdown 早于 click，避免与链接点击竞争）
+    document.addEventListener('pointerdown', (e) => {
+      if (!isOpen()) return;
+      const t = e.target as Node | null;
+      if (t && !panel.contains(t) && !toggle.contains(t)) setOpen(false);
+    });
+
+    // 视口拉宽到桌面宽度时清理移动态（否则汉堡隐藏而浮层仍开着）
+    const mq = window.matchMedia('(min-width: 721px)');
+    mq.addEventListener('change', (e) => {
+      if (e.matches && isOpen()) setOpen(false);
+    });
+  }
+
+  initNavToggle();
+</script>

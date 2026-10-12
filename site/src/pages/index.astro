@@ -101,7 +101,7 @@ const Q_BANK = 37;
 
   <!-- ── 详解 /details 入口 ──────────────────────────── -->
   <section>
-    <div class="card details-entry" style="display: block">
+    <div class="card card-block details-entry">
       <h3>为什么资深 agent 工程师不卡在细节上</h3>
       <p>
         8 个分水岭细节，每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
@@ -123,7 +123,7 @@ const Q_BANK = 37;
       这个仓库的每个设计判断都来自真实事故，而非教程。三起事故、三套机制：
     </p>
     <div class="cards">
-      <div class="card" style="display: block">
+      <div class="card card-block">
         <h3>幽灵事故 → 四通道沙箱</h3>
         <p>
           2026-10-09 18:00，一个并行 agent 会话在错误目录（旧 AINews compose 树）执行
@@ -137,7 +137,7 @@ const Q_BANK = 37;
           把事故重建成可重放剧本，3 次重放逐字节一致。
         </p>
       </div>
-      <div class="card" style="display: block">
+      <div class="card card-block">
         <h3>模型列表轮换 → 能力侦察</h3>
         <p>
           本地 OpenAI 兼容代理（litellm 网关）的模型列表会随时间变：
@@ -149,7 +149,7 @@ const Q_BANK = 37;
           <strong>能力矩阵必须动态侦察</strong>，静态配置必过期；provider 是组件不是基础设施，harness 必须能降级。
         </p>
       </div>
-      <div class="card" style="display: block">
+      <div class="card card-block">
         <h3>代理 400 → 防御性解析</h3>
         <p>
           19:33 起代理持续 400（请求被路由到要求旧版 functions 格式的 code 后端），
