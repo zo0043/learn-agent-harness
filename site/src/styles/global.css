@@ -984,6 +984,12 @@ a.domain-card:hover .dc-foot {
   border-collapse: collapse;
   font-size: 0.92rem;
   margin: 14px 0;
+  /* W4/t5（2026-10-12，CI 结构+几何回归抓到）：与 .markdown table 同一宽表横滚约束。
+     此前缺这三条，窄屏下 nowrap 列的 min-content（works 崩溃表实测 494px @375 视口）
+     把整个文档撑出横向溢出——现在宽了就在表内横滚，不再动页面。 */
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .file-table th,
 .file-table td {
