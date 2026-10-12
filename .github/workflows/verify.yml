@@ -1,0 +1,111 @@
+# 站点结构 + 几何回归：headless 三视口断言（W4 / t5）
+#
+# 定位与边界（诚实性声明，交付时逐字复述）：
+#   - 补本机 2 核 3.4GB 下 astro build 必 OOM（历史 exit 134/137）导致的「留浏览器目检」缺口：
+#     CI（ubuntu-latest）构建站点 → headless Chromium 在 3 视口（375/768/1280）加载
+#     首页 /learn/ /works/ /interview/ /map/ /details/ 与课程页 /c/rag/
+#   - 只断言**结构与几何**：① 无横向溢出 ② 关键元素可见（header 导航/页标题/卡片容器）③ 无 console error
+#   - **不**断言视觉审美（配色/排版/美观）——像素级视觉仍留浏览器人工目检，本作业不覆盖、不冒充覆盖
+#   - 本机不保证能装 headless 浏览器——CI 实跑为证据；断言器本机预检走 `node site/tools/visual-check.mjs --selftest`（不依赖站点构建）
+#
+# 与 deploy 的关系：独立 workflow、独立 concurrency 组；deploy（GitHub Pages）不依赖本作业，
+# 本作业也不依赖 deploy——互不阻塞。不改动 deploy.yml 的任何语义。
+#
+# 负路径自证（可证伪性）：workflow_dispatch 传 fault=overflow / missing-element 时，
+# 检查脚本在运行时注入故障（不改任何仓库文件）后作业**必须失败**；
+# 日志区分「故障已检出（预期失败）」与「故障未被检出（断言器过弱，同样失败）」——
+# 恒真的作业在这里同样跑不绿。
+name: Verify site (structure + 3-viewport)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      fault:
+        description: '负路径自证：注入故障（overflow / missing-element 时作业必须失败）'
+        required: false
+        default: none
+        type: choice
+        options: [none, overflow, missing-element]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Build site
+        working-directory: site
+        run: npm run build
+
+      # 本机 OOM 事故的 CI 免疫：dist 必须真的产出了 HTML（本机曾留下 85 文件/0 HTML 的残骸，
+      # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
+      - name: Build sanity (dist must contain real HTML)
+        run: |
+          count=$(find site/dist -name '*.html' | wc -l)
+          echo "dist HTML 文件数 = $count（下限 32 = 6 静态 + 17 课程页 + 8 专题页 + 404）"
+          test "$count" -ge 32
+
+      - name: Install headless browser (Chromium)
+        working-directory: site
+        run: npx playwright install --with-deps chromium
+
+      - name: Serve dist (static server)
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory site/dist > /tmp/httpd.log 2>&1 &
+          echo $! > /tmp/httpd.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:4173/learn-agent-harness/ > /dev/null; then
+              echo "static server ready on 127.0.0.1:4173"
+              break
+            fi
+            sleep 0.5
+          done
+          curl -sf http://127.0.0.1:4173/learn-agent-harness/ > /dev/null || { echo "static server 未就绪"; cat /tmp/httpd.log; exit 1; }
+
+      - name: Run 3-viewport structure + geometry assertions
+        working-directory: site
+        env:
+          FAULT: ${{ github.event.inputs.fault || 'none' }}
+        run: |
+          if [ "$FAULT" != "none" ]; then
+            echo "⚠️ 负路径：fault=$FAULT（运行时注入故障，作业按设计必须失败）"
+            node tools/visual-check.mjs --base "http://127.0.0.1:4173/learn-agent-harness/" --out tools/out --fault "$FAULT"
+          else
+            node tools/visual-check.mjs --base "http://127.0.0.1:4173/learn-agent-harness/" --out tools/out
+          fi
+
+      - name: Stop static server
+        if: always()
+        run: kill "$(cat /tmp/httpd.pid)" 2>/dev/null || true
+
+      # 截图 + report.json 作为 artifact（失败时也上传：现场即证据）
+      - name: Upload screenshots + report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-verify-${{ github.run_id }}
+          path: site/tools/out
+          retention-days: 14
+          if-no-files-found: warn

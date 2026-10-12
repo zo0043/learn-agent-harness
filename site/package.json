@@ -8,7 +8,8 @@
     "dev": "astro dev",
     "build": "bash build.sh",
     "build:fast": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check:visual": "node tools/visual-check.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2",
@@ -24,6 +25,7 @@
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
-    "pagefind": "^1.5.2"
+    "pagefind": "^1.5.2",
+    "playwright": "1.64.0"
   }
 }
