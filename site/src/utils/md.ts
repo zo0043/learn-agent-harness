@@ -7,13 +7,37 @@ import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
 
-/** 与 astro.config.mjs 的 remarkMermaid 一致：mermaid 围栏 → <div class="mermaid"> */
+/** mermaid 源码首行 %% caption: 注释 → 图注文本；无则 null */
+function captionOf(src: string): string | null {
+  const firstLine = src.split('\n').find((l) => l.trim() !== '') ?? '';
+  const m = firstLine.match(/^%%\s*caption:\s*(.+?)\s*$/);
+  return m ? m[1] : null;
+}
+
+/**
+ * 与站点主管线（astro.config.mjs 的 remarkMermaid）对齐：mermaid 围栏 →
+ * <figure class="mermaid-figure">（让 global.css 的 .mermaid-figure 规则生效），
+ * figcaption 取源码首行 %% caption: 注释，否则按页内序号自动编号『图 N』。
+ * figure 内联 <noscript> 兜底：无 JS 时（客户端脚本不执行）div 里显示的是
+ * 图表源码，noscript 给读者一句人话说明。
+ */
 function remarkMermaid() {
   return (tree: any) => {
+    let ordinal = 0;
     visit(tree, 'code', (node: any) => {
       if (node.lang === 'mermaid') {
+        ordinal += 1;
+        const caption = captionOf(node.value) ?? `图 ${ordinal}`;
         node.type = 'html';
-        node.value = `<div class="mermaid">\n${node.value}\n</div>`;
+        node.value = [
+          '<figure class="mermaid-figure">',
+          '<div class="mermaid">',
+          node.value,
+          '</div>',
+          `<figcaption>${esc(caption)}</figcaption>`,
+          '<noscript><p class="mermaid-noscript">此图需要 JavaScript 才能渲染；无脚本时上面显示的是图表源码。</p></noscript>',
+          '</figure>',
+        ].join('\n');
       }
     });
   };

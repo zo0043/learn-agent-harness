@@ -7,7 +7,9 @@ const nav = [
   { href: '/details/', label: '详解' },
   { href: '/works/', label: '作品' },
   { href: '/map/', label: '知识地图' },
-  { href: '/timeline/', label: '时间线' },
+  // W3-A：/timeline 路由已删（内容与 /c/llm-timeline 100% 重复且是残缺版：无 TOC / 无 page-foot）。
+  // 入口不破——导航改链课程页版本，那里有 meta-bar + TOC + 相关题 + page-foot。
+  { href: '/c/llm-timeline/', label: '时间线' },
 ];
 const rawPath = Astro.url.pathname;
 const path = rawPath.startsWith(base) ? rawPath.slice(base.length - 1) : rawPath;

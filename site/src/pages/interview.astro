@@ -5,8 +5,10 @@
  * 选题全部来自 notes/interview-bank.md 真实题目（§3 项目深挖 / §4 交叉快速问答 / §8 行为面），
  * 题号（§x·Qy）可回溯到下方全文；锚点 id 与站点 TOC 同算法（github-slugger 兼容）。
  * 下方：interview-bank.md 原样渲染（保持不动）。导航"题库"。
+ * 框架统一（P-06）：meta-bar / 面包屑 / TOC 侧栏 / page-foot 由 NotePageLayout 提供；
+ * 此前 extractToc 取了目录却从不渲染，全站最长的一页没有本页目录——现已真正显示。
  */
-import Base from '../layouts/Base.astro';
+import NotePageLayout from '../components/NotePageLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { extractToc } from '../utils/toc';
 import { COURSE_COUNT, WORK_COUNT } from '../data/courses';
@@ -80,23 +82,29 @@ const GROUPS: Group[] = entry
   : [];
 ---
 
-<Base title="面试题库">
-  {
+{
     rendered ? (
-      <article class="markdown">
-        <header class="course-meta-bar">
-          <div class="meta-row">
-            <span class="chip chip-strong">面试题库</span>
-            <span class="chip">结构 + 交叉题库 + JD 覆盖矩阵</span>
-          </div>
-          <nav class="crumbs" aria-label="面包屑">
-            <a href={base}>首页</a> / <span>面试题库</span>
-          </nav>
-        </header>
-
+      <NotePageLayout
+        title="面试题库"
+        chips={[
+          { text: '面试题库', strong: true },
+          { text: '结构 + 交叉题库 + JD 覆盖矩阵' },
+        ]}
+        crumbs={[
+          { label: '首页', href: base },
+          { label: '面试题库' },
+        ]}
+        toc={toc}
+        footLinks={[
+          { label: '学习路线', href: base + 'learn/' },
+          { label: '知识地图', href: base + 'map/' },
+          { label: '作品详解', href: base + 'works/' },
+          { label: '详解', href: base + 'details/' },
+        ]}
+      >
         {
           GROUPS.length > 0 && (
-            <section class="review-zone" aria-label="复习主区">
+            <section slot="before" class="review-zone" aria-label="复习主区">
               <div class="review-head">
                 <h2>复习主区</h2>
                 <span class="chip chip-strong">top 15 题</span>
@@ -166,7 +174,7 @@ const GROUPS: Group[] = entry
                     <h3>多智能体编排</h3>
                     <p>"读多路、写单线程"——一页判定该不该拆子代理，附给 harness-demo 设计子代理的练习。</p>
                   </a>
-                  <a class="card" href={base + 'timeline/'}>
+                  <a class="card" href={base + 'c/llm-timeline/'}>
                     <h3>LLM 时间线</h3>
                     <p>12 个演化节点：为什么当年这么设计、下一步往哪走——面试谈资备用。</p>
                   </a>
@@ -177,10 +185,11 @@ const GROUPS: Group[] = entry
         }
 
         <rendered.Content />
-        <p style="margin-top: 28px; color: var(--text-faint); font-size: 0.9rem">
+
+        <p slot="note" style="margin-top: 28px; color: var(--text-faint); font-size: 0.9rem">
           各课内部题库在课程文件末尾（<a href={base + 'learn/'}>学习路线 →</a>），本页面管结构、交叉题、项目深挖、关键词覆盖。
         </p>
-      </article>
+      </NotePageLayout>
     ) : (
       <div class="empty-state">
         <p class="empty-icon">🚧</p>
@@ -189,4 +198,3 @@ const GROUPS: Group[] = entry
       </div>
     )
   }
-</Base>

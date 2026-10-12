@@ -58,6 +58,16 @@ const relatedQuestions = bankEntry
       <Content />
 
       {
+        /* 无 JS 兜底：本页含 mermaid 图时提示读者——客户端渲染脚本不执行，图中显示的是图表源码。
+           提示只能由服务端产出（noscript 内容在无脚本时才渲染，客户端代码那时并不运行）。 */
+        (entry.body ?? '').includes('```mermaid') && (
+          <noscript>
+            <p class="mermaid-noscript">本页图表需要 JavaScript 才能渲染；未启用脚本时，图中显示的是图表源码。</p>
+          </noscript>
+        )
+      }
+
+      {
         relatedQuestions.length > 0 && (
           <section class="related-questions" aria-label="相关面试题">
             <h3>相关面试题</h3>

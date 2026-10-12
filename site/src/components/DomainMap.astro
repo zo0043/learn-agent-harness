@@ -1,0 +1,115 @@
+---
+/**
+ * DomainMap：/map 顶部的交互式知识域视图（P-05 知识地图交互化）。
+ *
+ * 数据全部派生自 src/data/courses.ts（零手抄、零漂移），过滤逻辑与 DOMAIN_COUNT 一致：
+ * 排除 whiteboard 白板卡与 phase='—' 横向资产（llm-timeline / industry-2026）后按 domain 去重
+ * ——即 knowledge-map 头部冻结口径的「知识域 15」。构建期断言派生集合与 DOMAIN_COUNT 严格
+ * 相等（条数 + 去重数双校验），不一致即构建失败：courses.ts 过滤逻辑或口径变动后静默漂移
+ * 会被这一步挡住（courses.ts 的 NON_COURSE_CARD_SLUG / HORIZONTAL_PHASE 常量不导出，在此
+ * 复述过滤规则并由断言兜底；未改 courses.ts 结构）。
+ *
+ * 交互形态（契约约束）：
+ *   - 纯 HTML/CSS：阶段分组 + 页内锚点导航（无 JS 可用）+ hover/focus-within 揭示面试视角，
+ *     触屏设备（hover: none）常显——不引第三方库、不写一行 JS，禁用 JS 的访客内容完整可见；
+ *   - 不做 mermaid 节点事件绑定：securityLevel:'strict' 下绑定被禁（W3-C 已核实 strict 并不
+ *     禁用 htmlLabels，但节点事件绑定在 strict 下确实无效），依赖关系继续由笔记内 mermaid
+ *     依赖图承担，避免与安全级别决策耦合；也不手绘连线、不从笔记 mermaid 解析边表。
+ */
+import { COURSES, DOMAIN_COUNT } from '../data/courses';
+
+interface DomainCard {
+  slug: string;
+  domain: string;
+  phase: string;
+  status: string;
+  intro: string;
+  interviewAngle: string;
+}
+
+/** 与 DOMAIN_COUNT 同一过滤逻辑：排除 whiteboard 白板卡与 phase='—' 横向资产 */
+const domains: DomainCard[] = COURSES.filter((c) => c.slug !== 'whiteboard' && c.phase !== '—');
+
+// 构建期一致性断言：派生集合必须与冻结口径（DOMAIN_COUNT）严格相等
+if (domains.length !== DOMAIN_COUNT || new Set(domains.map((d) => d.domain)).size !== DOMAIN_COUNT) {
+  throw new Error(
+    `DomainMap：派生域集合（${domains.length} 条 / ${new Set(domains.map((d) => d.domain)).size} 个去重 domain）` +
+      `与 DOMAIN_COUNT（${DOMAIN_COUNT}）不一致——courses.ts 过滤逻辑或计数口径变动后需同步本组件`,
+  );
+}
+
+const PHASE_ORDER = ['P0', 'P1', 'P2'];
+const PHASE_DESC: Record<string, string> = {
+  P0: '核心段：白板 / 系统设计 / 项目深挖的硬通货',
+  P1: '扩展段：公共地基 + 追问深度',
+  P2: '区分度段：按目标岗位权重排',
+};
+const groups = PHASE_ORDER.map((phase) => ({
+  phase,
+  desc: PHASE_DESC[phase],
+  cards: domains.filter((d) => d.phase === phase),
+}));
+
+/** 状态 → legend 三色（与笔记 mermaid classDef 同色：done #2ea043 / doing #bb8009 / todo #6e7681） */
+function statusDot(status: string): { cls: string; label: string } {
+  if (status.startsWith('✅')) return { cls: 'ok', label: status.replace(/^✅\s*/, '') };
+  if (status.startsWith('🔄')) return { cls: 'doing', label: status.replace(/^🔄\s*/, '') };
+  return { cls: 'todo', label: status.replace(/^⏳\s*/, '') };
+}
+
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="dm-zone" aria-label="知识域视图">
+  <h2 class="dm-title">知识域总览</h2>
+  <p class="dm-lead">
+    {domains.length} 个知识域（口径见 <code>notes/knowledge-map.md</code> 头部冻结块），
+    卡片数据由 <code>courses.ts</code> 派生——与下方课程总表同源，不会漂移。
+  </p>
+
+  <div class="legend">
+    <span><span class="legend-dot ok"></span>已完成</span>
+    <span><span class="legend-dot doing"></span>进行中 / 讲义已展开</span>
+    <span><span class="legend-dot todo"></span>规划中</span>
+    <span class="dm-count">面试视角：悬停或聚焦卡片显示</span>
+  </div>
+
+  <nav class="dm-nav" aria-label="按阶段跳转">
+    {groups.map((g) => (
+      <a class="chip" href={`#dm-${g.phase}`}>{g.phase} · {g.cards.length} 域</a>
+    ))}
+  </nav>
+
+  {
+    groups.map((g) => (
+      <div class="phase-section dm-group" id={`dm-${g.phase}`}>
+        <div class="phase-head">
+          <h3>{g.phase}</h3>
+          <span class="phase-desc">{g.desc}</span>
+        </div>
+        <div class="cards">
+          {g.cards.map((d) => {
+            const dot = statusDot(d.status);
+            return (
+              <a class="card domain-card dm-card" href={base + `c/${d.slug}/`}>
+                <div class="dc-top">
+                  <h3>{d.domain}</h3>
+                  <span class="dm-status">
+                    <span class={`legend-dot ${dot.cls}`}></span>
+                    {dot.label}
+                  </span>
+                  <span class="chip">{d.phase}</span>
+                </div>
+                <p class="dc-intro">{d.intro}</p>
+                <p class="dc-angle dm-angle">
+                  <strong>面试视角</strong>：{d.interviewAngle}
+                </p>
+                <p class="dc-foot">进入课程 →</p>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    ))
+  }
+</section>

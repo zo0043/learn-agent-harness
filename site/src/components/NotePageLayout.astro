@@ -1,0 +1,150 @@
+---
+/**
+ * NotePageLayout：原文渲染页（/map、/interview）的统一框架。
+ *
+ * 背景（P-06）：/map、/interview、/timeline 三个「笔记原文渲染」页曾各写一遍框架，
+ * 且能力不对等——/map 有 meta-bar + TOC + page-foot，/interview 有 meta-bar + 手写复习区
+ * 但**调了 extractToc 却从不渲染目录**，/timeline 更只有 meta-bar（无 TOC / 无 page-foot）。
+ * 本组件把「meta-bar + 面包屑 + 正文 + TOC 侧栏 + page-foot + 可选相关题区」收敛成一处，
+ * 与 /c/[slug] 课程页同一套 CSS 类（.course-layout / .markdown / .toc / .page-foot）。
+ *
+ * 槽位：
+ *   - `before`：正文之前的自定义区（/interview 的复习主区），可省略
+ *   - 默认槽：笔记正文（`<rendered.Content />`）+ 页面自己的尾注
+ *   - `note`：page-foot 之后的小字脚注（源码说明等），可省略
+ *
+ * 注意：/timeline 已于 W3-A 删除（内容与 /c/llm-timeline 100% 重复且是残缺版），
+ * 导航「时间线」项改链 /c/llm-timeline/——入口不破，/c/ 路由数仍是冻结的 17。
+ */
+import Base from '../layouts/Base.astro';
+import type { TocItem } from '../utils/toc';
+
+export interface Crumb {
+  label: string;
+  /** 省略 = 当前页（渲染为纯文本，不可点） */
+  href?: string;
+}
+
+export interface MetaChip {
+  text: string;
+  /** chip-strong = 高亮徽章（每行第一个通常是它） */
+  strong?: boolean;
+}
+
+export interface RelatedQuestion {
+  no: string;
+  text: string;
+  /** 指向面试题库小节锚点（与 TOC 同算法） */
+  anchor: string;
+}
+
+export interface FootLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  /** <title> 用的页面名 */
+  title: string;
+  /** 元信息条徽章 */
+  chips: MetaChip[];
+  /** 面包屑；最后一项通常省略 href（= 当前页） */
+  crumbs: Crumb[];
+  /** 本页目录（extractToc 产物）；空数组 = 不渲染侧栏 */
+  toc: TocItem[];
+  /** 可选：相关面试题交叉索引区。当前 /map、/interview 均不传（题库页自身即索引源），
+   *  保留为统一框架的扩展点——与 /c/[slug] 的 relatedQuestions 同一形态。 */
+  relatedQuestions?: RelatedQuestion[];
+  /** page-foot 横向链接；省略则用站点默认四项 */
+  footLinks?: FootLink[];
+}
+
+const { title, chips, crumbs, toc, relatedQuestions = [], footLinks } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const DEFAULT_FOOT: FootLink[] = [
+  { label: '学习路线', href: base + 'learn/' },
+  { label: '面试题库', href: base + 'interview/' },
+  { label: '作品详解', href: base + 'works/' },
+  { label: '知识地图', href: base + 'map/' },
+];
+const foot = footLinks ?? DEFAULT_FOOT;
+---
+
+<Base title={title}>
+  <div class="course-layout">
+    <article class="markdown">
+      <header class="course-meta-bar">
+        <div class="meta-row">
+          {
+            chips.map((c) =>
+              c.strong ? <span class="chip chip-strong">{c.text}</span> : <span class="chip">{c.text}</span>,
+            )
+          }
+        </div>
+        <nav class="crumbs" aria-label="面包屑">
+          {
+            crumbs.map((c, i) => (
+              <>
+                {i > 0 && ' / '}
+                {c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}
+              </>
+            ))
+          }
+        </nav>
+      </header>
+
+      <slot name="before" />
+
+      <slot />
+
+      {
+        relatedQuestions.length > 0 && (
+          <section class="related-questions" aria-label="相关面试题">
+            <h3>相关面试题</h3>
+            <p class="rq-note">
+              选自 <a href={base + 'interview/'}>面试题库</a>（题号 = 题库内编号，链接锚到对应小节）——追问到底 = 合格线。
+            </p>
+            <ul class="rq-list">
+              {
+                relatedQuestions.map((q) => (
+                  <li>
+                    <a href={`${base}interview/#${encodeURIComponent(q.anchor)}`}>
+                      <span class="rq-no">{q.no}</span>
+                      {q.text}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+        )
+      }
+
+      <footer class="page-foot">
+        {foot.map((l) => <a href={l.href}>{l.label}</a>)}
+      </footer>
+
+      <slot name="note" />
+    </article>
+
+    {
+      toc.length > 0 && (
+        <aside class="toc" aria-label="本页目录">
+          <details open>
+            <summary>本页目录</summary>
+            <ul>
+              {
+                toc.map((t) => (
+                  <li class={t.depth === 3 ? 'toc-3' : 'toc-2'}>
+                    <a href={`#${t.id}`}>{t.text}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </details>
+        </aside>
+      )
+    }
+  </div>
+</Base>

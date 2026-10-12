@@ -1,12 +1,17 @@
 ---
 /**
- * /map：知识地图 = notes/knowledge-map.md 原文渲染（单一真源，2026-10-12 起）。
+ * /map：知识地图 = 顶部交互式知识域视图（DomainMap，courses.ts 派生，P-05）
+ * + notes/knowledge-map.md 原文渲染（单一真源，2026-10-12 起）。
  * 此前是手绘副本（mermaid 依赖图 + 横切表 + 资产表），与 canonical 反复漂移；
  * 现改为与 /interview 同模式：从 courses 集合 render knowledge-map.md，
  * 笔记改动即同步。图内 mermaid 由 markdown 管线转 .mermaid div、客户端渲染
  * （viz/mermaid-check.mjs 覆盖本页，语法错会 FAIL）。
+ * 框架统一：meta-bar / 面包屑 / TOC 侧栏 / page-foot 由 NotePageLayout 提供（P-06）。
+ * 依赖关系（谁先谁后）继续由笔记内 mermaid 依赖图承担——交互视图不做连线、
+ * 不做 mermaid 节点事件绑定（strict 安全级别下被禁，见 DomainMap 注释）。
  */
-import Base from '../layouts/Base.astro';
+import NotePageLayout from '../components/NotePageLayout.astro';
+import DomainMap from '../components/DomainMap.astro';
 import { getCollection, render } from 'astro:content';
 import { extractToc } from '../utils/toc';
 
@@ -17,59 +22,40 @@ const toc = entry ? extractToc(entry.body ?? '') : [];
 const base = import.meta.env.BASE_URL;
 ---
 
-<Base title="知识地图">
-  {
-    rendered ? (
-      <div class="course-layout">
-        <article class="markdown">
-          <header class="course-meta-bar">
-            <div class="meta-row">
-              <span class="chip chip-strong">知识地图</span>
-              <span class="chip">索引 + 状态 + 依赖</span>
-              <span class="chip">笔记原文渲染</span>
-            </div>
-            <nav class="crumbs" aria-label="面包屑">
-              <a href={base}>首页</a> / <a href={base + 'learn/'}>学习路线</a> / <span>知识地图</span>
-            </nav>
-          </header>
+{
+  rendered ? (
+    <NotePageLayout
+      title="知识地图"
+      chips={[
+        { text: '知识地图', strong: true },
+        { text: '索引 + 状态 + 依赖' },
+        { text: '笔记原文渲染' },
+      ]}
+      crumbs={[
+        { label: '首页', href: base },
+        { label: '学习路线', href: base + 'learn/' },
+        { label: '知识地图' },
+      ]}
+      toc={toc}
+      footLinks={[
+        { label: '学习路线', href: base + 'learn/' },
+        { label: '面试题库', href: base + 'interview/' },
+        { label: '作品详解', href: base + 'works/' },
+      ]}
+    >
+      <DomainMap slot="before" />
 
-          <rendered.Content />
+      <rendered.Content />
 
-          <footer class="page-foot">
-            <a href={base + 'learn/'}>学习路线</a>
-            <a href={base + 'interview/'}>面试题库</a>
-            <a href={base + 'works/'}>作品详解</a>
-          </footer>
-          <p style="margin-top: 14px; color: var(--text-faint); font-size: 0.9rem">
-            本页由 <code>notes/knowledge-map.md</code> 自动渲染——改笔记即同步，不再维护站点侧副本。
-          </p>
-        </article>
-
-        {
-          toc.length > 0 && (
-            <aside class="toc" aria-label="本页目录">
-              <details open>
-                <summary>本页目录</summary>
-                <ul>
-                  {
-                    toc.map((t) => (
-                      <li class={t.depth === 3 ? 'toc-3' : 'toc-2'}>
-                        <a href={`#${t.id}`}>{t.text}</a>
-                      </li>
-                    ))
-                  }
-                </ul>
-              </details>
-            </aside>
-          )
-        }
-      </div>
-    ) : (
-      <div class="empty-state">
-        <p class="empty-icon">🚧</p>
-        <h1>知识地图</h1>
-        <p><code>notes/knowledge-map.md</code> 未就位——文件入仓后随下一次构建自动渲染。</p>
-      </div>
-    )
-  }
-</Base>
+      <p slot="note" style="margin-top: 14px; color: var(--text-faint); font-size: 0.9rem">
+        本页由 <code>notes/knowledge-map.md</code> 自动渲染——改笔记即同步，不再维护站点侧副本。
+      </p>
+    </NotePageLayout>
+  ) : (
+    <div class="empty-state">
+      <p class="empty-icon">🚧</p>
+      <h1>知识地图</h1>
+      <p><code>notes/knowledge-map.md</code> 未就位——文件入仓后随下一次构建自动渲染。</p>
+    </div>
+  )
+}

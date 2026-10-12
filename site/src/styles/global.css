@@ -548,6 +548,14 @@ pre.astro-code code {
   color: var(--text-faint);
   text-align: center;
 }
+/* 无 JS（noscript 内容）/ 渲染失败（.mermaid-error-hint）时的人话提示 */
+.mermaid-noscript,
+.mermaid-error-hint {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  text-align: center;
+}
 div.mermaid {
   display: flex;
   justify-content: center;
@@ -1236,6 +1244,34 @@ a.domain-card:hover .dc-foot {
 .legend-dot.ok { background: #2ea043; }
 .legend-dot.doing { background: #bb8009; }
 .legend-dot.todo { background: #6e7681; }
+
+/* ── 知识域交互视图（P-05 · W3-B：DomainMap）─────────────────
+ * 纯 HTML/CSS：锚点导航 + hover/focus 揭示面试视角，零 JS、零第三方库；
+ * 卡片本体复用 .card/.domain-card/.dc-*，这里只加视图层规则。 */
+.dm-zone { margin: 0 0 28px; }
+.dm-title { font-size: 1.3rem; margin: 0 0 6px; }
+.dm-lead { color: var(--text-soft); font-size: 0.92rem; margin: 0 0 14px; }
+.dm-lead code { font-size: 0.88em; }
+.dm-count { margin-left: auto; color: var(--text-faint); }
+.dm-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+.dm-nav a { text-decoration: none; }
+.dm-nav a:hover { border-color: var(--accent); color: var(--accent); }
+.dm-group { scroll-margin-top: 76px; }
+.dm-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+/* 面试视角默认收起，hover / 键盘聚焦展开；触屏设备（无 hover）常显 */
+.dm-angle { display: none; }
+.dm-card:hover .dm-angle,
+.dm-card:focus-within .dm-angle { display: block; }
+@media (hover: none) {
+  .dm-angle { display: block; }
+}
 
 /* ── 面试题库 /interview 复习主区 ──────────────────────────── */
 .review-zone {
