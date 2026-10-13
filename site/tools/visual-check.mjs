@@ -94,7 +94,7 @@ function injectFault(page, kind) {
 }
 
 // ── 单页 × 单视口 检查 ─────────────────────────────────────────────────────
-async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true } = {}) {
+async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true, searchRequired = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   const page = await ctx.newPage();
   const consoleErrors = [];
@@ -196,7 +196,10 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true 
 
     // ②b 搜索入口交互（强于「无 console error」：证明 SiteSearch 脚本真的初始化成功）
     // 触发按钮可见 → 点击 → dialog 打开（showModal）且输入框可见 → Esc 关闭还原现场。
-    // fixture 页（selftest）无搜索入口时跳过，不影响自检预期。
+    // 可证伪性加固（t16/F3，t12 评审发现）：searchRequired=true（真实页 CI 主跑）时
+    // **搜索入口必须存在，缺失即失败**——回归删掉搜索入口该页必须红。加固前入口缺失
+    // 会静默 `applicable:false` 通过（作业对「搜索入口被删」这类回归恒真，不可证伪）。
+    // selftest 的 fixture 页可不带搜索入口（applicable:false），除非调用方显式 searchRequired。
     const searchTriggerVisible = await vis('[data-search-open]');
     if (searchTriggerVisible) {
       await page.click('[data-search-open]');
@@ -216,6 +219,9 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true 
       const sOk = s.dialogOpen === true && s.inputVisible === true;
       details.search = { ...s, ok: sOk };
       if (!sOk) failures.push(`搜索初始化失败（dialog.open=${s.dialogOpen}，input 可见=${s.inputVisible}）`);
+    } else if (searchRequired) {
+      details.search = { visible: false, ok: false, required: true };
+      failures.push('搜索入口缺失：真实页必须存在 [data-search-open]（可证伪性加固：回归删除入口该页必须失败）');
     } else {
       details.search = { applicable: false };
     }
@@ -255,13 +261,13 @@ async function runMain() {
       for (const pg of PAGES) {
         let d;
         if (FAULT === 'none') {
-          d = await checkOne(browser, BASE, pg, vp, OUT);
+          d = await checkOne(browser, BASE, pg, vp, OUT, { searchRequired: true });
           all.push(d);
           printOne(d);
         } else {
           // 负路径：先基线（必须过，否则无法区分"本来就坏"和"注入导致"），
           // 再注入故障重跑断言，注入点必须被检出——两条都满足才算断言器有效。
-          const baseline = await checkOne(browser, BASE, pg, vp, OUT, { screenshot: false });
+          const baseline = await checkOne(browser, BASE, pg, vp, OUT, { screenshot: false, searchRequired: true });
           if (!baseline.pass) {
             console.error(`[visual-check] ❌ 负路径中止：基线本身未通过（${pg.id} ${vp.id}）：${baseline.failures.join('；')}——注入实验无意义`);
             await browser.close();
@@ -282,9 +288,14 @@ async function runMain() {
           const detectedOverflow = FAULT === 'overflow' && ov.scrollWidth > ov.clientWidth + TOLERANCE;
           const detectedMissing = FAULT === 'missing-element' && titleGone === true;
           const detected = detectedOverflow || detectedMissing;
+          // 失败现场截图（t16/F2：fault 模式 artifact 原只有 report.json、失败现场不可视——
+          // 注入后的现场直接落盘，artifact 里可见）
+          const faultShot = path.join(OUT, `${pg.id}_${vp.id}_fault-${FAULT}.png`);
+          await page.screenshot({ path: faultShot }).catch(() => {});
           const d = {
             page: pg.id, viewport: `${vp.width}x${vp.height}`, url: BASE + pg.path,
             fault: FAULT,
+            screenshot: path.relative(process.cwd(), faultShot),
             injection: { scrollWidth: ov.scrollWidth, clientWidth: ov.clientWidth, titleGone, overflowDetected: detectedOverflow, missingDetected: detectedMissing },
             pass: false, // 负路径下作业必须失败（exit 1），即使检出也保持 1
             failures: detected
@@ -364,10 +375,12 @@ async function runSelftest() {
   };
 
   try {
-    // 1) good 页：3 视口全过（断言器不会冤枉好页面）
+    // 1) good 页：3 视口全过（断言器不会冤枉好页面）；good 页带搜索入口，
+    //    按真实页标准（searchRequired=true）跑：入口存在 + 交互必须过
     for (const vp of VIEWPORTS) {
-      const d = await checkOne(browser, base, { path: 'good.html', id: 'good', label: 'good', title: 'h1', container: '.cards .card', cardsMin: 3 }, vp, outDir, { screenshot: false });
+      const d = await checkOne(browser, base, { path: 'good.html', id: 'good', label: 'good', title: 'h1', container: '.cards .card', cardsMin: 3 }, vp, outDir, { screenshot: false, searchRequired: true });
       expect(`good @${vp.id} 全部通过`, d.pass, d.failures.join('；'));
+      expect(`good @${vp.id} 搜索入口+交互通过`, d.search && d.search.ok === true, JSON.stringify(d.search));
     }
     // 2) 静态坏页：横向溢出 → 溢出断言必须失败，元素断言不受牵连
     for (const vp of VIEWPORTS) {
@@ -383,7 +396,15 @@ async function runSelftest() {
       expect(`bad-missing @${vp.id} 标题断言失败`, title && !title.ok, `title=${JSON.stringify(title)}`);
       expect(`bad-missing @${vp.id} 溢出断言通过`, d.overflow.pass, `sw=${d.overflow.scrollWidth} cw=${d.overflow.clientWidth}`);
     }
-    // 4) 运行时注入：good 页注入 overflow / missing，两条都必须被检出
+    // 4) 静态坏页：good 同款但**删掉搜索入口** + 按真实页标准（searchRequired=true）检查
+    //    → 搜索入口缺失断言必须失败（t16/F3 可证伪性加固：回归删除入口该页必须红，
+    //    而不是静默 applicable:false 通过）；其余断言不受牵连
+    for (const vp of VIEWPORTS) {
+      const d = await checkOne(browser, base, { path: 'bad-missing-search.html', id: 'bad-missing-search', label: 'bad-missing-search', title: 'h1', container: '.cards .card', cardsMin: 3 }, vp, outDir, { screenshot: false, searchRequired: true });
+      expect(`bad-missing-search @${vp.id} 搜索入口缺失断言失败`, !d.pass && d.failures.some((f) => f.includes('搜索入口缺失')), `failures=${JSON.stringify(d.failures)}`);
+      expect(`bad-missing-search @${vp.id} 溢出断言不受牵连`, d.overflow.pass, `sw=${d.overflow.scrollWidth} cw=${d.overflow.clientWidth}`);
+    }
+    // 5) 运行时注入：good 页注入 overflow / missing，两条都必须被检出
     for (const fault of ['overflow', 'missing-element']) {
       const vp = VIEWPORTS[2]; // 桌面视口足以代表（注入与视口无关时取一即可，3 视口注入已覆盖在 2 中由静态页完成）
       const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
@@ -408,7 +429,7 @@ async function runSelftest() {
     console.error(`\n[visual-check] ❌ selftest 失败：${bad.length}/${results.length} 项预期未命中（断言器不可信，禁止上 CI）`);
     process.exit(1);
   }
-  console.log(`\n[visual-check] ✅ selftest 全部命中：${results.length}/${results.length}（好页不被冤枉 / 溢出必被抓 / 缺标题必被抓 / 运行时注入必被抓）——断言器两条路径均可证伪`);
+  console.log(`\n[visual-check] ✅ selftest 全部命中：${results.length}/${results.length}（好页不被冤枉 / 溢出必被抓 / 缺标题必被抓 / 搜索入口缺失必被抓 / 运行时注入必被抓）——断言器两条路径均可证伪`);
   process.exit(0);
 }
 

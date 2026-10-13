@@ -112,7 +112,9 @@ jobs:
         if: always()
         run: kill "$(cat /tmp/httpd.pid)" 2>/dev/null || true
 
-      # 截图 + report.json 作为 artifact（失败时也上传：现场即证据）
+      # 截图 + report.json 作为 artifact（失败时也上传：现场即证据）。
+      # fault 模式（负路径自证）同样产出失败现场截图（*_fault-*.png，t16/F2 加固——
+      # 原实现 fault 模式按设计只出 report.json、无截图，失败现场不可视）。
       - name: Upload screenshots + report (artifact)
         if: always()
         uses: actions/upload-artifact@v4

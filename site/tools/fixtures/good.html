@@ -1,6 +1,8 @@
 <!doctype html>
 <!-- selftest fixture：结构完整的"好页面"（模拟站点关键结构）。
-     断言器对它的预期：3 视口全部通过。若这里失败 = 断言器冤枉好页面，selftest 报错。 -->
+     断言器对它的预期：3 视口全部通过（含搜索入口存在 + 交互，按真实页标准
+     searchRequired=true 检查——真实页的搜索入口是全站布局组件，缺失即回归）。
+     若这里失败 = 断言器冤枉好页面，selftest 报错。 -->
 <html lang="zh">
 <head>
 <meta charset="utf-8" />
@@ -36,12 +38,24 @@
       <a href="#">时间线</a>
     </nav>
     <button class="nav-toggle" type="button" aria-label="打开导航菜单">≡</button>
+    <button type="button" data-search-open>🔍 搜索</button>
   </header>
+  <dialog data-search-dialog style="border: 1px solid #999; border-radius: 8px; padding: 12px;">
+    <input data-search-input type="search" placeholder="搜索 fixture" style="width: 220px;" />
+  </dialog>
   <h1>good fixture 页标题</h1>
   <div class="cards">
     <div class="card">card-1</div>
     <div class="card">card-2</div>
     <div class="card">card-3</div>
   </div>
+  <script>
+    // 模拟站点 SiteSearch 的最小行为：点击入口 → dialog.showModal()；
+    // Esc 关闭为 <dialog> 原生行为（断言器点开后按 Esc 还原现场）。
+    document.querySelector('[data-search-open]')?.addEventListener('click', () => {
+      const d = document.querySelector('[data-search-dialog]');
+      try { d.showModal(); } catch { d.setAttribute('open', ''); }
+    });
+  </script>
 </body>
 </html>
