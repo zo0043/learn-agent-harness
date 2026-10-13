@@ -64,7 +64,7 @@ EXIT=125
 **⚠️ 本机不可验**：因此本次审计**无法获得完整构建产物**，"错误/警告/产物大小"这一项只能给出上半程结论：
 
 - 内容层与 SSR 层**无错误、无警告**（`[content] Synced content` / `[build] ✓ Completed in 824ms` / `[vite] ✓ built in 3.39s` 全绿）。
-- 客户端 bundle 阶段在本机必然 OOM，**不是站点代码错误**（AST 已编译通过、`dist/pages/*.astro.mjs` 与 `dist/chunks/*` 已生成）。
+- 客户端 bundle 阶段在本机 OOM 风险高（当时两次 attempt 均在 vite transform 阶段被杀；**2026-10-13 t21 独立实测：本机全量构建可约 17 分钟成功（首次 560s 超时被杀非 OOM）——「必然 OOM」不成立，本机可行但不可依赖，可靠路径是 CI**），**不是站点代码错误**（AST 已编译通过、`dist/pages/*.astro.mjs` 与 `dist/chunks/*` 已生成）。
 - 可参考的已生成物：`site/.astro/`（上次成功构建的中间产物，含 `chunks/_astro_data-layer-content_*.mjs`，即全部 SSR 后 HTML 字符串）与本次半程 `dist/`。本报告的渲染管线结论大量基于对 `site/.astro/chunks/_astro_data-layer-content_DBxbNg_o.mjs` 的静态核对（40 个 `<pre class="astro-code astro-code-themes">`、62 个 `<div class="mermaid">`，与 `notes/` 中 62 个 ` ```mermaid ` 围栏精确对应 → **markdown 管线本身无丢失**）。
 
 ### 1.4 一个被构建失败放大的运维风险（P1，见 F-12）

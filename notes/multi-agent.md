@@ -188,7 +188,7 @@ flowchart TD
 |---|---|---|---|
 | 原语 | subagents | handoffs（交接） | supervisor（图节点） |
 | 会话 | sessions continue/resume/fork | sessions（内置记忆） | checkpoint（持久化/回放） |
-| 定位 | harness 当库用（Claude Code 产品化） | Swarm 后继（guardrails） | 编排库（1.0.1，图+HITL） |
+| 定位 | harness 当库用（Claude Code 产品化） | Swarm 后继（guardrails） | 编排库（~~1.0.1~~ ~~1.4.21~~ **1.5.0**，图+HITL；版本号=截至 2026-10-13 全新缓存独立复核，1.4.21 为 2026-10-12 复核值） |
 
 **读法**：三条路 = **子循环（垂直分叉）/ 交接（水平移交）/ 图调度（显式控制）**。
 
@@ -393,6 +393,6 @@ flowchart TD
 - Anthropic [稳定历史]：最简单起步/workflow vs agent；4x/+90.2%/15x/80%/教委派（研究系统口径 §1.2/§4.4） → anthropic.com/engineering/{building-effective-agents, multi-agent-research-system}
 - Cognition [稳定历史→2026现行]：隐式决策/并行写冲突→单线程写；Devin 2 bug/58% → cognition.ai/blog/{dont-build-multi-agents, multi-agents-working}
 - OpenAI [稳定历史]：规则式失效才建 agent/失败停机 → cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf
-- 框架 [2026现行/稳定历史]：code.claude.com/docs/en/agent-sdk/overview（subagents/sessions continue-resume-fork） · developers.openai.com/codex（handoffs） · github.com/langchain-ai/langgraph（1.0.1） · a2a-protocol.org/latest/（A2A v1.0.1；AAIF 治理）
+- 框架 [2026现行/稳定历史]：code.claude.com/docs/en/agent-sdk/overview（subagents/sessions continue-resume-fork） · developers.openai.com/codex（handoffs） · github.com/langchain-ai/langgraph（~~1.0.1~~ ~~1.4.21~~ **1.5.0**；截至 2026-10-13 全新缓存独立复核，1.4.21=2026-10-12 复核值，详见 framework-ecosystem.md S2.3 与 industry-2026.md 核实台账第 4/4a 行） · a2a-protocol.org/latest/（A2A v1.0.1；AAIF 治理）
 - 本课 S8 轨迹 schema：`harness-demo/src/types.ts`（`TrajectoryEvent`）+ `harness-demo/trajectories/demo.jsonl`（实测）；恢复机制见 `harness-demo/src/agent.ts`（`guardedToolStep`）与 `harness-demo/src/session.ts:50`（`rebuild`）
 - 三个 demo 的权限模型（S8 走查取材，源码核验）：`harness-demo/src/policy.ts`（deny>approve>allow，默认 deny）、`sandbox-demo/src/policy.ts`（四通道，默认 deny）、`mcp-demo/src/defense.ts`（风险分级，未分级默认 deny）

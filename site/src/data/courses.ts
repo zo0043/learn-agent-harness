@@ -172,7 +172,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'data-flywheel', domain: '数据飞轮', phase: 'P1', status: '🔄 讲义已展开',
-    intro: '把 FinHot 台账 1830 行 + labeler 讲成“跑过一轮真实生产飞轮”的故事（含三轮真实评测指标：precision 0.256→0.304→0.272）',
+    intro: '把 FinHot 台账 1830 行（仓外生产数字）+ labeler 讲成“跑过一轮真实生产飞轮”的故事（含三轮真实评测指标：precision 0.256→0.304→0.272）',
     interviewAngle: '飞轮=最强项：FinHot 台账+labeler 全故事',
     relatedQuestions: [
       { no: '§3.2-Q1', text: '为什么 T+5 而不是 T+1？（金融数据的噪声/交易日历）', anchorPrefix: '3.2 FinHot labeler' },

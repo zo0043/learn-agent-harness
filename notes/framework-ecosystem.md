@@ -4,7 +4,7 @@
 > 深度定位：路线图原话"懂原理即可，不背 API"——目标是**选型判断力 + 框架边界感**
 > **我的独特资产**：pi 是**日常在用+读过文档+跑过 RPC 模式（pi-agents-team workers）的框架**——多数候选人对框架只有 API 级认知
 
-**本课导读**：框架课不是"API 速查"，而是回答三个问题——**它替我做了从零写 harness 的哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用从零写 harness 的语言拆任何框架，面试官就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（Claude Agent SDK 四能力，2026-10-11 本机实测 **11/11** 通过）当实证，凡标"已实测"的结论都能指着代码复现。
+**本课导读**：框架课不是"API 速查"，而是回答三个问题——**它替我做了从零写 harness 的哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用从零写 harness 的语言拆任何框架，面试官就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（**三家 SDK 同任务离线 mock 对照** + Claude Agent SDK 四能力）当实证，凡标"已实测"的结论都能指着代码复现（对照口径与命令见 [三家 SDK 五维对照](../framework-demo/docs/sdk-comparison.md)）。
 
 **本课地图**（每节回答一个问题）：
 
@@ -87,14 +87,32 @@ flowchart TD
 |---|---|---|
 | **pi**（earendil/badlogic 谱系，1.1.0） | 极简核心+扩展系统（extensions/skills/TUI）；会话=JSONL（同 从零写 harness §⑥ 设计）；RPC 模式可当 worker 进程 | **我日常用它+用它跑多 agent（pi-agents-team）**；扩展机制=JS/TS 直接进运行时（skill 加载、工具扩展）——框架即文档 |
 | **Claude Agent SDK** | Claude Code 的编程化：把完整 harness 当库用（subagents/hooks/MCP/权限模式/skills/sessions） | **2025-09 由 Claude Code SDK 改名而来**（Python+TypeScript，Apache 2.0）；"Claude Code 的机制=官方参考实现"，SDK=机制的可编程面 |
-| **OpenAI Agents SDK** | **Swarm 的官方后继**（2025 GA，Apache 2.0）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（系统设计 §S3）；guardrails=MCP 与供应链安全 Guardrails 的框架版 |
-| **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x，当前 1.0.1；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 系统设计 §S3 的 workflow 模式显式化；checkpoint=durable execution 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
+| **OpenAI Agents SDK** | **Swarm 的官方后继**（官方公告口径 2025 GA，Apache 2.0——**该时点本轮未能取得一手源，标"无法确认"**；registry 实测 2026-10-12 仍为 0.x 线：latest 0.20.0，即 registry 版本号未背书 1.0，见 industry-2026.md 核实台账）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（系统设计 §S3）；guardrails=MCP 与供应链安全 Guardrails 的框架版 |
+| **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x（历史）；~~当前 1.0.1~~ ~~1.4.21~~ **截至 2026-10-13 全新缓存复核：npm registry latest = 1.5.0**（time.modified 2026-10-12T23:19:38.982Z；历史：2026-10-12 独立新缓存 `npm view` 复核 = 1.4.21（time.modified 2026-10-07），命令见 industry-2026.md 核实台账）；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 系统设计 §S3 的 workflow 模式显式化；checkpoint=durable execution 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
 | **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF，A2A 同入（A2A **TSC 共 8 席**：Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM；AAIF 自身技术委员会另为 8 家） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
 | **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（MCP 与供应链安全 §S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
 | **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 面试谈资："GUI agent 不再是边角方向"；追问见 系统设计 §S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
 | **OpenAI Codex** [2026现行] | 由 CLI 转向 **agent 基础设施**：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；**AgentKit=低代码入口** | "OpenAI 在把 Codex 做成平台而不是产品"；https://developers.openai.com/codex |
 
 **共同点（比单家更值钱的面试点）**：四家都在解同一组问题——会话持久化（JSONL/checkpoint）、子代理边界（上下文隔离）、工具标准化（MCP）、权限/护栏（guardrails/hooks/policy）。**框架生态的收敛=行业问题定义的收敛**——我在从零写 harness 里从零写过这些层，所以能看出四家在做同一件事。
+
+### S2.4 三家 SDK 同任务离线对照（2026-10-12 新增 · 亲手实现，非文档复述）
+
+**入口**：`cd framework-demo && npm run compare`（一条命令跑完三家并打印结构化对照）+ `npm run compare:assert`（16 条断言，不符即非 0 退出）。
+**逐维结论表（每格带 `file:line` + 官方文档 URL）**：[`framework-demo/docs/sdk-comparison.md`](../framework-demo/docs/sdk-comparison.md)。
+**口径声明（不得省略）**：模型是**本地 mock 端点**（`framework-demo/src/mock-model.ts`，默认 `127.0.0.1:8791`，双格式：Anthropic `/v1/messages` + OpenAI `/v1/chat/completions`，响应=请求的纯函数）——**离线 mock 模型、非真实模型实跑**；无外网、无任何 key。因此本对照证明的是**三家的调用形状（loop 归属/工具声明/权限钩子/中断恢复/可观测钩子）**，不是模型能力。版本：Claude Agent SDK `0.3.296` / OpenAI Agents SDK `0.20.0` / LangGraph `1.4.21`。
+
+五维结论摘要（可直接引用，详表见上）：
+
+| 维度 | Claude Agent SDK | OpenAI Agents SDK | LangGraph |
+|---|---|---|---|
+| ① loop 归属 | SDK 内置（`query()` 起 CLI 子进程，loop 在 CLI 内） | SDK 内置（`run(agent, input)`） | **你拥有**（StateGraph 节点+边自己连） |
+| ② 工具与 schema 声明 | 不声明函数工具，用内置工具市场 + `allowedTools` 过滤 | `tool({name, description, parameters, execute})` 显式声明 | ToolNode + 工具数组（须传完整 ToolCall） |
+| ③ 权限与 HITL 钩子 | `canUseTool` 预执行回调（**注意 `allowedTools` 裸名会 shadow 它**；`permissionMode` 必须显式） | 工具级 `needsApproval` → 中断 → 批准后续跑 | 图内 `interrupt()` + checkpointer（**唯一默认就带"挂起"语义的**） |
+| ④ 状态与中断恢复 | 落盘 JSONL 会话转录（`$CLAUDE_CONFIG_DIR/projects/<cwd-slug>/`，刷盘时机不可控）+ `resume: session_id` | RunState（可序列化） | checkpointer 线程状态 + `new Command({resume})` |
+| ⑤ 可观测钩子 | `AsyncGenerator<SDKMessage>` 事件流 | Agent 实例 EventEmitter（`agent.on(...)`）+ tracing（对照中禁用 exporter 以保持离线） | `streamMode` 流（`updates`/`values`/`messages`） |
+
+**与"定位级/文档级"的差别**：这三段实现都是本仓库可跑代码（`framework-demo/src/sdks/{claude,openai,langgraph}.ts`），断言逐条对应上面的维度；被问"你用过哪几家、区别在哪"时给的是**同任务三实现 + 代码级对照**，不是复述文档。踩坑（`allowedTools` 抢跑、`permissionMode` 缺省 bypass、项目 slug 规则、trace exporter 必须禁用、LangGraph 须传完整 ToolCall）见 `framework-demo/README.md`。
 
 ---
 
@@ -262,9 +280,9 @@ flowchart LR
 
 | 候选 | 层级 | 为什么进候选 | 本地证据 |
 |---|---|---|---|
-| **A. Claude Agent SDK** | ①原语 + ③多智能体 | 目标岗"参考实现"（Claude Code harness 的产品化），且本仓库有实测 | `framework-demo/`（已跑通） |
-| **B. LangGraph 1.0.x** | ②图编排 | 30 分钟长任务需要显式状态 + checkpoint；HITL 在图内可控 | 无本地实测，文档级 |
-| **C. OpenAI Agents SDK** | ①原语 + ③多智能体 | 若团队走 Codex 系，sessions/tracing 开箱 | 无本地实测，文档级 |
+| **A. Claude Agent SDK** | ①原语 + ③多智能体 | 目标岗"参考实现"（Claude Code harness 的产品化），且本仓库有实测 | `framework-demo/src/sdks/claude.ts`（离线 mock 跑通） |
+| **B. LangGraph（latest 截至 2026-10-13 复核 = 1.5.0；2026-10-12 当时现行 1.4.x 已再升一版）** | ②图编排 | 30 分钟长任务需要显式状态 + checkpoint；HITL 在图内可控 | `framework-demo/src/sdks/langgraph.ts`（离线 mock 跑通，**不再是文档级**） |
+| **C. OpenAI Agents SDK** | ①原语 + ③多智能体 | 若团队走 Codex 系，sessions/tracing 开箱 | `framework-demo/src/sdks/openai.ts`（离线 mock 跑通，**不再是文档级**） |
 
 ### 步骤 2 · 用 `framework-demo` 的断言矩阵逐项验
 
@@ -277,7 +295,7 @@ flowchart LR
 | 人工审批 | 每次调用前能拦截、拒绝是合法结果 | ③ `deny 拦截真的发生了`（命中 1 次 `rm -rf`）；`被拦截后 agent 没有崩`；`最终回答说明处理方式`（deny 回写上下文） |
 | 30 分钟恢复 | 会话可 resume、历史可重建 | ④ `第一次产出 session_id`；`resume 后同一 session_id`；`回答带出代号 Nebula-7` |
 
-**断言口径**：代码里 10 条 `ok()` 能力断言（①2 / ②2 / ③3 / ④3）+ demo 末行 1 条整体判定（"4 个能力全部 ✅"、退出码 0/1）——合起来即本机实测的 **11/11**。候选 B/C 无本地实测，标记为**文档级待验**（`<!-- TODO 核实: LangGraph 1.0.x 的 HITL interrupt 具体 API 与语义、OpenAI Agents SDK 人工审批原语是否一等，以官方文档为准 -->`）。
+**断言口径**：A 家的能力断言 = 代码里 10 条 `ok()`（①2 / ②2 / ③3 / ④3，行号 13/14/37/38/62/63/64/73/75/76）+ demo 末行 1 条**整体判定**（"4 个能力全部 ✅"、退出码 0/1）——前 10 条是断言，末 1 条是汇总判定，**不合成「11 条断言」**（U-24 口径统一，2026-10-12）。B/C 两家此前标"文档级待验"，现已由 `framework-demo/src/sdks/` 的**离线 mock 实测**补齐（命令 `npm run compare` / `npm run compare:assert`，逐维结论见 `framework-demo/docs/sdk-comparison.md`）。
 
 ### 步骤 3 · 发现抽象泄漏（关键一步）
 
@@ -287,7 +305,7 @@ flowchart LR
 
 ### 步骤 4 · 选型结论与迁移成本估算
 
-**结论**：以 **A（Claude Agent SDK）** 起步——它是唯一在本仓库被 11/11 断言验证过的候选，loop/session/subagent/审批钩子齐全；但**权限语义要自持**（防泄漏）、**可观测要自建出口**。B（LangGraph）留作"控制流稳定成图之后"的迁移目标；C（OpenAI SDK）仅当团队走 Codex 系时替换。
+**结论**：以 **A（Claude Agent SDK）** 起步——它在本仓库有最完整的本地断言（10 条 `ok()` + 1 条整体判定），loop/session/subagent/审批钩子齐全；但**权限语义要自持**（防泄漏）、**可观测要自建出口**。B（LangGraph）留作"控制流稳定成图之后"的迁移目标，C（OpenAI Agents SDK）仅当团队走 Codex 系时替换——**两家的定位现在都有本地代码背书**（不再是纯文档级），逐维差异见 `framework-demo/docs/sdk-comparison.md`。
 
 **迁移成本估算**（教学走查值，非既成事实，仅用于练"怎么估"）：
 
@@ -296,7 +314,7 @@ flowchart LR
 | 工具 schema/描述、权限判据、评测 golden set | 能带走 | 适配 1-2 人日 |
 | 权限门重写（防 allowedTools 泄漏）+ OTel 出口 + 子代理预算策略 | 要新写 | 3-5 人日 |
 | 自研 loop 控制流 + 流式解析 + 重试（harness-demo ~600 行） | 沉没成本 | 不迁移 |
-| 升级回归（每次 SDK 升级跑 11/11 断言 + eval） | 持续成本 | 每次 0.5 人日 |
+| 升级回归（每次 SDK 升级跑 A 家 10 条断言 + 三家对照 + eval） | 持续成本 | 每次 0.5 人日 |
 
 **走查一句话收口**："选 A 是因为它的能力面被本地断言验过；我知道它会在权限优先级上泄漏，所以审批由我的执行层兜底——这就是'懂原理不背 API'。"
 
@@ -373,14 +391,14 @@ flowchart LR
 
 ## 来源与锚点（2026-10 核实回填）
 
-- 各家现状：Claude Agent SDK（2025-09 改名，Python+TS）/ OpenAI Agents SDK（Swarm 后继，GA）已核实（Anthropic/OpenAI 官方博客+仓库）；LangGraph 1.0 已核实（2025-10 alpha → 稳定 1.0.x，GitHub releases + langchain 官方博客；2026-10-11 复核）——S2.3 已回填
+- 各家现状：Claude Agent SDK（2025-09 改名，Python+TS）/ OpenAI Agents SDK（Swarm 后继；**"2025 GA"为官方公告口径、本轮未能取得一手源 → 标"无法确认"**，registry 2026-10-12 实测仍 0.x 线：0.20.0）已核实（Anthropic/OpenAI 官方博客+仓库）；LangGraph 1.0 已核实（2025-10 alpha → 稳定 1.0.x，GitHub releases + langchain 官方博客；2026-10-11 复核）；**2026-10-12 registry 复核：`@langchain/langgraph` latest = 1.4.21（time.modified 2026-10-07，独立新缓存 `npm view`），原「当前 1.0.1」为过期口径——已就地更正（S2.3 表）；2026-10-13 全新缓存复核：latest = 1.5.0（time.modified 2026-10-12T23:19:38.982Z，`npm view @langchain/langgraph version time.modified --cache $(mktemp -d)`），1.4.21→1.5.0 为版本演变、非口径错误——逐条命令与来源见 `notes/industry-2026.md` §已知缺口/待复核 的核实台账**——S2.3 已回填
 - 我的锚点：pi 1.1.0 日常（#38/#39 环境实践）、pi-agents-team 多 agent（orchestrator/worker/RPC，本会话正在用）、从零写 harness（"框架藏什么"的实证）
-- 实操已落地：framework-demo/（Claude Agent SDK 冒烟+四能力：agent/subagent/权限/会话，指向本地双格式代理）——S2/S3'框架给你什么/藏什么'的活样本；**2026-10-11 本机实测 `npm run demo` 退出码 0：11/11（10 条 `ok()` 断言 + 1 条整体判定）**，SDK 版本 `@anthropic-ai/claude-agent-sdk@0.3.296`
+- 实操已落地：`framework-demo/`——① Claude Agent SDK 四能力（agent/subagent/权限/会话，指向本地双格式代理）：`npm run demo` 退出码 0，**10 条 `ok()` 断言 + 1 条整体判定**（SDK 版本 `@anthropic-ai/claude-agent-sdk@0.3.296`；历史表述「11/11」即此 10+1 口径，**已按 U-24 统一，不再合成 11 条断言**）；② **三家 SDK 同任务离线 mock 对照**（Claude Agent SDK 0.3.296 / OpenAI Agents SDK 0.20.0 / LangGraph 1.4.21，**对照实跑快照=2026-10-12；截至 2026-10-13 复核 registry latest 已升 1.5.0**）：`npm run compare` 一条命令结构化对照、`npm run compare:assert` 16 条断言退出码 0；逐维结论（loop 归属 / 工具与 schema / 权限与 HITL / 状态与中断恢复 / 可观测钩子，每格带 `file:line` + 官方 URL）见 [`framework-demo/docs/sdk-comparison.md`](../framework-demo/docs/sdk-comparison.md)。**离线 mock 模型、非真实模型实跑**（本地 `127.0.0.1:8791`，无外网无 key）——这是本轮补的实操证据，B/C 两家因此从"定位级/文档级"升为"有亲手实现与对照"。
 - 对照 harness-demo 的踩坑实证见 framework-demo/README.md（2026-10-11：allowedTools 裸名会抢在 canUseTool 之前、子代理对话默认不出主流、maxTurns 语义反直觉）
 - 抽象泄漏定律：Joel Spolsky, *The Law of Leaky Abstractions*（2002）——S3 的理论锚点
 - 2026 行业上下文：Anthropic Managed Agents / token 经济学（agent ≈4×、多智能体 ≈15×）见 industry-2026.md §一；框架收敛=行业问题定义收敛（多智能体 S6 同源）
 - 接回：系统设计(形态选型)、durable execution(checkpoint)、可观测(可观测出口)、MCP 与供应链安全(MCP 支持面)、长期记忆(Magic Context)、多智能体编排(多智能体原语三条路)
 
-<!-- TODO 核实: LangGraph 1.0.x 的 HITL interrupt 具体 API 名与语义（本课只作定位级引用，未本地实测） -->
-<!-- TODO 核实: OpenAI Agents SDK 是否提供一等人工审批/中断原语（本仓库未实测，沿用官方文档记忆，勿当既成事实） -->
+<!-- ✅ 已核实（2026-10-12，t3 离线 mock 实测）：LangGraph 的 HITL = 图内 `interrupt()` + checkpointer，恢复用 `new Command({ resume })`——实现与断言见 framework-demo/src/sdks/langgraph.ts，不再只作定位级引用 -->
+<!-- ✅ 已核实（2026-10-12，t3 离线 mock 实测）：OpenAI Agents SDK 有工具级人工审批原语（`needsApproval` → run 返回 interruption → 批准后续跑）——实现与断言见 framework-demo/src/sdks/openai.ts -->
 <!-- TODO 核实: 托管运行时（Anthropic Managed Agents / OpenAI Codex hosted）的公开定价与限额——本课只讲定位，不引数字 -->

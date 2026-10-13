@@ -84,9 +84,9 @@
 
 | JD 关键词（2026 调研） | 课程 | 我的证据 | 覆盖度 |
 |---|---|---|---|
-| agent 可观测 / OTel GenAI / 成本归因 | 可观测 | 从零写 harness §⑥ JSONL（最小 trace）+ backfill 日志 + harness-demo `demo:otel`（11 spans/1 trace） | 🟢 概念 + 实操都有 |
+| agent 可观测 / OTel GenAI / 成本归因 | 可观测 | 从零写 harness §⑥ JSONL（最小 trace）+ backfill 日志 + harness-demo `demo:otel:mock` + `demo:otel:assert`（**离线 mock 判据**，2026-10-12 实跑：确定性 span 树 = **15 spans / 1 trace**＝invoke_agent×1 + chat×6 + execute_tool×8；历史「11 spans/1 trace」为活端点报告值、仓内无回放日志、标**未验证**、不作判据） | 🟢 概念 + 实操都有（判据可离线复跑） |
 | 沙箱 / 凭据 / 行为漂移拦截 | 沙箱与凭据 | 幽灵事故（真实）+ `sandbox-demo` 四通道 policy（3 次重放逐字节一致） | 🟢 故事 + demo 满配 |
-| 长期记忆 / 记忆检索 | 长期记忆 | pi Magic Context 日常（用过+接口级理解） | 🟡 有活系统，无自研 |
+| 长期记忆 / 记忆检索 | 长期记忆 | **自研** `memory-redteam/`（2026-10-12）：写/读/遗忘三路径 + JSONL 跨会话持久化 + 16 条探针（11 单元级 + 5 端到端）+ 逐层消融 18/18 层承重 + `npm run demo` 端到端走查（**可重跑**：`cd memory-redteam && node test.mjs` 16/16、`--ablate` 18/18 层承重、`--persist` 4/4 三进程 digest 逐字节一致）；另 pi Magic Context 日常（用过+接口级理解） | 🟢 自研实操 + 活系统都有（剩余差距见下） |
 | durable execution / stateful workflow / long-horizon | durable execution | backfill 断点续跑（真实）+ session.ts（自研） | 🟢 故事+代码都有 |
 | 评测 CI / LLM-judge / pass@k / 轨迹评测 | 评测工程化 | labeler（生产）+ rag-demo golden set + harness-demo 五模式 | 🟢 最强项之一 |
 | MCP / 供应链安全 / 红队 | MCP 与供应链安全 | 从零写 harness §③ 工具协议（机制同源）；MCP 协议+四攻击面 + `mcp-demo` 投毒/四层防御/消融 | 🟢 概念 + 实操都有 |
@@ -94,14 +94,16 @@
 | 数据飞轮 / 轨迹数据仓 / 自进化 | 数据飞轮 | FinHot 全链路（台账+labeler+两轮消融） | 🟢 最强项（多数候选人没有生产实例） |
 | coding agent / SWE-bench / solve rate | 系统设计 + 从零写 harness | harness-demo + whiteboard + 系统设计模板 | 🟢 |
 | RAG / 企业知识库 | RAG 与检索 | rag-demo（含评测）+ RAG 与检索 §⑪ 设计骨架 | 🟢 |
-| 框架生态 | 框架生态 | pi 源码级日常 + `framework-demo`（Claude Agent SDK，11/11 断言）+ 四家定位 | 🟡 有 SDK 实操，LangGraph 等仍只有定位级 |
+| 框架生态 | 框架生态 | pi 源码级日常（定位级）+ `framework-demo`：**三家 SDK 同任务离线 mock 对照**（Claude Agent SDK 0.3.296 / OpenAI Agents SDK 0.20.0 / LangGraph 1.4.21）——`npm run compare` 一条命令五维结构化对照、`npm run compare:assert` 16 条断言（工具调用数 / 权限拦截 / 中断恢复 / 消息与状态形态），A 家另有 `npm run demo` 四能力＝**10 条 `ok()` 断言 + 1 条整体判定**；逐维结论（含 `file:line` + 官方文档 URL）见 `framework-demo/docs/sdk-comparison.md` | 🟢 三家都有亲手实现（**离线 mock、非真实模型实跑**）；剩余差距：无生产级框架落地故事 |
 | A2A / agent 身份 | —（观察级） | 未排课 | ⚪ 按 roadmap 保持观察 |
 
 **补强优先级**（把 🟡 变 🟢 的最小动作）：
 1. ~~沙箱与凭据：写完 sandbox-demo src（四通道 policy+幽灵重放）~~ ✅ 已完成（2026-10-11，3 次重放逐字节一致）
-2. ~~可观测：harness-demo 加 OTel 埋点导出~~ ✅ 已完成（`demo:otel` 11 spans/1 trace）
+2. ~~可观测：harness-demo 加 OTel 埋点导出~~ ✅ 已完成（harness-demo `demo:otel:mock`+`demo:otel:assert` 离线可重跑：2026-10-12 实测 **15 spans/1 trace**；历史活端点报告值「11 spans」未验证、不作判据）
 3. ~~MCP 与供应链安全：本地 MCP server 投毒演示~~ ✅ 已完成（`mcp-demo` 投毒+四层防御+消融）
-4. ~~长期记忆：用 pi 的记忆机制做一个"记忆投毒回归测试"脚本（联动 I）~~ ✅ 已完成（2026-10-12，`memory-redteam/`）——零依赖可执行回归：11 条探针守住、10/10 对防线敏感（`node test.mjs` / `node test.mjs --ablate`）；编码自长期记忆 §S7 四道防线与 §S10 步骤 6-7
+4. ~~长期记忆：用 pi 的记忆机制做一个"记忆投毒回归测试"脚本（联动 I）~~ ✅ 已完成（2026-10-12，`memory-redteam/`）——零依赖可执行回归，编码自长期记忆 §S7 四道防线与 §S10 步骤 6-7
+5. ~~长期记忆「有活系统、无自研」~~ ✅ 已完成（2026-10-12 升级，`memory-redteam/`）：从"投毒回归脚本"补全为**可演示的自研记忆子系统**——写路径 7 项能力（信任分级/注入扫描/高危审批/审计留痕/冲突消解/时效窗口/遗忘传播）、读路径（scope 过滤 + BM25∥向量 RRF 融合 + 逐条注入理由审计）、跨会话持久化（JSONL 事件日志 → 新进程重建，三方 digest 逐字节一致）、`npm run demo` 端到端走查；16 条探针守住、15 条探针/18 层逐层消融全部承重
+   - **剩余差距（如实保留，不吹 🟢 到顶）**：embedding 是 64 维字符三元组 hash（确定性、可打印），**不是语义嵌入**；无 ANN 索引、无 cross-encoder rerank；单进程单写者、无文件锁/fsync。语义嵌入那一层的选型与代价会在"换真模型要改几行"的追问里主动交代（Embedder 接口可替换，架构不动）
 
 ## 7. 未结清单（非题库）
 

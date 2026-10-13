@@ -1,7 +1,10 @@
 # 站点结构 + 几何回归：headless 三视口断言（W4 / t5）
 #
 # 定位与边界（诚实性声明，交付时逐字复述）：
-#   - 补本机 2 核 3.4GB 下 astro build 必 OOM（历史 exit 134/137）导致的「留浏览器目检」缺口：
+#   - 补「留浏览器目检」缺口：本机 2 核 3.4GB 下 astro build 曾多次 OOM（历史 exit 134/137，
+#     曾留下 85 文件/0 HTML 静默残骸）；2026-10-13 t21 独立实测证伪「必然 OOM」——本机全量构建
+#     可以在约 17 分钟内成功完成（首次 560s 超时被杀**非** OOM，dist HTML=32 含 404.html），
+#     但极慢/超时风险使其**不可依赖**——CI 仍是可靠回归路径。故本作业建立在 CI 上：
 #     CI（ubuntu-latest）构建站点 → headless Chromium 在 3 视口（375/768/1280）加载
 #     首页 /learn/ /works/ /interview/ /map/ /details/ 与课程页 /c/rag/
 #   - 只断言**结构与几何**：① 无横向溢出 ② 关键元素可见（header 导航/页标题/卡片容器）③ 无 console error

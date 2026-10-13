@@ -33,7 +33,7 @@
 ## 来源与时间标注（数字→URL 对照）
 
 - **2025 前后有官方一手源**（自 industry-2026.md 复制）：
-  - 2024.11 MCP 发布（spec 2024-11-05 初版）+ 2025.03-04 跨厂商采纳 + 2025-12 捐给 Linux 基金会 AAIF + 2026.07 spec 修订（2026-07-28：订阅/多轮请求/授权服务器发现）[2026现行] → https://modelcontextprotocol.io/specification/versioning
+  - 2024.11 MCP 发布（spec 2024-11-05 初版）+ 2025.03-04 跨厂商采纳 + 2025-12 捐给 Linux 基金会 AAIF + 2026.07 spec 修订（2026-07-28：订阅/多轮请求/授权服务器发现）[2026现行，2026-10-12 复核：官方 versioning 页确认 "The current protocol version is 2026-07-28"，见 industry-2026.md 核实台账 #3] → https://modelcontextprotocol.io/specification/versioning
   - 2025.02-04 Claude Code 预览→GA / Agents SDK [2026现行] → https://code.claude.com/docs/en/agent-sdk/overview ；OpenAI Agents SDK（Swarm 后继）→ https://developers.openai.com/codex
   - 2025.09 Sonnet 4.5（SWE-bench ~77% 长时程编码）[2026现行] → https://www.anthropic.com/engineering/managed-agents （一手讨论 Sonnet 4.5→Opus 4.5 代际演化的源）
   - 2026.04 Managed Agents（harness 接口化/虚拟化）[2026现行] → https://www.anthropic.com/engineering/managed-agents

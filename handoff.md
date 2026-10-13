@@ -9,9 +9,9 @@
 >
 > **2026-10-11 三次整理**：面经检索（中文面经站/英文系统设计/模型八股三路）→ 缺口清单入 §4.2；全量学习规划入 §四（学习总纲：15 个知识域状态 + 分阶段顺序 + 完成判据）。
 >
-> **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 §S4 升级为 Agent 安全全景 / 模型基础 §S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → 当前 1.0.1）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
+> **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 §S4 升级为 Agent 安全全景 / 模型基础 §S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → ~~当前 1.0.1~~ **1.4.21**，2026-10-12 registry 复核）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
 >
-> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 实测 11 spans/1 trace）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（GitHub Actions→Pages，build 零错误，上线时 9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
+> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 离线 mock 实测 15 spans/1 trace，2026-10-12；历史活端点 11 spans 未验证）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（GitHub Actions→Pages，build 零错误，上线时 9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
 
 ---
 
@@ -74,7 +74,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | 崩溃恢复 | `npm run demo:crash` → `npm run demo` | ✅ 真实模型（未知状态→先核对再重写） |
 | 审批拒绝 | `npm run demo:reject` | ✅ 真实模型（跳过、不重试、out/ 为空） |
 | 压缩 | `npm run demo:compact` | ✅ 活体验证（2026-10-10 晚，qwen3.8-flash-next，`[压缩] 摘要 3 条，保留 9 条` 真实触发） |
-| OTel 埋点 | `npm run demo:otel` | ✅ 实测 11 spans / 1 trace |
+| OTel 埋点 | `npm run demo:otel` / `demo:otel:mock`+`demo:otel:assert` | ✅ 离线 mock 实测 15 spans / 1 trace（2026-10-12 可重跑；历史活端点 11 spans 未验证） |
 
 ---
 
@@ -159,7 +159,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 >
 > **2026-10-11 Phase 2 讲义展开轮(本次)**:durable execution / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 四门课同样展开为**开课版完整讲义**(各 4-5 张 mermaid,共 17 张;新增『实战走查』与『常见错误与面试官追问』节;题库各 8-10 → **14 题**)。引用一手源复核修正 8 处:MCP spec 版本线整段重写(**Streamable HTTP 与 OAuth 2.1 均为 2025-03-26 引入**、2025-06-18 加 elicitation/工具结构化输出、2025-11-25 加 OIDC 发现、2026-07-28 为去状态化+server/discover+订阅)、删掉**不存在的『OpenAI Registry/371 条目』**(URL 实测 404)、A2A TSC **8 席**(补 Cisco/ServiceNow)、生态规模数字改标『据媒体报道』、Anthropic **原生 structured outputs(`output_config.format`)+ strict tool use**(原写法已过时)、OpenAI 无 99.9% 遵循率官方数字、`effectively-once` 改用 Temporal/GCP 官方措辞、jitter 出处回填 AWS Architecture Blog (Marc Brooker, 2015)。**数据飞轮实战走查回填了真实三轮评测数据**(FinHot `.data/eval/selection-all-200-*.json`,n=200/seed=7):precision 0.256→**0.304**→0.272、accuracy 0.611→**0.676**→0.654(第二轮在 gold 重标后退步 → 提示词杠杆耗尽的实证)。四课共 17 张 mermaid 已渲染为 SVG 验收通过。
 >
-> **2026-10-11 Phase 3 讲义展开轮（本次）**：可观测 / 长期记忆 / 模型基础 / 框架生态 四课同样展开为**开课版完整讲义**（各 4 张 mermaid，共 16 张；新增『实战走查』与『常见错误与面试官追问』节；题库各 8-10 → **14 题**）。备课核对仓库真实资产：可观测对齐 harness-demo 的 `demo.jsonl` 实测事件分布（22 行：init×1 / model_response×6 / tool_intent×6 / tool_exec×8 / final×1；`compaction`/`crash` 仅 schema 定义未出现）；框架生态对齐 framework-demo 的 10 条 `ok()` 断言（+1 整体判定=11/11）与 allowedTools 抢跑坑；长期记忆对齐 rag-demo 机制与指标（HashEmbedder FNV-1a 768 维 / BM25 k1=1.5,b=0.75 / RRF k=60 / 85 chunks / recall@3=1.00、@5=0.94、@10=1.00）。待核实项仅保留无法用仓库资料或确定常识确认的少量条目（量化收益差异、LangGraph/OpenAI 审批原语、A-MEM/Zep 论文出处、GenAI stable 时间线），未编造任何 arXiv 号/年份。
+> **2026-10-11 Phase 3 讲义展开轮（本次）**：可观测 / 长期记忆 / 模型基础 / 框架生态 四课同样展开为**开课版完整讲义**（各 4 张 mermaid，共 16 张；新增『实战走查』与『常见错误与面试官追问』节；题库各 8-10 → **14 题**）。备课核对仓库真实资产：可观测对齐 harness-demo 的 `demo.jsonl` 实测事件分布（22 行：init×1 / model_response×6 / tool_intent×6 / tool_exec×8 / final×1；`compaction`/`crash` 仅 schema 定义未出现）；框架生态对齐 framework-demo 的 10 条 `ok()` 断言 + 1 条整体判定（U-24 口径：不合成「11/11」）与 allowedTools 抢跑坑；长期记忆对齐 rag-demo 机制与指标（HashEmbedder FNV-1a 768 维 / BM25 k1=1.5,b=0.75 / RRF k=60 / 85 chunks / recall@3=1.00、@5=0.94、@10=1.00（旧行号指针口径、已废））。待核实项仅保留无法用仓库资料或确定常识确认的少量条目（量化收益差异、LangGraph/OpenAI 审批原语、A-MEM/Zep 论文出处、GenAI stable 时间线），未编造任何 arXiv 号/年份。
 
 | 阶段 | 内容 | 每课动作 | 出口判据 |
 |---|---|---|---|

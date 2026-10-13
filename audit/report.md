@@ -167,6 +167,7 @@
 - **证据**（✅ 已复核 .gitignore + trajectory.ts）：路由算式 7 功能页 + 8 details + 17 课程页 = 32 成立，但 dist 无 html 且未跟踪（本机构建 OOM，属环境限制）；.gitignore:13 排除 harness-demo/trajectories/ → trajectory.ts 自注 CI 上 available=false → /works 轨迹 section 永远是占位说明，而 works.astro:283 仍写"数据源：demo.jsonl（build 时静态导入）"。
 - **建议修法**："32 个 html"改可复现算式表述或补 CI 产物计数；轨迹 section 二选一——提交一份脱敏 demo.jsonl 样本（`git add -f` 或白名单）让线上有真实事件流，或把 section 改名"本地运行 harness-demo 后生成"；.gitignore 补 site/dist。
 - **根因**：RC-6。
+- **就地更正说明（2026-10-13，t16/F4b——本项上一轮收口时未经验证，现已更正）**：上文证据里「路由算式 7 功能页 + 8 details + 17 课程页 = 32 成立」是**未经验证的推演**（本机 OOM 未产出构建，算式从未对照构建产物）——且**凭空加入了不存在的加数**：`site/src/pages` 实为 **6 静态页**（index/learn/works/map/interview/details 索引）+ **2 动态路由**（`c/[slug]` / `details/[slug]`），并无第 7 个功能页（`/timeline` 不是独立静态页、不在构建产物内）。本处「7 功能页」与 `content-audit.md` C-13 的「静态页 7（含 timeline）」、knowledge-map 旧口径的「+ 404.html」三套算式**互相矛盾且均为凑数**（一个加不存在的 timeline，一个加不存在的 404.html）。**实测（CI）**：dist HTML = **31** = 6 静态 + 17 课程页 + 8 专题页（绿 run [38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346) 日志「dist HTML 文件数 = 31」；加固后 run [38345995909](https://github.com/zo0043/learn-agent-harness/actions/runs/38345995909) 复证 31）；`site/src/pages/404.astro` 不存在、线上 `/404.html` 返回 HTTP 404（未实现自定义 404 页，GitHub Pages 用默认 404）。knowledge-map 计数口径块已于 2026-10-13 就地更正 32 → 31（t16，构成与依据见其 :17）。**最终态（2026-10-13，t20，经用户决定）**：实际实现了自定义 404 页 `site/src/pages/404.astro`——原「32」的 404.html 加数**当初确系凑数**，但经用户决定该页被实际实现，构建产物 = **32** HTML（6 静态 + 17 课程页 + 8 专题页 + 1 自定义 404 页），CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634) 日志「dist HTML 文件数 = 32」+「关键页存在且非空：404.html」，口径现为 **32** 且真正成立。完整历史链：当初 32 是凑数（本处「7 功能页」/ C-13「静态页 7 含 timeline」/ knowledge-map「+ 404.html」，算式互相矛盾）→ 实测 31（t16 就地更正）→ 实现自定义 404 后 32 才成立（t20）。本条原文作为历史记录保留。
 
 ### P2 — 细节体验与准确性问题
 
@@ -311,7 +312,7 @@ sandbox-demo / mcp-demo 逐字节一致**已实跑通过**（本综合采信内�
 
 ## ④ 建议行动顺序
 
-> 原则：先止血（P0 数字/公式）→ 再建制度（单一数据源）→ 再修结构（模板统一）→ 最后做体验增强。**每一波结束都应能在 CI 复跑验证**（注意：本机 astro build 在 vite 客户端阶段必然 OOM——这是 2 核 3.4GB 机器的环境限制，CI Runner 内存充裕不受影响；验证请走 GitHub Actions，勿用本机 dist 做判断，且注意 astro build 会先清空 outDir）。
+> 原则：先止血（P0 数字/公式）→ 再建制度（单一数据源）→ 再修结构（模板统一）→ 最后做体验增强。**每一波结束都应能在 CI 复跑验证**（注意：本机 astro build 曾多次 OOM——历史 exit 134/137、曾留下 85 文件/0 HTML 静默残骸；**2026-10-13 t21 独立实测证伪「必然 OOM」**：本机全量构建可约 17 分钟成功（首次 560s 超时被杀非 OOM，dist HTML=32 含 404.html）——本机可构建但**不可依赖**（极慢/超时风险），验证仍走 GitHub Actions，勿用本机 dist 做判断，且注意 astro build 会先清空 outDir）。
 
 **Wave 0 · 止血（可全部并行，无依赖）**
 - U-01（rag 数字统改）｜U-02（压缩数字划改）｜U-03（作品计数冻结为 6）｜U-04（$ 假公式三行 + 关 singleDollar）

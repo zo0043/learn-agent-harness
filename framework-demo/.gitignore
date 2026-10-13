@@ -1,0 +1,6 @@
+# framework-demo 运行态产物（可再生，不进仓库）
+.claude-home/
+out/
+.compare-trace.json
+.assert-watcher-result
+.assert-watcher.log

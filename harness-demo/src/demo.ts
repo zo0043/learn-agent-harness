@@ -4,7 +4,9 @@
 //   npm run demo:crash         在 write_file 的 intent 后模拟崩溃
 //   npm run demo:reject        审批拒绝路径
 //   npm run demo:compact       低阈值触发压缩
-//   npm run demo:otel          OTel GenAI 埋点（span 导出 + 收尾摘要）
+//   npm run demo:otel          OTel GenAI 埋点（span 导出 + 收尾摘要）——**需活端点**，仅作人工补充
+//   npm run demo:otel:mock     OTel 埋点离线复跑（本地 mock 模型，无外网无 key）→ 确定性 span 树
+//   npm run demo:otel:assert   对上面的 span 树做形态/计数断言，不符即非 0 退出（U-23 的可重跑判据）
 // ============================================================
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

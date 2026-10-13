@@ -25,13 +25,15 @@ export const tracer = trace.getTracer("harness-demo");
 const memoryExporter = new InMemorySpanExporter(); // 收集已导出 span，收尾打摘要
 let provider: BasicTracerProvider | null = null;
 
-/** 仅 demo:otel 入口调用；幂等 */
-export async function initOtel(): Promise<void> {
+/**
+ * 仅 demo:otel 入口调用；幂等。
+ * @param opts.console 是否挂 ConsoleSpanExporter（默认 true，保持 `demo:otel` 行为不变）；
+ *   离线断言脚本传 false——它自己打印 span 树，不需要原始 span JSON 噪声。
+ */
+export async function initOtel(opts: { console?: boolean } = {}): Promise<void> {
   if (provider) return;
-  const processors: SpanProcessor[] = [
-    new SimpleSpanProcessor(new ConsoleSpanExporter()),
-    new SimpleSpanProcessor(memoryExporter),
-  ];
+  const processors: SpanProcessor[] = [new SimpleSpanProcessor(memoryExporter)];
+  if (opts.console !== false) processors.unshift(new SimpleSpanProcessor(new ConsoleSpanExporter()));
   if (process.env.OTEL_EXPORT_OTLP === "1") {
     // 可选 OTLP 导出：动态 import，默认不加载（环境变量开关，不默认开）
     const { OTLPTraceExporter } = await import("@opentelemetry/exporter-trace-otlp-http");
@@ -46,6 +48,16 @@ export async function initOtel(): Promise<void> {
 
 export async function shutdownOtel(): Promise<void> {
   await provider?.shutdown();
+}
+
+/**
+ * 已结束/已导出的 span 列表（断言用）。
+ * 用途：`src/otel-assert.ts` 在**离线 mock 模型**下对 span 树做确定性断言
+ * （见 package.json 的 demo:otel:mock / demo:otel:assert）。
+ * 注意：这是内存导出器的快照，只反映本进程 initOtel() 之后产生的 span。
+ */
+export function finishedSpans() {
+  return memoryExporter.getFinishedSpans();
 }
 
 /** demo 收尾：打印收到的 span 摘要（span 名 + 关键属性），验证埋点生效 */
