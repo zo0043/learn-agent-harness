@@ -1,0 +1,49 @@
+---
+/**
+ * /404：自定义 404 页（2026-10-13 按用户决定新增，t20）。
+ *
+ * 历史链（不得抹掉）：口径块里"站点 html 32"的 404.html 加数**当初并不存在**——
+ * 审计 U-22 / C-13 查出后，t16 曾据此把口径就地更正为 31。2026-10-13 用户决定
+ * 实际实现本页，32 才第一次**真正成立**（构建产物实测 32，CI 日志为准）。
+ *
+ * 布局：复用 Base（Header 七导航 + 搜索入口 / Footer），不引入新依赖、不 import
+ * site/src/data（out of scope）。误路径落到本页时观感不再断裂（替代 GitHub Pages 默认 404）。
+ * GitHub Pages 约定：pages/404.astro → dist/404.html，未知路径由平台托管到本页。
+ */
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Base
+  title="404 · 未找到"
+  description="未找到——你要的路径在 learn-agent-harness 站点上不存在。回到首页、浏览课程或作品。"
+>
+  <section>
+    <h1 class="page-title">404 · 未找到</h1>
+    <p class="page-lead">
+      这个路径在站点上<strong>不存在</strong>（可能已移动，或链接笔误）。
+      本站是构建时快照，课程、作品与题库都从下面回到正轨：
+    </p>
+    <div class="cards">
+      <a class="card" href={base}>
+        <h3>返回首页</h3>
+        <p><span class="chip chip-strong">首页</span></p>
+        <p>全部内容总览：六个可运行作品、课程卡与进度。</p>
+      </a>
+      <a class="card" href={base + 'learn/'}>
+        <h3>浏览课程</h3>
+        <p><span class="chip chip-strong">学习路线</span></p>
+        <p>17 个课程页（按域分组的课程卡；白板卡无课程页）。</p>
+      </a>
+      <a class="card" href={base + 'works/'}>
+        <h3>看作品</h3>
+        <p><span class="chip chip-strong">作品</span></p>
+        <p>6 个可运行 demo 与实测记录（轨迹、OTel、压缩自测）。</p>
+      </a>
+    </div>
+    <p class="page-lead">
+      或者用顶栏右侧的 <strong>🔍 搜索</strong> 全站查找，或直接点顶栏七个导航项。
+    </p>
+  </section>
+</Base>

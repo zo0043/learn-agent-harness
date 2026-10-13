@@ -398,6 +398,18 @@ a.card:hover {
   background: var(--bg-soft);
   white-space: nowrap;
 }
+/* W4/t5（2026-10-12，CI 结构+几何回归抓到）：chip 的 nowrap + 不可断长内容
+   曾把整个文档撑出横向溢出（minified JSON 工具参数 chip 1741px / 来源 URL chip
+   610px——/works/ 与 /details/ 在 375/768/1280 三视口全中）。
+   定向收口（不全局放宽 .chip）：仅允许
+     - .chip-tool（works 轨迹里内联 JSON 的工具参数 chip）与
+     - .dc-top 内的 chip（details 卡片的来源 URL chip）
+   换行断字；其余短 chip 的 nowrap 与渲染零变化。 */
+.chip-tool,
+.dc-top .chip {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .chip-strong {
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
@@ -972,6 +984,12 @@ a.domain-card:hover .dc-foot {
   border-collapse: collapse;
   font-size: 0.92rem;
   margin: 14px 0;
+  /* W4/t5（2026-10-12，CI 结构+几何回归抓到）：与 .markdown table 同一宽表横滚约束。
+     此前缺这三条，窄屏下 nowrap 列的 min-content（works 崩溃表实测 494px @375 视口）
+     把整个文档撑出横向溢出——现在宽了就在表内横滚，不再动页面。 */
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .file-table th,
 .file-table td {

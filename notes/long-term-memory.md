@@ -3,7 +3,7 @@
 > 优先级 P2（腾讯 2 个专门 JD：企微记忆系统/小微记忆方向——目标平台向则提级）
 > 状态：📐 讲义已展开，待提问演练
 > 前置：Harness 架构 §5（上下文工程：日志≠上下文）+ 从零写 harness §⑧（压缩=会话内记忆的极限）
-> **我的活锚点**：pi 的 Magic Context 每天都在用——project-memory（pinboard）/ctx_note（tray）/ctx_search（archive 检索）=一套完整的跨会话记忆系统，面试可以讲"我用过+我读过它的接口设计"
+> **我的活锚点（两个，第二个是自研）**：① pi 的 Magic Context 每天都在用——project-memory（pinboard）/ctx_note（tray）/ctx_search（archive 检索）=一套完整的跨会话记忆系统，面试可以讲"我用过+我读过它的接口设计"；② **自研实现 `memory-redteam/`**（2026-10-12）——写/读/遗忘三路径 + 跨会话 JSONL 持久化 + 投毒红队回归，`npm run demo` 一条命令跑完 §S10 步骤 1-7 的生命周期，`node test.mjs --ablate` 逐层关防线证明断言有牙。**不依赖 pi**：被问"你自研过长期记忆吗"时给的是可跑代码 + 可复现的失败注入，而不是只谈设计。
 
 **这一课解决什么问题**：会话内上下文（工作记忆）天生短命——窗口一满就压缩、进程一崩就失忆、换一个会话就归零。真正让 agent 从"一次性工具"变成"越用越懂你/越懂这个项目"的工程能力，是**跨会话记忆**：在会话之外维护一份可写、可查、可更新、可遗忘的状态，并在合适的时机把它拿回上下文。这一课讲清三件事：记忆怎么分类（S1-S2）、怎么写与怎么读（S3-S4）、怎么消解冲突/遗忘/评测/防投毒（S5-S7），最后收口成设计题模板（S9）、一次完整生命周期走查（S10）和一个面试追问库（S11）。
 
@@ -141,7 +141,7 @@ flowchart LR
 
 **链路逐段解读（对照 rag-demo 实测机制）**：
 - **query 改写**：检索用的 query 和用户原话不是一回事（RAG 与检索 §⑤ 的 query-document 分布差）。记忆场景更明显：用户说"继续上次那个"，改写要补出任务实体。
-- **混合检索**：`rag-demo/` 里已验证两路互补——向量路（HashEmbedder，FNV-1a→768 维→L2 归一）擅长话题聚簇，BM25（`k1=1.5, b=0.75`）擅长**精确词**（模型名、错误码、文件路径这类"罕见 token"）。记忆里出现大量专有名词/ID，**BM25 这一路尤其不可省**——实测中"什么"（df 78/85，idf 0.09）这类噪声词，在换 BM25 价目表后不再压过真正的解释 chunk。
+- **混合检索**：`rag-demo/` 里已验证两路互补——向量路（HashEmbedder，FNV-1a→768 维→L2 归一）擅长话题聚簇，BM25（`k1=1.5, b=0.75`）擅长**精确词**（模型名、错误码、文件路径这类"罕见 token"）。记忆里出现大量专有名词/ID，**BM25 这一路尤其不可省**——实测中"什么"（df 78/85，idf 0.09）这类噪声词，在换 BM25 价目表后不再压过真正的解释 chunk。（`memory-redteam/` 有一份**独立参数**的同机制实现：k1=1.2、64 维字符三元组 hash——两份实现互为独立来源，不以"复用 rag-demo"自居。）
 - **RRF 融合（k=60，Cormack et al. 2009）**：向量分数 ∈ [-1,1]、BM25 无界，**不可直接相加**，用排名做公共货币。`score(c)=Σ 1/(k+rank)`。
 - **rerank（精排）**：`rag-demo/` 现在是直通插槽（IdentityReranker）；换成真 cross-encoder 只实现接口，pipeline 不动。记忆 top-k 小、质量要求高，rerank 值得。
 - **注入预算**：记忆进 system 的 token 有上限（几百 token 量级），超了=检索排序问题不是存储问题。**预算耗尽时宁可少注入、留工具按需查**，也不要把上下文挤爆。
@@ -247,7 +247,28 @@ stateDiagram-v2
 4. **审计**：记忆写入留痕（哪条轨迹触发的）——沙箱与凭据审计线的记忆版
 面试金句："**提示注入污染一次上下文，记忆投毒污染所有未来的上下文**——所以记忆写路径的安全等级要高于普通工具调用。"
 
-> **可执行回归**：本节四道防线与 §S10 步骤 6-7 的判定已落成 `memory-redteam/`（零依赖，`node test.mjs`）——11 条探针守住、10/10 对防线敏感（`--ablate` 消融自检，关掉防线则探针必须失败）。对应关系：防线 1 ↔ R1/R2、防线 2 ↔ R4、防线 3 ↔ R3、防线 4 ↔ R5、冲突消解 ↔ R6、遗忘传播 ↔ R9。
+> **可执行回归（自研实现，2026-10-12 升级）**：本节四道防线与 §S10 步骤 1-7 的判定已落成 `memory-redteam/`——零依赖、全离线、确定性（时钟注入，无墙钟调用）。
+> `npm run demo` 是可读的端到端走查；`node test.mjs` 16 条探针守住（单元级 R1-R11 + 端到端 E1-E5）；`node test.mjs --ablate` 逐层关掉防线，探针**必须失败**（15 条探针 / 18 层全部承重）；`node test.mjs --persist` 用子进程写 JSONL、新进程重建后比对末态读数（逐字节一致）。
+>
+> 本节各判定 ↔ 代码/探针逐条对照：
+>
+> | 笔记判定 | 代码位置 | 探针 |
+> |---|---|---|
+> | §S7 防御1 写侧信任分级 | `memory.mjs` `write()` / `injectable()` / `DEFENSE_KEYS.trustGate` | R1 R2 E1 |
+> | §S7 防御2 内容注入扫描（4 类签名族） | `memory.mjs` `scanContent()` / `injectionScan` | R4 |
+> | §S7 防御3 高危独立审批 | `memory.mjs` `HIGH_RISK_CATEGORIES` / `highRiskApproval` | R3 |
+> | §S7 防御4 审计留痕（含血缘） | `memory.mjs` `audit()` / `auditTrail`（六类 op：write/supersede/coexist/expire/delete/advisory） | R5 |
+> | §S5 冲突消解状态机（四种处置） | `memory.mjs` `conflictDecision()` / `conflictResolve` | R6 E4 |
+> | §S5 时效窗口（ttl → valid_to → expired） | `memory.mjs` `sweepExpired()` / `ttlWindow` | R10 E3 |
+> | §S4 scope 过滤（检索时做） | `memory.mjs` `scopeMatch()` / `scopeFilter` | R8 |
+> | §S4 混合检索 BM25 ∥ 向量 → RRF | `retrieval.mjs` `bm25Rank()` / `denseRank()` / `rrfFuse()` | R11 |
+> | §S6 指标1 一致性 | `memory.mjs` `consistencyReport()` | E4 |
+> | §S6 指标3 污染率 | `memory.mjs` `pollutionReport()` | R7 E2 |
+> | §S6 指标4 "不该召回" | `scenario.mjs` 反事实 query + `recall()` | R8 E5 |
+> | §S10 步骤 1-7 完整生命周期 | `scenario.mjs` `runScenario()` + `demo.mjs` | E1-E5 |
+> | §S2 轨迹落盘 = 审计/恢复/评测底座 | `persist.mjs`（JSONL 事件日志 + 顺序重放） | `--persist` |
+>
+> **三处实现期实测发现（写进边界，不当成"已完成"）**：① 污染率口径原先把"命中注入扫描签名"直接算作污染——会把**用户自己给的已审批运维步骤**（"部署前先运行 preflight.sh"命中 `script-exec`）虚报成污染（实测 33%）；签名是线索不是证据，现口径按**来源与状态**判定，签名交叉单列 `advisories` 且写路径"放行 + 留痕"。② 原 `forget()` 只清空派生物的 `content`，`status` 仍是 `active`——清空内容后状态没变，注入集判定仍可能放行；现置 `redacted`。③ 原回归套件里 R7 声称的 `ttlWindow` 防线从未被触发（那条"过期"事实上被 `scopeFilter` 挡下），逐层消融才暴露。
 
 **为什么写侧比读侧更危险**：读侧注入最多影响当前会话，会话结束即消散；写侧注入一旦落库，就获得了"跨会话的持久化"和"自动注入的特权"。所以 S3 决策树的 Q2/Q4（信任分级、高危隔离）不是可选项，是安全边界。
 
@@ -379,6 +400,8 @@ stateDiagram-v2
 6. **区分软删/硬删**：`superseded`/`archived` 是软删（保留可追溯）；用户主动"忘掉"= 硬删（内容清除 + 墓碑）。GDPR 式"被遗忘权"要求后者。
 
 **这七步的面试讲法**："一次偏好从写入、冲突消解、召回、评测到删除，每一步都有明确字段和判定；最容易被忽视的是**删除要沿血缘传播**——只删主记录，派生摘要还在，等于没删干净。"
+
+> **§S10 已被落成可执行走查（2026-10-12）**：`cd memory-redteam && npm run demo` 把上面步骤 1-7 逐步打印出来（含每条进/不进注入集的理由、覆盖链、血缘闭包、墓碑、以及跨会话持久化的三方 digest 比对）。上面步骤里标为**走查示例**的数值（如 `recall@1 = 0.87`）**仍未被断言**——落成的是判定与机制，不是那组示例数字；演示输出里也显式声明了这一点。
 
 ---
 

@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- selftest fixture：与 good.html 完全同款，但**删掉搜索入口**（无 [data-search-open]
+     按钮 / 无 [data-search-dialog] / 无 [data-search-input]）。
+     断言器对它的预期（按真实页标准 searchRequired=true 检查，t16/F3 可证伪性加固）：
+     **搜索入口缺失断言必须失败**（该页 d.pass=false），其余断言（溢出/标题/卡片）不受牵连。
+     用途：证明「回归删掉搜索入口」这类破坏会被作业抓住，而不是静默 applicable:false 通过。 -->
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>bad-missing-search fixture</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  .site-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #ccc; }
+  .brand { font-weight: bold; }
+  .site-nav { display: flex; gap: 8px; }
+  .site-nav a { text-decoration: none; color: #333; padding: 4px 8px; }
+  .nav-toggle { display: none; }
+  h1 { margin: 24px 16px 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 16px; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; }
+  @media (max-width: 720px) {
+    /* 与站点一致：≤720px 导航收起（display:none 是设计），汉堡按钮显示 */
+    .site-nav { display: none; }
+    .nav-toggle { display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <span class="brand">fixture-brand</span>
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <a href="#">首页</a>
+      <a href="#">题库</a>
+      <a href="#">学习路线</a>
+      <a href="#">详解</a>
+      <a href="#">作品</a>
+      <a href="#">知识地图</a>
+      <a href="#">时间线</a>
+    </nav>
+    <button class="nav-toggle" type="button" aria-label="打开导航菜单">≡</button>
+  </header>
+  <h1>bad-missing-search fixture 页标题</h1>
+  <div class="cards">
+    <div class="card">card-1</div>
+    <div class="card">card-2</div>
+    <div class="card">card-3</div>
+  </div>
+</body>
+</html>

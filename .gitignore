@@ -18,6 +18,9 @@ harness-demo/trajectories/*
 harness-demo/workspace/out/
 durable-execution-demo/.state/
 
+# 站点结构+几何回归的本地运行产物（截图/report，可再生；CI 侧以 artifact 为准）
+site/tools/out/
+
 *.log
 
 # AgentTeams 运行时状态（团队会话数据，勿提交）

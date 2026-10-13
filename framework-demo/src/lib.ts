@@ -67,11 +67,16 @@ export async function runQuery(prompt: string, extra: Partial<Options> = {}): Pr
   return { sessionId, isError, finalText, numTurns, cost, events, toolUses, subagentTexts };
 }
 
-// 断言式打印：✅/❌ + 累计失败数（demo 末尾据此决定退出码）
+// 断言式打印：✅/❌ + 累计失败数（demo 末尾据此决定退出码）。
+// U-24 口径修正：断言总数由 ok() 实际计数（assertionTotal），不在任何地方硬编码——
+// demo 输出是「N 断言 + 1 总体判定」（判定=demo 末尾那行总结，不是第 N+1 个断言）。
 let failures = 0;
+let total = 0;
 export function addFailure(n = 1) { failures += n; }
 export function failureCount() { return failures; }
+export function assertionTotal() { return total; }
 export function ok(cond: boolean, label: string, evidence = "") {
+  total++;
   if (cond) console.log(`  ✅ ${label}${evidence ? `（${evidence}）` : ""}`);
   else { failures++; console.log(`  ❌ ${label}${evidence ? `（证据: ${evidence}）` : ""}`); }
 }

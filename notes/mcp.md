@@ -91,7 +91,7 @@ flowchart TB
 
 > 记法：roots 是 server 的"自我声明"，elicitation 是 server 向用户的"现场提问"。二者都**不是强制机制**——真正的边界必须落在 host 侧（见 S8.2）。
 
-**spec 版本线（2026-10 核实，面试要能报版本节奏）**
+**spec 版本线（2026-10 核实；2026-10-12 复核：官方 versioning 页确认 "The current protocol version is 2026-07-28"，面试要能报版本节奏）**
 - 2024-11-05（初版）：JSON-RPC 2.0 + stdio / HTTP+SSE，含 tools / resources / prompts / sampling / roots。
 - **2025-03-26**：引入 **OAuth 2.1 授权框架**，并以 **Streamable HTTP 取代 HTTP+SSE**（HTTP+SSE 自此废弃）；另加 JSON-RPC 批处理与工具 annotations。
 - **2025-06-18**：OAuth 资源服务器分类 + RFC 8707 资源指示器；工具结构化输出；加入 **elicitation**；移除 JSON-RPC 批处理。
@@ -477,7 +477,8 @@ sequenceDiagram
 ## 来源与锚点（2026-10 核实回填）
 
 - 协议细节：spec 版本线/传输/registry 已核实（2026-10）——modelcontextprotocol.io/specification/{2025-03-26,2025-06-18,2025-11-25,2026-07-28}/changelog、modelcontextprotocol.io/specification/deprecated、modelcontextprotocol.io/registry/about；CVE-2025-6514：nvd.nist.gov/vuln/detail/CVE-2025-6514；A2A TSC：a2aproject/A2A GOVERNANCE.md
-- 安全：OWASP LLM Top 10 **2026 版**（2026-08-04 发布，GenAI-LLM-Top10 仓库 README+官方 publication）与 OWASP Agentic Top 10（2025-12-09 发布，genai.owasp.org 全文）均已核实并回填 S4.2/S4.3（2026-10-11）；tool poisoning/rug pull 另见 PoisonedRAG 等学术工作；MCP spec 自身 authorization 章节承认远程 server 的信任问题
+- 安全：OWASP LLM Top 10 **2026 版**（2026-08-04 发布，官方仓库 `GenAI-Security-Project/GenAI-LLM-Top10`（由 OWASP 组织迁出，见下条 2026-10-12 复核）README+官方 publication）与 OWASP Agentic Top 10（2025-12-09 发布，genai.owasp.org 全文）均已核实并回填 S4.2/S4.3（2026-10-11）；tool poisoning/rug pull 另见 PoisonedRAG 等学术工作；MCP spec 自身 authorization 章节承认远程 server 的信任问题
+- **2026-10-12 复核（t4 / U-26，逐条命令与结论见 `notes/industry-2026.md` §核实台账）**：① LLM Top 10 2026 版——官方仓库已迁至 `GenAI-Security-Project/GenAI-LLM-Top10`（README 明示 "Current release: 2026 — published August 4, 2026"），2026/final 清单交叉确认 Excessive Agency=LLM03（2025: LLM06）、Hidden Context Exposure=LLM08（2025: System Prompt Leakage=LLM07）→ **确认**；② Agentic Top 10——官方 PDF《OWASP Top 10 For Agentic Applications 2026》（Version 2026, December 2025）TOC 的 ASI01-ASI10 与 S4.3 表 **10/10 一致**，具体日「12-09」沿用上轮 genai.owasp.org 核实（本轮直连 403/429 受阻）→ **确认（条目/版本/月）**；③ A2A 最新 spec 发布 = **v1.0.1**（2026-05-28，a2aproject/A2A releases）→ 原「版本号未取得一手源」缺口**已补**
 - `mcp-demo` 实证（2026-10-11 本机实测，Node v22.23.2）：`npm run demo` 全流程通过（对照 ❌ → 防御 ✅ → 消融符合预期 → 重放 ✅），`npx tsc --noEmit` exit 0；src 6 文件 499 行；digest 锚点见 S6.1
 - 我的锚点：从零写 harness §③ 工具协议（MCP=它的标准化）、沙箱与凭据（沙箱/审计/重放测试）、Harness 架构 7.1/7.2（注入与两层控制）、pi 的 MCP 支持（框架生态）
 - JD 锚点：腾讯 Agent 安全专家岗（2026-09，`#15` 节调研）= 本课安全线的需求来源

@@ -9,7 +9,9 @@
     "demo:crash": "tsx src/demo.ts --fresh --crash",
     "demo:reject": "tsx src/demo.ts --fresh --no-approve",
     "demo:compact": "tsx src/demo.ts --fresh --compact",
-    "demo:otel": "tsx src/demo.ts --fresh --otel"
+    "demo:otel": "tsx src/demo.ts --fresh --otel",
+    "demo:otel:mock": "tsx src/otel-mock.ts",
+    "demo:otel:assert": "tsx src/otel-assert.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.0",

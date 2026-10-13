@@ -11,6 +11,9 @@ src/session.ts   ⑥ JSONL 轨迹日志 = 唯一事实源，上下文由日志�
 src/context.ts   ⑧ token 估算 + 压缩（保头尾、中间 LLM 摘要）
 src/agent.ts     ②⑥⑦⑧ agent loop + guarded_tool_step（intent→执行→result）
 src/otel.ts      可观测 §S2 OTel GenAI 埋点（invoke_agent→chat/execute_tool span 树，console 导出，OTEL_EXPORT_OTLP=1 开 OTLP）
+src/otel-mock-scenario.ts  U-23 离线判据：冻结场景（本地 mock 端点 6 轮脚本，tool 名字/顺序抄自 trajectories/demo.jsonl）+ EXPECTED 契约常量
+src/otel-mock.ts   U-23 离线复跑入口（demo:otel:mock：打印确定性 span 树 + 生成快照 workspace/out/otel-spans.md）
+src/otel-assert.ts U-23 离线断言入口（demo:otel:assert：断言 span 树形态/计数，不符即非 0 退出）
 src/demo.ts      ⑨ demo 入口（五种模式）
 src/test-compact.ts  ⑧ 压缩逻辑的本地 mock 测试（不依赖外部代理）
 ```
@@ -31,7 +34,9 @@ npm run demo:crash      # 在 write_file 的 intent 后模拟崩溃（exit 137�
 npm run demo            # ← 紧接着再跑一次 = 自动恢复（未知状态 → 模型先核对再重写）
 npm run demo:reject     # 审批拒绝路径（模型跳过写入、不重试、如实报告）
 npm run demo:compact    # 低压缩阈值（600 tokens）演示压缩
-npm run demo:otel       # OTel GenAI 埋点：最小 agent 循环（真实代理），console 导出 span 并收尾打印摘要
+npm run demo:otel       # OTel GenAI 埋点：最小 agent 循环（真实代理，人工补充用），console 导出 span 并收尾打印摘要
+npm run demo:otel:mock  # OTel 埋点**离线复跑**（本地 mock 端点：无外网、无 LLM key）→ 确定性 span 树 15 spans / 1 trace（2026-10-12 实跑值）
+npm run demo:otel:assert # 对离线 span 树断言形态/计数（exit 0 = 过）——**U-23 可重跑判据**；历史活端点报告值「11 spans」标未验证、不作判据
 npx tsx src/test-compact.ts   # 压缩逻辑的 mock 测试（不依赖代理）
 ```
 

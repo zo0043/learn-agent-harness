@@ -207,7 +207,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 | 崩溃恢复 | `demo:crash` → `npm run demo` | ⑥⑦ intent/exec/未知状态 | ✅ 恢复后模型先 read 核对再重写 |
 | 审批拒绝 | `demo:reject` | ⑤ approve 路径 + 拒绝也是结果 | ✅ 跳过写入、不重试、如实报告（out/ 空） |
 | 压缩 | `demo:compact` | ⑧ 预算/摘要 | ✅ mock 验证（代理故障期） |
-| 可观测 | `demo:otel` | OTel GenAI span 树（invoke_agent → chat / execute_tool，可观测 §S2 埋点） | ✅ console 导出可用；span 计数「11 spans / 1 trace」为**报告值**（仓内无回放日志，**未验证**——需活端点复跑） |
+| 可观测 | `demo:otel`（活端点，人工补充）/ `demo:otel:mock` + `demo:otel:assert`（离线判据） | OTel GenAI span 树（invoke_agent → chat / execute_tool，可观测 §S2 埋点） | ✅ 离线判据（U-23 收口，2026-10-12 实跑）：本地 mock 端点（无外网、无 key）跑出确定性 span 树 = **15 spans / 1 trace**（invoke_agent×1 + chat×6 + execute_tool×8，含 denied×1），`demo:otel:assert` 对形态/计数断言、不符即非 0 退出（快照 `harness-demo/workspace/out/otel-spans.md`，生成器产出勿手改）；历史「11 spans / 1 trace」为**活端点报告值**（仓内无回放日志，**未验证**——不作为任何判据） |
 
 **代理不稳定实录（真实可靠性故事）**：19:25-19:33 全部正常，19:33 起该代理持续 400（`"functions parameter of the code model must be provided"`——代理把请求路由到了要求旧版 functions 格式的 code 模型后端）；期间还出现工具名带不可见字符（`unknown tool: get_weather` 假错）→ 加了一行防御 `tc.name.trim()`。**面试点：provider 也是不可靠组件；重试/降级/防御性解析属于 API 层职责。**
 

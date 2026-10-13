@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- selftest fixture：good.html 去掉 <h1>（关键元素缺失）。
+     断言器对它的预期：3 视口的「页标题」断言全部失败；溢出断言通过。
+     若标题断言没失败 = 断言器抓不到缺失元素，selftest 报错。 -->
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>bad-missing fixture</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  .site-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #ccc; }
+  .brand { font-weight: bold; }
+  .site-nav { display: flex; gap: 8px; }
+  .site-nav a { text-decoration: none; color: #333; padding: 4px 8px; }
+  .nav-toggle { display: none; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 16px; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; }
+  @media (max-width: 720px) {
+    .site-nav { display: none; }
+    .nav-toggle { display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <span class="brand">fixture-brand</span>
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <a href="#">首页</a>
+      <a href="#">题库</a>
+      <a href="#">学习路线</a>
+      <a href="#">详解</a>
+      <a href="#">作品</a>
+      <a href="#">知识地图</a>
+      <a href="#">时间线</a>
+    </nav>
+    <button class="nav-toggle" type="button" aria-label="打开导航菜单">≡</button>
+  </header>
+  <!-- 注意：本 fixture 故意没有 <h1> -->
+  <div class="cards">
+    <div class="card">card-1</div>
+    <div class="card">card-2</div>
+    <div class="card">card-3</div>
+  </div>
+</body>
+</html>

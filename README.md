@@ -6,7 +6,7 @@ AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 
 ## 作品
 
-6 个可运行 demo（`npm run demo` 一键复现）：
+6 个可运行 demo（`npm run demo` 一键复现；即下表六个**具名作品**目录——`memory-redteam/` 为回归套件/自研实操证据，按口径块**不计入作品数**，见 [knowledge-map 计数口径](notes/knowledge-map.md)）：
 
 | 目录 | 内容 | 跑法 |
 |---|---|---|
@@ -15,17 +15,19 @@ AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 | [`sandbox-demo/`](sandbox-demo/) | **沙箱与凭据**：TS 迷你沙箱——四通道 policy 引擎（allow/deny/approve/sandbox，deny 优先）+ FinHot 幽灵事故重放剧本（"权限门≠沙箱"：step 3 的 docker_compose_up 动作合法但被沙箱通道关进隔离命名空间）+ 确定性重放验收（3 次逐字节一致）。全离线零依赖 | `cd sandbox-demo && npm i` → `npm run demo` |
 | [`mcp-demo/`](mcp-demo/) | **MCP 与供应链安全**：MCP 供应链投毒演示——对照组（注入指令劫持 send_email ❌）vs 四层防御（消毒/policy 门/沙箱断言/审计 ✅）+ 消融实验（L1 单独挡不住）+ 同进程两次重放逐字节一致。全离线 | `cd mcp-demo && npm i` → `npm run demo` |
 | [`durable-execution-demo/`](durable-execution-demo/) | **durable execution**：长任务不丢不重——journal（intent→exec 双锚点）+ checkpoint 原子写 + 幂等存储 + mock 外部消息服务；3 种崩溃点（intent 前 / intent 后 exec 前 / exec 后）真实 SIGKILL 自杀重启，恢复按 §S8.2 判定表逐步行 replay / skip / unknown→confirm；验收 = 3 崩溃点 × 各 3 次，副作用计数恒=1、恢复报告逐字节一致（负向测试证伪有牙）。全离线零依赖 | `cd durable-execution-demo && npm i` → `npm run demo` |
-| [`framework-demo/`](framework-demo/) | **框架生态** 实操：Claude Agent SDK 指向自持 OpenAI/Anthropic 双格式代理，四能力实证——agent / 自定义 subagent（forwardSubagentText 证明委派真发生）/ permissions（canUseTool 拦截 rm）/ session resume（上下文延续）。含与 harness-demo 的"给什么/藏什么"对照表 | `cd framework-demo && npm i`（.env 需支持 Anthropic 格式 /v1/messages 的端点）→ `npm run demo` |
+| [`framework-demo/`](framework-demo/) | **框架生态** 实操：① Claude Agent SDK 指向自持 OpenAI/Anthropic 双格式代理，四能力实证——agent / 自定义 subagent（forwardSubagentText 证明委派真发生）/ permissions（canUseTool 拦截 rm）/ session resume（上下文延续），`npm run demo` 退出码 0 = 10 条 `ok()` 断言 + 1 条整体判定；② **三家 SDK 同任务离线 mock 对照**（Claude Agent SDK 0.3.296 / OpenAI Agents SDK 0.20.0 / LangGraph 1.4.21）——`npm run compare` 一条命令五维结构化对照、`npm run compare:assert` 16 条断言（本地 mock 端点：无外网、零 key、非真实模型实跑），逐维结论见 `framework-demo/docs/sdk-comparison.md`。含与 harness-demo 的"给什么/藏什么"对照表 | `cd framework-demo && npm i` → `npm run compare`（全离线）/ `npm run demo`（.env 需支持 Anthropic 格式 /v1/messages 的端点） |
 
 配套资产（非 demo，支撑面试口述与站点）：
 
 | 目录 | 内容 | 跑法 |
 |---|---|---|
 | [`whiteboard/`](whiteboard/) | 白板版 agent（~180 行 Python，面试口述用） | 直接读源码 |
+| [`memory-redteam/`](memory-redteam/) | **长期记忆自研实操**（按计数口径**不计入 6 作品数**，见 knowledge-map 口径块）：写路径 7 项能力（信任分级/注入扫描/高危审批/审计留痕/冲突消解/时效窗口/遗忘传播）+ BM25∥字符三元组 hash 向量 RRF 混合检索（逐条注入理由审计）+ JSONL 跨进程持久化（三方 digest 逐字节一致）+ 16 条红队探针（逐层消融 18/18 层承重） | `cd memory-redteam && npm run demo`（全离线零依赖；`node test.mjs` / `--ablate` / `--persist` 可重跑判据） |
 | [`viz/render.mjs`](viz/render.mjs) | SVG→PNG 渲染器（node12 re-exec 自举 + playwright-core，复用本机 Chromium 零下载） | `node viz/render.mjs x.svg` |
 | [`site/`](site/) | Astro 公开学习站（本仓库内容的网站形态，GitHub Pages 部署） | 构建 `cd site && npm i && npm run build` |
+| [`.github/workflows/verify.yml`](.github/workflows/verify.yml) + [`site/tools/visual-check.mjs`](site/tools/visual-check.mjs) | **站点结构+几何回归（W4/t5，补「本机构建留浏览器目检」缺口——本机 astro build 曾多次 OOM（exit 134/137，曾留 85 文件/0 HTML 残骸）；2026-10-13 t21 独立实测证伪「必然 OOM」：本机全量构建可约 17 分钟成功（首次 560s 超时被杀非 OOM，dist HTML=32 含 404.html），可行但不可依赖，CI 仍是可靠回归路径）**：CI（ubuntu-latest）构建站点 → headless Chromium 3 视口（375/768/1280）× 8 页（含自定义 404 页，t20）——无横向溢出（容差 4px）/ 关键元素可见（header 导航/页标题/卡片容器/课程正文+meta 栏；404 页=标题+3 引导卡片）/ 无 console error + 搜索入口交互（入口必须存在、缺失即失败）+ 负路径自证（fault 注入必须被检出，作业按设计失败）。绿基线 [run 38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346)（21/21）/ 注入负路径 [run 38282852860](https://github.com/zo0043/learn-agent-harness/actions/runs/38282852860)（按设计失败）/ 加固后 [run 38345995909](https://github.com/zo0043/learn-agent-harness/actions/runs/38345995909)（21/21）/ 含 404 页后 [run 38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)（24/24，dist HTML=32）。**只断言结构+几何，不覆盖视觉审美——像素级仍留浏览器人工目检** | CI 自动（push/PR）；本机预检 `cd site && node tools/visual-check.mjs --selftest`（自带 fixture，不依赖构建，26/26） |
 
-作品要求 **node ≥ 18**；harness-demo / rag-demo / framework-demo 需任一支持 **tool calling + SSE 流式** 的 LLM 端点（framework-demo 额外要求 Anthropic 兼容格式），sandbox-demo / mcp-demo / durable-execution-demo / `viz/` 全离线零 key；`whiteboard/` 需自备 LLM_API_KEY / LLM_BASE_URL（可选 LLM_MODEL）。
+作品要求 **node ≥ 18**；harness-demo / rag-demo 需任一支持 **tool calling + SSE 流式** 的 LLM 端点，framework-demo 的 `npm run demo` 额外要求 Anthropic 兼容格式端点（其 `npm run compare` / `compare:assert` 为全离线本地 mock、零 key）；sandbox-demo / mcp-demo / durable-execution-demo / `viz/` 全离线零 key；`whiteboard/` 需自备 LLM_API_KEY / LLM_BASE_URL（可选 LLM_MODEL）。
 
 ## 课程笔记（`notes/`）
 
