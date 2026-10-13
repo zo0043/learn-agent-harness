@@ -66,6 +66,9 @@ const PAGES = [
   { path: 'map/', id: 'map', label: '知识地图', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'details/', id: 'details', label: '详解', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
   { path: 'c/rag/', id: 'course-rag', label: '课程页·RAG与检索', title: 'article.markdown h1', container: 'article.markdown', cardsMin: 1, course: true },
+  // t20：自定义 404 页纳入几何断言（2026-10-13 按用户决定实现，构建产物 32 页之一）。
+  // cardsMin=3 对应三个引导入口（首页/课程/作品）——缺一即该页失败。
+  { path: '404.html', id: 'not-found', label: '404 页', title: 'h1.page-title', container: '.cards .card', cardsMin: 3 },
 ];
 
 // 三个视口：mobile 375（汉堡态）/ tablet 768 / desktop 1280。
@@ -326,7 +329,7 @@ async function runMain() {
       for (const d of bad) console.error(`  - ${d.page} @${d.viewport}: ${d.failures.join('；')}`);
       process.exit(1);
     }
-    console.log(`\n[visual-check] ✅ 全部通过：${all.length} 页×视口（7 页 × 3 视口），无横向溢出 / 关键元素可见 / 无 console error`);
+    console.log(`\n[visual-check] ✅ 全部通过：${all.length} 页×视口（${PAGES.length} 页 × 3 视口），无横向溢出 / 关键元素可见 / 无 console error`);
     console.log('[visual-check] 再次声明：这不等于视觉正确——审美判断仍留浏览器人工目检。');
     process.exit(0);
   } else {

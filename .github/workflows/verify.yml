@@ -61,15 +61,17 @@ jobs:
 
       # 本机 OOM 事故的 CI 免疫：dist 必须真的产出了 HTML（本机曾留下 85 文件/0 HTML 的残骸，
       # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
-      # 下限 31 = 6 静态页（index/learn/works/interview/map/details 首页）+ 17 课程页 + 8 专题页
-      # —— 实构建物里没有 404.html（knowledge-map「站点 html 32」口径含概念 404，构建产物以 CI 为准）。
-      # 另逐一校验 7 个关键页存在且非空（结构回归的"关键页存在/非空"项）。
+      # 下限 32（t20 由 31 收紧）= 6 静态页（index/learn/works/interview/map/details 首页）
+      # + 17 课程页 + 8 专题页 + 1 自定义 404 页（site/src/pages/404.astro，2026-10-13 按用户决定实现，
+      # 原口径「站点 html 32」的 404.html 加数当初不存在、t16 曾更正为 31，实现后 32 才真正成立）。
+      # 理由：404.html 现已是真实构建产物——下界必须覆盖它，否则删页/构建残骸仍能混过 sanity。
+      # 另逐一校验 8 个关键页存在且非空（结构回归的"关键页存在/非空"项，404.html 一并纳入）。
       - name: Build sanity (dist must contain real HTML)
         run: |
           count=$(find site/dist -name '*.html' | wc -l)
-          echo "dist HTML 文件数 = $count（下限 31 = 6 静态 + 17 课程页 + 8 专题页；构建产物不含 404.html）"
-          test "$count" -ge 31
-          for p in index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html; do
+          echo "dist HTML 文件数 = $count（下限 32 = 6 静态 + 17 课程页 + 8 专题页 + 1 自定义 404 页（2026-10-13 新增））"
+          test "$count" -ge 32
+          for p in index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html 404.html; do
             [ -s "site/dist/$p" ] || { echo "关键页缺失或为空：$p"; exit 1; }
             echo "  关键页存在且非空：$p"
           done
