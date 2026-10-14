@@ -1,7 +1,7 @@
 # 毕业项目设计（生成层收口：开放命题 + 验收判据 + 自测引导）
 
 > sprint 6 开题。定位：主线 `my-agent` 走完 M0–M4（补全层）之后的**第三跳——生成层**。M0–M4 练的是「实现已知模块」（教师给定签名 + 预期 + TODO 切分）；毕业项目练的是「从模糊需求自己拆模块、定接口、写验收」的**设计能力**。所以本页**只给命题、判据、引导，不给 starter / TODO / 参考答案**。
-> 前置：`notes/capstone-blueprint.md`（主线全局六栏）+ `notes/capstone-style-guide.md`（断言三态）+ `my-agent/exercises/m0..m4` 与 `assert/m0..m4.assert.ts`（你亲手补全过的机制）。
+> 前置：`notes/process/capstone-blueprint.md`（主线全局六栏）+ `notes/process/capstone-style-guide.md`（断言三态）+ `my-agent/exercises/m0..m4` 与 `assert/m0..m4.assert.ts`（你亲手补全过的机制）。
 
 ## 1. 三步技能层级的收口
 

@@ -81,7 +81,7 @@ const tool_calls = [...tcSlots.entries()]
   .map(([, s]) => ({ id: s.id, name: s.name, arguments: s.argsStr ? JSON.parse(s.argsStr) : {} }));
 ```
 
-**这段在讲什么**：三件事一个都不能拆——① content 是逐帧累加；② tool_calls 的 `arguments` 是**跨帧的不完整 JSON 片段**，只能按 `index` 分槽拼接、**流结束才整体 `JSON.parse`**（对单个碎片 parse 必抛异常，S8 #8）；③ usage/model 帧在 `continue` 之前抓，供 OTel span 回填（observability S2 的成本归因原料）。这一段的"已实现生产差异"——没有 `error` 事件分支、没有 TTFB/总时长双定时器、没有 `AbortController` 取消传播——正是下一任务要建的 `api-demo` 的扩展点（见 notes/api-mvp-spec.md）。
+**这段在讲什么**：三件事一个都不能拆——① content 是逐帧累加；② tool_calls 的 `arguments` 是**跨帧的不完整 JSON 片段**，只能按 `index` 分槽拼接、**流结束才整体 `JSON.parse`**（对单个碎片 parse 必抛异常，S8 #8）；③ usage/model 帧在 `continue` 之前抓，供 OTel span 回填（observability S2 的成本归因原料）。这一段的"已实现生产差异"——没有 `error` 事件分支、没有 TTFB/总时长双定时器、没有 `AbortController` 取消传播——正是下一任务要建的 `api-demo` 的扩展点（见 notes/process/api-mvp-spec.md）。
 
 **失败模式速记**：把半截流当完整结果提交（下游拿到缺字段的消息）｜对单个 tool_calls 片段 parse（必抛 JSON 异常，从零写 harness §④ 已讲）｜只设总超时导致长生成被误杀或只设 TTFB 导致挂死｜用户取消后仍在后台烧 token。
 
@@ -257,7 +257,7 @@ const spec = registry.get(name);                       // trim 后命中注册�
 
 **这段在讲什么**：同一类「契约违约」可以有两种根因——步 1 是**路由错位**（400 不重试、换模型），步 2 是**不可见字符**（`trim` 防御）。这一行 `tc.name.trim()` 就是「防御性解析」的落点：先把 wire 上回来的脏数据挡在解析层，避免「模型幻觉调错工具」的假诊断。它和 `validateArgs` 是两道门——前者治「工具名不匹配」，后者治「参数语义非法」（S2 档 2 之后的最后一道）。
 
-**实跑判据（S7）**：已实现判据 = `cd harness-demo && npm run demo`（正常模式里 `chatStream` 拼流 + `tc.name.trim()` 都生效，`validateArgs` 在 tool 注册路径上）；规划判据 = `cd api-demo && npm run demo` 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）——克隆判据见 course-structure.ts 的 practicalOutput，实现规格见 notes/api-mvp-spec.md。
+**实跑判据（S7）**：已实现判据 = `cd harness-demo && npm run demo`（正常模式里 `chatStream` 拼流 + `tc.name.trim()` 都生效，`validateArgs` 在 tool 注册路径上）；规划判据 = `cd api-demo && npm run demo` 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）——克隆判据见 course-structure.ts 的 practicalOutput，实现规格见 notes/process/api-mvp-spec.md。
 
 **30 秒口述版（面试用）**："某次 demo 夜里开始全 400，错误体是 'functions parameter of the code model must be provided'——这不是我们请求的问题，是代理把请求路由到了一个只认旧版 functions 协议的 code 后端。同一请求重试只会继续 400，所以我没重试，而是查 wire 返回的 model 字段确认路由错位、换模型绕开。期间还发现工具名带不可见字符导致 `unknown tool` 假错，加了一行 `tc.name.trim()`。根因是 provider 把模型清单和路由改了我们不知道——所以后来把能力侦察前置（跑任务前先 GET /v1/models）、加了防御性解析和重试预算。"
 

@@ -1,6 +1,6 @@
 # 命题 C · signal-arbiter（带噪信号方向判断器）
 
-> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/capstone-final.md` §3 命题 C。
+> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/process/capstone-final.md` §3 命题 C。
 
 一句话：做一个从带噪 label 里做两轮降噪、门禁把关、给出方向提案并附成本意识的判断器，带飞轮、模型意识、可恢复。
 

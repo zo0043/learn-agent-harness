@@ -1,7 +1,7 @@
 /**
  * 五阶段课程编排（唯一真源，重建）。
  *
- * 唯一内容源：notes/site-refactor-plan.md §2/§3/§4/§5。17 项按 §3 线性阅读序排列
+ * 唯一内容源：notes/process/site-refactor-plan.md §2/§3/§4/§5。17 项按 §3 线性阅读序排列
  * （order = 数组 index，不必显式存）；slug/stage/prereqs/next/mvpSlug/前置知识与 §2 主表
  * 逐字一致，无遗漏、无漂移。
  *
@@ -261,7 +261,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'api-mvp',
     teachingFocus: 'SSE 流式 / 重试分类（4xx 不盲重试）/ 多模型路由 / 成本',
     practicalOutput:
-      '交付 api-mvp（独占：api-demo/，六模块最小闭环，规格 notes/api-mvp-spec.md）。判定 clone 能跑 = cd api-demo && npm i && npm run demo 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）+ 末尾 `✅ api 验收通过`（全离线零 key、确定性、断言自测）；observability 复用它的「成本归因 + gen_ai.response.model 埋点」作为可观测上游',
+      '交付 api-mvp（独占：api-demo/，六模块最小闭环，规格 notes/process/api-mvp-spec.md）。判定 clone 能跑 = cd api-demo && npm i && npm run demo 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）+ 末尾 `✅ api 验收通过`（全离线零 key、确定性、断言自测）；observability 复用它的「成本归因 + gen_ai.response.model 埋点」作为可观测上游',
     prerequisiteNote:
       '已能跑通 harness-demo（上一课带入 chatStream 的 SSE 三件事 + provider/context/压缩 + tc.name.trim() 防御性解析）；只需 HTTP 流式(SSE) / JSON 结构 / 基本成本概念的粗认知——六模块（流式 / 结构化 / caching / 重试分类 / 路由 / 成本）的具体机制随 api-demo 的 npm run demo 边跑边建，不要求用过 litellm / 真实多模型网关',
     isHorizontal: false,
@@ -314,7 +314,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'flywheel-mvp',
     teachingFocus: '数据版本化 / 标签噪声 / 两轮降噪指标（precision 0.256→0.304→0.272）',
     practicalOutput:
-      '交付 flywheel-mvp（独占：flywheel-demo/，四模块最小闭环，规格 notes/flywheel-mvp-spec.md）。判定 clone 能跑 = cd flywheel-demo && npm run demo 复现「脱敏台账样本 → filter/label 两轮降噪 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）；evaluation 复用它的「评测 = 飞轮仪表盘」口径做上游，model-basics 复用它的「指标可归因需版本字段」前置',
+      '交付 flywheel-mvp（独占：flywheel-demo/，四模块最小闭环，规格 notes/process/flywheel-mvp-spec.md）。判定 clone 能跑 = cd flywheel-demo && npm run demo 复现「脱敏台账样本 → filter/label 两轮降噪 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）；evaluation 复用它的「评测 = 飞轮仪表盘」口径做上游，model-basics 复用它的「指标可归因需版本字段」前置',
     prerequisiteNote:
       '已上完评测工程化（上一课带入「评测 = 飞轮的仪表盘」+「golden set 版本化 + 指标基线 + CI 门禁」的对照意识）；只需「训练/评测数据要版本化、标签会有噪声」的粗概念——FinHot 台账字段 / 在线-离线数据通路 / labeler 两轮降噪闭环随 flywheel-demo 的 npm run demo 边跑边建，不要求会真实微调平台 / 数据平台',
     isHorizontal: false,
@@ -331,7 +331,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'model-basics-mvp',
     teachingFocus: 'KV cache / 推理成本 / softmax 与矩阵乘法直觉 / 微调意识',
     practicalOutput:
-      '交付 model-basics-mvp（独占：model-basics-demo/，KV cache / 推理成本数值走查脚本，规格 notes/model-basics-mvp-spec.md）。判定 clone 能跑 = cd model-basics-demo && npm run demo 复现「输入上下文长/输出预算/单价 → KV 命中 savings / 首 token 时间估算 / 总成本拆分」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）；api-engineering 复用它的「成本 = token×单价×步数」理论底座，data-flywheel 复用它的「微调时机/取舍」意识',
+      '交付 model-basics-mvp（独占：model-basics-demo/，KV cache / 推理成本数值走查脚本，规格 notes/process/model-basics-mvp-spec.md）。判定 clone 能跑 = cd model-basics-demo && npm run demo 复现「输入上下文长/输出预算/单价 → KV 命中 savings / 首 token 时间估算 / 总成本拆分」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）；api-engineering 复用它的「成本 = token×单价×步数」理论底座，data-flywheel 复用它的「微调时机/取舍」意识',
     prerequisiteNote:
       '已上完 LLM 发展史与演进（上一课带入「模型是会持续换代的组件」时间轴：GPT 系 / o1 推理模型 / 开源系的代际差异）；只需「矩阵乘法 + softmax 是啥」的粗直觉——KV cache 机制 / prefill-decode 两阶段 / 推理成本构成 / 微调谱系随 model-basics-demo 的 npm run demo 边跑边建，不要求会 PyTorch / 推导 attention',
     isHorizontal: false,

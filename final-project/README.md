@@ -14,7 +14,7 @@
 
 ## 三个命题（选一条；想叠加两条算加分项）
 
-命题完整描述、判据锚点、白盒要素侧重见 `notes/capstone-final.md` §3：
+命题完整描述、判据锚点、白盒要素侧重见 `notes/process/capstone-final.md` §3：
 
 - **A · research-assistant**（个人研究助理）：查资料 → 记笔记 → 定时提醒，带权限门 / 可自评 / 可恢复。
 - **B · repo-guard**（仓库巡检门禁）：读变更 → 跑检查 → 写报告 → 放行/拦截，带沙箱边界 / golden 评测 / 可观测。
@@ -24,7 +24,7 @@
 
 ## 验收判据（黑盒 B1–B5 + 白盒 W1–W7）
 
-机器可读唯一真源在 `rubric.mjs`，逐字对照 `notes/capstone-final.md` §4。这里只放编号：
+机器可读唯一真源在 `rubric.mjs`，逐字对照 `notes/process/capstone-final.md` §4。这里只放编号：
 
 **黑盒（行为，可观察）**：B1 确定性 · B2 主任务跑通 · B3 权限/沙箱拦停 · B4 崩溃可恢复 · B5 评测自评。
 

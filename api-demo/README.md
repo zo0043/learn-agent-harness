@@ -34,7 +34,7 @@ npm run typecheck
 - `agent.ts` 的 `tc.name.trim()` 防御性解析思想 → 路由/工具名相关的注释里
 - `context.ts` 的「预算意识」→ `caching.ts` 的稳定前缀
 
-**唯一新增**（本 demo 相对 harness-demo 多的生产分支）：流中 `error` 帧、断流标 `incomplete`（均已实现）。双定时器/取消传播属「更大生产分支」，本最小闭环未实现（见 `notes/api-mvp-spec.md` §8.1 注明为桩不阻塞验收）。
+**唯一新增**（本 demo 相对 harness-demo 多的生产分支）：流中 `error` 帧、断流标 `incomplete`（均已实现）。双定时器/取消传播属「更大生产分支」，本最小闭环未实现（见 `notes/process/api-mvp-spec.md` §8.1 注明为桩不阻塞验收）。
 
 ## 事故场景（复用 notes/api-engineering.md S7）
 

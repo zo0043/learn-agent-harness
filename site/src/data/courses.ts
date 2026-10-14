@@ -259,7 +259,13 @@ const NON_COURSE_CARD_SLUG = 'whiteboard';
 /** 横向资产阶段标记：interview-bank / llm-timeline / industry-2026 不计入知识域门数。 */
 const HORIZONTAL_PHASE = '—' as const;
 
-/** 课程页口径：站点 /c/<slug>/ 实生成路由数（notes 顶层 19 − knowledge-map − interview-bank）= 17 */
+/**
+ * 课程页口径：站点 /c/<slug>/ 实生成路由数（notes 顶层 19 − knowledge-map − interview-bank）= 17。
+ * 19 = 17 课程正文 + `knowledge-map.md` + `interview-bank.md`（后两者必须留顶层：/map、/interview 从
+ * courses 集合按 id 取正文，且 `c/[slug].astro` 构建期解析 interview-bank 的 TOC 锚点，缺失即 fail-fast）；
+ * 20 份设计/过程文档在 `notes/process/`，被 `pattern:'*.md'` 挡在集合外，故不计入 19。
+ * 取证：`ls notes/*.md | wc -l` → 19；`ls notes/process/*.md | wc -l` → 20。
+ */
 export const COURSE_COUNT = COURSES.filter((c) => c.slug !== NON_COURSE_CARD_SLUG).length;
 
 /** 课程卡口径：courses.ts 全部条目数（含 whiteboard 白板卡，故比课程页多 1）= 18 */
@@ -275,7 +281,20 @@ export const DOMAIN_COUNT = new Set(
   ),
 ).size;
 
-/** 可运行 demo 作品口径：有 `npm run demo` 的目录数 = 6（whiteboard / viz / site 为配套资产，不计入）。 */
+/**
+ * 可运行 demo 作品口径：六个具名作品目录 = 6
+ * （harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo）。
+ * whiteboard / viz / site 为配套资产，memory-redteam 按回归套件计，均不计入作品数。
+ *
+ * ⚠️ 勿据「有 `npm run demo` 的目录数」推算本值：实测为 10（另含 model-basics-demo / flywheel-demo /
+ * api-demo / my-agent / memory-redteam；`rag-demo` 的入口是 `demo:eval`，反而不在那 10 个里）。
+ * 逐项加平：6 具名作品里只有 5 个有 demo 键（`rag-demo` 无，它的入口是 `demo:eval`）
+ *  + 5 个另含目录（model-basics-demo / flywheel-demo / api-demo / my-agent / memory-redteam）= 10 ✅
+ * 即 10 = harness-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo
+ *  + model-basics-demo / flywheel-demo / api-demo / my-agent / memory-redteam。
+ * `memory-redteam` 有 demo 键但按回归套件/自研实操证据计，故不计入作品数——这正是两个口径的分野。
+ * 本值口径见 `notes/knowledge-map.md` 计数口径块，与「有 demo 脚本的目录」不是同一件事。
+ */
 export const WORK_COUNT = 6;
 
 /** （收口，t36）旧三档「PHASE_COUNTS」已删除（t18）；五阶段计数单一真源在 course-structure.ts 的 STAGE_COUNTS。courses.ts 的 `phase` 字段已降为 legacy：P0/P1/P2 无读方（DomainMap.astro 已迁五档 stage，t36），仅 '—' 仍被两处消费——① DOMAIN_COUNT 过滤（下文 `c.phase !== HORIZONTAL_PHASE`）② c/[slug].astro:61 兜底 chip（`meta.phase === '—'` → '未分阶段'）。阶段定位一律以 course-structure.ts `stage` 为准，勿再依据 phase 呈现三档。 */
@@ -301,5 +320,12 @@ export function courseMeta(slug: string): CourseMeta {
   return COURSE_MAP.get(slug) ?? { ...DEFAULT_META, slug };
 }
 
-/** /c/[slug] 路由排除项：总地图/题库/重构方案文档/教学规范/MVP 设计规格/capstone 设计文档（蓝图/规范/呈现清单/M0 练习/M0 结构）各有独立页面（/map、/interview）；后几者是 process 文档不是课程，不能生成 /c/ 课程页。 */
-export const EXCLUDED_FROM_COURSE_ROUTE = new Set(['knowledge-map', 'interview-bank', 'site-refactor-plan', 'teaching-style-guide', 'api-mvp-spec', 'flywheel-mvp-spec', 'model-basics-mvp-spec', 'capstone-blueprint', 'capstone-style-guide', 'capstone-site-render-checklist', 'capstone-m0-exercise', 'capstone-m0-structure', 'capstone-m1-exercise', 'capstone-m1-structure', 'capstone-m2-exercise', 'capstone-m2-structure', 'capstone-m3-exercise', 'capstone-m3-structure', 'capstone-m4-exercise', 'capstone-m4-structure', 'capstone-final', 'capstone-final-structure']);
+/**
+ * /c/[slug] 路由排除项：仅 2 条真排除——总地图（`/map`）与题库（`/interview`）各有独立页面。
+ *
+ * 2026-10-14 结构重组：其余 20 份 process 文档（15 capstone 设计 + 3 MVP 规格 + 2 施工规范）已移入
+ * `notes/process/`，**不在 `courses` glob 内**（`site/src/content/config.ts:10` 的 `pattern:'*.md'`
+ * 仅匹配 `notes/` 顶层），`Set.has` 对它们恒 false，故从本集合删除（22 条 → 2 条）。
+ * ⇒ 新增 process 文档直接放进 `notes/process/` 即可，**无需再登记到本集合**。
+ */
+export const EXCLUDED_FROM_COURSE_ROUTE = new Set(['knowledge-map', 'interview-bank']);

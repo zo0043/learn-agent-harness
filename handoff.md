@@ -50,7 +50,7 @@
 | 文件 | 内容 | 状态 |
 |---|---|---|
 | `notes/agent-harness.md` | **Harness 架构**：15 节（第 1-2 节回顾；地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
-| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 15 文件 + golden set recall@3=1.00） |
+| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 15 文件 + golden set recall@3=0.31,2026-10-12 锚点式复测;旧 1.00 已废） |
 | `notes/harness-from-scratch.md` | **从零写 harness**：10 节，含真实实测输出、白板骨架、练习题、代理故障实录 | ✅ 完成 |
 | `notes/knowledge-map.md` + 十三个编号课文件 | **知识点完整性构建（2026-10-10 深夜 / 10-11 凌晨）**：系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
 
@@ -124,7 +124,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 |---|---|---|---|---|
 | 1 | Harness 架构(`agent-harness.md`) | 15 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 题库 8 题未考(存档,另约) |
 | 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(五模式实测) | 题库 8 题未考 |
-| 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=1.00) | S1 五道确认题已写入 rag.md 文末(存档待自测) |
+| 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=0.31,2026-10-12 锚点式复测;旧 1.00 已废) | S1 五道确认题已写入 rag.md 文末(存档待自测) |
 | 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 5 | 沙箱与凭据(`sandbox.md` + `sandbox-demo/`) | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(demo 已落地 2026-10-11) | 提问演练 + 题库 16 题通过(S2 demo 已验收:3 次重放逐字节一致) |
 | 6 | 评测工程化(`evaluation.md`) | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |

@@ -1,6 +1,6 @@
 # M2 · sandbox-mcp-eval 代码结构清单（capstone-m2-structure，写给 wei 直接建文件）
 
-> 按 `notes/capstone-m2-exercise.md` 落地 `my-agent/` 的 M2 增量骨架。**M2 在 M1 上真·增建**：`exercises/m2/starter` 继承 `exercises/m1/solution`（上一 milestone 完成态），本 milestone 新增能力挖成 `TODOError`。命名 / 协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1 structure 对齐。
+> 按 `notes/process/capstone-m2-exercise.md` 落地 `my-agent/` 的 M2 增量骨架。**M2 在 M1 上真·增建**：`exercises/m2/starter` 继承 `exercises/m1/solution`（上一 milestone 完成态），本 milestone 新增能力挖成 `TODOError`。命名 / 协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1 structure 对齐。
 
 ## 1. 目标目录结构（M2 阶段新增）
 

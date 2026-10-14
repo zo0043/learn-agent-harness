@@ -1,6 +1,6 @@
 # M4 · memory-flywheel-model 里程碑动手练习设计（capstone-m4-exercise）
 
-> 主线 `my-agent` 的最后一个动手点：在 M3（可恢复 + 流式路由 + 可观测）上**真·增建**四类记忆 + 评测飞轮 + 模型意识 + 框架边界对照，把 my-agent 补成「多工具 / 多轮 / 带权限沙箱 / 可观测 / 可评测 / 可恢复 / 有记忆」的完整工具（blueprint §3 M4 行收口形态）。本设计严格套用 `notes/capstone-blueprint.md`（§3 M4 行 / §4）+ `notes/capstone-style-guide.md` + M0/M1/M2/M3 四份 exercise 模式；不重新设计 milestone 划分（captain 已定 M4=P3+P4 记忆+飞轮+模型意识+框架收口）。
+> 主线 `my-agent` 的最后一个动手点：在 M3（可恢复 + 流式路由 + 可观测）上**真·增建**四类记忆 + 评测飞轮 + 模型意识 + 框架边界对照，把 my-agent 补成「多工具 / 多轮 / 带权限沙箱 / 可观测 / 可评测 / 可恢复 / 有记忆」的完整工具（blueprint §3 M4 行收口形态）。本设计严格套用 `notes/process/capstone-blueprint.md`（§3 M4 行 / §4）+ `notes/process/capstone-style-guide.md` + M0/M1/M2/M3 四份 exercise 模式；不重新设计 milestone 划分（captain 已定 M4=P3+P4 记忆+飞轮+模型意识+框架收口）。
 > 对应必修课 = `long-term-memory`（四类记忆 / 投毒防线）+ `data-flywheel`（两轮降噪 / 门禁）+ `model-basics`（KV cache / 成本）+ `framework-ecosystem`（框架抽象边界）+ `industry-2026`（横向收口素材）；参考答案 demo = `memory-redteam` / `flywheel-demo` / `model-basics-demo` / `framework-demo`。
 
 ## 1. M4 要交付什么（一句话 + 收口形态）

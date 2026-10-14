@@ -1,6 +1,6 @@
 # M1 · multi-tool-session 里程碑动手练习设计（capstone-m1-exercise）
 
-> 主线 `my-agent` 的第二个动手点：在 M0 单工具 loop 上**真·增建**多工具 + JSONL 会话 + 压缩 + 默认 deny 权限门。本设计严格套用 `notes/capstone-blueprint.md`（§3 M1 行 / §4 练习闭环）+ `notes/capstone-style-guide.md`（§1–§6）+ `notes/capstone-m0-exercise.md`（M0 模式逐段延续）；不重新设计 milestone 划分（captain 已定 M1=P0 多工具+会话+压缩）。
+> 主线 `my-agent` 的第二个动手点：在 M0 单工具 loop 上**真·增建**多工具 + JSONL 会话 + 压缩 + 默认 deny 权限门。本设计严格套用 `notes/process/capstone-blueprint.md`（§3 M1 行 / §4 练习闭环）+ `notes/process/capstone-style-guide.md`（§1–§6）+ `notes/process/capstone-m0-exercise.md`（M0 模式逐段延续）；不重新设计 milestone 划分（captain 已定 M1=P0 多工具+会话+压缩）。
 > 对应必修课 = `harness-from-scratch`（后段：恢复 / 压缩 / 多工具）+ `agent-harness`（分层）+ `rag`（检索=打分排序）+ `system-design`（收口）；参考答案 demo = `harness-demo`（5 运行模式）+ `rag-demo`（打分排序）。
 
 ## 1. M1 要交付什么（一句话 + 验收形态)

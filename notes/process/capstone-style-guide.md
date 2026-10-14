@@ -1,10 +1,10 @@
 # 增量主线施工规范（capstone-style-guide）
 
-> 主线 `my-agent` 的施工规范（供造 practice 的后续任务照此执行）。总原则与 `notes/teaching-style-guide.md` 一致：**每个结论落到一个可复现判据**；主线特有的增量约束是——**每 milestone 在上一 milestone 的代码上真·增建，复用的是学员自己写的**。
+> 主线 `my-agent` 的施工规范（供造 practice 的后续任务照此执行）。总原则与 `notes/process/teaching-style-guide.md` 一致：**每个结论落到一个可复现判据**；主线特有的增量约束是——**每 milestone 在上一 milestone 的代码上真·增建，复用的是学员自己写的**。
 
 ## 1. 里程碑命名与切分规则
 
-- **命名**：工号键用小写 `m0`…`m4`（目录 / 断言命令用小写），展示名用大写——五档固定为 `m0 minimal-loop` / `m1 multi-tool-session` / `m2 sandbox-mcp-eval` / `m3 durable-api-obs` / `m4 memory-flywheel-model`（与 `notes/capstone-blueprint.md` §3 映射表逐字一致，两处不得漂移）。
+- **命名**：工号键用小写 `m0`…`m4`（目录 / 断言命令用小写），展示名用大写——五档固定为 `m0 minimal-loop` / `m1 multi-tool-session` / `m2 sandbox-mcp-eval` / `m3 durable-api-obs` / `m4 memory-flywheel-model`（与 `notes/process/capstone-blueprint.md` §3 映射表逐字一致，两处不得漂移）。
 - **切分口径**：一阶段一个 milestone（不是一课一个）；`m0`/`m1` 同属 P0，按「增建能力单元」切——`m0` = 单工具最小 loop，`m1` = 多工具 + 会话 + 压缩（`m0` 是 `m1` 的地基）。
 - **切分红线**：一个 milestone 新增的能力必须**来自该阶段的课**（机制归属硬绑定，见映射表）；不得把下阶段机制提前塞进本 milestone（避免「练习炸碎 / 依赖错位」）。
 - **命名冲突**：断言、TODO、README 里出现的 milestone key 用小写单数 `m0`，示例命令 `npm run assert:m0`；不出现 `M0`（大写）作为文件系统路径或脚本参数。

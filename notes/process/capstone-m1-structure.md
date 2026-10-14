@@ -1,6 +1,6 @@
 # M1 · multi-tool-session 代码结构清单（capstone-m1-structure，写给 wei 直接建文件）
 
-> 按 `notes/capstone-m1-exercise.md` 落地 `my-agent/` 的 M1 增量骨架。**M1 在 M0 上真·增建**：`exercises/m1/starter` 继承 `exercises/m0/solution`（上一 milestone 完成态），本 milestone 新增的能力挖成 `TODOError` 占位。命名 / 协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + `capstone-m0-structure.md` 对齐。
+> 按 `notes/process/capstone-m1-exercise.md` 落地 `my-agent/` 的 M1 增量骨架。**M1 在 M0 上真·增建**：`exercises/m1/starter` 继承 `exercises/m0/solution`（上一 milestone 完成态），本 milestone 新增的能力挖成 `TODOError` 占位。命名 / 协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + `capstone-m0-structure.md` 对齐。
 
 ## 1. 目标目录结构（M1 阶段新增）
 

@@ -1,7 +1,7 @@
 /**
  * LLM 发展史与演进（横向知识导航页数据源，重建）。
  *
- * 唯一内容源：notes/site-refactor-plan.md §7（alex 审计后的权威事实表——已逐条 web 核实，
+ * 唯一内容源：notes/process/site-refactor-plan.md §7（alex 审计后的权威事实表——已逐条 web 核实，
  * 附 URL + 日期；臆测项「Agent 2.0 / Self-improvement / Multi-agent collaboration /
  * 2026 Next-gen」已全部删除，不进入数据层）。
  *

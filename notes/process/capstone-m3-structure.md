@@ -1,6 +1,6 @@
 # M3 · durable-api-obs 代码结构清单（capstone-m3-structure，写给 wei 直接建文件）
 
-> 按 `notes/capstone-m3-exercise.md` 落地 `my-agent/` 的 M3 增量骨架。**M3 在 M2 上真·增建**：`exercises/m3/starter` 继承 `exercises/m2/solution`（上一 milestone 完成态），本 milestone 新增能力（7 项 → 5 个 TODO）挖成 `TODOError`。命名 / 协议与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1/M2 structure 对齐。
+> 按 `notes/process/capstone-m3-exercise.md` 落地 `my-agent/` 的 M3 增量骨架。**M3 在 M2 上真·增建**：`exercises/m3/starter` 继承 `exercises/m2/solution`（上一 milestone 完成态），本 milestone 新增能力（7 项 → 5 个 TODO）挖成 `TODOError`。命名 / 协议与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1/M2 structure 对齐。
 
 ## 1. 目标目录结构（M3 阶段新增）
 

@@ -1,7 +1,7 @@
 /**
  * MVP 词表（单一真源）。
  *
- * 来源：notes/site-refactor-plan.md §4.1（13 个 mvpSlug，三态如实标注）。
+ * 来源：notes/process/site-refactor-plan.md §4.1（13 个 mvpSlug，三态如实标注）。
  * 口径：本文件是「课程 → MVP」映射与「MVP 现况」的唯一真源；course-structure.ts 的
  * 每个 mvpSlug 必须落在此表内（mvpStatusOf 对未知 slug fail-fast，映射闭合）。
  *
@@ -44,7 +44,7 @@ export const MVPS: Mvp[] = [
     reuse: ['agent-harness', 'system-design', 'multi-agent'],
     status: 'done',
     statusLabel: '✅ 已实现',
-    artifact: 'harness-demo/（10 src，5 运行模式）+ whiteboard/agent_whiteboard.py',
+    artifact: 'harness-demo/（13 src = 9 运行时 + 3 OTel 离线判据/断言 + 1 压缩自测，5 运行模式）+ whiteboard/agent_whiteboard.py',
   },
   {
     slug: 'rag-mvp',
@@ -158,7 +158,7 @@ export function mvpBySlug(slug: string): Mvp {
   const found = MVP_MAP.get(slug);
   if (!found) {
     throw new Error(
-      `mvps.ts：未知 mvpSlug「${slug}」——课程→MVP 映射未闭合（参照 notes/site-refactor-plan.md §4 词表）`,
+      `mvps.ts：未知 mvpSlug「${slug}」——课程→MVP 映射未闭合（参照 notes/process/site-refactor-plan.md §4 词表）`,
     );
   }
   return found;

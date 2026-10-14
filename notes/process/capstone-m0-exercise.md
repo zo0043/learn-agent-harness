@@ -1,6 +1,6 @@
 # M0 · minimal-loop 里程碑动手练习设计（capstone-m0-exercise）
 
-> 主线 `my-agent` 的第一个动手点：从零搭出「想→做→说」最小 agent loop。本设计严格套用 `notes/capstone-blueprint.md`（§3/§4）与 `notes/capstone-style-guide.md`（§1–§6）协议；不重新设计里程碑划分（captain 已定 M0=P0 最小 loop）。
+> 主线 `my-agent` 的第一个动手点：从零搭出「想→做→说」最小 agent loop。本设计严格套用 `notes/process/capstone-blueprint.md`（§3/§4）与 `notes/process/capstone-style-guide.md`（§1–§6）协议；不重新设计里程碑划分（captain 已定 M0=P0 最小 loop）。
 > 对应课程 = P0 `harness-from-scratch`（#2）；参考答案 demo = `harness-demo/`（harness-mvp）。
 
 ## 1. M0 要交付什么（一句话 + 验收形态）

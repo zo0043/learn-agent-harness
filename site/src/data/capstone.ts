@@ -2,9 +2,9 @@
  * 增量主线（capstone）呈现数据源。
  *
  * 只读课程/mvp 词表，不反向改它们。milestone 六栏（key/name/stage/adds/courses/reference）
- * 与 notes/capstone-blueprint.md §3 映射表逐字一致（这是「自洽」的机器可核对点）。
+ * 与 notes/process/capstone-blueprint.md §3 映射表逐字一致（这是「自洽」的机器可核对点）。
  *
- * term 约定（capstone-site-render-checklist §0）：milestone 键用小写 m0…m4，展示名 M0…M4；
+ * term 约定（notes/process/capstone-site-render-checklist.md §0）：milestone 键用小写 m0…m4，展示名 M0…M4；
  * demo 一律叫「参考样本（reference）」，主线 my-agent 是「你要搭的（your build）」。
  *
  * 每课「主线挂钩」不在本表——它作为 Course.capstoneHook 落在 course-structure.ts（单一真源），

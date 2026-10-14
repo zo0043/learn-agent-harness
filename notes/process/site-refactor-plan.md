@@ -3,6 +3,12 @@
 > 性质：**给后续工程任务（数据层、页面重构）的唯一输入文档**。本文件是编排与事实的单一真源，后续实现只引用、不改写本表结论。
 > 审计人：alex（课程内容架构师） · 任务 t1 · 时间 2026-10-13（系统时钟）
 > 审计对象：`site/src/data/courses.ts`（18 条 = 17 课程页 + 1 `whiteboard` 卡）、`notes/` 19 份笔记、三个草稿 `site/src/data/llm-history.ts` / `site/src/data/course-structure.ts` / `site/src/pages/nav.astro`。
+>
+> ⚠️ **文件位置与历史口径说明（2026-10-14 结构重组补记，不改动下文任何结论）**
+> ① **位置**：本文件已从 `notes/` 顶层移入 `notes/process/`（与另外 19 份设计/过程文档一起）——顶层从此恰为 19 个课程内容文件，站点课程路由数 17 的口径算式 `19 − knowledge-map − interview-bank` 首次与文件系统事实自洽。本文件内容未因迁移改写。
+> ② **历史口径**：§11–§13 及 sprint 记录里出现的 `notes/*.md=N`（20 / 22 / 24 等）是**各 sprint 当时时点的实测快照**，彼此并不一致，且与当时的真值（顶层 39）也不同。**它们是审计轨迹，不是当前口径陈述，故一律保留原数不改写**（改写＝伪造审计记录）。当前口径唯一参照 = `notes/knowledge-map.md` 头部计数口径块。
+> ③ **`EXCLUDED_FROM_COURSE_ROUTE`**：本文件提到该集合时其值为 22 条；2026-10-14 迁移后已收缩为 2 条（`knowledge-map` / `interview-bank`），其余 20 份因位于 `notes/process/` 而被 `pattern:'*.md'` 天然排除，无需再登记。下表 §2/§3/§4/§5/§7 的编排结论（17 课程页、五阶段、词表）不受影响。
+> ④ **glob 告警的定性（同属「时点快照」）**：§11.4-2 / §12.1 / §13.1 记录的 `Duplicate id "…"` WARN 是**各 sprint 当时的现场观测**（当时归因为 glob-loader 内容-store 缓存残留，非真实重复、不阻断构建），与同段引用的 `notes/*.md=20/22/24` 属同一批时点快照，故**原判断与原数一并保留、不改写**。同上：它们是审计轨迹，不是当前口径陈述；当前口径（顶层 19 / `EXCLUDED` 2 / 站点 html 33）的唯一参照 = `notes/knowledge-map.md` 头部计数口径块，并已由 `site/tools/check-counters.mjs` 在 CI 门禁化（`verify.yml` 的「Counter consistency gate」步骤）。§14「遗留事项（仍跟踪）」里那条 `Duplicate id` 条目属**未结项**、仍有效，故**不加**历史标注。
 
 ---
 
@@ -114,7 +120,7 @@ llm-timeline → harness-from-scratch → agent-harness → rag → system-desig
 
 | mvpSlug | 归属课（owner） | 复用/扩展课 | 现况 | 制品 |
 |---|---|---|---|---|
-| `harness-mvp` | `harness-from-scratch` | `agent-harness`、`system-design`、`multi-agent` | ✅ 已实现 | `harness-demo/`（10 src，5 运行模式）+ `whiteboard/agent_whiteboard.py` |
+| `harness-mvp` | `harness-from-scratch` | `agent-harness`、`system-design`、`multi-agent` | ✅ 已实现 | `harness-demo/`（13 src = 9 运行时 + 3 OTel 离线判据/断言 + 1 压缩自测，5 运行模式）+ `whiteboard/agent_whiteboard.py` |
 | `rag-mvp` | `rag` | `evaluation`、`system-design`(参考) | ✅ 已实现 | `rag-demo/`（132 chunks golden set，recall@3=0.31） |
 | `sandbox-mvp` | `sandbox` | — | ✅ 已实现 | `sandbox-demo/`（四通道 policy + 幽灵重放） |
 | `mcp-mvp` | `mcp` | — | ✅ 已实现 | `mcp-demo/`（投毒 + 四层防御 + 消融） |
@@ -363,7 +369,7 @@ cd site && ./node_modules/.bin/esbuild verify-t6.mjs --bundle --format=esm --pla
 1. `course-structure` `COURSE_COUNT=17` == `courses.ts` `COURSE_COUNT=17`。
 2. `STAGES` 五档、`STAGE_COUNTS={P0:5,P1:4,P2:3,P3:3,P4:2}`。
 3. courses.ts 课程卡（去 whiteboard）17 slug == course-structure 17 slug（单一真源不漂移）。
-4. `notes/*.md=20` − `EXCLUDED{knowledge-map, interview-bank, site-refactor-plan}` = 17 路由课程页 == course-structure 17 slug（修正 site-refactor-plan 外泄）。
+4. `notes/*.md=20` − `EXCLUDED{knowledge-map, interview-bank, site-refactor-plan}` = 17 路由课程页 == course-structure 17 slug（修正 site-refactor-plan 外泄）。 〔时点快照，非当前口径；见文首说明〕
 5. `MVP=13`，17 课 `mvpSlug` 全闭合、`mvpStatusOf` 可解析。
 6. `LLM_HISTORY=10`、`LLM_EVOLUTION=5`。
 7. 17 课 `prereqs` 全部指向更早序（拓扑无环）、`next=序+1`。
@@ -377,7 +383,7 @@ cd site && ./node_modules/.bin/esbuild verify-t6.mjs --bundle --format=esm --pla
 ### 11.4 遗留事项与留浏览器目检
 
 - **必须 CI 复验**：在内存充足 / `capped` 可用环境跑全量 `bash build.sh`（含 pagefind），确认 `dist/` 产出 34 页、`/nav`、`/learn`、各 `/c/<slug>/` 学习路径模块成品 HTML、页面无 `undefined` 残留——本沙箱无法完成 HTML 渲染，此三项属「留 CI 构建复验 + 浏览器目检」，不得以 HTTP 200 或编译产物冒充页面正确。
-- **「duplicate id site-refactor-plan」glob 告警**：首次 build 出现、重 build 已自愈（Astro content-store 缓存残留），非数据重复（已断言 notes/*.md=20 唯一）；且 §11.3-1 的 EXCLUDED 已兜底路由，该告警不阻断 CI。
+- **「duplicate id site-refactor-plan」glob 告警**：首次 build 出现、重 build 已自愈（Astro content-store 缓存残留），非数据重复（已断言 notes/*.md=20 唯一）；且 §11.3-1 的 EXCLUDED 已兜底路由，该告警不阻断 CI。 〔时点快照，非当前口径；见文首说明〕
 - **P1–P4 正文深度内容**：仍未被塞成教学型「代码+讲解」，属 §10.2 明确待办（已核：3 个规划 MVP 目录不存在、P1–P4 notes mtime 未变、未越界）。
 
 > 注：上一条是 t6 时点的记录；sprint 2（t7–t11）已收口其中 P1+P2 七课（见 §12），剩余 P3+P4 五课仍留 sprint 3。
@@ -398,7 +404,7 @@ cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fa
 
 - ✅ **服务端编译通过（零编译 / 零类型错误）**：`19:54:07 [vite] ✓ built in 3.49s` → `[build] ✓ Completed in 3.55s`（`Building static entrypoints`）。该阶段编译全部 `.astro` + `.ts`（nav / learn / c-[slug] / index / Header + course-structure/courses/mvps/llm-history 四数据层），并把 sprint 2 改动正确产入 `dist/`。
 - ⛔️ **HTML 渲染阶段被本沙箱环境卡死（留 CI / 浏览器目检）**：自 `[build] building client (vite)` 起停在 `19:54:07 [vite] transforming...`，`timeout 120` 触发（EXIT=124），`dist/*.html` 恒为 0。归因同 §11.1：本机 2 vCPU / 3.4G RAM，逐页渲染 22 篇 markdown（shiki + KaTeX）时 swap 打满、进程不可中断换页；属环境资源约束而非代码缺陷。
-- **WARN「Duplicate id」= t6 §11.4-2 同现象，非真实重复**：8 个本 sprint 编辑的 note（api-engineering / durable-execution / evaluation / mcp / multi-agent / observability / sandbox / site-refactor-plan）首次 build 各报一次 glob-loader 缓存残留告警（内容-store 缓存 + 新条目首同步）；WARN 不阻断 `✓ built`，且一致性断言已证 `notes/*.md=22` 唯一、无真实重复。
+- **WARN「Duplicate id」= t6 §11.4-2 同现象，非真实重复**：8 个本 sprint 编辑的 note（api-engineering / durable-execution / evaluation / mcp / multi-agent / observability / sandbox / site-refactor-plan）首次 build 各报一次 glob-loader 缓存残留告警（内容-store 缓存 + 新条目首同步）；WARN 不阻断 `✓ built`，且一致性断言已证 `notes/*.md=22` 唯一、无真实重复。 〔时点快照，非当前口径；见文首说明〕
 
 ### 12.2 一致性终验（esbuild bundle + node 断言，exit 0 全过）
 
@@ -408,7 +414,7 @@ cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fa
 2. `MVPS=13`；`api-mvp=done`（t11 落地）、`flywheel-mvp` / `model-basics-mvp` 仍 `planned`（本 sprint 未越界）；17 课 `mvpSlug` 全闭合。
 3. P1+P2 共 7 课（sandbox / mcp / evaluation / multi-agent / durable-execution / api-engineering / observability）`prerequisiteNote` 含「上一课」承接句 + `practicalOutput` 含 clone 判据（`npm run demo` / `demo:`）＝已精化。
 4. P3+P4 共 5 课（long-term-memory / data-flywheel / model-basics / framework-ecosystem / industry-2026）`prerequisiteNote` 仍简短（无「上一课」）+ `practicalOutput` 无 clone 判据＝未越界精化。
-5. `teaching-style-guide.md` 就位；`notes/*.md=22` − `EXCLUDED{knowledge-map, interview-bank, site-refactor-plan, teaching-style-guide, api-mvp-spec}` = 17 路由课程页 == course-structure 17 slug。
+5. `teaching-style-guide.md` 就位；`notes/*.md=22` − `EXCLUDED{knowledge-map, interview-bank, site-refactor-plan, teaching-style-guide, api-mvp-spec}` = 17 路由课程页 == course-structure 17 slug。 〔时点快照，非当前口径；见文首说明〕
 6. 17 课 `prereqs` 拓扑无环、`next=序+1`；`courses.ts`（去 whiteboard）17 slug == course-structure 17 slug；`LLM_HISTORY=10`、`LLM_EVOLUTION=5`。
 7. `npx tsc --noEmit` exit 0（无类型破坏）。
 
@@ -445,14 +451,14 @@ cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fa
 
 - ✅ **服务端编译通过（零编译 / 零类型错误）**：`21:08:42 [vite] ✓ built in 3.90s` → `[build] ✓ Completed in 3.97s`（`Building static entrypoints`）。特别确认：本任务删除 courses.ts 的 `PHASE_COUNTS` 后，服务端 entrypoints 编译仍零错误，sprint 3 改动正确产入 `dist/`。
 - ⛔️ **HTML 渲染阶段被本沙箱环境卡死（留 CI / 浏览器目检）**：自 `[build] building client (vite)` 起停在 `21:08:42 [vite] transforming...`，`timeout 120` 触发（EXIT=124），`dist/*.html` 恒为 0。归因同 §11.1 / §12.1：本机 2 vCPU / 3.4G RAM，逐页渲染 24 篇 markdown（shiki + KaTeX）时 swap 打满、不可中断换页；环境资源约束而非代码缺陷。
-- **WARN「Duplicate id」= t6 §11.4-2 / t12 §12.1 同现象**：本 sprint 编辑的 note（industry-2026 / long-term-memory / model-basics / site-refactor-plan 等）首次 build 各报一次 glob-loader 缓存残留告警；WARN 不阻断 `✓ built`，一致性断言已证 `notes/*.md=24` 唯一、无真实重复。
+- **WARN「Duplicate id」= t6 §11.4-2 / t12 §12.1 同现象**：本 sprint 编辑的 note（industry-2026 / long-term-memory / model-basics / site-refactor-plan 等）首次 build 各报一次 glob-loader 缓存残留告警；WARN 不阻断 `✓ built`，一致性断言已证 `notes/*.md=24` 唯一、无真实重复。 〔时点快照，非当前口径；见文首说明〕
 
 ### 13.2 一致性终验（esbuild bundle + node 断言，exit 0 全过）
 
 1. `COURSE_COUNT=17`、`STAGE_COUNTS={P0:5,P1:4,P2:3,P3:3,P4:2}`、17 课 `prereqs` 拓扑无环、`next=序+1`、industry-2026 为链尾。
 2. **MVP 三态最终盘点**：13 slug = **11 done / 0 planned / 2 asset**——api / flywheel / model-basics 三个规划态已全部落地（t10 / t16 / t17）；llm-history / industry-research 两项横向 `asset`；无 `planned` 残留，17 课 `mvpSlug` 全闭合。
 3. 17 课全精化：P0 用「0 经验」短式、P1–P4 用「上一课 / 无硬前置」承接；`practicalOutput` 全三件套；data-flywheel / model-basics 的「规划态·由下游实现」已就地回填 clean（无残留）。
-4. `teaching-style-guide.md` / `flywheel-mvp-spec.md` / `model-basics-mvp-spec.md` 三份 process 文档就位且在 EXCLUDED；`notes/*.md=24` − EXCLUDED(7) = 17 路由页 == course-structure 17 slug。
+4. `teaching-style-guide.md` / `flywheel-mvp-spec.md` / `model-basics-mvp-spec.md` 三份 process 文档就位且在 EXCLUDED；`notes/*.md=24` − EXCLUDED(7) = 17 路由页 == course-structure 17 slug。 〔时点快照，非当前口径；见文首说明〕
 5. `LLM_HISTORY=10`、`LLM_EVOLUTION=5`；`courses.ts`（去 whiteboard）17 slug == course-structure 17 slug；`npx tsc --noEmit` exit 0（含删 `PHASE_COUNTS` 后零破坏，全部断言 exit 0）。
 
 ### 13.3 正确性抽查（3 处实跑 exit 0 + 1 处源码/原文核对，均一致）

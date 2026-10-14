@@ -33,7 +33,7 @@ export interface Milestone {
 export const MILESTONES: Milestone[] = [/* 照 capstone-blueprint.md §3 映射表逐行抄入 */];
 ```
 
-**纪律**：`MILESTONES` 的 key/name/stage/adds/courses/reference 六栏必须与 `notes/capstone-blueprint.md` §3 映射表逐字一致（这是「自洽」的机器可核对点，见 §4 校验）；不得在 `capstone.ts` 里另造一套划分。
+**纪律**：`MILESTONES` 的 key/name/stage/adds/courses/reference 六栏必须与 `notes/process/capstone-blueprint.md` §3 映射表逐字一致（这是「自洽」的机器可核对点，见 §4 校验）；不得在 `capstone.ts` 里另造一套划分。
 
 ### 2.2 渲染（建议结构，不改现有 section）
 
@@ -116,5 +116,5 @@ capstoneHook?: string;
 
 - `MILESTONES.length === 5`，key 集合 = `{m0,m1,m2,m3,m4}`，stage 五档顺序与 `course-structure.ts` STAGE 一致；
 - `capstoneHookOf` 对 17 课逐一返回（或横向课显式空），无「漏填但声称已挂钩」；
-- `notes/*.md` − `EXCLUDED_FROM_COURSE_ROUTE` = 17（新增三份 capstone 设计文档计入 EXCLUDED，当前 EXCLUDED=10，路由页恒 17）；
+- ~~`notes/*.md` − `EXCLUDED_FROM_COURSE_ROUTE` = 17（新增三份 capstone 设计文档计入 EXCLUDED，当前 EXCLUDED=10，路由页恒 17）~~ → **2026-10-14 结构重组后失效，勿再据本行推算**：顶层 `notes/*.md` 现恒为 19（17 课程正文 + knowledge-map + interview-bank），`EXCLUDED_FROM_COURSE_ROUTE` 恒为 **2** 条，算式 `19 − 2 = 17`。capstone 设计文档不再需要登记进 EXCLUDED——它们位于 `notes/process/`，被 `courses` 集合的 `pattern:'*.md'`（仅顶层）天然排除。口径唯一参照：`notes/knowledge-map.md` 计数口径块；
 - `mvps.ts` 三态仍 11 done / 0 planned / 2 asset（本清单不动词表）。

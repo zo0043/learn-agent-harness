@@ -1,6 +1,6 @@
 # M4 · memory-flywheel-model 代码结构清单（capstone-m4-structure，写给 wei 直接建文件）
 
-> 按 `notes/capstone-m4-exercise.md` 落地 `my-agent/` 的 M4 增量骨架（最后一个 milestone）。**M4 在 M3 上真·增建**：`exercises/m4/starter` 继承 `exercises/m3/solution`（上一 milestone 完成态），本 milestone 新增能力（4 项 → 4 个 TODO）挖成 `TODOError`。命名 / 协议与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1/M2/M3 structure 对齐。
+> 按 `notes/process/capstone-m4-exercise.md` 落地 `my-agent/` 的 M4 增量骨架（最后一个 milestone）。**M4 在 M3 上真·增建**：`exercises/m4/starter` 继承 `exercises/m3/solution`（上一 milestone 完成态），本 milestone 新增能力（4 项 → 4 个 TODO）挖成 `TODOError`。命名 / 协议与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` + M0/M1/M2/M3 structure 对齐。
 
 ## 1. 目标目录结构（M4 阶段新增）
 

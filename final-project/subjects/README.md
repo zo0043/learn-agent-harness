@@ -2,8 +2,8 @@
 
 三个命题（A research-assistant / B repo-guard / C signal-arbiter）选一条；想叠加两条属加分项。
 
-- 命题正文 + 判据锚点：`notes/capstone-final.md` §3（本站「毕业项目」卡）。
-- 判据清单（黑盒 B1–B5 + 白盒 W1–W7）：`notes/capstone-final.md` §4，机器可读真源 `../rubric.mjs`。
+- 命题正文 + 判据锚点：`notes/process/capstone-final.md` §3（本站「毕业项目」卡）。
+- 判据清单（黑盒 B1–B5 + 白盒 W1–W7）：`notes/process/capstone-final.md` §4，机器可读真源 `../rubric.mjs`。
 - 自测引导三步：`../README.md`。
 - 判据运行：`node ../grade.mjs <你的成品目录>`。
 

@@ -98,7 +98,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
         harness 的契约是 <code>policy → intent → execute → result</code>（结果必回写，拒绝也是结果）。
       </p>
 
-      <h3>10 个 src 文件（9 运行时 + 1 压缩自测）↔ ①-⑩ 十节（下表按主要落点）</h3>
+      <h3>13 个 src 文件（9 运行时 + 3 OTel 离线判据/断言 + 1 压缩自测）↔ ①-⑩ 十节（下表按主要落点）</h3>
       <table class="file-table">
         <thead>
           <tr><th>文件</th><th>对应节</th><th>职责</th></tr>
@@ -113,6 +113,9 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
           <tr><td>context.ts</td><td class="sec">⑧ 预算 / 压缩</td><td>token 估算 + 教学压缩策略</td></tr>
           <tr><td>demo.ts</td><td class="sec">⑨ 轨迹 / 演示</td><td>多步任务 + 五种运行模式</td></tr>
           <tr><td>otel.ts</td><td class="sec">⑨ 轨迹 / 演示 · 可观测 §S2</td><td>OTel GenAI span 树（invoke_agent → chat / execute_tool）+ console 导出；<code>OTEL_EXPORT_OTLP=1</code> 时追加 OTLP/HTTP</td></tr>
+          <tr><td>otel-mock-scenario.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线判据</td><td>冻结场景（本地 mock 端点 6 轮脚本）+ EXPECTED 契约常量；tool 名字/顺序抄自 <code>trajectories/demo.jsonl</code></td></tr>
+          <tr><td>otel-mock.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线复跑</td><td>入口 <code>npm run demo:otel:mock</code>：打印确定性 span 树 + 生成快照 <code>workspace/out/otel-spans.md</code></td></tr>
+          <tr><td>otel-assert.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线断言</td><td>入口 <code>npm run demo:otel:assert</code>：断言 span 树形态/计数，不符即非 0 退出</td></tr>
           <tr><td>test-compact.ts</td><td class="sec">⑧ 压缩验证</td><td>本地 mock 模型单独验证压缩逻辑（不依赖外部代理）</td></tr>
         </tbody>
       </table>
@@ -402,9 +405,12 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <section>
     <h2>口径说明</h2>
     <p class="work-soft">
-      本页共 <strong>{WORK_COUNT} 个可运行 demo 作品</strong>（= 有 <code>npm run demo</code>
-      的目录：harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo /
-      framework-demo）；另有 <code>whiteboard/</code>（Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
+      本页共 <strong>{WORK_COUNT} 个<em>具名作品</em>目录</strong>（harness-demo / rag-demo /
+      sandbox-demo / mcp-demo / durable-execution-demo / framework-demo）；另有 <code>whiteboard/</code>
+      （Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
+      ⚠️ 本值<strong>不是</strong>「有 <code>npm run demo</code> 的目录数」——实测为 10（另含 model-basics-demo /
+      flywheel-demo / api-demo / my-agent / memory-redteam；而 <code>rag-demo</code> 的入口是
+      <code>demo:eval</code>，反而不在那 10 个里）。口径见 <code>notes/knowledge-map.md</code> 计数口径块。
     </p>
   </section>
 </Base>

@@ -58,23 +58,52 @@ jobs:
         working-directory: site
         run: npm ci
 
+      # ── 口径一致性门禁（D7 的机制性修复，t7 新增；与下方 Build sanity 步骤互不重叠）──────────
+      # 背景：`notes/knowledge-map.md` 的「计数口径」块自称「全仓唯一参照，其余位置只引用本块」，
+      # 但该约定长期**只靠人工遵守、从来没有机器门禁**，已实测多起「修一处、漏两处」：
+      #   · 口径「站点 html 32」漏了 `nav`（真值 33），在 knowledge-map.md / README.md / 本文件三处各有手工副本；
+      #   · `courses.ts` 注释曾写「有 npm run demo 的目录数 = 6」而实测为 10；
+      #   · `README.md` 曾称「27 个文件 / ~600KB」而实测为 47 个文件 / ~996KB。
+      # 本步骤把该约定升级为门禁：逐条**重算**口径块里的数字并与块内声明值比对，不符即非 0 退出；
+      # 同时交叉核对同一口径的其余手工副本（README.md / courses.ts 注释 / 本文件），
+      # 于是「改了知识库却忘了同步口径块」或「改了口径块却与实际不符」下次会被机器抓住，而非靠人记得。
+      # 刻意置于 `Build site` **之前**：口径失真属廉价可判定的问题，应在耗时的站点构建（CI 上数分钟）
+      # 之前就失败，而不是等构建跑完才在下方的 Build sanity 里暴露。
+      # 本步骤不依赖站点构建产物（不读 site/dist）、不读 node_modules，仅用 Node 内置模块读源码与文件系统，秒级完成。
+      # 边界诚实：本步骤绿只证明「口径块与实数一致」，**不**证明页面渲染正确——渲染正确性由下方
+      # Build sanity（dist 等值断言 33 + 关键页非空）与本作业后续的 3 视口 headless 断言覆盖。
+      - name: Counter consistency gate (口径门禁)
+        run: node site/tools/check-counters.mjs
+
       - name: Build site
         working-directory: site
         run: npm run build
 
       # 本机 OOM 事故的 CI 免疫：dist 必须真的产出了 HTML（本机曾留下 85 文件/0 HTML 的残骸，
       # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
-      # 下限 32（t20 由 31 收紧）= 6 静态页（index/learn/works/interview/map/details 首页）
-      # + 17 课程页 + 8 专题页 + 1 自定义 404 页（site/src/pages/404.astro，2026-10-13 按用户决定实现，
-      # 原口径「站点 html 32」的 404.html 加数当初不存在、t16 曾更正为 31，实现后 32 才真正成立）。
-      # 理由：404.html 现已是真实构建产物——下界必须覆盖它，否则删页/构建残骸仍能混过 sanity。
-      # 另逐一校验 8 个关键页存在且非空（结构回归的"关键页存在/非空"项，404.html 一并纳入）。
+      # 站点 html 口径（2026-10-14 结构重组实测更正，见 notes/knowledge-map.md 计数口径块）：
+      #   33 = 8 静态页 + 17 课程页 + 8 专题页（三桶互斥且穷尽，成员逐一枚举）：
+      #      · 8 静态页（site/src/pages/**/*.astro 中的非动态页，即文件名不含 [ 参数者）：
+      #        index / learn / works / map / interview / nav / 404 / details/index
+      #      · 17 课程页（site/src/pages/c/[slug].astro）
+      #      · 8 专题页（site/src/pages/details/[slug].astro）
+      #   等价写法：7 顶层页含 404 + 1 details/index + 17 + 8。
+      #   ⚠️ 禁止把 404 在静态页之外再计一次——历史上曾写成未枚举成员的「7 静态页」另外
+      #   再加一个 404，那个「7」会被读成 `ls site/src/pages/*.astro` 的 7 个文件（含 404），
+      #   从而被读成 404 重复计数。
+      # 原写「6 静态页…= 32」的枚举**漏了 nav**（site/src/pages/nav.astro 是真实顶层页，
+      # Header 导航栏 + index 卡片均链向 /nav/）。下界断言 `-ge 32` 结构上永远发现不了
+      # 「少枚举一个页面」，故这里改为**等值断言 33**，并把 nav/index.html 补进关键页清单。
+      # 实测依据：2026-10-14 t2 本机全量构建 `astro build` → 「33 page(s) built in 484.44s」+
+      # `find site/dist -name '*.html' | wc -l` → 33。但本机构建**不稳定**：同日复跑一次在
+      # `client (vite) transforming` 阶段被杀（内存 3.4G 争用），故本机成或败都不代表 CI 结果——
+      # **构建产物数以 CI 为准**。本步骤的等值断言即为此在 CI 上的守门。
       - name: Build sanity (dist must contain real HTML)
         run: |
           count=$(find site/dist -name '*.html' | wc -l)
-          echo "dist HTML 文件数 = $count（下限 32 = 6 静态 + 17 课程页 + 8 专题页 + 1 自定义 404 页（2026-10-13 新增））"
-          test "$count" -ge 32
-          for p in index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html 404.html; do
+          echo "dist HTML 文件数 = $count（等值断言 33 = 8 静态页（index/learn/works/map/interview/nav/404/details/index）+ 17 课程页（c/[slug]）+ 8 专题页（details/[slug]））"
+          test "$count" -eq 33
+          for p in index.html nav/index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html 404.html; do
             [ -s "site/dist/$p" ] || { echo "关键页缺失或为空：$p"; exit 1; }
             echo "  关键页存在且非空：$p"
           done

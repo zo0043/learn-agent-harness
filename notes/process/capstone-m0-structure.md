@@ -1,6 +1,6 @@
 # M0 · minimal-loop 代码结构清单（capstone-m0-structure，写给 wei 直接建文件）
 
-> 按 `notes/capstone-m0-exercise.md` 落地 `my-agent/` 的 M0 目标目录结构与每文件职责。这是「建骨架」清单，不含补全后的业务代码（TODO 体由 wei 填 `TODOError` 占位，solution 由 wei 按 exercise §3 补全）。命名/协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` 对齐。
+> 按 `notes/process/capstone-m0-exercise.md` 落地 `my-agent/` 的 M0 目标目录结构与每文件职责。这是「建骨架」清单，不含补全后的业务代码（TODO 体由 wei 填 `TODOError` 占位，solution 由 wei 按 exercise §3 补全）。命名/协议已与 `capstone-blueprint.md` §7 + `capstone-style-guide.md` 对齐。
 
 ## 1. 目标目录结构（M0 阶段）
 

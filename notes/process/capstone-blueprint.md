@@ -66,7 +66,7 @@ assert/m<N>.assert.ts  本 milestone 断言（starter 里跑红，solution 里�
 ## 5. demo → 「参考实现」定位转换说明
 
 - **原地位**：17 个独立 demo 是「老师搭好、学员能 clone 跑的正确答案」——这没错，但要明确它是**切片**。
-- **转换后**：demo 一律标「参考实现 / 对照样本」（reference），主线 `my-agent` 是「你要搭的」（your build）。course 页 / learn 卡把 demo chip 从「作品 / MVP」话术改为「参考样本」（具体话术见 `notes/capstone-site-render-checklist.md`）。
+- **转换后**：demo 一律标「参考实现 / 对照样本」（reference），主线 `my-agent` 是「你要搭的」（your build）。course 页 / learn 卡把 demo chip 从「作品 / MVP」话术改为「参考样本」（具体话术见 `notes/process/capstone-site-render-checklist.md`）。
 - **边界（不破坏 sprint 1–3）**：不改任何 demo 源码的正确性、不改 `mvps.ts` 三态、不改 17 课正文事实、不改五阶段结构。只做**定位转换**——新增主线，并在呈现层把 demo 标注成「主线某 milestone 的参考答案」。
 
 ## 6. 「参考 / 主线」关系图
@@ -123,5 +123,5 @@ my-agent/
 ## 8. 与 sprint 1–3 的边界（防破坏）
 
 - 不动：17 课正文事实、`mvps.ts` 三态（13 slug）/ `course-structure.ts` 五阶段与 prereqs、现有 17 demo 源码正确性。
-- 新增：`my-agent/`（sprint 4 造）、线条与断言（后续任务逐 milestone 造）、`notes/capstone-style-guide.md` + `notes/capstone-site-render-checklist.md` 三份设计文档。
+- 新增：`my-agent/`（sprint 4 造）、线条与断言（后续任务逐 milestone 造）、`notes/process/capstone-style-guide.md` + `notes/process/capstone-site-render-checklist.md` 三份设计文档。
 - 呈现层只加「主线入口 / 主线挂钩」与「作品→参考样本」话术，不改现有卡片路由与 17 课结构。

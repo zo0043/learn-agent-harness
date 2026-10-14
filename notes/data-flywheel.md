@@ -12,7 +12,7 @@
 
 - **课程依赖（prereqs）**：`evaluation`——上一课带入「评测 = 飞轮的仪表盘」+「golden set 版本化 / 指标基线 / CI 门禁 / skipped 是一等终态」的对照意识，本课把它从「一次评测」扩成「一圈一圈转」。
 - **技能门槛**：只需「训练/评测数据要版本化、标签会有噪声」的粗概念即可。
-- **不需要提前会**：真实微调平台、数据平台、FinHot 私有台账——一律不用会。飞轮四环节（闭环 / 数据模型 / 筛选 / 消融决策）+ labeler 两轮降噪闭环随 `flywheel-demo` 的 `npm run demo` 建立（本 sprint 规格先行，目录由下游按 notes/flywheel-mvp-spec.md 建成）；生产数据在仓外，课上只用脱敏样本。
+- **不需要提前会**：真实微调平台、数据平台、FinHot 私有台账——一律不用会。飞轮四环节（闭环 / 数据模型 / 筛选 / 消融决策）+ labeler 两轮降噪闭环随 `flywheel-demo` 的 `npm run demo` 建立（本 sprint 规格先行，目录由下游按 notes/process/flywheel-mvp-spec.md 建成）；生产数据在仓外，课上只用脱敏样本。
 
 ---
 
@@ -324,7 +324,7 @@ function metrics(rows) {
 
 **这段在讲什么**：指标本身不是武器，**归因证据**才是——第一轮能说「+6.5pt 归给 prompt」，是因为 `selection-score` 是 12 个提示词文件里唯一哈希变了的那个（其余 11 个全程未动，「一次只动一个变量」可验证）；第二轮退步不能归因给 prompt，是因为**同日发生了 gold 重标**（社融例行发布改 reject 口径，正类 29/171 → 27/173），提示词编辑和标签口径两个变量叠加，指标差被污染。这就是「一次只动一个变量」的正反两面，也是它停下来的直接原因之一——飞轮的产出不是「下一版提示词」，是「这一圈有没有让归因更干净」。
 
-**实跑判据（本课，规划态三样，目录由下游建成）**：本 sprint 先产设计规格（notes/flywheel-mvp-spec.md），`flywheel-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd flywheel-demo && npm i && npm run demo` 复现「脱敏台账样本 → filter/label 两轮 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）。本课正文的 FinHot 真实数字（1830 行 / 858 skipped / precision 0.256→0.304→0.272 / `selection-score@5c5a429baa` 等）属「来源与锚点」的内部证据（FinHot 私有台账，仓外不可复核），面试讲方法与数字、不号称公开可查；它们**只做教学锚、不冒充可机器核对的 clone 判据**。
+**实跑判据（本课，规划态三样，目录由下游建成）**：本 sprint 先产设计规格（notes/process/flywheel-mvp-spec.md），`flywheel-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd flywheel-demo && npm i && npm run demo` 复现「脱敏台账样本 → filter/label 两轮 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）。本课正文的 FinHot 真实数字（1830 行 / 858 skipped / precision 0.256→0.304→0.272 / `selection-score@5c5a429baa` 等）属「来源与锚点」的内部证据（FinHot 私有台账，仓外不可复核），面试讲方法与数字、不号称公开可查；它们**只做教学锚、不冒充可机器核对的 clone 判据**。
 
 ---
 

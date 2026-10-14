@@ -13,7 +13,7 @@
 
 - **课程依赖（prereqs）**：`llm-timeline`（横向导航页，位于 P0 之前）——上一课带入「模型是会持续换代的组件」时间轴（GPT 系 / o1 推理模型 / 开源系的代际差异），本课把它从「一代代更替」落到「每一代在 harness 里有什么工程后果」。
 - **技能门槛**：只需「矩阵乘法 = 行列点积、softmax = 归一化成概率」的粗直觉即可。
-- **不需要提前会**：PyTorch / attention 数学推导 / 真实微调 / 推理引擎调优——一律不用会。KV cache 机制、prefill-decode 两阶段、推理成本构成、微调谱系随 `model-basics-demo` 的 `npm run demo` 边跑边建（本 sprint 规格先行，目录由下游按 notes/model-basics-mvp-spec.md 建成）。
+- **不需要提前会**：PyTorch / attention 数学推导 / 真实微调 / 推理引擎调优——一律不用会。KV cache 机制、prefill-decode 两阶段、推理成本构成、微调谱系随 `model-basics-demo` 的 `npm run demo` 边跑边建（本 sprint 规格先行，目录由下游按 notes/process/model-basics-mvp-spec.md 建成）。
 
 ---
 
@@ -351,7 +351,7 @@ KV per token 用 S1 公式估（示例：32 层、8 个 KV head、head_dim=128�
 
 **面试官一般怎么追**：他不会重复问定义，而是拿一个维度把你逼到边界——"并发 10× 时 KV 先炸还是算力先炸"（S1/S4）、"这个优化救 TTFT 还是 TPOT"（S8）、"MoE 省显存吗"（S9-②）。答法固定：先报机制（带公式），再报工程后果，最后给一个可执行的验证动作。
 
-**实跑判据（本课，规划态，目录由下游建成）**：本 sprint 先产设计规格（notes/model-basics-mvp-spec.md），`model-basics-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd model-basics-demo && npm run demo` 复现「KV cache 显存估算（Mistral-7B 量级 0.13MB/token）+ 前缀缓存命中 savings（prefill 8K→500 token）+ TTFT/TPOT 估算（3.2s / 40ms）+ 总成本拆分（token×单价×步数）」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）。正文里的数值（0.13MB/token、输出 3-5×、decode 加速 2-3× 等）是**量级参考**（S8 示例模型量级），不是精确承诺——规格把「期望测试值」用预置输入手算后写死，不给会随模型/硬件漂移的精确数。
+**实跑判据（本课，规划态，目录由下游建成）**：本 sprint 先产设计规格（notes/process/model-basics-mvp-spec.md），`model-basics-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd model-basics-demo && npm run demo` 复现「KV cache 显存估算（Mistral-7B 量级 0.13MB/token）+ 前缀缓存命中 savings（prefill 8K→500 token）+ TTFT/TPOT 估算（3.2s / 40ms）+ 总成本拆分（token×单价×步数）」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）。正文里的数值（0.13MB/token、输出 3-5×、decode 加速 2-3× 等）是**量级参考**（S8 示例模型量级），不是精确承诺——规格把「期望测试值」用预置输入手算后写死，不给会随模型/硬件漂移的精确数。
 
 ---
 

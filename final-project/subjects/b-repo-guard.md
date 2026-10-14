@@ -1,6 +1,6 @@
 # 命题 B · repo-guard（仓库巡检门禁）
 
-> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/capstone-final.md` §3 命题 B。
+> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/process/capstone-final.md` §3 命题 B。
 
 一句话：做一个读代码变更、跑检查、写报告、并给出放行/拦截结论的巡检 agent，带沙箱边界、golden 评测、可观测。
 

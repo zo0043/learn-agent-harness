@@ -1,6 +1,6 @@
 # M3 · durable-api-obs 里程碑动手练习设计（capstone-m3-exercise）
 
-> 主线 `my-agent` 的第四个动手点：在 M2（四通道/沙箱/MCP/评测）上**真·增建** durable execution（崩溃恢复）+ SSE 流式 + 重试分类/prompt caching + 多模型路由/成本归因 + OTel trace/span。本设计严格套用 `notes/capstone-blueprint.md`（§3 M3 行 / §4）+ `notes/capstone-style-guide.md` + M0/M1/M2 三份 exercise 的模式；不重新设计 milestone 划分（captain 已定 M3=P2 可恢复+流式路由+可观测）。
+> 主线 `my-agent` 的第四个动手点：在 M2（四通道/沙箱/MCP/评测）上**真·增建** durable execution（崩溃恢复）+ SSE 流式 + 重试分类/prompt caching + 多模型路由/成本归因 + OTel trace/span。本设计严格套用 `notes/process/capstone-blueprint.md`（§3 M3 行 / §4）+ `notes/process/capstone-style-guide.md` + M0/M1/M2 三份 exercise 的模式；不重新设计 milestone 划分（captain 已定 M3=P2 可恢复+流式路由+可观测）。
 > 对应必修课 = `durable-execution`（journal 双锚点 / checkpoint 原子写 / 幂等键）+ `api-engineering`（SSE / 重试分类 / prompt caching / 路由 / 成本）+ `observability`（OTel trace/span + 成本归因）；参考答案 demo = `durable-execution-demo` / `api-demo` / `harness-demo demo:otel`。
 
 ## 1. M3 要交付什么（一句话 + 验收形态）

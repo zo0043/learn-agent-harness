@@ -1,6 +1,6 @@
 # 命题 A · research-assistant（个人研究助理）
 
-> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/capstone-final.md` §3 命题 A。
+> 完整命题 / 判据锚点 / 白盒要素侧重见 `notes/process/capstone-final.md` §3 命题 A。
 
 一句话：做一个能处理「查资料 → 记笔记 → 定时提醒」三类任务、带权限门、能对 golden set 自评、崩溃可恢复的个人助理 agent。
 

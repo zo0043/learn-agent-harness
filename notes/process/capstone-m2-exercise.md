@@ -1,6 +1,6 @@
 # M2 · sandbox-mcp-eval 里程碑动手练习设计（capstone-m2-exercise）
 
-> 主线 `my-agent` 的第三个动手点：在 M1（多工具/会话/压缩/权限门）上**真·增建**四通道权限门 + 沙箱第三通道 + MCP 远程工具（供应链四层防御）+ 评测套件。本设计严格套用 `notes/capstone-blueprint.md`（§3 M2 行 / §4）+ `notes/capstone-style-guide.md` + M0/M1 两份 exercise 的模式；不重新设计 milestone 划分（captain 已定 M2=P1 沙箱+MCP+评测）。
+> 主线 `my-agent` 的第三个动手点：在 M1（多工具/会话/压缩/权限门）上**真·增建**四通道权限门 + 沙箱第三通道 + MCP 远程工具（供应链四层防御）+ 评测套件。本设计严格套用 `notes/process/capstone-blueprint.md`（§3 M2 行 / §4）+ `notes/process/capstone-style-guide.md` + M0/M1 两份 exercise 的模式；不重新设计 milestone 划分（captain 已定 M2=P1 沙箱+MCP+评测）。
 > 对应必修课 = `sandbox`（四通道 policy）+ `mcp`（MCP 原语 / 供应链四层防御）+ `evaluation`（judge / golden set / CI 门禁）+ `multi-agent`（写单线程约束的意识）；参考答案 demo = `sandbox-demo` / `mcp-demo` / `rag-demo demo:eval`。
 
 ## 1. M2 要交付什么（一句话 + 验收形态）

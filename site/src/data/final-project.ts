@@ -1,6 +1,6 @@
 // ============================================================
 // final-project.ts —— 毕业项目（生成层收口）站点数据源
-//   与 notes/capstone-final.md 逐字一致（单一真源；learn.astro 只读它渲染，不另造文案）。
+//   与 notes/process/capstone-final.md 逐字一致（单一真源；learn.astro 只读它渲染，不另造文案）。
 // ============================================================
 
 /** 生成层纪律（一句话，capstone-final.md §2） */
@@ -60,7 +60,7 @@ export const FINAL_SELF_CHECK = [
   '再补断言：把手工输入固化成确定性断言（B1–B5），连跑两次 diff 空。',
 ];
 
-/** 判据运行入口（capstone-final-structure.md §3.2） */
+/** 判据运行入口（notes/process/capstone-final-structure.md §3.2） */
 export const FINAL_GRADE_CMD = 'node grade.mjs <成品目录>';
 
 /** 毕业判据一句话收口（capstone-final.md §6） */
