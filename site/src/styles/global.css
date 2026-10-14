@@ -1732,7 +1732,7 @@ a.pipe-step:hover {
   display: block;
 }
 
-/* ≤720px：七个导航项收进浮层，主题/搜索留在同行 */
+/* ≤720px：八个导航项收进浮层，主题/搜索留在同行 */
 @media (max-width: 720px) {
   .brand {
     margin-right: auto; /* 导航绝对定位后接管右侧推力，brand 自己推 */

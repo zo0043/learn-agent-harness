@@ -72,14 +72,14 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     capstoneHook: '全域 · 背景地图（序章）',
     stage: 'P0',
     domain: 'LLM 时间线',
-    title: 'LLM 发展史与演进（序章·横向）',
-    intro: 'LLM 发展史与演进横向导航页正文：2017 Transformer → 2025 DeepSeek-R1 的 10 个关键节点，带权威出处',
+    title: 'LLM 时间线（agent 开发者视角·序章横向）',
+    intro: 'agent 开发者视角时间线正文：2023 GPT-4 → 2026 的 12 个关键节点（function calling / MCP / 推理代际等必记里程碑），带出处',
     prereqs: [],
     next: ['harness-from-scratch'],
     mvpSlug: 'llm-history',
-    teachingFocus: '历史脉络 / 架构代际 / 事实出处（序章背景地图，非动手课）',
+    teachingFocus: 'agent 里程碑 / 能力代际 / 面试谈资（序章背景地图，非动手课）',
     practicalOutput:
-      '交付 llm-history 横向数据资产：10 节点带出处时间线 + 5 代演进。判定「跑得起来」= npm run build 后 /nav 渲染出 10 节点、5 代、17 课卡；无独立代码，是全站「背景 → 主线」衔接起点',
+      '交付 agent 视角 12 节点时间线正文（notes/llm-timeline.md）。判定「跑得起来」= npm run build 后 /c/llm-timeline 渲染出 12 节点表；横向资产另见 mvpSlug=llm-history（/nav 发展史 10 节点 + 5 代演进，与本文互补：模型史 vs agent 史）',
     prerequisiteNote: '0 经验可读：会看网页即可，无代码/数学门槛',
     isHorizontal: true,
   },
@@ -97,7 +97,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 harness-mvp（独占）：最小 agent loop（权限门/崩溃恢复/压缩，5 种运行模式）。判定 clone 能跑 = cd harness-demo && npx tsx src/test-compact.ts 复现压缩 1378→426 tokens；它是主干第一块砖，agent-harness/sandbox/durable-execution/multi-agent 复用/扩展这份代码',
     prerequisiteNote:
-      '0 经验可入手：会跑终端命令、能用 pip 装包即可，不要求懂模型原理（懂函数/异常/文件 IO 更好）',
+      '0 经验可入手：会 Python 基础（函数/异常/文件 IO）＋ 跑终端命令即可，不要求懂模型原理（demo 用 npm/tsx，白板版纯标准库）',
     isHorizontal: false,
   },
   {
@@ -129,7 +129,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     teachingFocus: 'chunking / 检索打分排序 / RRF 融合 / 强制引用与拒答',
     practicalOutput:
       '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（132 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
-    prerequisiteNote: '0 经验可入手：会读写文件即可，无需语义模型/向量库（「检索=打分排序」直觉随课建立）',
+    prerequisiteNote: '已能跑通 harness-demo（上一课带入最小 loop 与工具协议直觉）；只需会读写文件、无需语义模型/向量库——「检索=打分排序」直觉随课建立',
     isHorizontal: false,
   },
   {

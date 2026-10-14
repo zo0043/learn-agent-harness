@@ -28,6 +28,12 @@ export interface CourseMeta {
   slug: string;
   /** 知识域名 */
   domain: string;
+  /**
+   * legacy 旧三档阶段标记：P0/P1/P2 已无读写方（唯一读方 DomainMap.astro 已迁到
+   * course-structure.ts 五档 stage，t36）。当前仅 '—' 仍有语义——标记横向资产
+   * （llm-timeline / industry-2026），被 DOMAIN_COUNT 过滤与 c/[slug].astro 兜底 chip
+   * 消费。阶段口径唯一源 = course-structure.ts stage，勿据此字段呈现阶段定位。
+   */
   phase: 'P0' | 'P1' | 'P2' | '—';
   status: '✅ 完成' | '🔄 进行中' | '🔄 讲义已展开' | '⏳ 规划中';
   /** 一句话导读（占位，可改） */
@@ -272,7 +278,7 @@ export const DOMAIN_COUNT = new Set(
 /** 可运行 demo 作品口径：有 `npm run demo` 的目录数 = 6（whiteboard / viz / site 为配套资产，不计入）。 */
 export const WORK_COUNT = 6;
 
-/** （收口，t18 终审）旧三档「PHASE_COUNTS」已删除：无消费方（grep 全 src 仅定义处），五阶段计数单一真源在 course-structure.ts 的 STAGE_COUNTS。courses.ts 的 `phase` 字段仍被消费、暂保留：① DomainMap.astro（三档 legacy 分组 P0/P1/P2）② c/[slug].astro:61（`meta.phase === '—'` 兜底 chip）③ 本文件 DOMAIN_COUNT 过滤（`c.phase !== HORIZONTAL_PHASE`）。DomainMap 三档→五档迁移属 UI 待办（见 notes/site-refactor-plan.md §13），不在本 sprint 收口范围。 */
+/** （收口，t36）旧三档「PHASE_COUNTS」已删除（t18）；五阶段计数单一真源在 course-structure.ts 的 STAGE_COUNTS。courses.ts 的 `phase` 字段已降为 legacy：P0/P1/P2 无读方（DomainMap.astro 已迁五档 stage，t36），仅 '—' 仍被两处消费——① DOMAIN_COUNT 过滤（下文 `c.phase !== HORIZONTAL_PHASE`）② c/[slug].astro:61 兜底 chip（`meta.phase === '—'` → '未分阶段'）。阶段定位一律以 course-structure.ts `stage` 为准，勿再依据 phase 呈现三档。 */
 
 /** 按状态分组的课程卡数（从 learn.astro 原有逻辑抽出共享）。 */
 export const STATUS_COUNTS = {
