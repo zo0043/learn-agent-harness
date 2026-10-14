@@ -7,6 +7,7 @@ import {
   STAGES,
   STAGE_LABELS,
   STAGE_COUNTS,
+  STAGE_DESC,
 } from '../data/course-structure';
 import { courseMeta } from '../data/courses';
 import { mvpBySlug } from '../data/mvps';
@@ -27,15 +28,7 @@ const base = import.meta.env.BASE_URL;
 const entries = await getCollection('courses');
 const slugSet = new Set(entries.map((e) => e.id));
 
-// 阶段目标说明（§1 五阶段定位；页面级呈现，真源在 course-structure.ts 的 STAGE_LABELS / STAGE_COUNTS）。
-const STAGE_DESC: Record<string, string> = {
-  P0: '0 经验可入手 · 从零写 harness 起步（序章 + 动手）',
-  P1: '工具调用 / 供应链安全 / 评测 / 多智能体编排',
-  P2: '长任务不丢不重 / 多模型路由 / 可观测',
-  P3: '长期记忆 / 数据飞轮 / 模型基础',
-  P4: '框架生态收口 + 行业前线调研',
-};
-
+// 阶段目标说明：单一真源在 course-structure.ts 的 STAGE_DESC（首页与本页共用，避免两份漂移）。
 const bySlug = new Map(COURSE_STRUCTURE.map((c) => [c.slug, c]));
 
 /** 课程卡联合视图：结构（stage/prereqs/next/mvpSlug/教学字段，course-structure.ts）
@@ -71,16 +64,27 @@ const STATUS_FILTERS = (() => {
 <Base title="学习路线">
   <h1 class="page-title">学习路线</h1>
   <p class="page-lead">
-    P0–P4 五阶段 × <strong>{COURSE_STRUCTURE.length} 门课</strong>（线性阅读序，
-    <code>src/data/course-structure.ts</code> 驱动）；✅ 完成 {doneCount} / 🔄 进行中 {doingCount} / ⏳ 规划 {plannedCount}。
-    每课带<strong>前置知识</strong> + <strong>独占 MVP</strong>（三态如实标注），点开进课程页。
+    P0–P4 五阶段 × <strong>{COURSE_STRUCTURE.length} 门课</strong>，线性阅读序，每课带
+    <strong>前置知识</strong> + <strong>独占参考样本</strong>，点开进课程页。
   </p>
-  <p class="page-lead">
-    <span class="lf-count-note">
-      阶段计数：P0×{STAGE_COUNTS.P0} / P1×{STAGE_COUNTS.P1} / P2×{STAGE_COUNTS.P2} / P3×{STAGE_COUNTS.P3} / P4×{STAGE_COUNTS.P4}；
-      <code>whiteboard</code> 白板卡是「从零写 harness」的配套资产（链向 /works/#whiteboard），不计入课程页。
-      五阶段总览与 LLM 横向知识导航见 <a href={base + "nav/"}>学习导航 →</a>
-    </span>
+
+  <!-- ── 路线概览：五阶段一眼可见（可点跳该段）─────────────────
+       读者来 /learn/ 的第一诉求是「这条路由哪几段组成、从哪开始」，
+       故把路线形状提到最前；术语与计数口径降为页尾脚注（见页面末「口径说明」）。 -->
+  <nav class="stage-overview" aria-label="五阶段概览">
+    {
+      STAGES.map((stage) => (
+        <a class="so-item" href={`#stage-${stage}`}>
+          <span class="so-stage">{stage}</span>
+          <span class="so-label">{STAGE_LABELS[stage]}</span>
+          <span class="so-count">{STAGE_COUNTS[stage]} 门</span>
+        </a>
+      ))
+    }
+  </nav>
+
+  <p class="stage-progress">
+    ✅ 完成 {doneCount} · 🔄 进行中 {doingCount} · ⏳ 规划 {plannedCount}
   </p>
 
   <!-- ── 筛选（渐进增强）──────────────────────────────────
@@ -106,7 +110,7 @@ const STATUS_FILTERS = (() => {
 
   {
     STAGES.map((stage) => (
-      <section class="phase-section" data-lf-section data-stage={stage}>
+      <section class="phase-section" id={`stage-${stage}`} data-lf-section data-stage={stage}>
         <div class="phase-head">
           <h2>{stage} · {STAGE_LABELS[stage]}</h2>
           <span class="phase-desc">{STAGE_DESC[stage]} · {STAGE_COUNTS[stage]} 门课</span>
@@ -187,8 +191,9 @@ const STATUS_FILTERS = (() => {
   </section>
 
   <!-- ── 增量主线（capstone：你要搭的 / 17 demo 是参考样本）──────────────
-       静态 HTML 无 JS 也全可见；milestone 卡由 capstone.ts（照 capstone-blueprint §3）驱动。 -->
-  <section class="phase-section" data-capstone>
+       静态 HTML 无 JS 也全可见；milestone 卡由 capstone.ts（照 capstone-blueprint §3）驱动。
+       id="capstone" 是首页「看主线蓝图」的跳转锚点（此前只有 data-capstone，锚点静默失效）。 -->
+  <section class="phase-section" id="capstone" data-capstone>
     <div class="phase-head">
       <h2>增量主线 · capstone（你要搭的）</h2>
       <span class="phase-desc">my-agent：从零增建一个完整 agent——5 个 milestone 对应 P0–P4，后段复用你亲手写的代码；17 个 demo 不是终点作品，而是每个 milestone 的参考答案（参考样本）</span>
@@ -256,6 +261,28 @@ const STATUS_FILTERS = (() => {
         <p class="cp-closing">收口：{FINAL_CLOSING}</p>
       </div>
     </div>
+  <!-- ── 口径说明（原先挤在页首的两段术语，降为页尾脚注）────────── -->
+  <section class="phase-section">
+    <div class="phase-head">
+      <h2>口径说明</h2>
+      <span class="phase-desc">计数与命名口径，便于核对</span>
+    </div>
+    <div class="card card-block">
+      <p class="lw-count-note">
+        <strong>阶段计数</strong>：P0×{STAGE_COUNTS.P0} / P1×{STAGE_COUNTS.P1} / P2×{STAGE_COUNTS.P2} /
+        P3×{STAGE_COUNTS.P3} / P4×{STAGE_COUNTS.P4}（合计 {COURSE_STRUCTURE.length} 门，单一真源
+        <code>src/data/course-structure.ts</code>）。
+      </p>
+      <p class="lw-count-note">
+        <strong>参考样本</strong>：每门课声明一个 <code>mvpSlug</code>，指向可 clone 运行的样本（三态如实标注：
+        完成 / 规划中 / 横向资产）。<code>whiteboard</code> 白板卡是「从零写 harness」的配套资产
+        （链向 <a href={base + 'works/#whiteboard'}>作品页白板版</a>），不计入课程页。
+      </p>
+      <p class="lw-count-note">
+        <strong>横向知识</strong>：LLM 发展史与演进、行业调研等不挂在任一阶段上，见
+        <a href={base + 'nav/'}>学习导航</a> 与 <a href={base + 'map/'}>知识地图</a>。
+      </p>
+    </div>
   </section>
 </Base>
 
@@ -312,6 +339,53 @@ const STATUS_FILTERS = (() => {
 <style>
   /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。 */
   .lf-count-note { color: var(--text-soft); font-size: 0.94rem; }
+
+  /* 路线概览条：五阶段一眼可见，可点跳到该段（阶段段的 id 由下方生成） */
+  .stage-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 18px 0 0;
+  }
+  .so-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+  }
+  .so-item:hover {
+    border-color: var(--accent);
+  }
+  .so-stage {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.05rem;
+  }
+  .so-label {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .so-count {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+  }
+  .stage-progress {
+    margin: 12px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-soft);
+  }
+  .lw-count-note {
+    margin: 0 0 8px;
+    font-size: 0.88rem;
+    color: var(--text-soft);
+  }
+  .lw-count-note:last-child { margin-bottom: 0; }
 
   /* 标题：与域名不同的课程显示教学标题（域名即标题时不再重复一行） */
   .lw-title { margin: 0; font-weight: 600; font-size: 0.92rem; }

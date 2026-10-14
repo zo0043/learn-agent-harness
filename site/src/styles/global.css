@@ -751,6 +751,10 @@ div.mermaid.mermaid-error {
 .phase-section {
   margin-top: 34px;
 }
+/* 阶段段可被锚点跳转（如首页 → /learn/#capstone）：与 h2/h3 同口径，不被 sticky 顶栏盖住。 */
+.phase-section[id] {
+  scroll-margin-top: calc(var(--header-offset) + 8px);
+}
 .phase-head {
   display: flex;
   align-items: baseline;

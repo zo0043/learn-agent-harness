@@ -29,6 +29,18 @@ export const STAGE_LABELS: Record<Stage, string> = {
   P4: '收口与前沿',
 };
 
+/**
+ * 阶段目标一句话（单一真源）。
+ * /learn/ 与首页共用——此前硬编码在 learn.astro，首页要用时若各写一份即为重复真源。
+ */
+export const STAGE_DESC: Record<Stage, string> = {
+  P0: '0 经验可入手 · 从零写 harness 起步（序章 + 动手）',
+  P1: '工具调用 / 供应链安全 / 评测 / 多智能体编排',
+  P2: '长任务不丢不重 / 多模型路由 / 可观测',
+  P3: '长期记忆 / 数据飞轮 / 模型基础',
+  P4: '框架生态收口 + 行业前线调研',
+};
+
 export interface Course {
   /** 课程页 slug（与 courses.ts / notes 同名） */
   slug: string;

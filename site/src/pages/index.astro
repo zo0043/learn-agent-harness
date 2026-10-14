@@ -1,9 +1,29 @@
 ---
+/**
+ * 首页信息架构（第一性原理重排，2026-10-14）：
+ *
+ * 旧版把首页当作「学习成果陈列柜」——先铺 6 个作品、3 起事故，读者要翻到页尾
+ * 才知道这是个 17 课的五阶段体系。新版按「读者来干什么」排序：
+ *   ① 这里能学到什么（五阶段路线一屏可见，可点进任一阶段）
+ *   ② 怎么学（增量主线：自己搭 vs 参考答案）
+ *   ③ 学完能干什么（作品/题库/详解 = 横向纵深）
+ *   ④ 数据（进度总览，降到页尾）
+ * 作品与事故不再是主角，而是「路线走完后的纵深材料」。
+ */
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import { COURSE_COUNT, DOMAIN_COUNT, WORK_COUNT } from '../data/courses';
+import {
+  COURSE_STRUCTURE,
+  STAGES,
+  STAGE_LABELS,
+  STAGE_COUNTS,
+  STAGE_DESC,
+} from '../data/course-structure';
+import { MILESTONES } from '../data/capstone';
 import { parseRagStats } from '../utils/ragStats';
 
+const base = import.meta.env.BASE_URL;
 const repo = 'https://github.com/zo0043/learn-agent-harness';
 
 // rag-demo 评测数字构建期从 notes/rag.md §13 解析（唯一真源），解析失败即构建失败、不静默回退。
@@ -13,164 +33,224 @@ const rag = parseRagStats(ragEntry?.body ?? '');
 // 题目计数口径见 notes/knowledge-map.md 头部「计数口径」块（课内嵌 205 + 面试题库精选 37）。
 const Q_IN_LESSON = 205;
 const Q_BANK = 37;
+
+/** 各阶段首课（读者点进就能立刻开始，不用先回 /learn/ 找）。 */
+const bySlug = new Map(COURSE_STRUCTURE.map((c) => [c.slug, c]));
+const stageFirst = (stage: string) => COURSE_STRUCTURE.find((c) => c.stage === stage);
+const stageCourses = (stage: string) => COURSE_STRUCTURE.filter((c) => c.stage === stage);
+
+const mDone = MILESTONES.filter((m) => m.status === 'done').length;
 ---
 
 <Base>
+  <!-- ① 定位 + 路线一屏可见 ─────────────────────────────────── -->
   <section class="hero">
-    <p class="hero-kicker">coding agent 工程师方向 · 公开学习过程 · 面试备考</p>
-    <h1>learn-agent-harness</h1>
+    <p class="hero-kicker">coding agent 工程师 · 五阶段课程体系 · 每课带可运行参考样本</p>
+    <h1>从 0 到能写 agent 工具</h1>
     <p class="hero-sub">
-      备考 <strong>coding agent 工程师</strong>的公开学习记录：<strong>{COURSE_COUNT} 课 × {DOMAIN_COUNT} 知识域</strong>、
-      课内嵌 {Q_IN_LESSON} 题 + 面试题库精选 {Q_BANK} 题、<strong>{WORK_COUNT} 个可运行作品</strong>（sandbox-demo / mcp-demo / durable-execution-demo 全离线零 key，
-      事故重放与 SIGKILL 崩溃恢复均逐字节可复现）——每节课的设计判断都<strong>长自真实事故</strong>，不是教程。
+      <strong>{COURSE_COUNT} 课 · 五个阶段 · {DOMAIN_COUNT} 个知识域</strong>，每门课都带
+      <strong>可运行的参考样本</strong>（clone 下来就能跑，全离线零 key）。课程之外还有一条
+      <strong>增量主线</strong>：跟着 {MILESTONES.length} 个里程碑，亲手搭出你自己的 agent 工具——
+      每个里程碑的参考答案，就是前面那门课的 demo。
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href={import.meta.env.BASE_URL + "nav/"}>学习导航</a>
-      <a class="btn" href={import.meta.env.BASE_URL + "learn/"}>查看学习路线</a>
-      <a class="btn" href={import.meta.env.BASE_URL + "works/"}>看作品详解</a>
+      <a class="btn btn-primary" href={base + 'learn/'}>查看五阶段路线 →</a>
+      <a class="btn" href={base + 'c/harness-from-scratch/'}>从第一课开始</a>
       <a class="btn" href={repo} target="_blank" rel="noopener">GitHub 仓库 ↗</a>
     </div>
   </section>
 
-  <!-- ── 作品（6 个可运行 demo）───────────────────────── -->
-  <section>
-    <h2 class="page-title">六个作品</h2>
-    <div class="cards">
-      <a class="card" href={import.meta.env.BASE_URL + "works/#harness-demo"}>
-        <h3>harness-demo</h3>
-        <p><span class="chip chip-strong">从零写 harness</span></p>
-        <p>
-          从零手写最小 agent harness：10 个 src 文件（9 运行时 + 1 压缩自测）↔ ①-⑩ 十节——loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/
-          JSONL 轨迹 + 崩溃恢复 / token 压缩；5 种 demo 模式实测 + OTel 埋点（11 spans/1 trace）。
-          白板面试版：<code>whiteboard/</code>（~180 行纯标准库，1:1 对应）。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>错误恢复才是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，harness 的契约是 policy → intent → execute → result（结果必回写，拒绝也是结果）</p>
-      </a>
-      <a class="card" href={import.meta.env.BASE_URL + "works/#rag-demo"}>
-        <h3>rag-demo</h3>
-        <p><span class="chip chip-strong">RAG 与检索</span></p>
-        <p>
-          零依赖 RAG：chunking → hash embedding → 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用 / 强制拒答生成 →
-          10 题 golden set 评测（{rag.chunks} chunks，recall@3={rag.recall3} / @5={rag.recall5} / @10={rag.recall10}，PASS {rag.pass}）。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>词法检索只走表面形式重叠</strong>——BM25 修了定价，改不掉词法上限；这正是 embedding 路存在的理由</p>
-      </a>
-      <a class="card" href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>
-        <h3>sandbox-demo</h3>
-        <p><span class="chip chip-strong">沙箱与凭据</span></p>
-        <p>
-          TS 迷你沙箱，全离线确定性（不调模型 / 不联网 / 不用墙钟）：四通道 policy 引擎
-          （deny &gt; approve &gt; sandbox &gt; allow，默认 deny）+ 幽灵事故重放——
-          仅权限门组复现事故，四通道 + 沙箱组保住生产；3 次重放逐字节一致。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”，照样炸了生产</p>
-      </a>
-      <a class="card" href={import.meta.env.BASE_URL + "works/#mcp-demo"}>
-        <h3>mcp-demo</h3>
-        <p><span class="chip chip-strong">MCP 与供应链安全</span></p>
-        <p>
-          MCP 供应链投毒演示，全离线（零网络、零 key）：mock server 在 web_search 返回里藏注入 →
-          mock 模型被劫持 → 试图经 send_email 外泄机密；对照组 ❌ 无声得逞，
-          四层防御（消毒 / policy 门 / egress 白名单 / 审计）✅ 拦截，单层消融 + 确定性重放。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——消融证明确定性硬防线在 L2 policy 门 / L3 egress 白名单，互为独立 backstop</p>
-      </a>
-      <a class="card" href={import.meta.env.BASE_URL + "works/#durable-execution-demo"}>
-        <h3>durable-execution-demo</h3>
-        <p><span class="chip chip-strong">durable execution</span></p>
-        <p>
-          journal 双锚点 + checkpoint 原子写 + 幂等存储；3 种崩溃点真实 SIGKILL 自杀重启，
-          恢复按判定表逐步 replay / skip / unknown→confirm——副作用计数恒=1、恢复报告逐字节一致（含负向测试）。全离线。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——未知态先只读问外部，绝不盲放</p>
-      </a>
-      <a class="card" href={import.meta.env.BASE_URL + "works/#framework-demo"}>
-        <h3>framework-demo</h3>
-        <p><span class="chip chip-strong">框架生态</span></p>
-        <p>
-          Claude Agent SDK 四能力跑通：最小 agent / subagent / 权限 deny / session resume，
-          每步断言式输出——“框架给你什么 / 藏什么”的活样本：
-          <code>allowedTools</code> 裸名会抢在 <code>canUseTool</code> 之前 auto-approve。
-        </p>
-        <p class="work-lesson">一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——allowedTools 裸名抢跑 auto-approve（SDK 警告 CLAUDE_SDK_CAN_USE_TOOL_SHADOWED）</p>
-      </a>
-    </div>
-    <p class="works-note">
-      <a href={import.meta.env.BASE_URL + "works/#whiteboard"}>whiteboard/</a>：180 行 Python 面试口述版（见仓库）
-    </p>
-  </section>
-
-  <!-- ── 详解 /details 入口 ──────────────────────────── -->
-  <section>
-    <div class="card card-block details-entry">
-      <h3>为什么资深 agent 工程师不卡在细节上</h3>
-      <p>
-        8 个分水岭细节，每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
-        面试答到机制层时直接用的素材。
+  <!-- 五阶段路线（核心：一屏看清学什么、每段几门课、从哪开始） -->
+  <section class="route-section">
+    <div class="route-head">
+      <h2 class="page-title">五阶段路线</h2>
+      <p class="page-lead">
+        线性阅读序，每课都声明前置；点任一阶段直达该段课程。完整的依赖图见
+        <a href={base + 'map/'}>知识地图 →</a>
       </p>
+    </div>
+    <div class="route-grid">
+      {
+        STAGES.map((stage, i) => {
+          const first = stageFirst(stage);
+          const courses = stageCourses(stage);
+          return (
+            <div class="route-card">
+              <div class="route-top">
+                <span class="route-stage">{stage}</span>
+                <span class="route-label">{STAGE_LABELS[stage]}</span>
+                <span class="route-count">{STAGE_COUNTS[stage]} 门课</span>
+              </div>
+              <p class="route-desc">{STAGE_DESC[stage]}</p>
+              <ul class="route-list">
+                {courses.map((c) => (
+                  <li>
+                    <a href={base + 'c/' + c.slug + '/'}>{bySlug.get(c.slug)?.domain ?? c.slug}</a>
+                  </li>
+                ))}
+              </ul>
+              {first && (
+                <p class="route-start">
+                  <a href={base + 'c/' + first.slug + '/'}>
+                    从{first.isHorizontal ? '这一篇' : '这一课'}开始 →
+                  </a>
+                </p>
+              )}
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- ② 增量主线：怎么学（自己搭 vs 参考答案） -->
+  <section class="route-section">
+    <div class="route-head">
+      <h2 class="page-title">增量主线：亲手搭一个 agent</h2>
+      <p class="page-lead">
+        {MILESTONES.length} 个里程碑对应五个阶段，后段复用你亲手写的前段代码——
+        不是读完 17 个 demo 就结束，而是<strong>你自己写的代码能跑起来</strong>。
+        {mDone === MILESTONES.length
+          ? `当前 ${MILESTONES.length} 个里程碑全部就位，仓库根目录 my-agent/ 可直接 clone。`
+          : `当前 ${mDone}/${MILESTONES.length} 个里程碑就位。`}
+      </p>
+    </div>
+    <ol class="ms-track">
+      {
+        MILESTONES.map((m) => (
+          <li class="ms-item" data-milestone={m.key}>
+            <span class="ms-name">{m.name}</span>
+            <span class="chip">{m.stage}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="route-more">
+      <a class="btn btn-primary" href={base + 'learn/#capstone'}>看主线蓝图与过关判据 →</a>
+    </p>
+  </section>
+
+  <!-- ③ 纵深材料：作品 / 题库 / 详解（路线之外，按需取用） -->
+  <section class="route-section">
+    <div class="route-head">
+      <h2 class="page-title">课程之外的三类纵深</h2>
+      <p class="page-lead">
+        路线走完后按需取用——作品是参考样本的完整形态，题库是检验，详解是资深判断。
+      </p>
+    </div>
+
+    <!-- 3a. 作品：与课程一一对应的参考样本 -->
+    <div class="depth-block">
+      <div class="depth-head">
+        <h3>{WORK_COUNT} 个可运行作品</h3>
+        <p>
+          每个作品对应一门课，clone 下来即可跑（全离线零 key、逐字节可复现）。
+          完整详解见 <a href={base + 'works/'}>作品页 →</a>
+        </p>
+      </div>
+      <div class="cards">
+        <a class="card depth-card" href={base + 'works/#harness-demo'}>
+          <h4>harness-demo</h4>
+          <p><span class="chip chip-strong">从零写 harness</span></p>
+          <p>
+            最小 agent harness：loop / 工具协议 / SSE 流式 / 权限门（默认 deny）/
+            JSONL 轨迹 + 崩溃恢复 / token 压缩（1378→426 tok）。
+          </p>
+        </a>
+        <a class="card depth-card" href={base + 'works/#rag-demo'}>
+          <h4>rag-demo</h4>
+          <p><span class="chip chip-strong">RAG 与检索</span></p>
+          <p>
+            零依赖 RAG：chunking → hash embedding → 暴力余弦 ∥ BM25 → RRF 融合 → 强制引用 →
+            golden set 评测（{rag.chunks} chunks，recall@3={rag.recall3}，PASS {rag.pass}）。
+          </p>
+        </a>
+        <a class="card depth-card" href={base + 'works/#sandbox-demo'}>
+          <h4>sandbox-demo</h4>
+          <p><span class="chip chip-strong">沙箱与凭据</span></p>
+          <p>
+            四通道 policy 引擎（deny &gt; approve &gt; sandbox &gt; allow）+ 幽灵事故重放，
+            3 次重放逐字节一致。
+          </p>
+        </a>
+        <a class="card depth-card" href={base + 'works/#mcp-demo'}>
+          <h4>mcp-demo</h4>
+          <p><span class="chip chip-strong">MCP 与供应链安全</span></p>
+          <p>MCP 供应链投毒演示：mock server 注入 → 模型被劫持 → 四层防御拦截，单层消融 + 确定性重放。</p>
+        </a>
+        <a class="card depth-card" href={base + 'works/#durable-execution-demo'}>
+          <h4>durable-execution-demo</h4>
+          <p><span class="chip chip-strong">durable execution</span></p>
+          <p>
+            journal 双锚点 + checkpoint 原子写；3 种崩溃点真实 SIGKILL，恢复按判定表 replay / skip /
+            unknown→confirm，副作用计数恒=1。
+          </p>
+        </a>
+        <a class="card depth-card" href={base + 'works/#framework-demo'}>
+          <h4>framework-demo</h4>
+          <p><span class="chip chip-strong">框架生态</span></p>
+          <p>Claude Agent SDK 四能力跑通：「框架给你什么 / 藏什么」的活样本。</p>
+        </a>
+      </div>
+      <p class="depth-foot">
+        <a href={base + 'works/#whiteboard'}>whiteboard/</a>：180 行 Python 面试口述版 · 全部作品见
+        <a href={base + 'works/'}>作品页 →</a>
+      </p>
+    </div>
+
+    <!-- 3b. 题库 -->
+    <div class="depth-block">
+      <div class="depth-head">
+        <h3>题库：{Q_IN_LESSON} 题课内嵌 + {Q_BANK} 题精选</h3>
+        <p>课内嵌练习题随课出现；面试题库精选按知识域组织，可当模拟考卷用。</p>
+      </div>
+      <p class="route-more">
+        <a class="btn" href={base + 'interview/'}>进题库 →</a>
+      </p>
+    </div>
+
+    <!-- 3c. 详解 -->
+    <div class="depth-block">
+      <div class="depth-head">
+        <h3>详解：8 个资深分水岭</h3>
+        <p>
+          每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
+          面试答到机制层时直接用的素材。
+        </p>
+      </div>
       <div class="details-entry-links">
-        <a href={import.meta.env.BASE_URL + "details/01-context-rot/"}>context rot：窗口大不等于能全塞</a>
-        <a href={import.meta.env.BASE_URL + "details/02-tool-granularity/"}>工具粒度：工具定义就是契约</a>
-        <a href={import.meta.env.BASE_URL + "details/07-harness-rot/"}>harness 假设会腐烂：为尚不存在的模型写稳定接口</a>
+        <a href={base + 'details/01-context-rot/'}>context rot：窗口大不等于能全塞</a>
+        <a href={base + 'details/02-tool-granularity/'}>工具粒度：工具定义就是契约</a>
+        <a href={base + 'details/07-harness-rot/'}>harness 假设会腐烂：为尚不存在的模型写稳定接口</a>
       </div>
-      <a class="dc-foot" href={import.meta.env.BASE_URL + "details/"}>查看全部 8 个 →</a>
+      <p class="route-more">
+        <a class="btn" href={base + 'details/'}>查看全部 8 篇 →</a>
+      </p>
     </div>
   </section>
 
-  <!-- ── 事故驱动 ─────────────────────────────────────── -->
-  <section>
-    <h2 class="page-title section-gap">事故驱动</h2>
-    <p class="page-lead">
-      这个仓库的每个设计判断都来自真实事故，而非教程。三起事故、三套机制：
-    </p>
+  <!-- ④ 站内导航（横向知识：时间线 / 知识地图） -->
+  <section class="route-section">
+    <div class="route-head">
+      <h2 class="page-title">横向知识</h2>
+      <p class="page-lead">不挂在任一阶段上，但读课时随时会用到。</p>
+    </div>
     <div class="cards">
-      <div class="card card-block">
-        <h3>幽灵事故 → 四通道沙箱</h3>
+      <a class="card depth-card" href={base + 'nav/'}>
+        <h4>LLM 发展史与演进</h4>
         <p>
-          2026-10-09 18:00，一个并行 agent 会话在错误目录（旧 AINews compose 树）执行
-          <code>docker compose build+up</code>——每一步都合法——18:00:09 生产 worker/api 被幽灵代码替换，
-          18:25 重建恢复（25 分钟）。权限门全程放行，因为缺的不是“工具权限”：compose 是合法工具、命令是合法命令，
-          缺的是<strong>执行环境边界</strong>（哪个 compose 项目 / 目录树 / 命名空间）。
+          {COURSE_STRUCTURE.find((c) => c.slug === 'llm-timeline')?.intro ?? ''}
         </p>
-        <p>
-          长出的机制：权限（意图门）与沙箱（执行环境边界）拆成<strong>两道独立的门</strong>，
-          policy 增加第四通道 sandbox；<a href={import.meta.env.BASE_URL + "works/#sandbox-demo"}>sandbox-demo</a>
-          把事故重建成可重放剧本，3 次重放逐字节一致。
-        </p>
-      </div>
-      <div class="card card-block">
-        <h3>模型列表轮换 → 能力侦察</h3>
-        <p>
-          本地 OpenAI 兼容代理（litellm 网关）的模型列表会随时间变：
-          <code>qwen3.8-flash</code> 下架后 qwen 系只剩 <code>qwen3.8-flash-next</code>（tool calling + SSE 已验证）；
-          <code>step-5-preview</code> 仍在，但直接回“无法调用工具”。
-        </p>
-        <p>
-          长出的机制：跑任务前先 <code>GET /v1/models</code> + tool-calling 冒烟测试——
-          <strong>能力矩阵必须动态侦察</strong>，静态配置必过期；provider 是组件不是基础设施，harness 必须能降级。
-        </p>
-      </div>
-      <div class="card card-block">
-        <h3>代理 400 → 防御性解析</h3>
-        <p>
-          19:33 起代理持续 400（请求被路由到要求旧版 functions 格式的 code 后端），
-          同时工具名带不可见字符，造成 <code>unknown tool: get_weather</code> 假错。
-          同一请求重试 100 次也是 400——契约违约不盲目重试。
-        </p>
-        <p>
-          长出的机制：4xx 读响应体报真实错误、工具名 <code>tc.name.trim()</code>、
-          历史 tool_calls 统一按 OpenAI wire 格式回写（arguments 必须是 JSON 字符串）——
-          <strong>防御性解析是 API 层职责</strong>。
-        </p>
-      </div>
+      </a>
+      <a class="card depth-card" href={base + 'map/'}>
+        <h4>知识地图</h4>
+        <p>按知识域与阶段铺开全部课程，看清课程之间的依赖与被依赖关系。</p>
+      </a>
     </div>
-    <p class="soft-md spaced">
-      完整时间线与修复记录见仓库 <a href={repo + '/notes'} target="_blank" rel="noopener">notes/ ↗</a>
-      （harness-from-scratch §⑨ 代理实录 / sandbox S1 / api-engineering S4）。
-    </p>
   </section>
 
-  <section>
+  <!-- ⑤ 进度总览（降到页尾：想了解规模时才看） -->
+  <section class="route-section">
     <h2 class="page-title">进度总览</h2>
     <div class="stats">
       <div class="stat">
@@ -182,6 +262,10 @@ const Q_BANK = 37;
         <span class="stat-label">知识域</span>
       </div>
       <div class="stat">
+        <span class="stat-num">{WORK_COUNT}</span>
+        <span class="stat-label">可运行作品</span>
+      </div>
+      <div class="stat">
         <span class="stat-num">{Q_IN_LESSON}</span>
         <span class="stat-label">课内嵌练习题</span>
       </div>
@@ -189,15 +273,11 @@ const Q_BANK = 37;
         <span class="stat-num">{Q_BANK}</span>
         <span class="stat-label">面试题库精选</span>
       </div>
-      <div class="stat">
-        <span class="stat-num">{WORK_COUNT}</span>
-        <span class="stat-label">可运行作品</span>
-      </div>
     </div>
     <p class="tight">
-      学习路线：<a href={import.meta.env.BASE_URL + "learn/"}>P0–P4 五阶段 × 17 课线性阅读序 →</a> ·
-      知识依赖：<a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a> ·
-      模拟考卷：<a href={import.meta.env.BASE_URL + "interview/"}>面试题库 →</a>
+      学习路线：<a href={base + 'learn/'}>P0–P4 五阶段 × {COURSE_COUNT} 课线性阅读序 →</a> ·
+      知识依赖：<a href={base + 'map/'}>知识地图 →</a> ·
+      模拟考卷：<a href={base + 'interview/'}>面试题库 →</a>
     </p>
     <p class="snap-note">
       📸 <strong>本站为构建时快照</strong>——内容由 Astro 在构建期从仓库 <code>notes/</code>
@@ -207,9 +287,127 @@ const Q_BANK = 37;
 </Base>
 
 <style>
-  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。 */
-  .section-gap { margin-top: 44px; }
-  .soft-md { color: var(--text-soft); font-size: 0.92rem; }
-  .spaced { margin-top: 14px; }
-  .tight { margin-top: 6px; }
+  /* 首页专属：路线网格与纵深分块（其余复用 global.css 的 .card/.chip/.stats/.btn） */
+  .route-section {
+    margin-top: 42px;
+  }
+  .route-head .page-title {
+    margin-bottom: 6px;
+  }
+
+  /* 五阶段路线：窄屏单列；宽屏固定 5 列一排（5 个阶段正好一行，避免 4+1 落单） */
+  .route-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+  @media (min-width: 640px) {
+    .route-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1000px) {
+    .route-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+  .route-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .route-top {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .route-stage {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.02rem;
+  }
+  .route-label {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .route-count {
+    width: 100%;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+  }
+  .route-desc {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--text-soft);
+  }
+  .route-list {
+    margin: 4px 0 0;
+    padding-left: 16px;
+    font-size: 0.86rem;
+    line-height: 1.65;
+  }
+  .route-start {
+    margin: 4px 0 0;
+    font-size: 0.84rem;
+  }
+
+  /* 主线里程碑轨道：横向序号，窄屏换行 */
+  .ms-track {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ms-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 0.9rem;
+  }
+  .ms-name {
+    font-weight: 600;
+  }
+
+  /* 纵深材料分块 */
+  .depth-block {
+    margin-top: 24px;
+  }
+  .depth-head h3 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+  }
+  .depth-head p {
+    margin: 0 0 12px;
+    color: var(--text-soft);
+    font-size: 0.92rem;
+  }
+  .depth-card h4 {
+    margin: 0;
+    font-size: 1.02rem;
+  }
+  .depth-card p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .depth-foot,
+  .route-more {
+    margin: 12px 0 0;
+    font-size: 0.9rem;
+  }
+  .tight {
+    margin-top: 10px;
+  }
 </style>
