@@ -468,202 +468,35 @@ cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fa
 - **`phase` 字段仍保留（有 3 个消费方，不强行删破坏构建）**：① `DomainMap.astro`（三档 legacy 分组 `PHASE_ORDER=['P0','P1','P2']`）② `c/[slug].astro:61`（`meta.phase === '—'` 兜底 chip）③ `courses.ts` `DOMAIN_COUNT` 过滤（`c.phase !== HORIZONTAL_PHASE`）。
 - **待办（非本 sprint 范围）**：`DomainMap.astro` 三档→五档迁移属 UI 迁移，涉视觉目检，留待后续；迁移完成后 `phase` 字段与 `HORIZONTAL_PHASE` 才可进一步取舍。
 
-### 13.5 遗留事项（sprint 4）与留 CI / 浏览器目检
+### 13.5 遗留事项与留 CI / 浏览器目检
 
-- **留 CI 复验 34 页 HTML + 浏览器目检**：本沙箱 HTML 渲染卡死，须在内存充足 / `capped` 可用环境跑全量 `bash build.sh`（含 pagefind），确认 `dist/` 34 页、`/nav`、`/learn`、各 `/c/<slug>/` 成品 HTML、页面无 `undefined` 残留——不得以 HTTP 200 或编译产物冒充页面正确（同 §11.4 / §12.4）。
-- **P0 正文终稿统一复审**：P0 五课 sprint 1 已深度填充，但「正文终稿」复审未再动，留 sprint 4。
-- **DomainMap.astro 三档→五档迁移 + `phase`/`HORIZONTAL_PHASE` 后续取舍**（见 §13.4 待办）。
-- **courses.ts 其余派生口径**（`STATUS_COUNTS` / `PHASE_*` 相关残留）：本任务只收口 `PHASE_COUNTS`，未越界动其他导出；若后续有迁移，一并评估。
+> 状态划改（2026-10-14）：本清单原写「留 sprint 4」，但 sprint 4–6 均已落地并提交（见 §14）。
+> 下列各项已按其**实际当下状态**就地更正，不再保留「待 sprint 4」的旧措辞。
 
-## §14 sprint 4 验收与终审（t23）
+- **留 CI 复验全页 HTML + 浏览器目检**：本机 HTML 渲染阶段易卡死/超时（2 vCPU / 3.4G），须在内存充足或 CI 环境跑全量 `bash build.sh`（含 pagefind）复验 `dist/` 全页成品与 `/nav`、`/learn`、各 `/c/<slug>/` 无 `undefined` 残留——不得以 HTTP 200 或编译产物冒充页面正确（同 §11.4 / §12.4）。**仍跟踪**，已并入 §14 遗留清单。
+- **P0 正文终稿统一复审**：**仍未完成**——P0 五课正文深度已填充，但「正文终稿」复审自 sprint 1 后未再动。**仍跟踪**，已并入 §14 遗留清单。
+- ~~**DomainMap.astro 三档→五档迁移 + `phase`/`HORIZONTAL_PHASE` 后续取舍**~~ **已完成（sprint 4 / t36）**：DomainMap.astro 已迁五档 `stage`，`courses.ts` 的 `phase` 字段降为 legacy（仅 `'—'` 仍被 DOMAIN_COUNT 过滤与 `c/[slug].astro` 兜底 chip 消费）。详见 `courses.ts:281` 注释。
+- **courses.ts 其余派生口径**（`STATUS_COUNTS` / `PHASE_*` 残留）：`PHASE_COUNTS` 已删除（t18）；其余导出未动，**仍跟踪**。
 
-> 本节把 sprint 4（增量主线蓝图 + M0 范例 + 站点呈现）的改动清单 + 一致性终验 + M0 两态实跑证据 + 构建证据 + 遗留落成可复验记录。
 
-### 14.1 改动文件清单（t19–t22，sprint 4 四任务）
+## §14 后续 sprint 收口（sprint 4–6 已完成，过程记录已精简）
 
-| 任务 | 改动 |
-|---|---|
-| t19 主线蓝图与施工规范 | `notes/capstone-blueprint.md` + `notes/capstone-style-guide.md` + `notes/capstone-site-render-checklist.md`（新·3 份设计文档）；`site/src/data/courses.ts`（EXCLUDED 7→10） |
-| t20 M0 练习设计 | `notes/capstone-m0-exercise.md` + `notes/capstone-m0-structure.md`（新·2 份）；`site/src/data/courses.ts`（EXCLUDED 10→12） |
-| t21 M0 代码骨架 | `my-agent/` 13 文件新建（package.json/tsconfig/README/assert/m0.assert.ts/exercises/m0/{starter,solution}/{types,model,tools,loop}.ts）；按任务未动 mvps.ts / course-structure.ts |
-| t22 站点呈现主线 | `site/src/data/capstone.ts`（新）；`site/src/pages/learn.astro` + `site/src/pages/c/[slug].astro` + `site/src/data/course-structure.ts`（新增 `capstoneHook?` 字段，17 课填实） |
+> 原 §14 / §15 / §16 为 sprint 4–6 的逐项验收流水账（改动清单、两态实跑证据、构建日志、留 CI 目检项），
+> 全部任务已落地并提交（`git log`：`cc1b906` 五阶段课程体系 + 增量主线 M0–M4、`my-agent` 主线、`final-project` 毕业项目）。
+> 本节只保留**仍有后续价值**的结论与遗留清单；过程记录不再保留，如需回溯请查 git 历史。
 
-### 14.2 主线蓝图要点（capstone）
+### 收口结论（四段式演进已完成）
 
-- 主线项目 `my-agent`：学员从零逐步增建、最终 = 多工具/多轮/带权限沙箱/可观测/可评测/可恢复/有记忆的完整工具；TS + tsx 全离线零 key 确定性。
-- 5 milestone（M0–M4）对应 P0–P4：M0 最小 loop（P0）；M1 多工具+会话+压缩（P0）；M2 沙箱+MCP+评测（P1）；M3 durable+路由+可观测（P2）；M4 记忆+飞轮+模型意识（P3+P4，跨两阶段）。
-- 17 独立 demo 降格为「参考样本（reference）」，主线是「你要搭的（your build）」，只做定位转换不改 demo 正确性 / mvps.ts 三态 / 五阶段结构 / 17 课正文。
-- 练习闭环：`m<N>/starter`（半成品挖 TODO，`TODOError('m<N>.<k>')` 占位）→ 补全 → `m<N>/solution`（参考答案）；断言三态「确定性 / 可机器核对 / 可重放」+ 半成品三分（starter 红→补全绿→solution 绿）；真增建证据 = `m<N>/solution` == `m<N+1>/starter` 字节一致 + `git tag m0..m4` 渐进快照。
+1. **拼凑记录 → 五阶段教学体系**：17 课线性五档（P0–P4）+ LLM 发展史横向导航页；每课前置知识 / 独占 MVP，13 MVP = 11 done / 2 asset。
+2. **+ 增量主线 M0–M4**：`my-agent` 五 milestone 真·增建（`m<N>/starter` = `m<N-1>/solution` 剪除后冻结），补全层三态「starter 红 / 补全绿 / solution 绿」，`npm run assert:m0..m4:solution` 串链全绿。
+3. **+ 生成层毕业项目**：开放命题（research-assistant / repo-guard / signal-arbiter）+ 黑盒 B1–B5 / 白盒 W1–W7 判据 + 自测三步；**不给 starter / TODO / 参考答案**，学员从空目录起步。
+4. **收口形态**：`毕业判据 = 成品能跑 + 黑盒断言过(B1–B5) + 白盒要素齐(W1–W7)`——「你搭出的这个，与 M4 的 `my-agent` 同级，且是你从空目录、从模糊需求、独立设计出来的」。
 
-### 14.3 M0 范例两态实跑证据（练习闭环生命线，亲自核验）
+### 遗留事项（仍跟踪）
 
-```bash
-cd my-agent
-npm run assert:m0            # 未补 TODO：3 条 ❌ + ❌ m0 验收通过，exit 1
-npm run assert:m0:solution   # 参考答案：3 条 ✅ + ✅ m0 验收通过，exit 0
-npm run demo                 # starter 未补：❌ 仍有 TODO 未完成 + 位置提示，exit 1
-npx tsx exercises/m0/solution/loop.ts   # solution：打印最终回答 + ✅ m0 demo 通过，exit 0
-```
-
-实跑结果（本终审 t23 亲自跑，非引报告）：
-- `assert:m0`（starter）→ `❌ m0.1 解析判别 / ❌ m0.2 执行回填 / ❌ m0.3 loop 收口`（逐条列出 TODO 位置）+ `❌ m0 验收通过（3 条未过）`，**exit 1**。
-- `assert:m0:solution` → `✅ m0.1 / ✅ m0.2 / ✅ m0.3` + `✅ m0 验收通过`，**exit 0**。
-- `npm run demo`（starter）→ `❌ 仍有 TODO 未完成：m0.3…` + `请补全 exercises/m0/ 下 loop.ts 的对应 TODO`，**exit 1**（非静默崩）。
-- `npx tsx exercises/m0/solution/loop.ts` → `notes/hello.txt 的内容是：hello from my-agent` + `✅ m0 demo 通过`，**exit 0**。
-
-两态（未补「红 exit 1」/ 完整「绿 exit 0」）真实成立，是练习闭环的生命线，非只信报告。
-
-### 14.4 一致性终验（esbuild bundle + node 断言，exit 0 全过）
-
-1. 现有结构零破坏：`COURSE_COUNT=17`、`STAGE_COUNTS={P0:5,P1:4,P2:3,P3:3,P4:2}`、17 课 prereqs 拓扑无环、`next=序+1`、`industry-2026` 链尾；MVP 三态 13=**11 done / 0 planned / 2 asset**（sprint 4 未动 mvps.ts 词表）。
-2. **capstone 主线自洽**：`capstone.ts` 5 milestone 键 `m0..m4`、阶段序 `P0,P0,P1,P2,P3`、必修课全可解析；17 课 `capstoneHook` 全非空（无 undefined）；`M<k>` 双向一致——唯一跨 milestone 课是 `harness-from-scratch`（blueprint §3 明确同时供 **M0 前段** loop/工具协议 + **M1 后段** 恢复/压缩/多工具）；`capstoneHook` 单值取 M0（主 hook），M1 关系由 `MILESTONES.m1.courses` 承担，非漂移。
-3. **三份主线设计文档自洽**：`capstone-blueprint` / `capstone-style-guide` / `capstone-m0-exercise` 的 m0–m4 键 + 五命名（minimal-loop/multi-tool-session/sandbox-mcp-eval/durable-api-obs/memory-flywheel-model）+ `my-agent` / `exercises/` / `TODOError` / `assert/` 路径一致，无 `src↔lib` 漂移。
-4. 5 份 capstone 设计文档均 EXCLUDED，`notes/*.md=29` − EXCLUDED(12) = 17 路由页 == course-structure 17 slug。
-5. `npx tsc --noEmit` exit 0（含 `capstone.ts` / `capstoneHook` 字段引入后零类型错误）。
-
-> **字段名提示**：任务描述写「若新增 `mainlineMilestone` 字段」，实际字段名为 `capstoneHook?`（t22 落地，语义 = 本课给 `my-agent` 哪个 milestone 供什么机制）。二者指同一机制；终审按实际 `capstoneHook` 核对，17 课映射与蓝图 §3 一致、无 undefined。
-
-### 14.5 构建验证（诚实两段式，沿 §11/§12/§13 口径）
-
-```bash
-cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fast > /tmp/astro-build-t23.log 2>&1; echo "EXIT=$?" >> /tmp/astro-build-t23.log
-```
-
-结果日志：`/tmp/astro-build-t23.log`（两段式）：
-
-- ✅ **服务端编译通过（零编译 / 零类型错误）**：`22:38:02 [vite] ✓ built in 3.26s` → `22:38:02 [build] ✓ Completed in 3.34s`（`Building static entrypoints`），sprint 4 四任务改动（learn 主线入口 / demo→参考定位话术 / 课程页主线挂钩 / `capstone.ts` + `capstoneHook` 字段）正确产入 `dist/`，服务端零错误。
-- ⛔️ **HTML 渲染阶段仍被本沙箱环境卡死（留 CI / 浏览器目检）**：自 `[build] building client (vite)` 起停在 `[vite] transforming...`，`timeout 120` 触发（EXIT=124），`dist/*.html=0`。归因同 §11.1 / §12.1 / §13.1：本机 2 vCPU / 3.4G RAM，逐页渲染时 swap 打满、不可中断换页；环境资源约束而非代码缺陷，不冒充全绿。
-
-### 14.6 遗留事项（sprint 5 及之后）
-
-- **M1–M4 里程碑实现留 sprint 5**：M1 multi-tool-session / M2 sandbox-mcp-eval / M3 durable-api-obs / M4 memory-flywheel-model 的 `starter`/`solution` + 断言均「building」，留后续任务按蓝图 §3 逐 milestone 增建；落地时只需把 `m.stage/status` 翻 done、补 `assertCmd` 真实可达，`capstone.ts` 映射表与 `course-structure.ts` 的 `capstoneHook` 已完成双向断言、不必再动。
-- **P0 正文终稿统一复审**：sprint 1 已深度填充，正文终稿复审留 sprint 5（沿 §12.4 / §13.5）。
-- **留 CI 复验 34 页 HTML + 浏览器目检**：本沙箱 HTML 渲染卡死，须在内存充足 / `capped` 环境跑全量 `bash build.sh`（含 pagefind）；新增目检项——learn 页 capstone section 5 卡视觉、c/[slug] 五格 lp-grid（前置/教学重点/实际输出/主线挂钩/后续）换行、`my-agent` README + `npm run demo` 浏览器视角。
-- **`capstoneHook` 跨 milestone 单值局限**：`harness-from-scratch` 同时供 M0/M1，单值 `capstoneHook` 只落主 hook（M0）；若后续需要 M1 关系显式可见，再评估加 `capstoneHooks?: string[]`（非本 sprint 范围，现设计已可读且与蓝图一致）。
-
----
-
-## §15 sprint 5 验收与终审（t32）—— 增量主线整体收口
-
-> sprint 5 = t24–t32：M1–M4 里程碑设计（alex，t24/t26/t28/t30）与实现（wei，t25/t27/t29/t31）+ 本终审（alex，t32）。收口后增量主线 `my-agent` 从「M0 试点」成为「五 milestone 完整」的课程动手闭环主线。
-
-### 15.1 改动文件清单（sprint 5 九任务）
-
-| 任务 | 产物 |
-|---|---|
-| t24/t26/t28/t30（设计） | `notes/capstone-m1/m2/m3/m4-exercise.md` + `notes/capstone-m1/m2/m3/m4-structure.md`（8 份）；`site/src/data/courses.ts` EXCLUDED 12→20（逐次追加 8 项设计文档） |
-| t25/t27/t29/t31（实现） | `my-agent/exercises/m1/m2/m3/m4/{starter,solution}/` 各 milestone 源文件 + `my-agent/assert/m1/m2/m3/m4.assert.ts` + `my-agent/package.json` scripts增量 + `my-agent/README.md` 七段；`site/src/data/capstone.ts` m1–m4 status 翻 done |
-| t32（终审） | `site/verify-t32.mjs`（临时校验，已删）；本 §15 |
-
-### 15.2 M0–M4 串链证据（真·增建，脚本核验 diff 空）
-
-逐级脚本核验（esbuild bundle + node，exit 0），proves「学员复用自己上一级 solution 的代码」：
-
-| 边界 | 给全继承（逐字节 diff 空） | 升级（types/model/loop/tools/policy 剪除处） | 新增 |
-|---|---|---|---|
-| M1 ← M0 | 0 文件 | loop/model/tools/types（4） | session/compress/policy（3） |
-| M2 ← M1 | compress/session/tools（3） | loop/model/policy/types（4） | eval/golden/mcp/sandbox（4） |
-| M3 ← M2 | compress/eval/golden/mcp/policy/sandbox/session/tools（8） | loop/model/types（3） | durable/otel/retry/router/stream（5） |
-| M4 ← M3 | compress/durable/eval/golden/mcp/model/otel/policy/retry/router/sandbox/session/stream/tools（14） | loop/types（2） | costwalk/flywheel/framework/memory（4） |
-
-- **给全继承文件逐字节 diff 空**、升级文件仅在 `{types,model,loop,tools,policy}` 白名单内、无上一级 solution 文件被丢弃——「真·增建」硬证据成立。
-- **git tag m0..m4 不可交付（诚实标注，同 t25/t27/t29/t31）**：`my-agent/` 全目录 git untracked（`?? my-agent/`），tag 需先 commit，而团队纪律 flag-for-merge 不 commit；串链以文件级逐字节 diff + 五档 assert 串链证据交付，tag 留 merge/CI commit 环境再打。
-
-### 15.3 练习闭环两态证据（亲自实跑，非转述）
-
-`npm run assert:m<N>`（半成品红）+ `npm run assert:m<N>:solution`（绿）+ `demo` 未补退出码：
-
-| milestone | starter 红 | solution 绿 |
-|---|---|---|
-| m0 | exit 1（3 条未过） | exit 0 `✅ m0 验收通过` |
-| m1 | exit 1（4 条未过） | exit 0 `✅ m1 验收通过` |
-| m2 | exit 1（4 条未过） | exit 0 `✅ m2 验收通过` |
-| m3 | exit 1（5 条未过） | exit 0 `✅ m3 验收通过` |
-| m4 | exit 1（4 条未过） | exit 0 `✅ m4 验收通过` |
-
-- 抽查未补 demo：`npm run demo:m4`（starter）exit 1，先跑通 M0–M3 全链（审计 fnv1a + durable messageDeliveries=1 + SSE + 重试 0.5× + 路由 + span total=3）后在 m4.1 停：`❌ 仍有 TODO 未完成：m4.1: 实现记忆写路径四道投毒防线 + 冲突消解`。
-- `exercises/m4/solution/loop.ts` 直跑 exit 0：记忆 write/recall/forget + 飞轮 round/gate/curate + 模型意识 kv/成本（fine-tune）+ 框架对照 5 维 + 抢跑 deny，末行 `✅ m4 demo 通过`。
-- 「未完成=可检测失败、补全=可判定过关」在 M0–M4 五档全部成立。
-
-### 15.4 正确性抽查（4+1 处，与 demo 源码一致）
-
-1. **M1 压缩** `m1/solution/compress.ts`：超阈值 head=[system,首 user]+中间确定性摘要（`slice(0,80)` truncate，不调真实模型）+tail 原样（keepTail=2）——与 `api-demo` context 的 estimateTokens/compactIfNeeded 同构。
-2. **M2 四通道 policy** `m2/solution/policy.ts`：`CHANNEL_PRIORITY` deny>approve>sandbox>allow 遍历 + RULE_TABLE（read_file/search=allow、write_file=sandbox、run_shell/send_email=approve）+ `when(args)` 参数匹配 + fallback deny——与 sandbox-demo policy 一致。
-3. **M3 重试分类** `m3/solution/retry.ts`：classify（400 不盲重试 / 429 退避更长 / 5xx / timeout / refusal / eof）、backoffMs 指数退避 + `mulberry32` 固定 seed jitter、prefixKey djb2 稳定前缀命中 0.5×——与 api-demo retry/caching 一致。
-4. **M4 记忆投毒防线** `m4/solution/memory.ts`：`FOUR_POISON_DEFENSES`=[trustGate,injectionScan,highRiskApproval,auditTrail]（=memory-redteam S7.1–S7.4）+ `DEFENSE_KEYS` 8 键（+conflictResolve/scopeFilter/ttlWindow/forgetPropagation）+ write 低信任不覆盖高信任/recall scope 过滤+时效窗口/forget 落墓碑沿血缘传播——与 memory-redteam `memory.mjs` 同构。
-5. **M4 飞轮门禁** `m4/solution/flywheel.ts`：`gate`（f1 不降 && precision 提升 >NOISE(0.02)→propose 否则 reject，action 无 apply 态）+ `round`（除 prompt_version 外逐字段全同否则抛错）+ `curate`（去污染去重）——与 flywheel-demo label/gate/curate 一致。
-
-未发现需要就地划改的错误。
-
-### 15.5 构建证据（诚实两段式，沿 §11–§14 口径）
-
-```bash
-cd site && NODE_OPTIONS="--max-old-space-size=1024" timeout 120 npm run build:fast > /tmp/astro-build-t32.log 2>&1; echo "EXIT=$?" >> /tmp/astro-build-t32.log
-```
-
-结果日志：`/tmp/astro-build-t32.log`（两段式）：
-
-- ✅ **服务端编译通过（零编译 / 零类型错误）**：`10:02:13 [vite] ✓ built in 4.50s` → `[build] ✓ Completed in 4.56s`（`Building static entrypoints`），capstone.ts 5 milestone 全 done 后 learn capstone 卡从「🚧 施工中」变「✅ 已就位」的数据驱动已就位、正确产入 `dist/`。
-- ⛔️ **HTML 渲染阶段仍被本沙箱环境卡死（留 CI / 浏览器目检）**：自 `[build] building client (vite)` 起停在 `[vite] transforming...`，`timeout 120` 触发（EXIT=124），`dist/*.html=0`。归因同 §11.1–§14.5：本机 2 vCPU / 3.4G RAM，逐页渲染 swap 打满、不可中断换页；环境资源约束而非代码缺陷，不冒充全绿。
-- 附带 WARN（非阻断）：`[glob-loader] Duplicate id "site-refactor-plan"`——`site-refactor-plan.md` 在课程 EXCLUDED 集合内、无课程路由依赖它，且已核验 37 份顶层 notes 文件名与 frontmatter slug 均无真实重复；判断为 Astro glob-loader 缓存/加载次序摩擦，不影响 17 课输出，留后续一并查（不影响本 sprint 收口）。
-
-### 15.6 capstone 5 milestone 全 done + capstoneHook 双向
-
-- `site/src/data/capstone.ts`：MILESTONES 5 项（m0 minimal-loop / m1 multi-tool-session / m2 sandbox-mcp-eval / m3 durable-api-obs / m4 memory-flywheel-model）status 全 `done` + `assertCmd` 全就位（`npm run assert:m<N>`）；`assertMilestonesCoursesResolve()` （必修课 slug 全解析）exit 0。
-- `site/src/data/course-structure.ts`：17 课 `capstoneHook` 全非空；16 课 `M<k> · …` 前缀 + 序章 llm-history `全域 · 背景地图（序章）`；双向一致（hook 的 M<k> ↔ MILESTONES key 闭包）exit 0。
-- 现有结构零破坏：17 课五档 `STAGE_COUNTS={P0:5,P1:4,P2:3,P3:3,P4:2}`、MVP 13=11/0/2、prereq 合法、`notes=37 − EXCLUDED=20 = 17` 路由口径。
-
-### 15.7 遗留事项
-
-- **P0 正文终稿统一复审**：沿 §12.4 / §13.5 / §14.6 继续留 sprint 后续（正文改动不在本 sprint 范围）。
-- **留 CI 复验 34 页 HTML + 浏览器目检**：本沙箱 HTML 渲染卡死，须在内存充足 / `capped` 环境跑全量 `bash build.sh`（含 pagefind）；目检项——learn 页 capstone section 5 卡视觉（应已「✅ 已就位」而非「🚧 施工中」）、c/[slug] 五格 lp-grid、`my-agent` README + `npm run demo`（前进到 M4）浏览器视角。
-- **git tag m0..m4 五档补打**：`my-agent/` 现 untracked（`?? my-agent/`），待 flag-for-merge commit 后补打 `m0..m4` 五档（`git diff m0 m4` 即完整主线逐 milestone 真增建历程），作为 CI 复验一项。
-- **`Duplicate id "site-refactor-plan"` WARN**：逐项排除真实重复后判断为 glob-loader 摩擦，留后续清查 `.astro/` 内容缓存与加载次序（不影响 17 课输出、无路由依赖）。
-- **P1–P4 正文深度**：首次 sprint 仅 P0 深度填充，P1–P4 元数据/结构就位、正文深度留后续 sprint（原定范围，非本 sprint 遗漏）。
-
----
-
-## 16. sprint 6 毕业项目（生成层收口）设计与整体最终终审
-
-> 毕业项目是主线 `my-agent` 的**终极收口**：把学员从「补全已给签名的 TODO」（补全层）推到「从模糊需求独立设计 + 实现自己的 agent」（生成层）。三层级收口——追踪(demo) → 补全(M0–M4 TODO) → 生成(本任务)——在本 sprint 落地并终审通过。改动文件：`notes/capstone-final.md`（设计，t33）、`notes/capstone-final-structure.md`（落地清单，t33）、`final-project/`（脚手架，t34）、`site/src/data/final-project.ts` + `site/src/pages/learn.astro`（站点呈现，t34）、`site/src/data/courses.ts`（EXCLUDED 20→22）、本文件（§16，t35）。
-
-### 16.1 生成层纪律核验（关键：未退化为补全层）
-
-- **脚手架原子扫描（文件级）**：`final-project/` 共 7 文件（`README.md` / `grade.mjs` / `rubric.mjs` / `subjects/{README,a-research,b-repo-guard,c-signal-arbiter}.md`）；`.ts` 半成品 = **0**；`throw new TODOError` = **0**；`starter`/`solution`/`exercises` 目录 = **0**。
-- **grep 命中均为「纪律否定表述 / 三层级对照」**，不是真实结构：`grade.mjs:21`「本页无 starter/TODO/参考答案」、`README.md`「不提供 starter/TODO/参考答案，学员从空目录起步」、`README.md` 三层级表「补全层给 starter+solution」——这些是**说明「不给什么」**，非交付中的半成品。
-- **脚手架只含三样合规物**：① `grade.mjs`（判据运行器：跑学员 `assert.mjs` 认 exit + 读学员 `MANIFEST.md` 认 W1–W7 覆盖性，不判实现）；② `rubric.mjs`（B1–B5 / W1–W7 机器可读唯一真源，无实现 hint）；③ `subjects/*.md` + `README.md`（空命题骨架：标题 + 一句话，判据指针回 `capstone-final.md`）。结论：**生成层纪律成立，退回补全层的风险被文件级探针封死。**
-
-### 16.2 判据可用性（亲自实跑，样例跑完即删）
-
-- `npm run check:final`（无成品态）→ `❌ 未找到成品目录：请从空目录开始搭建（本页无 starter/TODO/参考答案）… exit 1` —— 可检测、非 TODO 式。
-- **最小合规成品样例**（`/tmp/final-sample-ok`，仅验证判据器，**跑完已删、未写入交付**）→ `✅ 黑盒判据通过 → ✅ 白盒要素 W1–W7 全指认 → ✅ 毕业判据通过 exit 0`。
-- 反例三态各 exit 1 且逐条列缺失：黑盒 `assert.mjs exit 1` + 白盒缺 W3,W5 → `❌ 毕业判据通过（黑盒未过；白盒缺 W3,W5）`；缺 `MANIFEST.md` → `❌ 白盒缺 W1–W7 全列`。判据器「过/不过」两向正确命中。
-
-### 16.3 站点 + 一致性断言（esbuild+node exit 0 / tsc 0）
-
-- `site/src/data/final-project.ts`（GENERATIVE_DISCIPLINE / SKILL_LADDER 三步 / FINAL_SUBJECTS 3 命题 / FINAL_BLACKBOX B1–B5 / FINAL_WHITEBOX W1–W7 / FINAL_SELF_CHECK 三步 / FINAL_GRADE_CMD / FINAL_CLOSING）与 `rubric.mjs` **逐字一致**（单一真源自洽）。
-- `learn.astro` capstone 主线 M0–M4 五卡后追加「毕业项目 · 生成层收口」`final-card`（三命题 + 判据摘要 + 自测三步 + `node grade.mjs` 入口 + 收口句），静态无 JS 全可见。
-- **白盒要素 M0–M4 衔接核验**：W1 loop(M0) / W2 工具分发(M1) / W3 默认 deny·白名单·多通道(M1/M2) / W4 golden+可跑断言(M2) / W5 journal·checkpoint·幂等(M3) / W6 span·metric·结构化日志(M3) / W7 记忆·评测飞轮·模型成本(M4 三选一)——机制全为 M0–M4 教过，未凭空新增。
-- 结构零破坏：17 课五档 `STAGE_COUNTS={P0:5,P1:4,P2:3,P3:3,P4:2}`、MVP 13=11/0/2、prereq 合法、`capstone.ts` 5 milestone 全 `done` + `assertCmd` 就位、`notes=39 − EXCLUDED=22 = 17` 路由口径；`npx tsc --noEmit` exit 0。
-
-### 16.4 构建证据（诚实两段式，同 §11–§14 / §15.6）
-
-- **服务端 ✓ built 零错误**：`10:58:14 [vite] ✓ built in 12.49s` → `[build] ✓ Completed in 12.89s`（日志 `/tmp/astro-build-t16.log`）。
-- **HTML 渲染卡死（环境约束，如实记录，不冒充全绿）**：停在 `10:58:14 [vite] transforming...`，`dist/html = 0`（2 vCPU/3.4G 沙箱，同 §11–§16 一贯现象）；附非阻断 WARN `Duplicate id "site-refactor-plan"`（glob-loader 摩擦，已逐项排除真实重复，无 17 课路由依赖，留 §16.6）。
-
-### 16.5 全局收口结论（四段式演进已完成）
-
-从「拼凑感强的公开学习记录」到完整课程体系，四段式演进在本重构全部落地：
-
-1. **拼凑记录 → 五阶段教学体系**：17 课线性五档（P0–P4）+ LLM 发展史横向知识导航页（P0 前）+ 每课前置知识/独占 MVP，13 MVP = 11 done / 2 asset；
-2. **+ 增量主线 M0–M4**：`my-agent` 五 milestone 真·增建（`mN/starter = mN-1/solution` 冻结剪除 + 断言闭环），补全层三态「starter 红 / 补全绿 / solution 绿」全部实跑成立，五档 `assert:m0..m4:solution` 串链全绿；
-3. **+ 生成层毕业项目**：开放命题（research-assistant / repo-guard / signal-arbiter）+ 黑盒 B1–B5 / 白盒 W1–W7 判据 + 自测三步（先黑盒 → 再白盒 → 再补断言），**不给 starter/TODO/参考答案**，学员从空目录起步；
-4. **收口形态**：`毕业判据 = 成品能跑 + 黑盒断言过(B1–B5) + 白盒要素齐(W1–W7)`，收口一句话——「你搭出的这个，与 M4 的 `my-agent` 同级，且是你从空目录、从模糊需求、独立设计出来的」。
-
-### 16.6 最终遗留清单（M0–M4 + 毕业项目全部落地后的收口 items）
-
-- **CI 复验 34 页 HTML + 浏览器目检**：本沙箱 HTML 渲染卡死，须在内存充足环境跑全量 `bash build.sh`（含 pagefind）复验 dist 全页；浏览器目检 learn 页 capstone section（M0–M4 5 卡 + 毕业项目卡视觉）、c/[slug] 五格 lp-grid、`my-agent` README + `npm run demo` 前进到 M4、`node final-project/grade.mjs <成品>` 判据入口。
-- **git commit + 补打 `m0..m4` 五档 tag**：`my-agent/` 现 untracked，待 flag-for-merge commit 后补打五档（`git diff m0 m4` 即完整主线逐 milestone 真增建历程）作为 CI 复验一项；毕业项目 `final-project/` 一并纳入。
-- **`Duplicate id "site-refactor-plan"` WARN**：glob-loader 摩擦，留后续清查 `.astro/` 内容缓存与加载次序（不影响 17 课、无路由依赖）。
-- **P0 正文终稿统一复审 + P1–P4 正文深度**：沿 §12.4/§13.5/§14.6 及原定范围留后续 sprint。
-- **真实 key 可选加分（毕业项目）**：红线延续「全离线零 key」为默认；学员接真实模型 key/数据源为加分项、非门槛，判据不因此加分/减分（判据只认 B1–B5 行为 + W1–W7 要素）。
+- **CI 复验全页 HTML + 浏览器目检**：本机 2 vCPU / 3.4G 下 HTML 渲染阶段易卡死/超时（历史 exit 134/137），须在内存充足环境或 CI 跑全量 `bash build.sh`（含 pagefind）复验 dist 全页。目检项：learn 页 capstone 区（M0–M4 5 卡 + 毕业项目卡）、`c/[slug]` 五格 lp-grid、`my-agent` README + `npm run demo` 前进到 M4、`node final-project/grade.mjs <成品>` 判据入口。
+  > 口径更正：本机「必然 OOM」的旧断言已于 2026-10-13 被独立实测证伪——全量构建可在约 17 分钟内成功完成；但极慢/超时风险使其**不可依赖**，CI 仍是可靠回归路径。
+- **补打 `m0..m4` 五档 tag**：`my-agent/` 与 `final-project/` commit 后补打，`git diff m0 m4` 即完整主线逐 milestone 真增建历程。
+- **`Duplicate id "site-refactor-plan"` WARN**：glob-loader 摩擦，留后续清查 `.astro/` 内容缓存与加载次序（不影响 17 课路由）。
+- **P0 正文终稿统一复审 + P1–P4 正文深度**：沿 §12.4 / §13.5 及原定范围留后续 sprint。
+- **真实 key 可选加分（毕业项目）**：默认「全离线零 key」；学员接真实模型 key/数据源为加分项、非门槛，判据不因此加减分。
