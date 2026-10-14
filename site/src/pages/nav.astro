@@ -87,34 +87,89 @@ const base = import.meta.env.BASE_URL;
       <h2>五阶段课程导航</h2>
       <span class="phase-desc">P0 基础篇 → P4 收口与前沿 · 共 {COURSE_STRUCTURE.length} 门课线性阅读序</span>
     </div>
+    <!-- 本页定位是「横向知识」（时间线 + 代际），课程列表的完整形态在 /learn/。
+         此处只给紧凑索引，避免与 /learn/ 重复一整面卡片墙。 -->
+    <p class="nav-learn-link">
+      完整课程卡（含前置知识 / 参考样本 / 主线挂钩）见
+      <a href={base + 'learn/'}>学习路线 →</a>
+    </p>
+    <div class="nav-course-grid">
+      {
+        STAGES.map((stage) => (
+          <div class="nav-course-group">
+            <h3 class="nav-course-head">
+              <span class="nc-stage">{stage}</span>
+              <span class="nc-label">{STAGE_LABELS[stage]}</span>
+              <span class="nc-count">{STAGE_COUNTS[stage]} 门</span>
+            </h3>
+            <ul class="nav-course-list">
+              {coursesByStage(stage).map((course) => (
+                <li>
+                  <a href={base + 'c/' + course.slug + '/'}>{course.domain}</a>
+                  {course.isHorizontal && <span class="chip">横向</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
   </section>
-  {
-    STAGES.map((stage) => (
-      <section class="phase-section">
-        <div class="phase-head">
-          <h3>{stage} · {STAGE_LABELS[stage]}</h3>
-          <span class="phase-desc">{STAGE_COUNTS[stage]} 门课</span>
-        </div>
-        <div class="cards">
-          {coursesByStage(stage).map((course) => (
-            <a class="card" href={base + "c/" + course.slug + "/"}>
-              <div class="dc-top">
-                <h3>{course.domain}</h3>
-                <span class="chip chip-strong">{course.stage}</span>
-                {course.isHorizontal && <span class="chip">横向</span>}
-              </div>
-              <p class="dc-intro">{course.intro}</p>
-              <p class="dc-angle"><strong>前置知识</strong>：{course.prerequisiteNote}</p>
-              <p class="dc-foot"><code>{course.mvpSlug}</code> · 进入课程 →</p>
-            </a>
-          ))}
-        </div>
-      </section>
-    ))
-  }
 </Base>
 
 <style>
+  /* ── 课程紧凑索引（完整卡片在 /learn/，本页不重复卡片墙）──── */
+  .nav-learn-link {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: var(--text-soft);
+  }
+  .nav-course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .nav-course-group {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+  }
+  .nav-course-head {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0 0 6px;
+    font-size: 0.92rem;
+  }
+  .nc-stage {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .nc-label {
+    font-weight: 600;
+  }
+  .nc-count {
+    width: 100%;
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    font-weight: 400;
+  }
+  .nav-course-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.88rem;
+    line-height: 1.75;
+  }
+  .nav-course-list li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   /* ── LLM 历史：纵向时间线 ─────────────────────────── */
   .llm-timeline {
     list-style: none;

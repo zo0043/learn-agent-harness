@@ -25,6 +25,17 @@ const KIND_LABEL: Record<string, string> = {
   'cost-detail': '成本细节',
 };
 const kind = KIND_LABEL[entry.data.kind as string] ? (entry.data.kind as string) : undefined;
+
+/** 来源 URL → 可读域名（meta 条里放完整 URL 会在窄屏撑破布局：实测 375px 溢出 197px）。 */
+const sourceUrl = entry.data.source as string | undefined;
+const sourceHost = (() => {
+  if (!sourceUrl) return undefined;
+  try {
+    return new URL(sourceUrl).host.replace(/^www\./, '');
+  } catch {
+    return sourceUrl;
+  }
+})();
 ---
 
 <Base title={title}>
@@ -34,7 +45,11 @@ const kind = KIND_LABEL[entry.data.kind as string] ? (entry.data.kind as string)
         <span class="chip chip-strong">详解</span>
         {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
         {entry.data.domain && <span class="chip">{entry.data.domain}</span>}
-        {entry.data.source && <span class="chip">来源：{entry.data.source}</span>}
+        {sourceUrl && (
+          <a class="chip chip-src" href={sourceUrl} target="_blank" rel="noopener" title={sourceUrl}>
+            来源：{sourceHost} ↗
+          </a>
+        )}
         {entry.data.status && <StatusBadge status={entry.data.status} />}
       </div>
       <nav class="crumbs" aria-label="面包屑">
@@ -50,3 +65,16 @@ const kind = KIND_LABEL[entry.data.kind as string] ? (entry.data.kind as string)
     </footer>
   </article>
 </Base>
+
+<style>
+  /* 来源 chip：域名形态通常很短，仍加换行保护，避免极端长域名撑破窄屏 */
+  .chip-src {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+  .chip-src:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>

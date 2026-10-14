@@ -4,6 +4,8 @@ import TrajectoryTimeline from '../components/TrajectoryTimeline.astro';
 import { getCollection } from 'astro:content';
 import { parseRagStats } from '../utils/ragStats';
 import { WORK_COUNT } from '../data/courses';
+import { COURSE_STRUCTURE } from '../data/course-structure';
+import { MVPS } from '../data/mvps';
 import { trajectory } from '../data/trajectory';
 
 const repo = 'https://github.com/zo0043/learn-agent-harness';
@@ -49,13 +51,34 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <p class="page-lead">
     每个作品都是课程的可运行证据：文件 ↔ 课程节一一对应，本地可跑、可复现。
     源码见 <a href={repo} target="_blank" rel="noopener">仓库 ↗</a>。
-    <br />
-    <span class="work-soft">
-      计数口径：本页共 <strong>{WORK_COUNT} 个可运行 demo 作品</strong>（= 有 <code>npm run demo</code>
-      的目录：harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo /
-      framework-demo）；另有 <code>whiteboard/</code>（Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
-    </span>
   </p>
+
+  <!-- ── 作品概览：一屏看清「每个作品对应哪门课、能不能离线跑」──────
+       读者来本页的第一诉求是「我想跑哪个、怎么选」，故先给一张可扫的概览，
+       再往下是逐个作品的详解；计数口径降为页尾脚注。
+       对应课通过「作品目录名 → owner 课」映射（mvpSlug 是词表 slug 如 harness-mvp，
+       与 demo 目录名 harness-demo 不同名，不能直接相等比较）。 -->
+  <section class="demo-overview">
+    <h2 class="do-title">{WORK_COUNT} 个可运行作品一览</h2>
+    <ul class="do-list">
+      {
+        DEMO_ANCHORS.map((id) => {
+          const mvp = MVPS.find((m) => (m.artifact ?? '').startsWith(id + '/'));
+          const course = mvp ? COURSE_STRUCTURE.find((c) => c.slug === mvp.owner) : undefined;
+          const rm = RUN_MODES[DEMO_RUN_MODE[id]];
+          return (
+            <li class="do-row">
+              <a class="do-row-link" href={`#${id}`}>
+                <span class="do-name">{id}</span>
+                <span class="do-domain">{course?.domain ?? '配套资产'}</span>
+                <span class={`chip ${rm.cls}`}>{rm.label}</span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
 
   {/* P-08 sticky 标签栏：贴在小顶栏下方，六个 demo 锚点横跳（窄屏可横滑）。
       .work 的 scroll-margin-top 已按「小顶栏 + 本栏高度」加高，锚点跳转不被遮挡。 */}
@@ -374,6 +397,16 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
       </div>
     </div>
   </section>
+
+  <!-- ── 口径说明（原先挤在页首，降为页尾脚注）──────────────── -->
+  <section>
+    <h2>口径说明</h2>
+    <p class="work-soft">
+      本页共 <strong>{WORK_COUNT} 个可运行 demo 作品</strong>（= 有 <code>npm run demo</code>
+      的目录：harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo /
+      framework-demo）；另有 <code>whiteboard/</code>（Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
+    </p>
+  </section>
 </Base>
 
 <style>
@@ -388,4 +421,34 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   .work-lesson { margin-bottom: 10px; }
   .work-soft { color: var(--text-soft); font-size: 0.94rem; }
   .work-note { color: var(--text-soft); font-size: 0.9rem; }
+
+  /* 作品概览表：作品名 + 对应课程 + 实跑前提，一行一个可扫 */
+  .demo-overview { margin-top: 20px; }
+  .do-title { font-size: 1rem; margin: 0 0 8px; color: var(--text-soft); font-weight: 600; }
+  .do-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-card);
+  }
+  .do-row + .do-row { border-top: 1px solid var(--border); }
+  .do-row-link {
+    display: grid;
+    grid-template-columns: 210px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 9px 14px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .do-row-link:hover { background: var(--bg-soft); }
+  .do-name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.86rem; font-weight: 600; }
+  .do-domain { font-size: 0.9rem; color: var(--text-soft); }
+  @media (max-width: 640px) {
+    .do-row-link { grid-template-columns: 1fr; gap: 4px; }
+    .do-domain { font-size: 0.86rem; }
+  }
 </style>

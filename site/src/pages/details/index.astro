@@ -20,13 +20,13 @@ const kindOf = (item: (typeof items)[number]) =>
 
 /** 面试最常考 top3（C2b 指定：context-rot / tool-granularity / harness-rot） */
 const TOP3_SLUGS = ['01-context-rot', '02-tool-granularity', '07-harness-rot'];
-const TOP3_SET = new Set(TOP3_SLUGS);
+const top3Set = new Set(TOP3_SLUGS);
 const top3 = TOP3_SLUGS.map(
   (slug) => items.find((i) => (i.data.slug ?? i.id) === slug),
 ).filter((i): i is (typeof items)[number] => Boolean(i));
 
 /** 其余详解 = 全部条目去掉 top3 三篇（top3 已在上方单列，避免同页双渲染） */
-const rest = items.filter((i) => !TOP3_SET.has(i.data.slug ?? i.id));
+const rest = items.filter((i) => !top3Set.has(i.data.slug ?? i.id));
 
 /** 取正文“## 一句话定义”下第一段作为卡片摘要 */
 function oneLiner(body: string | undefined): string {
@@ -47,13 +47,41 @@ function oneLiner(body: string | undefined): string {
 <Base title="详解">
   <h1 class="page-title">详解</h1>
   <p class="page-lead">
-    课程之外的延伸详解（<code>notes/details/</code>）：资深分水岭 8 细节、事故复盘、机制拆解、一手资料精读等。
+    课程之外的延伸详解：<strong>{items.length} 个资深分水岭</strong>——每篇带行业一手源 + 本地映射
+    （哪些课已覆盖 / 哪些没覆盖），面试答到机制层时直接可用。
   </p>
+
+  <!-- ── 全景索引：先给「这 8 个分水岭分别属于哪个领域」──────
+       读者来本页的第一诉求是「资深分水岭有哪些、我需要补哪个」，
+       故把 8 篇按领域铺成一张紧凑索引表，再往下才是正文卡片。 -->
+  <section class="dx-index">
+    <h2 class="dx-index-title">8 个分水岭一览</h2>
+    <ul class="dx-list">
+      {
+        items.map((item) => {
+          const kind = kindOf(item);
+          const slug = item.data.slug ?? item.id;
+          return (
+            <li class="dx-row">
+              <a class="dx-row-link" href={import.meta.env.BASE_URL + `details/${slug}/`}>
+                <span class="dx-domain">{item.data.domain ?? '—'}</span>
+                <span class="dx-title">{item.data.title ?? slug}</span>
+                <span class="dx-meta">
+                  {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
+                  {top3Set.has(slug) && <span class="chip chip-strong">最常考</span>}
+                </span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
 
   {
     top3.length > 0 && (
       <section class="details-top3">
-        <h2 class="page-title">面试最常考 top3</h2>
+        <h2 class="page-title section-gap">面试最常考 top3</h2>
         <div class="cards">
           {
             top3.map((item) => {
@@ -113,4 +141,61 @@ function oneLiner(body: string | undefined): string {
 <style>
   /* U-36 收敛：本页标题间距内联样式提为页面级类（视觉零变化）。 */
   .section-gap { margin-top: 34px; }
+
+  /* 全景索引：8 行紧凑列表（领域 + 标题 + 标签），比卡片墙更快扫完 */
+  .dx-index {
+    margin-top: 20px;
+  }
+  .dx-index-title {
+    font-size: 1rem;
+    margin: 0 0 8px;
+    color: var(--text-soft);
+    font-weight: 600;
+  }
+  .dx-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-card);
+  }
+  .dx-row + .dx-row {
+    border-top: 1px solid var(--border);
+  }
+  .dx-row-link {
+    display: grid;
+    grid-template-columns: 130px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 9px 14px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .dx-row-link:hover {
+    background: var(--bg-soft);
+  }
+  .dx-domain {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+  .dx-title {
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .dx-meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  @media (max-width: 640px) {
+    .dx-row-link {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .dx-domain {
+      font-weight: 600;
+    }
+  }
 </style>
