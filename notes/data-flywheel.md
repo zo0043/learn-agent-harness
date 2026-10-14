@@ -8,6 +8,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`evaluation`——上一课带入「评测 = 飞轮的仪表盘」+「golden set 版本化 / 指标基线 / CI 门禁 / skipped 是一等终态」的对照意识，本课把它从「一次评测」扩成「一圈一圈转」。
+- **技能门槛**：只需「训练/评测数据要版本化、标签会有噪声」的粗概念即可。
+- **不需要提前会**：真实微调平台、数据平台、FinHot 私有台账——一律不用会。飞轮四环节（闭环 / 数据模型 / 筛选 / 消融决策）+ labeler 两轮降噪闭环随 `flywheel-demo` 的 `npm run demo` 建立（本 sprint 规格先行，目录由下游按 notes/flywheel-mvp-spec.md 建成）；生产数据在仓外，课上只用脱敏样本。
+
+---
+
 ## S1 定义：什么是 agent 系统的数据飞轮
 
 **这一节解决什么问题**：把"数据飞轮"从口号变成可检验的对象。面试官听到这四个字，心里会追问三件事——它靠什么转（数据从哪来）、每圈产出什么（资产/指标）、什么算坏了（判据）。先把这三件事钉死，后面 S2-S4 才不是流水账。一句话定义：**飞轮 = 把生产轨迹持续转成评测资产、再用评测资产驱动 harness 变更的闭环**；它的燃料是轨迹，它的产出是"更大/更准的评测集 + 被验证过的改进"。
@@ -135,6 +143,24 @@ flowchart TD
 **反事实样本的放置**：`published=false` 的 1634 行不是"废数据"，是筛选器**没让上线**的那部分判断。把它当反事实、和已发布的样本**按同一套标签口径**评，才是在测"判断本身对不对"，而不是"是否迎合了发布筛选器"。这是 S3 最容易被忽略、面试最容易被追问的一条。
 
 **可背面试句**："筛选的目的不是让数据变少，是让评测集的**分布**贴近你真正关心的能力分布——去掉污染、去掉重复、保住困难子集，然后定期换血。"
+
+```js
+// flywheel-mvp-spec.md 接口（规划态，flywheel-demo/ 落地后即此形状）——curation 三道门 + 状态机
+const STATUS = ['pending', 'labeled', 'skipped'];   // skipped 带 reason（FinHot 858 条），一等终态 ≠ 废数据
+function curate(rows) {
+  return rows
+    .filter((r) => !isPoisoned(r))                  // 去污染：direction failed 的行单独归因，不混进质量指标
+    .dedup(byTaskSimilarity)                        // 去重：同板块同事件聚成代表，防「长得像的题」灌水
+    .stratify({ label: ['none','bullish','bearish','neutral'], difficulty, failure }); // 分层：固定配额
+}
+// 反事实样本：published=false 的 1634 行 ≠ 废数据，是「没让上线」的那部分判断——
+// 和已发布样本按同一套标签口径评，测的是「判断本身对不对」，不是「是否迎合发布筛选器」
+function evaluate(rows) {
+  return metrics(rows.filter((r) => r.outcome_status === 'labeled'));  // 分母 = labeled 行（skipped 不进分母）
+}
+```
+
+**这段在讲什么**：三道门各防一种指标失真——去污染防「把数据事故当模型能力」、去重防「长得像的题灌水」、分层防「简单样本刷分遮挡困难子集全灭」。两条最容易被追问的口径要钉死：① `skipped` 是**一等终态**（带原因、不混进分子也不混进分母），所以分母 = `labeled` 行才可解释；② 反事实样本（`published=false`）不是废数据，是「筛选器没让上线」的判断本身——把判断（而不是上线结果）纳入评测，才不朝筛选器偏好优化。
 
 ---
 
@@ -281,6 +307,24 @@ flowchart TD
 | 决策 | 关键不降 + 目标显著升 → 提案 | T3.2 禁 auto-apply，人按合入键 |
 
 **可背面试句**："这一圈转完，我拿到的不是'提示词变好了'，是一套能复现的过程：1830 行全量台账、858 条可解释的 skipped、n≈60 的 baseline、两轮只动 prompt 的消融、和一个带证据的合入提案。飞轮的价值不在那一版提示词，在这套过程下次还能再用。"
+
+```js
+// flywheel-mvp-spec.md 接口（规划态）——指标计算 + 归因证据 + 决策门禁（数字为 FinHot 真实评测记录，n=200/seed=7）
+function metrics(rows) {
+  const { tp, fp, tn, fn, errors, decisive } = tally(rows);   // decisive = 有效判断（非 skipped 的落判）
+  const p = tp/(tp+fp), r = tp/(tp+fn);
+  return { precision: p, recall: r, f1: 2*p*r/(p+r), accuracy: (tp+tn)/(tp+fp+tn+fn), errors, decisive };
+}
+// 第一轮 v1→v2：变量 = prompt（12 个提示词文件只 selection-score 一段哈希 5c5a429baa→05b5fc85c5 变了）。
+//   precision 0.256→0.304、accuracy 0.611→0.676、f1 0.404→0.462、errors 33→27、decisive 167→173 —— 归因成立
+// 第二轮 v2→v3：prompt 编辑 + gold 重标（正类 29/171→27/173，旧版留 backup-20261002-1428）双变量叠加 → 不可归因（反例）。
+//   precision 0.304→0.272、recall 0.960→0.880、errors 27→21 —— 退步，结论 = 提示词杠杆耗尽、瓶颈回到 gold 口径
+// 门禁（S4 决策图）：关键指标不降 && 目标指标显著升 → 生成提案；T3.2 禁 auto-apply（自动化止步提案，人按合入键）
+```
+
+**这段在讲什么**：指标本身不是武器，**归因证据**才是——第一轮能说「+6.5pt 归给 prompt」，是因为 `selection-score` 是 12 个提示词文件里唯一哈希变了的那个（其余 11 个全程未动，「一次只动一个变量」可验证）；第二轮退步不能归因给 prompt，是因为**同日发生了 gold 重标**（社融例行发布改 reject 口径，正类 29/171 → 27/173），提示词编辑和标签口径两个变量叠加，指标差被污染。这就是「一次只动一个变量」的正反两面，也是它停下来的直接原因之一——飞轮的产出不是「下一版提示词」，是「这一圈有没有让归因更干净」。
+
+**实跑判据（本课，规划态三样，目录由下游建成）**：本 sprint 先产设计规格（notes/flywheel-mvp-spec.md），`flywheel-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd flywheel-demo && npm i && npm run demo` 复现「脱敏台账样本 → filter/label 两轮 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）。本课正文的 FinHot 真实数字（1830 行 / 858 skipped / precision 0.256→0.304→0.272 / `selection-score@5c5a429baa` 等）属「来源与锚点」的内部证据（FinHot 私有台账，仓外不可复核），面试讲方法与数字、不号称公开可查；它们**只做教学锚、不冒充可机器核对的 clone 判据**。
 
 ---
 

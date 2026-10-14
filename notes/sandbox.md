@@ -7,6 +7,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`harness-from-scratch`——能跑通 `harness-demo`、理解最小 loop 与 policy 门「默认 deny」。
+- **技能门槛**：会「进程 / 文件系统 / 容器隔离」的粗概念即可（一句话说得清「容器 = namespace + cgroup」就算过关）。
+- **不需要提前会**：seccomp / Landlock / gVisor / bubblewrap、写沙箱配置——一律不用。四通道与三条边界（路径 / env / 网络）的机制，随 `sandbox-demo`（`npm run demo`）边跑边建。
+
+---
+
 ## 开篇：为什么沙箱是 coding agent 的 P0
 
 普通程序的动作来自代码，agent 的动作来自**概率模型**——模型提出"行动请求"，真正落地的是执行层。这中间有一道许多团队会忽略的缝：**请求合法 ≠ 影响可控**。
@@ -104,6 +112,24 @@ flowchart TD
 **关键洞察：`sandbox` 不是第五个 `deny`。** `deny` 是"不做"，`sandbox` 是"照做但关进边界"：同一个 `docker compose up`，权限门完全允许，只是它只影响自己的命名空间。这个区别直接决定可观测性——`deny` 的执行结果是"没发生"，`sandbox` 的执行结果是"发生了，但在隔离世界里"，二者的审计与恢复语义不同（这也是 S2.5 要纠正的一处旧表述）。
 
 `Policy.decide` 的匹配规则是**确定性、可离线**的：按冲突优先级 `deny → approve → sandbox → allow` 逐通道扫规则，命中即返回；没有规则则落到 `fallback = deny`（安全默认，沿用 从零写 harness §⑤）。
+
+```ts
+// src/policy.ts —— 四通道判定（确定性、可离线）
+const CHANNEL_PRIORITY: readonly Channel[] = ["deny", "approve", "sandbox", "allow"];
+
+decide(tool: string, args: Record<string, unknown>): Verdict {
+  for (const ch of CHANNEL_PRIORITY) {            // ① 按冲突优先级扫「通道」
+    for (const r of this.rules) {                 // ② 再扫该通道下的规则
+      if (r.channel !== ch || !r.tools.includes(tool)) continue;
+      if (r.when && !r.when(args)) continue;      // ③ 参数级匹配（.env / 跨树写在这里拦）
+      return { channel: ch, ruleId: r.id, reason: `命中规则 ${r.id}` };
+    }
+  }
+  return { channel: this.fallback, ruleId: null, reason: "无匹配规则，默认 deny" }; // ④ fallback=deny（安全默认）
+}
+```
+
+**这段在讲什么**：四个通道不是四个等价的 if 分支，而是**按固定优先级逐通道扫**——`deny` 优先级最高，意味着「一条 deny 规则」永远盖过「一条 allow 规则」；`sandbox` 插在 `approve` 与 `allow` 之间（隔离更多者优先）。`when(args)` 是参数级匹配，正是它把 `read_file(…/.env)`、`write_file(work/ainews-new/…)` 这些「凭据/跨树」危险参数拦下来（见 S4/S8 的凭据面）。末行 `fallback=deny` 是安全默认：没写规则的工具一律不放行。
 
 ```mermaid
 flowchart TD
@@ -229,6 +255,28 @@ flowchart TD
 四层各自的失败模式（面试常追问"你最担心哪层"）：
 
 1. **canonicalize 失败**：路径校验被绕过——`..` 编码、符号链接、Unicode 归一化、Windows 短名 / 8.3 名。demo 里 `assertInWorkspace` 是纯字符串逻辑（教学用），真实系统要靠 `realpath`/`openat` 在内核侧判定，并防 TOCTOU（见 S8）。
+
+```ts
+// src/sandbox.ts —— L1 路径 canonicalize（教学版：纯字符串；真实系统换 realpath/openat）
+export function assertInWorkspace(workspace: string, raw: string): string {
+  if (raw === "" || raw.startsWith("/") || raw.includes("\0"))
+    throw new BoundaryViolation("path", `非法路径（空或绝对路径）: ${raw}`);
+  const segs: string[] = [];
+  for (const seg of raw.split("/")) {
+    if (seg === "" || seg === ".") continue;         // 跳过空段与「.」
+    if (seg === "..") {
+      if (segs.length === 0) throw new BoundaryViolation("path", `路径越出根: ${raw}`);
+      segs.pop();                                    // 「..」越根即拒，否则回退一级
+    } else segs.push(seg);
+  }
+  const resolved = segs.join("/");
+  if (resolved !== workspace && !resolved.startsWith(workspace + "/"))
+    throw new BoundaryViolation("path", `路径越出 workspace: ${raw}`);
+  return resolved;   // 用「解析后的绝对逻辑路径」，不依赖进程 cwd（S8.1）
+}
+```
+
+**这段在讲什么**：canonicalize 的本质是「把相对路径解析成不依赖 cwd 的逻辑路径，并证明它落在 workspace 内」。三处 `throw` 对应三种越界——绝对路径/空/NUL 直接拒、`..` 爬出根拒、解析结果不在 workspace 下拒。demo 只用字符串逻辑（教学简化），真实系统必须在**内核侧**用 `realpath`/`openat` 解析，否则 `..` 编码 / 符号链接都能绕过（S8.2 TOCTOU）。
 2. **许可失败**：默认 allow、规则写反、参数级匹配漏了（demo 里用参数级 `when` 才把 `.env` 和跨树写拦下）。**安全默认必须是 deny。**
 3. **lockdown 失败**：声明了沙箱但没真正生效——进程仍继承宿主 env、网络没关、命名空间没建、以 root 跑。demo 用 `openNetwork` 断言 + env 白名单 + 隔离 world view 把这条"变成代码"。
 4. **审计失败**：拦了但没留痕，事后无法取证、无法做漂移检测、无法重放（S5/S6）。demo 用 `World.log` + 每条 policy 判定进转录。
@@ -311,6 +359,22 @@ FinHot 根目录 `.env` 就是生产配置（compose `env_file`）——**根目
 3. **事故重放**：幽灵事故剧本（S2）= 可复现的故障注入测试；**能重放事故的系统才能证明自己防得住**。
 
 验收指标：`run N 次 → diff 全空`；评测集结果跨天可复现（评测工程化 CI 门禁的前提）。`sandbox-demo` 的具体验收见 S2.5（A/B 各 3 次、sha256 golden diff）。
+
+```ts
+// src/replay.ts —— S6 可复现：同一剧本跑 N 次，逐字节 diff 全空
+export function assertDeterministic(label, runOnce, times = 3) {
+  const golden = runOnce();                 // 第 1 次 = golden（基线）
+  const hash = sha256(golden);
+  let ok = true;
+  for (let i = 2; i <= times; i++) {
+    const t = runOnce();
+    // 与 golden 逐字节比对；不一致 → 打印首处 diff 行，ok=false
+  }
+  return { ok, hash, lines };               // sandbox-demo 末尾断言打印 `✅ 重放一致性断言通过`
+}
+```
+
+**实跑判据（S6）**：`cd sandbox-demo && npm run demo`，末尾出现 `✅ 重放一致性断言通过`（A 组仅权限门、B 组四通道+沙箱各跑 3 次、转录逐字节一致）。这是「系统行为可复现」的机器可核证据——不是「跑过一遍」，是「跑 N 遍都一字不差」（克隆判据见 course-structure.ts 的 practicalOutput）。
 
 ### S6.1 崩溃恢复窗口：写前 / 写后 / 提交中
 

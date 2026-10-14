@@ -1,0 +1,275 @@
+---
+import Base from '../layouts/Base.astro';
+import { LLM_HISTORY, LLM_EVOLUTION } from '../data/llm-history';
+import {
+  COURSE_STRUCTURE,
+  STAGES,
+  STAGE_LABELS,
+  STAGE_COUNTS,
+  coursesByStage,
+} from '../data/course-structure';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Base
+  title="学习导航"
+  description="LLM 发展史与演进横向知识总览 + 五阶段（P0–P4）课程地图：一条带出处的时间线、五代代际、17 门课线性阅读序。"
+>
+  <h1 class="page-title">学习导航</h1>
+  <p class="page-lead">
+    LLM 发展史与演进是贯穿全站的<strong>横向知识</strong>（位于 P0 之前）——
+    先给一条<strong>带出处的时间线</strong>与<strong>五代演进总览</strong>，
+    再给<strong>五阶段（P0–P4）课程地图</strong>；点开任一课程进入正文。
+    深度正文见 <a href={base + "c/llm-timeline/"}>LLM 时间线课程页 →</a>
+  </p>
+
+  <!-- ── LLM 发展历史（时间线）────────────────────────── -->
+  <section class="phase-section">
+    <div class="phase-head">
+      <h2>LLM 发展历史</h2>
+      <span class="phase-desc">2017 Transformer → 2025 DeepSeek-R1 · {LLM_HISTORY.length} 节点带权威出处</span>
+    </div>
+    <ol class="llm-timeline">
+      {LLM_HISTORY.map((item) => (
+        <li class="llm-tl-item">
+          <div class="llm-tl-date">{item.date}</div>
+          <div class="llm-tl-body">
+            <div class="llm-tl-head">
+              <strong class="llm-tl-name">{item.name}</strong>
+              <span class="chip">{item.org}</span>
+              {item.verified === 'month' && <span class="chip chip-strong">月份级·待复核</span>}
+            </div>
+            <p class="llm-tl-sig">{item.significance}</p>
+            <p class="llm-tl-summary">{item.summary}</p>
+            {item.note && <p class="llm-tl-note">{item.note}</p>}
+            <p class="llm-tl-connect">👉 {item.connectsTo}</p>
+            <div class="llm-tl-src">
+              <span class="llm-tl-src-label">出处</span>
+              {item.source.map((url) => (
+                <a href={url} target="_blank" rel="noopener">{url}</a>
+              ))}
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ── LLM 演进过程（代际）──────────────────────────── -->
+  <section class="phase-section">
+    <div class="phase-head">
+      <h2>LLM 演进过程</h2>
+      <span class="phase-desc">预训练 → 规模/上下文学习 → 对齐 → 工具/多模态 → 推理，五代代际</span>
+    </div>
+    <div class="cards">
+      {LLM_EVOLUTION.map((era) => (
+        <div class="card">
+          <div class="dc-top">
+            <h3>{era.era}</h3>
+            <span class="chip chip-strong">{era.period}</span>
+          </div>
+          <p class="llm-evo-arch"><code>{era.architecture}</code></p>
+          <ul class="llm-evo-features">
+            {era.features.map((f) => <li>{f}</li>)}
+          </ul>
+          <p class="llm-evo-sig">{era.significance}</p>
+          <p class="llm-evo-transition">{era.transition}</p>
+          <p class="llm-evo-connect">👉 {era.connectsTo}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── 五阶段课程导航（P0–P4）───────────────────────── -->
+  <section class="phase-section">
+    <div class="phase-head">
+      <h2>五阶段课程导航</h2>
+      <span class="phase-desc">P0 基础篇 → P4 收口与前沿 · 共 {COURSE_STRUCTURE.length} 门课线性阅读序</span>
+    </div>
+  </section>
+  {
+    STAGES.map((stage) => (
+      <section class="phase-section">
+        <div class="phase-head">
+          <h3>{stage} · {STAGE_LABELS[stage]}</h3>
+          <span class="phase-desc">{STAGE_COUNTS[stage]} 门课</span>
+        </div>
+        <div class="cards">
+          {coursesByStage(stage).map((course) => (
+            <a class="card" href={base + "c/" + course.slug + "/"}>
+              <div class="dc-top">
+                <h3>{course.domain}</h3>
+                <span class="chip chip-strong">{course.stage}</span>
+                {course.isHorizontal && <span class="chip">横向</span>}
+              </div>
+              <p class="dc-intro">{course.intro}</p>
+              <p class="dc-angle"><strong>前置知识</strong>：{course.prerequisiteNote}</p>
+              <p class="dc-foot"><code>{course.mvpSlug}</code> · 进入课程 →</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  /* ── LLM 历史：纵向时间线 ─────────────────────────── */
+  .llm-timeline {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    position: relative;
+  }
+  .llm-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border-strong);
+  }
+  .llm-tl-item {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    padding: 0 0 20px;
+  }
+  .llm-tl-item:last-child {
+    padding-bottom: 0;
+  }
+  .llm-tl-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 1.5px var(--accent);
+  }
+  .llm-tl-date {
+    flex: 0 0 76px;
+    padding-left: 26px;
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--accent);
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .llm-tl-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .llm-tl-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .llm-tl-name {
+    font-size: 1rem;
+  }
+  .llm-tl-sig {
+    margin: 4px 0 0;
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+  .llm-tl-summary {
+    margin: 6px 0 0;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 56em;
+  }
+  .llm-tl-note {
+    margin: 4px 0 0;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    max-width: 44em;
+  }
+  .llm-tl-connect {
+    margin: 5px 0 0;
+    color: var(--accent);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 56em;
+  }
+  .llm-tl-src {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+  }
+  .llm-tl-src-label {
+    color: var(--text-faint);
+    font-size: 0.76rem;
+  }
+  .llm-tl-src a {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── LLM 演进：代际卡片 ───────────────────────────── */
+  .llm-evo-arch {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.9rem;
+  }
+  .llm-evo-features {
+    margin: 0;
+    padding-left: 1.25em;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .llm-evo-features li {
+    margin: 2px 0;
+  }
+  .llm-evo-sig {
+    margin: 0;
+    color: var(--text-faint);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .llm-evo-transition {
+    margin: 8px 0 0;
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .llm-evo-connect {
+    margin: 6px 0 0;
+    color: var(--accent);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  /* ── 五阶段课程导航 ───────────────────────────────── */
+  .phase-head h3 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .dc-foot code {
+    font-size: 0.82rem;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0 5px;
+  }
+
+  @media (max-width: 560px) {
+    .llm-tl-item {
+      flex-direction: column;
+      gap: 4px;
+    }
+    .llm-tl-date {
+      padding-left: 26px;
+    }
+  }
+</style>

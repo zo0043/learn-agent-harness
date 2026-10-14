@@ -1,0 +1,31 @@
+{
+  "name": "my-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "capstone 主线：从零逐步增建一个能「想→做→说」的 agent（M0 = 单工具最小 loop，全离线零 key 确定性）",
+  "scripts": {
+    "demo": "tsx exercises/m4/starter/loop.ts",
+    "demo:m0": "tsx exercises/m0/starter/loop.ts",
+    "demo:m1": "tsx exercises/m1/starter/loop.ts",
+    "demo:m2": "tsx exercises/m2/starter/loop.ts",
+    "demo:m3": "tsx exercises/m3/starter/loop.ts",
+    "demo:m4": "tsx exercises/m4/starter/loop.ts",
+    "assert:m0": "tsx assert/m0.assert.ts",
+    "assert:m0:solution": "tsx assert/m0.assert.ts solution",
+    "assert:m1": "tsx assert/m1.assert.ts",
+    "assert:m1:solution": "tsx assert/m1.assert.ts solution",
+    "assert:m2": "tsx assert/m2.assert.ts",
+    "assert:m2:solution": "tsx assert/m2.assert.ts solution",
+    "assert:m3": "tsx assert/m3.assert.ts",
+    "assert:m3:solution": "tsx assert/m3.assert.ts solution",
+    "assert:m4": "tsx assert/m4.assert.ts",
+    "assert:m4:solution": "tsx assert/m4.assert.ts solution",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.6.0"
+  }
+}

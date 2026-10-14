@@ -4,6 +4,9 @@ import SiteSearch from './SiteSearch.astro';
 const base = import.meta.env.BASE_URL;
 const nav = [
   { href: '/', label: '首页', start: true },
+  // 横向知识导航页（LLM 发展史与演进 + 五阶段课程地图）：按方案位于 P0 之前，
+  // 故排在首页之后、题库之前。
+  { href: '/nav/', label: '导航' },
   { href: '/interview/', label: '题库', featured: true },
   { href: '/learn/', label: '学习路线' },
   { href: '/details/', label: '详解' },

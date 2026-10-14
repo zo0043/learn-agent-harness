@@ -2,34 +2,68 @@
 import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import { getCollection } from 'astro:content';
-import { COURSES, CARD_COUNT, COURSE_COUNT, DOMAIN_COUNT, STATUS_COUNTS, type CourseMeta } from '../data/courses';
+import {
+  COURSE_STRUCTURE,
+  STAGES,
+  STAGE_LABELS,
+  STAGE_COUNTS,
+} from '../data/course-structure';
+import { courseMeta } from '../data/courses';
+import { mvpBySlug } from '../data/mvps';
+import { MILESTONES } from '../data/capstone';
+import {
+  GENERATIVE_DISCIPLINE,
+  FINAL_SUBJECTS,
+  FINAL_BLACKBOX,
+  FINAL_WHITEBOX,
+  FINAL_SELF_CHECK,
+  FINAL_GRADE_CMD,
+  FINAL_CLOSING,
+} from '../data/final-project';
 
+const base = import.meta.env.BASE_URL;
+
+// 路由集合：/c/<slug>/ 由 notes/*.md glob 驱动（新增文件自动出现），用于课程卡"是否已就位"判断。
 const entries = await getCollection('courses');
 const slugSet = new Set(entries.map((e) => e.id));
 
-// 总进度全部取自 courses.ts 派生量（口径块见 notes/knowledge-map.md 头部「计数口径」：
-// 课程卡 18 = 全部条目含 whiteboard 白板卡；知识域 15 = 14 编号课 + Harness 架构主线）。
-const { done, doing, planned } = STATUS_COUNTS;
+// 阶段目标说明（§1 五阶段定位；页面级呈现，真源在 course-structure.ts 的 STAGE_LABELS / STAGE_COUNTS）。
+const STAGE_DESC: Record<string, string> = {
+  P0: '0 经验可入手 · 从零写 harness 起步（序章 + 动手）',
+  P1: '工具调用 / 供应链安全 / 评测 / 多智能体编排',
+  P2: '长任务不丢不重 / 多模型路由 / 可观测',
+  P3: '长期记忆 / 数据飞轮 / 模型基础',
+  P4: '框架生态收口 + 行业前线调研',
+};
 
-const PHASES: { phase: CourseMeta['phase']; desc: string }[] = [
-  { phase: 'P0', desc: '核心段：白板 / 系统设计 / 项目深挖的硬通货' },
-  { phase: 'P1', desc: '扩展段：公共地基 + 追问深度' },
-  { phase: 'P2', desc: '区分度段：按目标岗位权重排' },
-  { phase: '—', desc: '横向素材：未分阶段' },
-];
+const bySlug = new Map(COURSE_STRUCTURE.map((c) => [c.slug, c]));
 
-/** 状态徽章文本 → 稳定 key（与 STATUS_COUNTS 的判定规则一致：取 emoji 前缀） */
-function statusKey(status: CourseMeta['status']): string {
+/** 课程卡联合视图：结构（stage/prereqs/next/mvpSlug/教学字段，course-structure.ts）
+ *  + 元数据（状态/面试视角，courses.ts）+ MVP 词表（mvps.ts 三态如实标注）。 */
+const items = COURSE_STRUCTURE.map((c) => ({
+  course: c,
+  meta: courseMeta(c.slug),
+  mvp: mvpBySlug(c.mvpSlug),
+  exists: slugSet.has(c.slug),
+}));
+
+/** 状态徽标 key（与 StatusBadge 判定同源：emoji 前缀） */
+function statusKey(status: string): string {
   if (status.startsWith('✅')) return 'done';
   if (status.startsWith('🔄') || status.startsWith('🚧')) return 'doing';
   if (status.startsWith('⏳')) return 'planned';
   return 'other';
 }
 
-// 筛选 chip 的状态维度：从 COURSES 实际出现的状态派生（不手抄，避免与数据漂移）
+// 完成/进行/规划计数（17 门课口径，whiteboard 白板卡不在此表——见站点 nav/ 或 /map）。
+const doneCount = items.filter((it) => statusKey(it.meta.status) === 'done').length;
+const doingCount = items.filter((it) => statusKey(it.meta.status) === 'doing').length;
+const plannedCount = items.filter((it) => statusKey(it.meta.status) === 'planned').length;
+
+// 状态筛选维度：从 17 门课实际出现的状态派生（不手抄，避免与数据漂移）
 const STATUS_FILTERS = (() => {
   const seen = new Map<string, string>();
-  for (const c of COURSES) seen.set(statusKey(c.status), c.status);
+  for (const it of items) seen.set(statusKey(it.meta.status), it.meta.status);
   return [...seen.entries()].map(([key, label]) => ({ key, label }));
 })();
 ---
@@ -37,33 +71,27 @@ const STATUS_FILTERS = (() => {
 <Base title="学习路线">
   <h1 class="page-title">学习路线</h1>
   <p class="page-lead">
-    总进度：<strong>{CARD_COUNT} 张课程卡</strong> · {DOMAIN_COUNT} 知识域 ·
-    ✅ 完成 {done} / 🔄 讲义已展开 {doing} / ⏳ 规划 {planned}
-    （状态实时取自 <code>src/data/courses.ts</code> 派生量）
+    P0–P4 五阶段 × <strong>{COURSE_STRUCTURE.length} 门课</strong>（线性阅读序，
+    <code>src/data/course-structure.ts</code> 驱动）；✅ 完成 {doneCount} / 🔄 进行中 {doingCount} / ⏳ 规划 {plannedCount}。
+    每课带<strong>前置知识</strong> + <strong>独占 MVP</strong>（三态如实标注），点开进课程页。
   </p>
   <p class="page-lead">
-    P0 / P1 / P2 三段 × 知识域。卡片数据来自手写映射 <code>src/data/courses.ts</code>
-    （基线：notes/knowledge-map.md 课程总表）；点开进课程页。
-    <br />
     <span class="lf-count-note">
-      计数口径：{CARD_COUNT} 张课程卡 = courses.ts 全部条目（含 <code>whiteboard</code> 白板卡，
-      无独立课程页、链向 /works/#whiteboard，故比 {COURSE_COUNT} 个课程页多 1）；
-      {DOMAIN_COUNT} 知识域 = 14 编号课 + Harness 架构主线，不含 LLM 时间线 / 行业前线调研等横向资产。
+      阶段计数：P0×{STAGE_COUNTS.P0} / P1×{STAGE_COUNTS.P1} / P2×{STAGE_COUNTS.P2} / P3×{STAGE_COUNTS.P3} / P4×{STAGE_COUNTS.P4}；
+      <code>whiteboard</code> 白板卡是「从零写 harness」的配套资产（链向 /works/#whiteboard），不计入课程页。
+      五阶段总览与 LLM 横向知识导航见 <a href={base + "nav/"}>学习导航 →</a>
     </span>
   </p>
 
-  <!-- ── 筛选（P-12 · W4-A）──────────────────────────────
-       渐进增强：静态 HTML 里没有任何 hidden 属性 → 无 JS 时全部卡片可见；
-       筛选条本身由 CSS 默认隐藏，脚本就绪后才显示（否则会给读者一堆按了没反应的按钮）。
-       维度：阶段（隐藏整个 phase-section）+ 状态（隐藏单张卡片）。 -->
+  <!-- ── 筛选（渐进增强）──────────────────────────────────
+       静态 HTML 无任何 hidden → 无 JS 时全部卡片可见；筛选条由 CSS 默认隐藏、
+       脚本就绪后才显示。维度：阶段（五档，隐藏整个 section）+ 状态（隐藏单张卡片）。 -->
   <div class="learn-filters" data-learn-filters>
     <div class="lf-group" role="group" aria-label="按阶段筛选">
       <span class="lf-label">阶段</span>
-      <button type="button" class="chip lf-chip is-on" data-lf-phase="">全部</button>
-      {PHASES.map(({ phase }) => (
-        <button type="button" class="chip lf-chip" data-lf-phase={phase}>
-          {phase === '—' ? '未分阶段' : phase}
-        </button>
+      <button type="button" class="chip lf-chip is-on" data-lf-stage="">全部</button>
+      {STAGES.map((stage) => (
+        <button type="button" class="chip lf-chip" data-lf-stage={stage}>{stage}</button>
       ))}
     </div>
     <div class="lf-group" role="group" aria-label="按状态筛选">
@@ -77,84 +105,162 @@ const STATUS_FILTERS = (() => {
   </div>
 
   {
-    PHASES.map(({ phase, desc }) => {
-      const list = COURSES.filter((c) => c.phase === phase);
-      return (
-        <section class="phase-section" data-lf-section data-phase={phase}>
-          <div class="phase-head">
-            <h2>{phase === '—' ? '未分阶段' : phase}</h2>
-            <span class="phase-desc">{desc}</span>
-          </div>
-          <div class="cards">
-            {
-              list.map((c) => {
-                const exists = slugSet.has(c.slug);
-                const isWhiteboard = c.slug === 'whiteboard';
-                return isWhiteboard ? (
-                  <a class="card domain-card" href={import.meta.env.BASE_URL + "works/#whiteboard"} data-lf-card data-status={statusKey(c.status)}>
+    STAGES.map((stage) => (
+      <section class="phase-section" data-lf-section data-stage={stage}>
+        <div class="phase-head">
+          <h2>{stage} · {STAGE_LABELS[stage]}</h2>
+          <span class="phase-desc">{STAGE_DESC[stage]} · {STAGE_COUNTS[stage]} 门课</span>
+        </div>
+        <div class="cards">
+          {
+            items
+              .filter((it) => it.course.stage === stage)
+              .map(({ course, meta, mvp, exists }) =>
+                exists ? (
+                  <div class="card domain-card" data-lf-card data-status={statusKey(meta.status)}>
                     <div class="dc-top">
-                      <h3>{c.domain}</h3>
-                      <StatusBadge status={c.status} />
+                      <h3>{course.domain}</h3>
+                      <span class="chip chip-strong">{course.stage}</span>
+                      <StatusBadge status={meta.status} />
                     </div>
-                    <p class="dc-intro">{c.intro}</p>
-                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
-                    <p class="dc-foot">作品详解 →</p>
-                  </a>
-                ) : exists ? (
-                  <a class="card domain-card" href={import.meta.env.BASE_URL + `c/${c.slug}/`} data-lf-card data-status={statusKey(c.status)}>
-                    <div class="dc-top">
-                      <h3>{c.domain}</h3>
-                      <StatusBadge status={c.status} />
-                    </div>
-                    <p class="dc-intro">{c.intro}</p>
-                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
-                    <p class="dc-foot">进入课程 →</p>
-                  </a>
+                    {course.title !== course.domain && <p class="lw-title">{course.title}</p>}
+                    <p class="dc-intro">{course.intro}</p>
+                    {
+                      course.prereqs.length > 0 && (
+                        <p class="lw-prereqs">
+                          <span class="lw-label">前置</span>
+                          {course.prereqs.map((slug) => {
+                            const p = bySlug.get(slug);
+                            return <a href={base + 'c/' + slug + '/'}>{p ? p.domain : slug}</a>;
+                          })}
+                        </p>
+                      )
+                    }
+                    {meta.interviewAngle && (
+                      <p class="dc-angle"><strong>面试视角</strong>：{meta.interviewAngle}</p>
+                    )}
+                    <p class="dc-foot">
+                      <span class="chip">参考样本 <code>{course.mvpSlug}</code></span>
+                      {course.capstoneHook && <span class="chip chip-hook">主线挂钩 {course.capstoneHook}</span>}
+                      {mvp.status === 'planned' && <span class="chip">规划中</span>}
+                      {mvp.status === 'asset' && <span class="chip">横向资产</span>}
+                      <a href={base + 'c/' + course.slug + '/'}>进入课程 →</a>
+                    </p>
+                  </div>
                 ) : (
-                  /* aria-label 从无 role 的 div 上移除（U-31/P-14：div 上挂 aria-label 是
-                     无效 ARIA，且会与卡片内可见文字（域名/intro/状态/撰写中提示）竞争）；
-                     「撰写中」由 .dc-foot 可见文字与 StatusBadge 承担，信息不丢失。 */
-                  <div class="card domain-card soon" data-lf-card data-status={statusKey(c.status)}>
+                  <div class="card domain-card soon" data-lf-card data-status={statusKey(meta.status)}>
                     <div class="dc-top">
-                      <h3>{c.domain}</h3>
-                      <StatusBadge status={c.status} />
+                      <h3>{course.domain}</h3>
+                      <span class="chip chip-strong">{course.stage}</span>
+                      <StatusBadge status={meta.status} />
                     </div>
-                    <p class="dc-intro">{c.intro}</p>
-                    {c.interviewAngle && <p class="dc-angle"><strong>面试视角</strong>：{c.interviewAngle}</p>}
+                    <p class="dc-intro">{course.intro}</p>
                     <p class="dc-foot">撰写中（文件未就位）</p>
                   </div>
-                );
-              })
-            }
-          </div>
-          <p class="lf-empty" data-lf-empty hidden>该阶段没有符合当前状态的卡片。</p>
-        </section>
-      );
-    })
+                ),
+              )
+          }
+        </div>
+        <p class="lf-empty" data-lf-empty hidden>该阶段没有符合当前状态的卡片。</p>
+      </section>
+    ))
   }
 
+  <!-- ── 建议开课顺序（§3 线性阅读序）────────────────────── -->
   <section class="phase-section">
     <div class="phase-head">
       <h2>建议开课顺序</h2>
+      <span class="phase-desc">线性阅读序 #1→#17（COURSE_STRUCTURE 数组序，与 course-structure.ts 单一真源）</span>
     </div>
     <div class="card card-block">
-      <p class="order-first">
-        <code>系统设计</code> → <code>沙箱与凭据（续 S2）</code> → <code>评测工程化</code> →
-        <code>durable execution</code> → <code>MCP 与供应链安全</code> → <code>API 与多模型路由</code> →
-        <code>数据飞轮</code> →（P2 四课按目标岗位权重排）
+      <p class="order-chain">
+        {COURSE_STRUCTURE.map((c) => (
+          <a href={base + 'c/' + c.slug + '/'}>{c.domain}</a>
+        ))}
       </p>
       <p class="order-reason">
-        理由:系统设计把「从零写 harness / RAG 与检索」收口成“设计能力”;沙箱与凭据讲义已展开且 demo 已落地;评测工程化是 P1 三课(durable execution / MCP 与供应链安全 / 数据飞轮)的公共地基。
+        顺序语义：每门课 <code>next</code> = 线性序 + 1（末课空，即上下篇导航）；
+        跨多门的逻辑依赖由 <code>prereqs</code> 承载（如「评测工程化」同时是「durable execution」与
+        「数据飞轮」的前置，但上下篇仍走单链线性序不打散）。完整依赖图见 <a href={base + "map/"}>知识地图 →</a>
       </p>
-      <p class="order-more">
-        完整依赖图与横切知识点见 <a href={import.meta.env.BASE_URL + "map/"}>知识地图 →</a>
-      </p>
+    </div>
+  </section>
+
+  <!-- ── 增量主线（capstone：你要搭的 / 17 demo 是参考样本）──────────────
+       静态 HTML 无 JS 也全可见；milestone 卡由 capstone.ts（照 capstone-blueprint §3）驱动。 -->
+  <section class="phase-section" data-capstone>
+    <div class="phase-head">
+      <h2>增量主线 · capstone（你要搭的）</h2>
+      <span class="phase-desc">my-agent：从零增建一个完整 agent——5 个 milestone 对应 P0–P4，后段复用你亲手写的代码；17 个 demo 不是终点作品，而是每个 milestone 的参考答案（参考样本）</span>
+    </div>
+    <div class="cards">
+      <div class="card capstone-hero">
+        <p class="cp-hero-text">
+          <strong>主线是你亲手搭的工具；17 个 demo 是每个 milestone 的参考答案。</strong>
+          M0（最小 loop）已就位——本仓库根目录 <code>my-agent/</code>，读 README + <code>npm run assert:m0</code> 起步；
+          M1–M4 的练习就位内容留待 sprint 5。
+        </p>
+        <p class="cp-hero-link">
+          第一课主线锚点 <a href={base + 'c/harness-from-scratch/'}>从零写 harness</a>；完整蓝图见 <code>notes/capstone-blueprint.md</code>。
+        </p>
+      </div>
+
+      {MILESTONES.map((m) => (
+        <div class="card capstone-card" data-milestone={m.key}>
+          <div class="cp-top">
+            <h3>{m.name}</h3>
+            <span class="chip chip-strong">{m.stage}{m.stageNote ? ` · ${m.stageNote}` : ''}</span>
+            <span class="chip">{m.statusLabel}</span>
+          </div>
+          <ul class="cp-adds">
+            {m.adds.map((a) => <li>{a}</li>)}
+          </ul>
+          <p class="cp-courses">
+            <span class="lw-label">必修课</span>
+            {m.courses.map((slug) => (
+              <a href={base + 'c/' + slug + '/'}>{bySlug.get(slug)?.domain ?? slug}</a>
+            ))}
+          </p>
+          <p class="cp-ref">
+            <span class="lw-label">参考样本</span>
+            {m.reference.join(' · ')}
+          </p>
+          {m.status === 'done' && <p class="cp-assert">过关判据：<code>{m.assertCmd}</code></p>}
+        </div>
+      ))}
+
+      <div class="card capstone-card final-card" data-milestone="final">
+        <div class="cp-top">
+          <h3>毕业项目 · 生成层收口</h3>
+          <span class="chip chip-strong">生成（generate）</span>
+          <span class="chip">自由命题 · 无脚手架</span>
+        </div>
+        <p class="cp-hero-text">
+          <strong>从模糊需求，独立设计并实现你自己的 agent。</strong>
+          主线 M0–M4 练「补全」；本卡是第三跳「生成」。<em>{GENERATIVE_DISCIPLINE}</em>
+        </p>
+        <ul class="cp-adds">
+          {FINAL_SUBJECTS.map((s) => (
+            <li>{s.title} —— {s.summary}</li>
+          ))}
+        </ul>
+        <p class="cp-courses">
+          <span class="lw-label">判据（机器可读）</span>
+          {FINAL_BLACKBOX.map(([id, name]) => `${id} ${name}`).join(' · ')} · {FINAL_WHITEBOX.map(([id, name]) => `${id} ${name}`).join(' · ')}
+        </p>
+        <p class="cp-ref">
+          <span class="lw-label">怎么判自己过关</span>
+          {FINAL_SELF_CHECK.map((s) => s.replace(/^先[黑]?白?[盒]?[自查，]*/, '')).join('；')}
+        </p>
+        <p class="cp-assert">判据入口：<code>{FINAL_GRADE_CMD}</code>（完整命题/判据/自测见 <code>notes/capstone-final.md</code>）</p>
+        <p class="cp-closing">收口：{FINAL_CLOSING}</p>
+      </div>
     </div>
   </section>
 </Base>
 
 {/* 筛选逻辑（vanilla JS，无第三方库）。
-    无 JS 时：静态 HTML 无任何 hidden → 18 张卡片全部可见，筛选条被 CSS 藏住。
+    无 JS 时：静态 HTML 无任何 hidden → 17 张卡片全部可见，筛选条被 CSS 藏住。
     有 JS 时：脚本先摘掉隐藏再绑定，chip 点击改 hidden 属性（不碰内联 style）。 */}
 <script>
   const bar = document.querySelector<HTMLDivElement>('[data-learn-filters]');
@@ -163,24 +269,24 @@ const STATUS_FILTERS = (() => {
     const sections = [...document.querySelectorAll<HTMLElement>('[data-lf-section]')];
     const cards = [...document.querySelectorAll<HTMLElement>('[data-lf-card]')];
     const count = bar.querySelector<HTMLElement>('[data-lf-count]');
-    const phaseChips = [...bar.querySelectorAll<HTMLButtonElement>('[data-lf-phase]')];
+    const stageChips = [...bar.querySelectorAll<HTMLButtonElement>('[data-lf-stage]')];
     const statusChips = [...bar.querySelectorAll<HTMLButtonElement>('[data-lf-status]')];
 
-    let phase = '';
+    let stage = '';
     let status = '';
 
     function apply() {
       let shown = 0;
       for (const sec of sections) {
-        const phaseOk = !phase || sec.dataset.phase === phase;
+        const stageOk = !stage || sec.dataset.stage === stage;
         let secShown = 0;
         for (const card of cards.filter((c) => c.closest('[data-lf-section]') === sec)) {
           const statusOk = !status || card.dataset.status === status;
-          const show = phaseOk && statusOk;
+          const show = stageOk && statusOk;
           card.hidden = !show;
           if (show) secShown += 1;
         }
-        sec.hidden = !phaseOk || secShown === 0;
+        sec.hidden = !stageOk || secShown === 0;
         const empty = sec.querySelector<HTMLElement>('[data-lf-empty]');
         if (empty) empty.hidden = sec.hidden || secShown > 0;
         shown += secShown;
@@ -191,23 +297,126 @@ const STATUS_FILTERS = (() => {
     function bind(chips: HTMLButtonElement[], set: (v: string) => void) {
       for (const chip of chips) {
         chip.addEventListener('click', () => {
-          set(chip.dataset.lfPhase ?? chip.dataset.lfStatus ?? '');
+          set(chip.dataset.lfStage ?? chip.dataset.lfStatus ?? '');
           for (const c of chips) c.classList.toggle('is-on', c === chip);
           apply();
         });
       }
     }
-    bind(phaseChips, (v) => (phase = v));
+    bind(stageChips, (v) => (stage = v));
     bind(statusChips, (v) => (status = v));
     apply();
   }
 </script>
 
 <style>
-  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。
-     .order-first 的 margin-top:0 与 .card p{margin:0} 同值，保留显式声明以免依赖全局规则。 */
+  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。 */
   .lf-count-note { color: var(--text-soft); font-size: 0.94rem; }
-  .order-first { margin-top: 0; }
+
+  /* 标题：与域名不同的课程显示教学标题（域名即标题时不再重复一行） */
+  .lw-title { margin: 0; font-weight: 600; font-size: 0.92rem; }
+
+  /* 前置知识：课程卡内嵌的 prereq 链接（卡片改为 div，允许内嵌锚链） */
+  .lw-prereqs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+  }
+  .lw-prereqs .lw-label {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+  }
+  .lw-prereqs a {
+    font-size: 0.85rem;
+  }
+
+  /* dc-foot 内 MVP chip + 进入课程链接并排 */
+  .dc-foot {
+    display: flex;
+    align-items: center;
+    gap: 6px 10px;
+    flex-wrap: wrap;
+  }
+  .dc-foot a {
+    font-weight: 500;
+  }
+
+  /* 建议开课顺序：线性链 */
+  .order-chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    margin: 0;
+    line-height: 2;
+  }
+  .order-chain a {
+    color: var(--text);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .order-chain a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .order-chain a::after {
+    content: ' → ';
+    color: var(--text-faint);
+    font-weight: 400;
+  }
+  .order-chain a:last-child::after {
+    content: '';
+  }
   .order-reason { color: var(--text-soft); font-size: 0.92rem; }
-  .order-more { font-size: 0.9rem; }
+
+  /* ── 增量主线（capstone）卡片 ─────────────────────────────── */
+  .chip-hook {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .capstone-hero { grid-column: 1 / -1; }
+  .cp-hero-text { margin: 0; line-height: 1.7; }
+  .cp-hero-link { margin: 8px 0 0; color: var(--text-soft); font-size: 0.88rem; }
+  .capstone-card .cp-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+  }
+  .capstone-card h3 { margin: 0; font-size: 0.95rem; }
+  .cp-adds {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .cp-courses,
+  .cp-ref {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin: 8px 0 0;
+    font-size: 0.84rem;
+    color: var(--text-soft);
+  }
+  .cp-courses a {
+    font-size: 0.84rem;
+  }
+  .cp-assert {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+  .final-card { grid-column: 1 / -1; border-color: var(--accent); }
+  .final-card .cp-hero-text { margin-top: 10px; font-size: 0.9rem; }
+  .final-card .cp-hero-text em { color: var(--accent); }
+  .cp-closing {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
 </style>

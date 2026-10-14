@@ -9,6 +9,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`llm-timeline`（横向导航页，位于 P0 之前）——上一课带入「模型是会持续换代的组件」时间轴（GPT 系 / o1 推理模型 / 开源系的代际差异），本课把它从「一代代更替」落到「每一代在 harness 里有什么工程后果」。
+- **技能门槛**：只需「矩阵乘法 = 行列点积、softmax = 归一化成概率」的粗直觉即可。
+- **不需要提前会**：PyTorch / attention 数学推导 / 真实微调 / 推理引擎调优——一律不用会。KV cache 机制、prefill-decode 两阶段、推理成本构成、微调谱系随 `model-basics-demo` 的 `npm run demo` 边跑边建（本 sprint 规格先行，目录由下游按 notes/model-basics-mvp-spec.md 建成）。
+
+---
+
 ## S1 推理管线：一次生成的两个阶段
 
 **这一节解决什么问题**：先把"模型从哪来、到你这儿时是什么形态"钉死，再讲一次生成内部发生了什么。很多工程现象（TTFT 为什么高、并发为什么上不去、前缀缓存为什么能省钱）都能在这一节找到根。
@@ -53,6 +61,16 @@ prefill（吃 prompt）→ decode（逐 token 吐）
 - 相关优化（意识级）：GQA/MQA（减少 KV head 数）、PagedAttention（vLLM：KV 分页管理，减少碎片）、量化（FP8/INT8，省带宽）、FlashAttention（分块计算 attention，减少显存读写，不改变 O(n²) 计算量；Dao et al., NeurIPS 2022, arXiv:2205.14135）
 
 **失败模式**：把 KV cache 当"缓存命中就免费"。它省的是重算，不省显存——并发 8 路、每路 8K 上下文时，KV cache 可能比模型权重还占显存；这时加并发先撞显存墙，而不是算力墙。（量级参照：LLaMA-2 70B 为 80 层 / 64 注意力头 / 8 个 KV head（GQA）/ head_dim=128，来源 Meta 官方 config）
+
+```js
+// model-basics-mvp-spec.md 接口（规划态，model-basics-demo/ 落地后即此形状）——KV cache 显存估算
+const kvBytesPerToken = (layers, kvHeads, headDim, bytes) => 2 * layers * kvHeads * headDim * bytes; // 2 = K + V
+// 实例（S8 走查的 Mistral-7B 量级：32 层 / 8 KV heads / head_dim=128 / FP16 即 bytes=2）：
+//   kvBytesPerToken(32, 8, 128, 2) = 131072 B/token ≈ 0.13 MB/token
+//   8K prompt = 8192 × 0.13MB ≈ 1.0 GB/路；并发 8 路 ≈ 8 GB 只放 KV（还没算权重）
+```
+
+**这段在讲什么**：这条公式要能当场推——`2×layers×kv_heads×head_dim×bytes` 里只有 `seq_len` 是运行时变量，其余四项是模型固定结构。两个直接推论：① 上下文越长 → 每步 decode 越慢、显存越多（长会话要压缩的模型侧理由）；② 同模型并发多请求 → KV 总量受限 → 吞吐瓶颈在显存不在算力（容量按显存规划）。GQA 的价值就是砍 `kv_heads` 这一项（LLaMA-2 70B 从 64 头砍到 8 个 KV head），代价是 KV 表达能力下降——这就是 S7-4 那道"为什么 GQA 成为主流而非 MQA"的机制底。
 
 ---
 
@@ -140,6 +158,16 @@ flowchart LR
 - 长上下文的非线性：KV cache 显存↑ → 并发↓ → 单位成本↑（S1 推论 2 的定价版）
 
 **失败模式**：只优化单步 prompt 长度，不看步数。步数从 8 涨到 12 会吃掉你省下的所有 token；反过来，如果你能砍掉两次不必要的工具往返，比把 prompt 缩短 20% 更值钱。
+
+```js
+// model-basics-mvp-spec.md 接口（规划态）——成本拆分 + TTFT/TPOT 估算
+const stepCost = (inputT, outputT, pIn, pOut) => inputT * pIn + outputT * pOut;  // 输出常是输入 3-5×（decode 串行 + 每 token 全模型前向）
+const taskCost = (steps) => steps.reduce((sum, c) => sum + c, 0);                // 总成本 = Σ 单步 × 步数（步数是唯一乘数放大项）
+// TTFT  = t_queue + t_prefill + t_network，t_prefill ≈ prompt_tokens / prefill_throughput   （算力受限、可并行）
+// TPOT ≈ (weight_bytes + B × kv_bytes_per_seq) / HBM_bandwidth  （B=并发；decode 每步读一次权重、读 B 份 KV）
+```
+
+**这段在讲什么**：成本模型要能白板手推——`stepCost` 两刀独立（输入吃 prefill、输出吃 decode），而 `taskCost` 的 `× 步数` 是唯一能**乘数放大**的项，所以「少步 > 省字」。caching 折扣只打在「命中前缀」那一段 prefill 上（动态字段放 prompt 最前 = 前缀每轮都变 = 缓存永远 miss，S8 步骤 3 的 0.13MB/token 全重算）；TTFT/TPOT 两段瓶颈不同，优化手段不同（quantization/speculative 只能救 TPOT，S7-15/14）。
 
 ---
 
@@ -322,6 +350,8 @@ KV per token 用 S1 公式估（示例：32 层、8 个 KV head、head_dim=128�
 - 追问："那 agent 架构要怎么改？" 答：减少无谓的自洽投票与重试，把预算给一次深推理；但可验证任务仍要靠 evaluator/测试闭环，不迷信"模型自己会想"。
 
 **面试官一般怎么追**：他不会重复问定义，而是拿一个维度把你逼到边界——"并发 10× 时 KV 先炸还是算力先炸"（S1/S4）、"这个优化救 TTFT 还是 TPOT"（S8）、"MoE 省显存吗"（S9-②）。答法固定：先报机制（带公式），再报工程后果，最后给一个可执行的验证动作。
+
+**实跑判据（本课，规划态，目录由下游建成）**：本 sprint 先产设计规格（notes/model-basics-mvp-spec.md），`model-basics-demo/` 尚未存在——clone 判据在规格 §5 定义、下游建成后生效：`cd model-basics-demo && npm run demo` 复现「KV cache 显存估算（Mistral-7B 量级 0.13MB/token）+ 前缀缓存命中 savings（prefill 8K→500 token）+ TTFT/TPOT 估算（3.2s / 40ms）+ 总成本拆分（token×单价×步数）」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）。正文里的数值（0.13MB/token、输出 3-5×、decode 加速 2-3× 等）是**量级参考**（S8 示例模型量级），不是精确承诺——规格把「期望测试值」用预置输入手算后写死，不给会随模型/硬件漂移的精确数。
 
 ---
 

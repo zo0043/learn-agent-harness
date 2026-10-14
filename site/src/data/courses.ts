@@ -272,14 +272,7 @@ export const DOMAIN_COUNT = new Set(
 /** 可运行 demo 作品口径：有 `npm run demo` 的目录数 = 6（whiteboard / viz / site 为配套资产，不计入）。 */
 export const WORK_COUNT = 6;
 
-/** 按阶段分组的课程卡数（P0 / P1 / P2 / 横向），与 /learn 的 phase-section 一一对应。 */
-export const PHASE_COUNTS: Record<string, number> = COURSES.reduce<Record<string, number>>(
-  (acc, c) => {
-    acc[c.phase] = (acc[c.phase] ?? 0) + 1;
-    return acc;
-  },
-  {},
-);
+/** （收口，t18 终审）旧三档「PHASE_COUNTS」已删除：无消费方（grep 全 src 仅定义处），五阶段计数单一真源在 course-structure.ts 的 STAGE_COUNTS。courses.ts 的 `phase` 字段仍被消费、暂保留：① DomainMap.astro（三档 legacy 分组 P0/P1/P2）② c/[slug].astro:61（`meta.phase === '—'` 兜底 chip）③ 本文件 DOMAIN_COUNT 过滤（`c.phase !== HORIZONTAL_PHASE`）。DomainMap 三档→五档迁移属 UI 待办（见 notes/site-refactor-plan.md §13），不在本 sprint 收口范围。 */
 
 /** 按状态分组的课程卡数（从 learn.astro 原有逻辑抽出共享）。 */
 export const STATUS_COUNTS = {
@@ -302,5 +295,5 @@ export function courseMeta(slug: string): CourseMeta {
   return COURSE_MAP.get(slug) ?? { ...DEFAULT_META, slug };
 }
 
-/** /c/[slug] 路由排除项：总地图与题库各有独立页面（/map、/interview） */
-export const EXCLUDED_FROM_COURSE_ROUTE = new Set(['knowledge-map', 'interview-bank']);
+/** /c/[slug] 路由排除项：总地图/题库/重构方案文档/教学规范/MVP 设计规格/capstone 设计文档（蓝图/规范/呈现清单/M0 练习/M0 结构）各有独立页面（/map、/interview）；后几者是 process 文档不是课程，不能生成 /c/ 课程页。 */
+export const EXCLUDED_FROM_COURSE_ROUTE = new Set(['knowledge-map', 'interview-bank', 'site-refactor-plan', 'teaching-style-guide', 'api-mvp-spec', 'flywheel-mvp-spec', 'model-basics-mvp-spec', 'capstone-blueprint', 'capstone-style-guide', 'capstone-site-render-checklist', 'capstone-m0-exercise', 'capstone-m0-structure', 'capstone-m1-exercise', 'capstone-m1-structure', 'capstone-m2-exercise', 'capstone-m2-structure', 'capstone-m3-exercise', 'capstone-m3-structure', 'capstone-m4-exercise', 'capstone-m4-structure', 'capstone-final', 'capstone-final-structure']);

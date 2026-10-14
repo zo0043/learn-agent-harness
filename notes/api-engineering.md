@@ -10,6 +10,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`harness-from-scratch`——上完它，`chatStream` 的 SSE 三件事（`\n\n` 分帧 / content 拼接 / tool_calls 按 index 拼接后整体 parse）+ `provider / context 压缩 / validateArgs` 直接复用。
+- **技能门槛**：会「HTTP 流式(SSE) / JSON 结构 / 成本 = token×单价」的粗概念即可。
+- **不需要提前会**：litellm、vLLM、真实多模型网关、SSE 传输层细节——一律不用。六模块（流式 / 结构化 / caching / 重试分类 / 路由 / 成本）随 `api-demo`（`npm run demo`）边跑边建，全部 mock 零 key。
+
+---
+
 ## S1 流式深水区（从零写 harness §④ 的三件必须事已实测，本节补"生产四件额外的事"）
 
 **这一节解决什么问题**：从零写 harness §④ 教你把一条正常的流拼对——`\n\n` 分帧、content delta 拼接、tool_calls 按 index 拼接后整体 parse。但生产里的"流"是一台状态机，"正常走完"只占其中一条路径。这一节把 从零写 harness §④ 的成果放进真实网络环境，补上中途断连、流中错误帧、超时、客户端取消四条提前结束的路径——面试官问"你的流式怎么处理异常"，答的正是这四条。
@@ -58,6 +66,22 @@ stateDiagram-v2
 ```
 
 **已实测与代码核对（`harness-demo/src/llm.ts`）**：`chatStream` 确实实现了 从零写 harness §④ 三件事——`\n\n` 分帧（`buf.indexOf("\n\n")` 切帧）、content 拼接（`content += delta.content`）、tool_calls 按 index 分槽拼接后整体 `JSON.parse(s.argsStr)`；usage/model 帧在 `continue` 之前抓取，供 OTel span 的 `gen_ai.response.model` 使用。但"生产四件额外的事"在 demo 里**尚未实现**：没有流中 `error` 事件分支、没有 TTFB/总时长两个定时器、没有把 `AbortController` 的取消信号接到 `fetch`、暂无 `incomplete` 落标。所以本节把它们标成"生产要求"而非"已实测"——这个区分在面试里要守住（见报告"代码一致性"）。
+
+```ts
+// harness-demo/src/llm.ts —— chatStream：SSE 三件事（从零写 harness §④ 的实现在这里）
+const tcSlots = new Map<number, { id: string; name: string; argsStr: string }>(); // tool_calls 按 index 分槽
+let buf = "", content = "";
+// …逐 chunk 读 body：
+//   buf += chunk；while ((i = buf.indexOf("\n\n")) >= 0) { frame = buf.slice(0,i); buf = buf.slice(i+2); /* parse frame */ }
+//   chunk.usage 帧（choices 为空）在 continue 之前抓取 → 供 OTel 的 gen_ai.response.model
+//   chunk.delta.content != null → content += delta.content                       // ① content 拼接
+//   chunk.delta.tool_calls → tcSlots.get(tc.index)?.argsStr += tc.function.arguments // ② 碎片只拼接、不 parse
+// 流结束才整体 parse（③ tool_calls 按 index 分槽拼接后，一次 JSON.parse）：
+const tool_calls = [...tcSlots.entries()]
+  .map(([, s]) => ({ id: s.id, name: s.name, arguments: s.argsStr ? JSON.parse(s.argsStr) : {} }));
+```
+
+**这段在讲什么**：三件事一个都不能拆——① content 是逐帧累加；② tool_calls 的 `arguments` 是**跨帧的不完整 JSON 片段**，只能按 `index` 分槽拼接、**流结束才整体 `JSON.parse`**（对单个碎片 parse 必抛异常，S8 #8）；③ usage/model 帧在 `continue` 之前抓，供 OTel span 回填（observability S2 的成本归因原料）。这一段的"已实现生产差异"——没有 `error` 事件分支、没有 TTFB/总时长双定时器、没有 `AbortController` 取消传播——正是下一任务要建的 `api-demo` 的扩展点（见 notes/api-mvp-spec.md）。
 
 **失败模式速记**：把半截流当完整结果提交（下游拿到缺字段的消息）｜对单个 tool_calls 片段 parse（必抛 JSON 异常，从零写 harness §④ 已讲）｜只设总超时导致长生成被误杀或只设 TTFB 导致挂死｜用户取消后仍在后台烧 token。
 
@@ -222,6 +246,18 @@ $$C_{task} = \sum_{i=1}^{N} (tokens_i \times price_i)$$
 | 5 | 加固 | — | — | — | — | 重试预算 + 熔断 + 抖动（防重试风暴）；对 4xx 断言"不重试"；能力矩阵动态侦察 |
 
 **怎么读这条时间线**：三步信号精确对应 S4 表的三行——步 1 走"契约违约（400）"的**不重试**分支，步 2 也走契约违约但处置是**防御性解析**（同名不同因，说明分类之后还要再分因），步 3 走"能力不匹配"、触发**降级阶梯**（换模型支援）。步 4-5 才是价值所在：**事故的产出不是"修好了"，而是长出了三条结构性加固**（侦察/防御/预算），让同类信号下次能自动分流。
+
+```ts
+// harness-demo/src/agent.ts —— 防御性解析（S7 步 2：工具名带尾随空白/零宽字符 → 注册表查不到）
+// 防御：部分代理返回的工具名带首尾空白（qwen3.8-flash 2026-10-10 实测），不 trim 会注册表查不到
+const name = tc.name.trim();
+const spec = registry.get(name);                       // trim 后命中注册表
+// tools.ts 的 validateArgs(spec.parameters, args)     // 执行层最后一道（schema 合法 ≠ 语义正确，S2）
+```
+
+**这段在讲什么**：同一类「契约违约」可以有两种根因——步 1 是**路由错位**（400 不重试、换模型），步 2 是**不可见字符**（`trim` 防御）。这一行 `tc.name.trim()` 就是「防御性解析」的落点：先把 wire 上回来的脏数据挡在解析层，避免「模型幻觉调错工具」的假诊断。它和 `validateArgs` 是两道门——前者治「工具名不匹配」，后者治「参数语义非法」（S2 档 2 之后的最后一道）。
+
+**实跑判据（S7）**：已实现判据 = `cd harness-demo && npm run demo`（正常模式里 `chatStream` 拼流 + `tc.name.trim()` 都生效，`validateArgs` 在 tool 注册路径上）；规划判据 = `cd api-demo && npm run demo` 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）——克隆判据见 course-structure.ts 的 practicalOutput，实现规格见 notes/api-mvp-spec.md。
 
 **30 秒口述版（面试用）**："某次 demo 夜里开始全 400，错误体是 'functions parameter of the code model must be provided'——这不是我们请求的问题，是代理把请求路由到了一个只认旧版 functions 协议的 code 后端。同一请求重试只会继续 400，所以我没重试，而是查 wire 返回的 model 字段确认路由错位、换模型绕开。期间还发现工具名带不可见字符导致 `unknown tool` 假错，加了一行 `tc.name.trim()`。根因是 provider 把模型清单和路由改了我们不知道——所以后来把能力侦察前置（跑任务前先 GET /v1/models）、加了防御性解析和重试预算。"
 

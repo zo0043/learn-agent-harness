@@ -11,6 +11,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`rag`——上一课带入余弦相似度 + BM25/RRF 混合检索的底层机制，本课「读路径（S4）」直接复用同一套轮子（`memory-redteam/src/retrieval.mjs` 独立实现，机制同源、不 import rag-demo）。
+- **技能门槛**：只需「会话上下文有窗口上限、进程/会话之间默认无状态」的粗概念即可。
+- **不需要提前会**：pi Magic Context / Letta / Mem0 任一产品都不用会——四类记忆的存储介质、写/读/遗忘状态机、四道投毒防线随 `memory-redteam` 的 `npm run demo` + `node test.mjs --ablate` 边跑边建。
+
+---
+
 ## S1 分类：agent 记忆的四种（先立坐标系）
 
 **这一节解决什么问题**：面试里问"你怎么设计记忆系统"，80% 的候选人只会说"存进向量库、下次检索出来"——那只做了四类记忆里的一类。先把坐标系立起来，后面的写、读、遗忘、评测才有落点：**不同类的记忆，写入时机、存储介质、生命周期、检索方式都不同**，混在一起设计必然坏。
@@ -247,6 +255,26 @@ stateDiagram-v2
 4. **审计**：记忆写入留痕（哪条轨迹触发的）——沙箱与凭据审计线的记忆版
 面试金句："**提示注入污染一次上下文，记忆投毒污染所有未来的上下文**——所以记忆写路径的安全等级要高于普通工具调用。"
 
+```js
+// memory-redteam/src/memory.mjs —— write()：写路径四道防线 + 冲突消解（笔记 §S7·§S5 判定的落成）
+export function write(store, candidate) {
+  const at = candidate.valid_from ?? store.clock();          // 确定性：时钟注入、缺省 FIXED_NOW，不取墙钟
+  const flags = scanContent(candidate.content);              // [S7防御2] 4 类注入签名族
+  if (store.defenses.injectionScan && flags.length && candidate.trust !== TRUST.USER)
+    return { op: 'rejected', id, reason: `注入扫描命中: ${flags.join(',')}`, flags };  // 低信任毒候选 → 拒
+  if (store.defenses.highRiskApproval && HIGH_RISK_CATEGORIES.has(candidate.category) && !candidate.approved)
+    return { op: 'pending_approval', id, reason: `高危类别 ${candidate.category} 未审批` };  // [S7防御3]
+  const existing = store.defenses.conflictResolve ? findConflict(store, candidate) : undefined;
+  if (existing && conflictDecision(existing, candidate, store.defenses.trustGate) === 'reject-lower-trust')
+    return { op: 'rejected', id, reason: `低信任(${candidate.trust})不得覆盖高信任(${existing.trust})` };  // [S7防御1]
+  // …supersede / coexisting / accepted 分支（[S5] 覆盖不物理删除、并存带时间戳），每次变更走 audit() 留痕 [S7防御4]
+  audit(store, 'write', { id, actor: `source:${candidate.source_session}`, triggered_by: candidate.triggered_by, result: 'accepted' });
+  return { op: 'accepted', id, flags };
+}
+```
+
+**这段在讲什么**：四道防线 + 冲突消解**全部可开关**（`store.defenses`），这是 `--ablate` 能「逐层关掉、探针必须失败」的前提——一个恒真通过的测试是零信息量的。特别要守住一处区分：`flags.length && trust !== USER` 之后，用户来源命中签名走的是**放行 + 审计（`op:'advisory'`）**，不是拒绝——**签名是线索不是证据**（README「消融自检」第 4 条：否则「用户自己给的运维步骤」会被虚报成污染，实测污染率从 0 → 33%）。
+
 > **可执行回归（自研实现，2026-10-12 升级）**：本节四道防线与 §S10 步骤 1-7 的判定已落成 `memory-redteam/`——零依赖、全离线、确定性（时钟注入，无墙钟调用）。
 > `npm run demo` 是可读的端到端走查；`node test.mjs` 16 条探针守住（单元级 R1-R11 + 端到端 E1-E5）；`node test.mjs --ablate` 逐层关掉防线，探针**必须失败**（15 条探针 / 18 层全部承重）；`node test.mjs --persist` 用子进程写 JSONL、新进程重建后比对末态读数（逐字节一致）。
 >
@@ -402,6 +430,12 @@ stateDiagram-v2
 **这七步的面试讲法**："一次偏好从写入、冲突消解、召回、评测到删除，每一步都有明确字段和判定；最容易被忽视的是**删除要沿血缘传播**——只删主记录，派生摘要还在，等于没删干净。"
 
 > **§S10 已被落成可执行走查（2026-10-12）**：`cd memory-redteam && npm run demo` 把上面步骤 1-7 逐步打印出来（含每条进/不进注入集的理由、覆盖链、血缘闭包、墓碑、以及跨会话持久化的三方 digest 比对）。上面步骤里标为**走查示例**的数值（如 `recall@1 = 0.87`）**仍未被断言**——落成的是判定与机制，不是那组示例数字；演示输出里也显式声明了这一点。
+
+**实跑判据（本课机器可核对的锚点，三态）**：
+- **确定性**：`memory-redteam` 时钟注入、缺省 `FIXED_NOW`，代码不含 `new Date()`/`Date.now()`；同命令连跑两次 `diff` 为空。
+- **可机器核对**：`cd memory-redteam && npm run demo`（§S10 步骤 1-7 + 每条进/不进注入集的理由）+ `node test.mjs`（16/16 条探针守住，exit 0）+ `node test.mjs --ablate`（逐层关防线探针须失败，18/18 层承重）。
+- **可重放**：`node test.mjs --persist`（两个子进程写 / 重建 JSONL + 本进程独立跑，三方 digest 逐字节一致）。
+- 克隆判据 = 上面三条全过 + `node test.mjs` 末尾打印 `16/16 条探针守住`；**注意口径**：被断言的是判定与机制，不是 §S10 走查示例数值（`recall@1=0.87` 等归正文「来源与锚点」，不冒充可机器核对）。
 
 ---
 

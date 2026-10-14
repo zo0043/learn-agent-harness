@@ -22,6 +22,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`agent-harness`（从零写 harness 的底座）——上一课带入「loop / 工具 / 权限 / 会话是四层可拆卸预制件」的拆解语言，本课用它拆任何框架（框架给你什么 = 它替你焊死了哪几层；藏什么 = 那几层的默认决策进了黑盒）。
+- **技能门槛**：只需会读 TS 接口签名 + CLI 输出即可。
+- **不需要提前会**：Python / 背任何框架 API——三家 SDK 的调用形状 / 权限钩子 / 恢复语义随 `framework-demo` 的 `npm run compare` + `compare:assert` 边跑边建（离线 mock，无 key）。
+
+---
+
 ## S1 框架三族（坐标系）
 
 **这一节解决什么问题**：先立坐标系。面试里问"你用过什么框架"时，真正被评估的不是名单长度，而是你**按什么轴给框架分类**。本课的轴只有一条：**它替你拿走了从零写 harness 十节里的哪几层**。按这条轴，市面上的东西分成三族——不是按 star 数、不是按厂商，也不是按"是不是 LLM 原生"。
@@ -300,6 +308,24 @@ flowchart LR
 ### 步骤 3 · 发现抽象泄漏（关键一步）
 
 需求含"人工审批"，对应 S3 方向一。**如果不小心把 `Bash` 放进 `allowedTools`**，`allowedTools` 裸名会抢在 `canUseTool` 之前 **auto-approve 整个 Bash**，审批回调根本不触发（`CLAUDE_SDK_CAN_USE_TOOL_SHADOWED` 警告）——于是 `rm -rf` 会和 `df -h` 一起被放行，HITL 名存实亡。demo 的 step3 之所以能拦到 `rm`，正是因为它**故意不把 Bash 放进 allowedTools**（源码注释即证据）。
+
+```ts
+// framework-demo/src/capabilities.ts —— step3_permissions()：权限钩子的正反两面（可跑）
+// 反面（注释即证据）：allowedTools 裸名会抢在 canUseTool 之前 auto-approve——
+//   若把 Bash 放进 allowedTools，canUseTool 回调根本不触发，rm -rf 与 df -h 一起被放行
+// 正面：故意**不**把 Bash 放进 allowedTools，让 Bash 落入 canUseTool，才能演示「每次调用前过权限回调」
+canUseTool: async (toolName, input) => {
+  if (toolName === "Bash" && /(^|;|&&|\|)\s*rm\b/.test(String(input.command ?? "")))
+    return { behavior: "deny", message: "安全策略禁止 rm 类命令（这条 deny 来自 canUseTool 回调）" };
+  return { behavior: "allow" };
+},
+// 断言（有牙）：deny 真的发生 + 被拦后 agent 没崩 + deny 消息回进上下文
+ok(denied.length >= 1, "deny 拦截真的发生了（canUseTool 返回 deny）", `命中 ${denied.length} 次`);
+ok(!r.isError, "被拦截后 agent 没有崩，正常跑完（is_error=false）", `turns=${r.numTurns}`);
+ok(/拒绝|被拒|不许|禁止|不能|无法|政策|策略|denied/i.test(r.finalText), "最终回答里说明了被拒操作的处理方式（deny 消息回进了上下文）");
+```
+
+**这段在讲什么**：抽象泄漏最危险的一档 = **权限**。框架给你 `allowedTools`（按名字白名单）和 `canUseTool`（逐调用回调）两个钩子，但两者的优先级是反直觉的——`allowedTools` 裸名一旦命中，会**抢在 `canUseTool` 之前 auto-approve**，你的审批回调静默失效。所以正确写法是「白名单只管该放行的，把需要人工审批的工具**留在名单外**让它走回调」。这条是 S4.1 第 3 问（权限/护栏模型）的实操判据，也是 S8.1「把框架当能力」的反面——**框架给你的是钩子，不是替你做了安全决策**。
 
 → 选型动作：**把"逐调用审批"当作自己执行层的职责，不依赖框架的 allowedTools 优先级**；对该工具只用 `canUseTool`/`disallowedTools`/`permissionMode`（具体组合待验），并用回归断言锁死"审批必触发"。
 

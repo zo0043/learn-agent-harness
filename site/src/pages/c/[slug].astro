@@ -1,13 +1,15 @@
 ---
 /**
  * 课程页：notes/*.md 原样渲染（KaTeX + mermaid 由站点管线处理）。
- * 顶部元信息条（域/阶段/状态，来自 src/data/courses.ts）+ 侧栏 TOC。
+ * 顶部元信息条（域/阶段/状态）+「学习路径」模块（course-structure.ts）+ 侧栏 TOC。
  * 排除项（knowledge-map / interview-bank）各有独立页面（/map、/interview）。
  */
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import { getCollection, render } from 'astro:content';
-import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE, COURSES } from '../../data/courses';
+import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE } from '../../data/courses';
+import { courseBySlug, orderOf, prevCourse, nextCourse } from '../../data/course-structure';
+import { mvpBySlug } from '../../data/mvps';
 import { extractToc } from '../../utils/toc';
 
 export async function getStaticPaths() {
@@ -21,6 +23,15 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const meta = courseMeta(entry.id);
 const toc = extractToc(entry.body ?? '');
+
+// 学习路径（course-structure.ts §3 线性序）：课程在结构表中缺失时 structure=undefined，
+// 模块与五阶段阶段标签优雅降级（不渲染/回退 courses.ts phase），不报错。
+const structure = courseBySlug(entry.id);
+const mvp = structure ? mvpBySlug(structure.mvpSlug) : null;
+// 上下篇（§8.1：线性序 index = order-1 / order+1；不用 next 字段重算序列）
+const order = orderOf(entry.id);
+const prev = prevCourse(entry.id);
+const next = nextCourse(entry.id);
 
 // 相关面试题锚点：构建期从 notes/interview-bank.md 的 TOC 按 anchorPrefix 解析出真实 heading id
 // （与 interview.astro 的 idOf 同机制、同 slug 算法）——题库标题一变锚点随动；
@@ -38,31 +49,6 @@ function bankAnchor(prefix: string): string {
 const relatedQuestions = bankEntry
   ? meta.relatedQuestions.map((q) => ({ ...q, anchor: bankAnchor(q.anchorPrefix) }))
   : [];
-
-// P-08 课程上下篇：顺序 = COURSES 数组序。只取真实存在 /c/ 路由的条目——
-// whiteboard 在 COURSES 里但没有 notes 文件（无 /c/whiteboard/ 路由），链过去即 404；
-// 路由集合从 content collection 派生（glob 驱动，新增笔记自动出现），不手抄 slug。
-const routedSlugs = new Set(
-  (await getCollection('courses'))
-    .filter((e) => !EXCLUDED_FROM_COURSE_ROUTE.has(e.id))
-    .map((e) => e.id),
-);
-const sequence = COURSES.filter((c) => routedSlugs.has(c.slug));
-
-/** 上下篇邻接计算（纯函数，node 抽取验证用）：首篇 prev=null、尾篇 next=null（对应方向禁用）；
- *  slug 不在序列中（DEFAULT_META 兜底的新笔记）时 index=-1、两者皆 null（不渲染上下篇）。 */
-function prevNext<T extends { slug: string }>(
-  seq: T[],
-  slug: string,
-): { index: number; prev: T | null; next: T | null } {
-  const index = seq.findIndex((c) => c.slug === slug);
-  return {
-    index,
-    prev: index > 0 ? seq[index - 1] : null,
-    next: index >= 0 && index < seq.length - 1 ? seq[index + 1] : null,
-  };
-}
-const pn = prevNext(sequence, entry.id);
 ---
 
 <Base title={meta.domain}>
@@ -72,13 +58,79 @@ const pn = prevNext(sequence, entry.id);
         <div class="meta-row">
           <span class="chip chip-strong">{meta.domain}</span>
           <span class="chip">notes/{entry.id}.md</span>
-          <span class="chip">{meta.phase === '—' ? '未分阶段' : meta.phase}</span>
+          <span class="chip">{structure ? structure.stage : meta.phase === '—' ? '未分阶段' : meta.phase}</span>
           <StatusBadge status={meta.status} />
         </div>
         <nav class="crumbs" aria-label="面包屑">
           <a href={import.meta.env.BASE_URL + ""}>首页</a> / <a href={import.meta.env.BASE_URL + "learn/"}>学习路线</a> / <span>{meta.domain}</span>
         </nav>
       </header>
+
+      {
+        structure && mvp && (
+          <section class="learning-path" aria-label="学习路径">
+            <h2 class="lp-h">学习路径</h2>
+            <dl class="lp-grid">
+              <div class="lp-item">
+                <dt>前置知识</dt>
+                <dd>
+                  {structure.prereqs.length > 0 ? (
+                    <ul class="lp-links">
+                      {structure.prereqs.map((slug) => {
+                        const p = courseBySlug(slug);
+                        return (
+                          <li><a href={import.meta.env.BASE_URL + 'c/' + slug + '/'}>{p ? p.domain : slug}</a></li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <span class="lp-none">无硬前置</span>
+                  )}
+                  {structure.prerequisiteNote && structure.prerequisiteNote !== '—' && (
+                    <p class="lp-note">技能储备：{structure.prerequisiteNote}</p>
+                  )}
+                </dd>
+              </div>
+              <div class="lp-item">
+                <dt>核心概念 / 教学重点</dt>
+                <dd>{structure.teachingFocus}</dd>
+              </div>
+              <div class="lp-item">
+                <dt>实际输出</dt>
+                <dd>
+                  {structure.practicalOutput}
+                  <p class="lp-mvp">
+                    <span class="chip chip-strong">参考样本</span>
+                    <code>{structure.mvpSlug}</code>
+                    <span class="lp-mvp-status">{mvp.statusLabel}</span>
+                  </p>
+                </dd>
+              </div>
+              <div class="lp-item">
+                <dt>后续课程</dt>
+                <dd>
+                  {structure.next.length > 0 ? (
+                    <ul class="lp-links">
+                      {structure.next.map((slug) => {
+                        const n = courseBySlug(slug);
+                        return (
+                          <li><a href={import.meta.env.BASE_URL + 'c/' + slug + '/'}>{n ? n.domain : slug}</a></li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <span class="lp-none">末课 · 无后续</span>
+                  )}
+                </dd>
+              </div>
+              <div class="lp-item">
+                <dt>主线挂钩</dt>
+                <dd>{structure.capstoneHook ?? '无主线挂钩'}</dd>
+              </div>
+            </dl>
+          </section>
+        )
+      }
 
       <Content />
 
@@ -118,13 +170,14 @@ const pn = prevNext(sequence, entry.id);
       <footer class="page-foot">
         {
           /* P-08 上下篇：左侧（margin-right:auto 推开右侧站内链接）。
-             首/尾篇对应方向渲染为 aria-disabled 的 span——不是点了 404 的链接。 */
-          pn.index >= 0 && (
+             §8.1：顺序 = course-structure.ts 的线性序 index（order-1 / order+1）。
+             结构表中缺失的笔记 order=-1，不渲染上下篇（不 404）。 */
+          order >= 0 && (
             <nav class="prev-next" aria-label="课程上下篇">
-              {pn.prev ? (
-                <a class="pn-link pn-prev" rel="prev" href={import.meta.env.BASE_URL + 'c/' + pn.prev.slug + '/'}>
+              {prev ? (
+                <a class="pn-link pn-prev" rel="prev" href={import.meta.env.BASE_URL + 'c/' + prev.slug + '/'}>
                   <span class="pn-dir">← 上一篇</span>
-                  <span class="pn-title">{pn.prev.domain}</span>
+                  <span class="pn-title">{prev.domain}</span>
                 </a>
               ) : (
                 <span class="pn-link pn-prev pn-disabled" aria-disabled="true">
@@ -132,10 +185,10 @@ const pn = prevNext(sequence, entry.id);
                   <span class="pn-title">已是第一篇</span>
                 </span>
               )}
-              {pn.next ? (
-                <a class="pn-link pn-next" rel="next" href={import.meta.env.BASE_URL + 'c/' + pn.next.slug + '/'}>
+              {next ? (
+                <a class="pn-link pn-next" rel="next" href={import.meta.env.BASE_URL + 'c/' + next.slug + '/'}>
                   <span class="pn-dir">下一篇 →</span>
-                  <span class="pn-title">{pn.next.domain}</span>
+                  <span class="pn-title">{next.domain}</span>
                 </a>
               ) : (
                 <span class="pn-link pn-next pn-disabled" aria-disabled="true">
@@ -175,3 +228,74 @@ const pn = prevNext(sequence, entry.id);
     }
   </div>
 </Base>
+
+<style>
+  /* 学习路径模块：图卡式四象限（前置 / 教学重点 / 实际输出 / 后续）。
+     位于 course-meta-bar 之后、正文之前；与 TOC / 上下篇 / 相关题共存。 */
+  .learning-path {
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 0 0 24px;
+    box-shadow: var(--shadow);
+  }
+  .learning-path .lp-h {
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    font-size: 1.05rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px 20px;
+    margin: 0;
+  }
+  .lp-item dt {
+    font-weight: 600;
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    margin: 0 0 4px;
+  }
+  .lp-item dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .lp-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .lp-links li {
+    margin: 2px 0;
+  }
+  .lp-none {
+    color: var(--text-faint);
+  }
+  .lp-note {
+    margin: 4px 0 0;
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .lp-mvp {
+    margin: 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 6px 8px;
+    flex-wrap: wrap;
+  }
+  .lp-mvp code {
+    font-size: 0.82rem;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0 5px;
+  }
+  .lp-mvp-status {
+    color: var(--text-faint);
+    font-size: 0.82rem;
+  }
+</style>

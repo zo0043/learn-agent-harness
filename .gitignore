@@ -1,6 +1,9 @@
 # 依赖
 node_modules/
 
+# npm 缓存（本机安装缓存，可再生，勿提交）
+.npm-cache/
+
 # secrets —— 永不提交（本地 .env 自行维护，模板见 .env.example）
 .env
 .env.*

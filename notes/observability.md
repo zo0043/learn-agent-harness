@@ -8,6 +8,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`api-engineering`（上一课带入「成本归因 = 路由决策输入」的账本意识——可观测就是这套账本的**数据来源**）。
+- **技能门槛**：会「trace / span / metric」三个 OTel 术语的粗概念即可（trace=一次任务、span=树里的一个节点、metric=时序数值）。
+- **不需要提前会**：Prometheus / Grafana / Langfuse 的配置、OTel SDK 内部细节——一律不用。OTel GenAI 属性族 / span 树建模 / burn-rate 告警随 `harness-demo`（`npm run demo:otel:mock` / `npm run demo:otel:assert`）边跑边建。
+
+---
+
 ## S1 为什么 agent 可观测 ≠ 微服务可观测
 
 **这一节解决什么问题**：先把坐标系立起来。面试官问"你怎么做可观测"，如果答"上 Prometheus + Grafana"或"日志全量采"，说明还把 agent 当普通后端——普通后端的可观测回答"哪台机器慢了"，agent 的可观测要回答"这次任务为什么跑偏、钱花在哪一步、下次怎么更好"。前者是运维视角，后者是**数据管道视角**：观测的产出不只是告警，还有能回放、能对比、能喂评测的轨迹。
@@ -69,6 +77,36 @@ OpenTelemetry 为 GenAI 定义了语义约定（`gen_ai.*` 属性族）。
 - **为什么重要（面试点）**：语义约定=**厂商中立的轨迹格式**——harness 按它埋点，后端接 Langfuse / Phoenix / Jaeger 任意一个，不用为每个平台重写。**"OTel 之于可观测，就是 MCP 之于工具接口"——都是把 N×M 降成 N+M**
 
 **实操锚（harness-demo 已实现，复现命令 `npm run demo:otel`）**：`harness-demo/src/otel.ts`（SDK + console 导出，`OTEL_EXPORT_OTLP=1` 才追加 OTLP/HTTP）+ `src/agent.ts`（`invoke_agent`→`chat` / `execute_tool` span 树）+ `src/llm.ts`（流式 usage/model 回填）。`npm run demo:otel` 跑最小 agent 循环并在收尾打印 span 摘要（span 名 + 关键属性）。**验收标准**：收尾摘要显示 `收到 N 个 span（M 个 trace）`，每个 `chat` span 带 `gen_ai.usage.input_tokens` / `output_tokens`，每个 `execute_tool` span 带 `harness.tool.status`。**注意仓库内代码用的是旧属性名**：`gen_ai.system` 与 `gen_ai.session.id`（相对当前规范应为 `gen_ai.provider.name` 与 `gen_ai.conversation.id`）——这是本课埋点与最新约定的一处不一致，见 S8 与文末核实清单。**离线可重跑判据（U-23 收口，2026-10-12 实跑）**：`npm run demo:otel:mock` 用本地 mock 端点（无外网、无 LLM key）打印确定性 span 树，`npm run demo:otel:assert` 对其形态/计数断言、不符即非 0 退出；本次 mock 实测 **15 spans / 1 trace**（invoke_agent×1 + chat×6 + execute_tool×8，含 denied×1），历史活端点报告值「11 spans / 1 trace」仓内无可复跑日志、标**未验证**、不作判据（详见 从零写 harness §⑨）。
+
+```ts
+// harness-demo/src/otel.ts —— SDK：console 导出默认；OTEL_EXPORT_OTLP=1 才加 OTLP（默认关）
+export const tracer = trace.getTracer("harness-demo");
+export async function initOtel(opts: { console?: boolean } = {}): Promise<void> {
+  if (provider) return;                                   // 幂等：不重复起 provider
+  const processors: SpanProcessor[] = [new SimpleSpanProcessor(memoryExporter)];
+  if (opts.console !== false) processors.unshift(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  if (process.env.OTEL_EXPORT_OTLP === "1") { /* 动态 import OTLPTraceExporter，默认不加载 */ }
+  provider = new BasicTracerProvider({ resource: resourceFromAttributes({ "service.name": "harness-demo" }), spanProcessors: processors });
+  trace.setGlobalTracerProvider(provider);
+}
+
+// harness-demo/src/agent.ts —— span 树：invoke_agent 根 → chat / execute_tool 子 span（父子天然正确）
+const agentSpan = tracer.startSpan("invoke_agent", {
+  attributes: { "gen_ai.operation.name": "invoke_agent", "gen_ai.agent.name": "harness-demo", "gen_ai.session.id": o.session.id },
+});
+chatSpan.setAttribute("gen_ai.operation.name", "chat");
+chatSpan.setAttribute("gen_ai.usage.input_tokens", r.usage.prompt_tokens);       // 流式 usage 回填
+chatSpan.setAttribute("gen_ai.usage.output_tokens", r.usage.completion_tokens);
+toolSpan = tracer.startSpan("execute_tool", {
+  attributes: { "gen_ai.operation.name": "execute_tool", "gen_ai.tool.name": name,
+                "gen_ai.tool.call.arguments": JSON.stringify(tc.arguments).slice(0, 500) }, // 参数摘要截断 500
+});
+toolSpan.setAttribute("harness.tool.status", status);   // ok / error / denied
+```
+
+**这段在讲什么**：一段埋点就把 S1–S3 的关键点都摊开了——① `invoke_agent` 是**根 span**（`1 trace = 1 任务`，S3 纪律 1），`chat` / `execute_tool` 作为子 span 由 tracer 自动挂亲；② `gen_ai.usage.input_tokens` 是流式调用在**收尾回填**的（S4 成本归因的原料）；③ 参数/结果都**截断 500 字符**（S2 原文「参数摘要」），全量对象只在 JSONL 事实源里（S2 对照图）。注意仓库用的是旧属性名 `gen_ai.session.id`（当前规范应为 `gen_ai.conversation.id`），这是 S8 #3「Development 阶段属性会改名」的现场实例。
+
+**实跑判据（S2）**：`cd harness-demo && npm run demo:otel:mock`（离线无 key，收尾打印确定性 span 树）+ `npm run demo:otel:assert`（断言 15 spans/1 trace、invoke_agent×1 + chat×6 + execute_tool×8，不符即 exit 1）。这是「OTel GenAI 埋点真的跑起来了」的机器可核证据（clone 判据见 course-structure.ts 的 practicalOutput）。
 
 **一次运行的两个视图**：同一批活动，既可看成 OTel span 树（运行时/后端视图），也可看成 JSONL 轨迹事件流（落盘事实源）。二者对照是理解本课的关键：
 

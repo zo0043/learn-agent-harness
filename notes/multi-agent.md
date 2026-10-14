@@ -5,6 +5,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`system-design`（上一课带入「谁和谁说话 × 怎么想」与读写分治）+ `harness-from-scratch`（能跑通 `harness-demo`、理解 loop / policy 门 / JSONL 恢复）。
+- **技能门槛**：会「顺序执行 vs 并发」的粗概念即可（一句话：并行只省墙钟、不省 token，写冲突必须收敛到单线程）。
+- **不需要提前会**：LangGraph / Claude Agent SDK / 真实多进程编排框架——一律不用。orchestrator-worker 与「子代理四决」随 `harness-demo`（`npm run demo:reject` / `npm run demo:otel:mock`）与 S8 走查边跑边建。
+
+---
+
 ## 本课导读：多智能体到底在买什么
 
 多智能体不是"更聪明的模型"，它是一套**工程手段**：把一个大任务拆成多个各自独立上下文的 agent，换取两样东西——
@@ -208,11 +216,50 @@ flowchart TD
 
 2. **轨迹记录**：复用 demo.jsonl 事件类型（`init / model_response / tool_intent / tool_exec / compaction / final / crash`），子段加 `subagentId`；父进程只记"委派请求 + 摘要返回"（1-2k token），完整子轨迹落独立文件（从零写 harness §⑥）。这样父轨迹保持小、子轨迹可审计。
 
+```ts
+// harness-demo/src/types.ts —— 子代理轨迹复用同一 schema（子段加 subagentId）
+export type TrajectoryEvent =
+  | { kind: "init"; system: string; user: string; startedAt: number }
+  | { kind: "model_response"; assistant: AssistantMessage; finishReason: string; ms: number }
+  | { kind: "tool_intent"; id: string; name: string; args: Record<string, unknown> }
+  | { kind: "tool_exec"; id: string; name: string; status: "ok" | "error" | "denied" | "unknown-state"; result?: string; ms: number }
+  | { kind: "compaction"; summarized: number; kept: number }
+  | { kind: "final"; content: string; totalMs: number }
+  | { kind: "crash"; note: string };
+
+// harness-demo/src/session.ts —— rebuild()：从日志重建上下文（崩溃恢复 + 子代理独立 JSONL 的地基）
+// tool_intent 在、对应 tool_exec 不在 = 未知状态 → 模型先核对再重写（demo:crash）
+```
+
+**这段在讲什么**：子代理的「上下文隔离」不是玄学，是**复用同一套 JSONL 事件 schema + 每子代理一个独立文件**——父轨迹里只记 `委派 + 摘要`，子轨迹完整落盘。`tool_intent` 与 `tool_exec` 分两条事件是关键：两者配对才能判断一个调用到底是「已执行」还是「未知状态」（崩溃窗口，见 durable-execution）。这正是 S7 决策 2「完整子轨迹可审计」的代码落点。
+
 3. **权限继承**：子 policy ⊆ 父 policy——**父为上界，只允许收紧**（如 researcher 只读工具）；policy 是进程级门（Harness 架构 §7），子代理不豁免。这点在 S8 走查里会具体体现（worker 只读、写由父单线程做）。
+
+```ts
+// harness-demo/src/policy.ts —— 父 policy（三通道 deny>approve>allow，默认 deny）
+export class Policy {
+  decide(tool: string) {
+    for (const d of ["deny", "approve", "allow"] as PolicyDecision[]) {  // 按优先级扫
+      const rule = this.rules.find((r) => r.decision === d && r.tools.includes(tool));
+      if (rule) return { decision: d, reason: `命中规则: ${d}` };
+    }
+    return { decision: this.fallback, reason: "无匹配规则，默认拒绝" };   // fallback=deny
+  }
+}
+export const DEMO_POLICY = new Policy([
+  { tools: ["run_shell"], decision: "deny" },       // 硬禁止
+  { tools: ["write_file"], decision: "approve" },   // 副作用需审批
+  { tools: ["get_weather", "list_dir", "read_file"], decision: "allow" }, // 只读放行
+]);
+```
+
+**这段在讲什么**：「子 policy ⊆ 父 policy」的实操就是把父的 `DEMO_POLICY` 再砍一刀——researcher 子代理只留 `read_file / list_dir`（allow），把 `write_file`(approve)、`run_shell`(deny) 整段不继承。policy 是**进程级门**（在执行路径上拦，不在提示词里），子代理不豁免——这是 S8 里「worker 只读、写由父单线程做」的机制来源。
 
 4. **上下文传递**：只传"目标 + 输出契约"（S2 教委派三要素），不传父全量轨迹；返回 = 约束摘要（S3 上行规则）。
 
 四题的共同内核：**子代理是"上下文隔离 + 权限收紧"的容器，不是"更聪明的小助手"**。任何一条答成"给子代理更多信息/更多权限会更好"，都违背了 Harness 架构 §8.2。
+
+> **实跑判据（S7）**：本课复用 harness-mvp（双 agent 可运行 demo 仍在 Roadmap「规划中」，见 site/src/pages/works.astro），所以「clone 能跑」落在 harness-demo 现有模式——`cd harness-demo && npm run demo:reject`（复现「单线程写 + 审批拒绝 → 模型不重试、如实报告」）与 `npm run demo:otel:mock`（复现 15 spans/1 trace 确定性 span 树，子代理 trace 埋点地基）；完整轨迹 schema 见 `harness-demo/trajectories/demo.jsonl`（clone 判据见 course-structure.ts 的 practicalOutput）。
 
 ---
 

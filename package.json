@@ -5,7 +5,8 @@
   "description": "pi-web adaptation of amosblomqvist/learn: teaching skill + graded quiz + md-log, with SVG→PNG render helper for Obsidian-embedded visuals.",
   "type": "module",
   "scripts": {
-    "render": "node viz/render.mjs"
+    "render": "node viz/render.mjs",
+    "check:final": "node final-project/grade.mjs"
   },
   "dependencies": {
     "playwright-core": "^1.63.0"

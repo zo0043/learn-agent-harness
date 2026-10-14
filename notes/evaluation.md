@@ -9,6 +9,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`rag`（RAG 与检索）——上完它，`recall@k` / `golden set` / 逐题错误归因这三样直觉直接复用；`rag-demo` 的 `demo:eval` 就是本课「跑得起来」的底座。
+- **技能门槛**：会「precision / recall + 抽样统计」的粗概念即可（precision=判对里对几个、recall=真相关里捞回几个；样本 n 越大估算越稳）。
+- **不需要提前会**：pass@k 无偏估计量、Cohen's Kappa、G-Eval 这些公式/文献——脚注都在正文里给；不要求用过任何评测框架。judge 校准 / 分母纪律 / CI 门禁随 `rag-demo`（`npm run demo:eval`）与 S9 走查边跑边建。
+
+---
+
 ## S1 为什么 agent 需要独立的评测体系
 
 传统软件测试的地基是**确定性**：`assert f(x) == y`。给定输入，输出唯一，测试要么绿要么红。agent 把这个地基抽掉了。四个失败模式，每一个都在逼你长出新的评测形态：
@@ -179,6 +187,33 @@ stateDiagram-v2
 **污染怎么被发现的**（面试追问）：指标**突然**大幅上涨但线上体感不变，是最典型的污染信号。检测手段：① 看上涨是否集中在"可能出现在训练语料里"的题；② n-gram / 子串命中检查；③ 拿时间切分（训练截止前 vs 之后）分别看；④ 换血 30% 后看指标是否回落。私有集不公开是最省事的结构性防御。
 
 **你的锚点**：rag-demo 的 10 题 golden set 就是这套做法的迷你版——8 范围内 + 2 范围外（拒答探针）、绑定 recall@k 版本、还能把 5 题 FAIL 逐题归因到机制层（语料缺口 / 检索短板 / 表面形式盲区，RAG 与检索 §13）。
+
+```ts
+// rag-demo/src/evaluate.ts —— golden 锚点解析 + recall@k + PASS 判据（S5 版本化的代码落点）
+GOLDEN.forEach((g, i) => {
+  if (g.outOfScope) return;                        // 范围外题 → 拒答轨，不进 recall 统计
+  const ids = new Set<string>();
+  for (const a of g.anchors) {                     // gold = 文本锚点（8-20 字），不是行号/id 指针
+    const hit = chunks.filter((c) => c.text.includes(a));  // 子串匹配 → 定位 chunk id
+    if (hit.length === 0) anchorMiss.push({ no: i + 1, ... }); // 锚点失配 → ❌ 拒绝出数
+    else for (const c of hit) ids.add(c.id);      // 同一锚点命中多个 chunk：全算 gold
+  }
+});
+if (anchorMiss.length > 0) {
+  /* ❌ 逐题打印失配锚点 + 原文 + 建议 → console 报「指针失效，拒绝出数」→ process.exit(1) */
+}
+
+const K_LIST = [3, 5, 10];
+const recalls = K_LIST.map((k) => {               // recall@k = |top-k ∩ gold| / |gold|（分母=gold，不是 k）
+  const top = new Set(fused.slice(0, k).map((f) => f.chunk.id));
+  return g.ids.filter((id) => top.has(id)).length / g.ids.length;
+});
+const pass = recalls[2] === 1;                    // 判据：全部 gold chunk 进 top-10（recall@10 = 1.00）
+```
+
+**这段在讲什么**：golden set「版本化」的两个硬约束都在这段代码里——① gold 用**文本锚点**定位而非行号/id 指针（`rag.md#28` 这种指针一编辑就漂移，旧版曾静默算出「recall 0.13、宣称值 1.00」的假数据，见 evaluate.ts 头部注释）；② **锚点失配不是降级、是 fail-fast**——任一锚点匹配不到 chunk 就 `exit(1)` 拒绝出数，绝不拿漂移的评测集强行报指标。
+
+**实跑判据（S5）**：`cd rag-demo && npm run demo:eval`，输出 `recall@3=0.31`（132 chunks、PASS 3/8；范围外 2 题走拒答轨；若有锚点失配会以 ❌ + 退出码 1 终止）。这是「指标绑定某版 golden set」的可复现证据（clone 判据见 course-structure.ts 的 practicalOutput）。
 
 > **可背面试句**："裸的指标数字没有意义；有意义的是'哪一版评测集上的哪个指标、分母是谁、对照是什么'。"
 

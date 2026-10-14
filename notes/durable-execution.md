@@ -9,6 +9,14 @@
 
 ---
 
+## 预备知识（这课的门槛，只讲「课程外」要会什么）
+
+- **课程依赖（prereqs）**：`harness-from-scratch`（上一课带入 `session.ts` 的最小 durable journal：intent→exec、"有 intent 无 exec = 未知态"）+ `evaluation`（轨迹级评测 = 恢复正确性的验证手段）。
+- **技能门槛**：会「幂等 / 事务 / checkpoint」的粗概念即可（幂等=同一操作执行两次最终状态一样；checkpoint=定期快照）。
+- **不需要提前会**：Temporal / Restate / DBOS 的 API、分布式一致性、故障注入框架——一律不用。journal 双锚点 / 原子写 / 未知态只读确认随 `durable-execution-demo`（`npm run demo`）边跑边建。
+
+---
+
 ## S1 问题定义：长任务的三个"随时"
 
 **这一节解决什么问题**：先把失败的定义校准。短任务（一次问答）崩溃了，重跑一遍的成本可以忽略；但 agent 任务可能跑几分钟到几天，重跑的代价是"8 小时白跑 + 副作用重复"。这一节把"长任务为什么是另一类问题"立成坐标系，后面每一层机制都在回答这里暴露的一个失败。
@@ -66,6 +74,20 @@ sequenceDiagram
   W->>X: ⑧ 仅对"未完成 / 未知"副作用执行幂等兜底
   X-->>W: ⑨ 幂等键命中 → 无效果 or 返回既有结果
 ```
+
+```ts
+// durable-execution-demo/src/state.ts —— checkpoint 原子写 + 校验和（S9.1 #2 毒快照防御）
+function writeJsonAtomic(path: string, value: unknown): void {
+  writeFileSync(`${path}.tmp`, canonical(value));   // ① 先写临时文件
+  renameSync(`${path}.tmp`, path);                  // ② 原子 rename：写一半崩溃也不会留半截 .json
+}
+// canonical() = 键排序 + 无空白 → 跨进程/跨次字节一致（恢复报告 sha256 可比的前提）
+export function sha256(s: string): string { return createHash("sha256").update(s, "utf8").digest("hex"); }
+// readCheckpoint()：读回后校验 checksum === sha256(canonical(rest))；
+//   不通过 → 退回上一个完好快照 + 重放 checkpoint 之后的 journal（checkpoint 只是加速器，journal 才是真相）
+```
+
+**这段在讲什么**：checkpoint 的「毒快照」防御靠两件事——① **临时文件 + `renameSync` 原子替换**（序列化到一半崩溃，留下的也是 `.tmp` 不是损坏的 `.json`）；② **校验和**（读回时验不过就退回上一个完好快照）。两者都指向同一个认知：**快照永远不是唯一事实源**，所以毒快照的代价只是「多重放一段日志」，不会数据错乱（S9.1 #2 / #6）。
 
 **你的锚点**：harness-demo 的 `session.ts`（appendFileSync JSONL：intent→exec）就是机制 1 的最小实现；从零写 harness §⑦ 的"只读重放 / 非只读摆状态给模型"就是机制 3 的 agent 版实现。**面试讲法：我不是背概念，是我 150 行白板 harness 里就有 journal 和幂等分类。**
 
@@ -232,6 +254,23 @@ npm run typecheck
 ```
 
 末尾 `✅ durable 验收通过：3 崩溃点 × 各 3 次，副作用计数恒=1` 即本节验收；断言失败退出码为 1（可进 CI）。崩溃/resume 也可手工分步复现：`npx tsx src/worker.ts --mode=crash --crash=C` → `npx tsx src/worker.ts --mode=resume`。运行产物全在 `.state/`（journal JSONL / checkpoint / 幂等存储 / mock 服务 ledger），`rm -rf .state` 即可重来。
+
+```ts
+// durable-execution-demo/src/recover.ts —— 恢复器纯判定（S8.2 判定表 = 本文件实现）
+//   exec 在（快照或 journal）          → skip                读历史结果，不重做
+//   intent 在、exec 缺 · 只读          → replay              免费重放（确定性）
+//   intent 在、exec 缺 · 幂等写        → replay              幂等键兜底，外部状态收敛
+//   intent 在、exec 缺 · 非幂等        → unknown→confirm      只读问 mock 服务：已送达→skip；未送达→exec
+//   无 intent                          → replay              从未开始，安全执行
+export function analyze(plan: StepSpec[], store: Store, ext: ExternalWorld): RecoveryView {
+  const ck = store.readCheckpoint();   // 读快照（校验和；毒快照 → 退回全量重放）
+  const events = store.readJournal();  // 读 journal（intent / exec 双记录）
+  // 为每一步产 Disposition：skip | replay | unknown-confirm-exec | unknown-confirm-skip
+  // analyze 是纯判定：不执行任何副作用 → 可单测、可被 demo 首行的规则自检复用
+}
+```
+
+**这段在讲什么**：恢复的正确性藏在这一步——`analyze` **只读、纯判定、不碰副作用**，把「该不该重放」与「重放了会不会重复」分开裁决。它先读 checkpoint（校验和通过才信）+ journal，再按决策树把每步归为 `skip / replay / unknown→confirm`；`unknown→confirm` 是**先只读问外部世界现状**再决定 exec 还是 skip（S3 决策树的 `U` 分支）。demo 首行的「规则自检」正是拿它把 S3 决策树**所有分支**都合成跑一遍（见 7.5 #3 —— 它不调模型、不联网，所以让恢复判定的正确性本身可证伪）。
 
 ### 7.2 src 文件清单（821 行，全离线确定性：mock 外部服务 + 逻辑时钟，不调模型 / 不联网 / 不用墙钟）
 
