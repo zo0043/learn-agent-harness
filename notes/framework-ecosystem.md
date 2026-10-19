@@ -1,10 +1,10 @@
 # 框架生态(懂原理不背 API)
 
-> 优先级 P2 · 状态：📐 讲义已展开，待提问演练
+> 优先级 P2 · 状态：🔄 讲义已展开（待脱稿复述演练）
 > 深度定位：路线图原话"懂原理即可，不背 API"——目标是**选型判断力 + 框架边界感**
 > **我的独特资产**：pi 是**日常在用+读过文档+跑过 RPC 模式（pi-agents-team workers）的框架**——多数读者对框架只有 API 级认知
 
-**本课导读**：框架课不是"API 速查"，而是回答三个问题——**它替我做了从零写 harness 的哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用从零写 harness 的语言拆任何框架，读者就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（**三家 SDK 同任务离线 mock 对照** + Claude Agent SDK 四能力）当实证，凡标"已实测"的结论都能指着代码复现（对照口径与命令见 [三家 SDK 五维对照](../framework-demo/docs/sdk-comparison.md)）。
+**本课导读**（链接口径：本站点只发布 `site/public/**`，`framework-demo/docs/` 等仓内 demo 子目录不走站点路由，故相关链接一律给 GitHub 绝对 URL）：框架课不是"API 速查"，而是回答三个问题——**它替我做了从零写 harness 的哪几层？它把那几层的决策藏去了哪里？什么时候该把决策权抢回来？** 只要你能用从零写 harness 的语言拆任何框架，读者就判定你"懂原理"；只说得出一串 `import` 和配置项，就是"背 API"。本课全程用真实资产 `framework-demo/`（**三家 SDK 同任务离线 mock 对照** + Claude Agent SDK 四能力）当实证，凡标"已实测"的结论都能指着代码复现（对照口径与命令见 [三家 SDK 五维对照](https://github.com/zo0043/learn-agent-harness/blob/main/framework-demo/docs/sdk-comparison.md)）。
 
 **本课地图**（每节回答一个问题）：
 
@@ -106,7 +106,7 @@ flowchart TD
 ### S2.4 三家 SDK 同任务离线对照（2026-10-12 新增 · 亲手实现，非文档复述）
 
 **入口**：`cd framework-demo && npm run compare`（一条命令跑完三家并打印结构化对照）+ `npm run compare:assert`（16 条断言，不符即非 0 退出）。
-**逐维结论表（每格带 `file:line` + 官方文档 URL）**：[`framework-demo/docs/sdk-comparison.md`](../framework-demo/docs/sdk-comparison.md)。
+**逐维结论表（每格带 `file:line` + 官方文档 URL）**：[`framework-demo/docs/sdk-comparison.md`](https://github.com/zo0043/learn-agent-harness/blob/main/framework-demo/docs/sdk-comparison.md)。
 **口径声明（不得省略）**：模型是**本地 mock 端点**（`framework-demo/src/mock-model.ts`，默认 `127.0.0.1:8791`，双格式：Anthropic `/v1/messages` + OpenAI `/v1/chat/completions`，响应=请求的纯函数）——**离线 mock 模型、非真实模型实跑**；无外网、无任何 key。因此本对照证明的是**三家的调用形状（loop 归属/工具声明/权限钩子/中断恢复/可观测钩子）**，不是模型能力。版本：Claude Agent SDK `0.3.296` / OpenAI Agents SDK `0.20.0` / LangGraph `1.4.21`。
 
 五维结论摘要（可直接引用，详表见上）：
@@ -396,7 +396,7 @@ ok(/拒绝|被拒|不许|禁止|不能|无法|政策|策略|denied/i.test(r.fina
 
 - 各家现状：Claude Agent SDK（2025-09 改名，Python+TS）/ OpenAI Agents SDK（Swarm 后继；**"2025 GA"为官方公告口径、本轮未能取得一手源 → 标"无法确认"**，registry 2026-10-12 实测仍 0.x 线：0.20.0）已核实（Anthropic/OpenAI 官方博客+仓库）；LangGraph 1.0 已核实（2025-10 alpha → 稳定 1.0.x，GitHub releases + langchain 官方博客；2026-10-11 复核）；**2026-10-12 registry 复核：`@langchain/langgraph` latest = 1.4.21（time.modified 2026-10-07，独立新缓存 `npm view`），原「当前 1.0.1」为过期口径——已就地更正（S2.3 表）；2026-10-13 全新缓存复核：latest = 1.5.0（time.modified 2026-10-12T23:19:38.982Z，`npm view @langchain/langgraph version time.modified --cache $(mktemp -d)`），1.4.21→1.5.0 为版本演变、非口径错误——逐条命令与来源见 `notes/industry-2026.md` §已知缺口/待复核 的核实台账**——S2.3 已回填
 - 我的锚点：pi 1.1.0 日常（#38/#39 环境实践）、pi-agents-team 多 agent（orchestrator/worker/RPC，本会话正在用）、从零写 harness（"框架藏什么"的实证）
-- 实操已落地：`framework-demo/`——① Claude Agent SDK 四能力（agent/subagent/权限/会话，指向本地双格式代理）：`npm run demo` 退出码 0，**10 条 `ok()` 断言 + 1 条整体判定**（SDK 版本 `@anthropic-ai/claude-agent-sdk@0.3.296`；历史表述「11/11」即此 10+1 口径，**已按 U-24 统一，不再合成 11 条断言**）；② **三家 SDK 同任务离线 mock 对照**（Claude Agent SDK 0.3.296 / OpenAI Agents SDK 0.20.0 / LangGraph 1.4.21，**对照实跑快照=2026-10-12；截至 2026-10-13 复核 registry latest 已升 1.5.0**）：`npm run compare` 一条命令结构化对照、`npm run compare:assert` 16 条断言退出码 0；逐维结论（loop 归属 / 工具与 schema / 权限与 HITL / 状态与中断恢复 / 可观测钩子，每格带 `file:line` + 官方 URL）见 [`framework-demo/docs/sdk-comparison.md`](../framework-demo/docs/sdk-comparison.md)。**离线 mock 模型、非真实模型实跑**（本地 `127.0.0.1:8791`，无外网无 key）——这是本轮补的实操证据，B/C 两家因此从"定位级/文档级"升为"有亲手实现与对照"。
+- 实操已落地：`framework-demo/`——① Claude Agent SDK 四能力（agent/subagent/权限/会话，指向本地双格式代理）：`npm run demo` 退出码 0，**10 条 `ok()` 断言 + 1 条整体判定**（SDK 版本 `@anthropic-ai/claude-agent-sdk@0.3.296`；历史表述「11/11」即此 10+1 口径，**已按 U-24 统一，不再合成 11 条断言**）；② **三家 SDK 同任务离线 mock 对照**（Claude Agent SDK 0.3.296 / OpenAI Agents SDK 0.20.0 / LangGraph 1.4.21，**对照实跑快照=2026-10-12；截至 2026-10-13 复核 registry latest 已升 1.5.0**）：`npm run compare` 一条命令结构化对照、`npm run compare:assert` 16 条断言退出码 0；逐维结论（loop 归属 / 工具与 schema / 权限与 HITL / 状态与中断恢复 / 可观测钩子，每格带 `file:line` + 官方 URL）见 [`framework-demo/docs/sdk-comparison.md`](https://github.com/zo0043/learn-agent-harness/blob/main/framework-demo/docs/sdk-comparison.md)。**离线 mock 模型、非真实模型实跑**（本地 `127.0.0.1:8791`，无外网无 key）——这是本轮补的实操证据，B/C 两家因此从"定位级/文档级"升为"有亲手实现与对照"。
 - 对照 harness-demo 的踩坑实证见 framework-demo/README.md（2026-10-11：allowedTools 裸名会抢在 canUseTool 之前、子代理对话默认不出主流、maxTurns 语义反直觉）
 - 抽象泄漏定律：Joel Spolsky, *The Law of Leaky Abstractions*（2002）——S3 的理论锚点
 - 2026 行业上下文：Anthropic Managed Agents / token 经济学（agent ≈4×、多智能体 ≈15×）见 industry-2026.md §一；框架收敛=行业问题定义收敛（多智能体 S6 同源）

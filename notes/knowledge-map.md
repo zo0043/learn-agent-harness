@@ -52,19 +52,19 @@
 | 主题 | 内容权重 | 状态 | 课程文件 | 完成后你能做到 |
 |---|---|---|---|---|
 | 从零写 harness | W0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
-| RAG 与检索 | W0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 123-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
-| Agent 系统设计模板 | W0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
-| Agent 可观测 | W2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
-| 沙箱与凭据·可复现 | W0 | 📐 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
-| 长期记忆 | W2 | 📐 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
-| durable execution | W1 | 📐 | `durable-execution.md`(`durable-execution-demo/`,S7 demo 已落地) | 讲清长任务不丢不重（journal/checkpoint/幂等） |
-| 评测工程化 | W0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
-| MCP 协议 + 供应链安全 | W1 | 📐 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
-| API 实操 + 多模型路由 | W1 | 📐 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
-| 数据飞轮 | W1 | 📐 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成“生产数据飞轮”故事 |
-| 模型基础 | W2 | 📐 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
-| 框架生态 | W2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
-| 多智能体编排 | W0 | 📐 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
+| RAG 与检索 | W0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 125-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
+| Agent 系统设计模板 | W0 | 🔄 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
+| Agent 可观测 | W2 | 🔄 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
+| 沙箱与凭据·可复现 | W0 | 🔄 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
+| 长期记忆 | W2 | 🔄 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
+| durable execution | W1 | 🔄 | `durable-execution.md`(`durable-execution-demo/`,S7 demo 已落地) | 讲清长任务不丢不重（journal/checkpoint/幂等） |
+| 评测工程化 | W0 | 🔄 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
+| MCP 协议 + 供应链安全 | W1 | 🔄 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
+| API 实操 + 多模型路由 | W1 | 🔄 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
+| 数据飞轮 | W1 | 🔄 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成“生产数据飞轮”故事 |
+| 模型基础 | W2 | 🔄 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
+| 框架生态 | W2 | 🔄 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
+| 多智能体编排 | W0 | 🔄 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
 
 > **第 2 列口径（2026-10-19 二度改名）**：`W0/W1/W2` 现为**内容权重**——`W0` = 主必修（不懂它后面都悬空）、`W1` = 重要、`W2` = 扩展。**它不是教学阶段、不是阅读序**——阶段标签 `P0–P4` 与线性阅读序见站点 `/learn/`（唯一真源 `site/src/data/course-structure.ts` 的 `stage` 与数组序）。沿革：2026-10-19 之前该列叫「岗位权重」（由更早的「优先级 / P0-P2」改名而来），语义是**按目标 JD 的备考优先级**；随面试定位一并移除后改为内容权重，**列名与语义同步换，不再有 JD 派生含义**。
 
@@ -90,18 +90,18 @@ graph TD
   HARNESS["✅ 从零写 harness · W0"]:::done
   AGENTH["✅ Harness 架构 · 主线"]:::done
   RAG["✅ RAG 与检索 · W0"]:::done
-  SYSDESIGN["📐 系统设计 · W0"]:::doing
-  SANDBOX["📐 沙箱与凭据 · W0"]:::doing
-  EVAL["📐 评测工程化 · W0"]:::doing
-  DURABLE["📐 durable execution · W1"]:::doing
-  MCP["📐 MCP 与供应链安全 · W1"]:::doing
-  API["📐 API 与多模型路由 · W1"]:::doing
-  FLYWHEEL["📐 数据飞轮 · W1"]:::doing
-  OBS["📐 可观测 · W2"]:::doing
-  MEMORY["📐 长期记忆 · W2"]:::doing
-  MODEL["📐 模型基础 · W2"]:::doing
-  FRAMEWORK["📐 框架生态 · W2"]:::doing
-  MULTIAGENT["📐 多智能体编排 · W0"]:::doing
+  SYSDESIGN["🔄 系统设计 · W0"]:::doing
+  SANDBOX["🔄 沙箱与凭据 · W0"]:::doing
+  EVAL["🔄 评测工程化 · W0"]:::doing
+  DURABLE["🔄 durable execution · W1"]:::doing
+  MCP["🔄 MCP 与供应链安全 · W1"]:::doing
+  API["🔄 API 与多模型路由 · W1"]:::doing
+  FLYWHEEL["🔄 数据飞轮 · W1"]:::doing
+  OBS["🔄 可观测 · W2"]:::doing
+  MEMORY["🔄 长期记忆 · W2"]:::doing
+  MODEL["🔄 模型基础 · W2"]:::doing
+  FRAMEWORK["🔄 框架生态 · W2"]:::doing
+  MULTIAGENT["🔄 多智能体编排 · W0"]:::doing
   TIMELINE["✅ LLM 时间线 · 横向资产"]:::done
   INDUSTRY["✅ 行业前线调研 · 横向资产"]:::done
   SYNTH["🔁 复盘整合 · 收口活动（非课程·无前置边）"]:::hub
@@ -125,7 +125,7 @@ graph TD
   AGENTH --> FRAMEWORK
 ```
 
-图外补充（**非前置边**，勿读成依赖）：可观测加深评测工程化（指标的数据管道上游）；长期记忆进系统设计设计题（`long-term-memory.md §S9` 收口系统设计）；实战演练是全部课程之后的收口活动。
+图外补充（**非前置边**，勿读成依赖）：可观测加深评测工程化（指标的数据管道上游）；长期记忆进系统设计设计题（`long-term-memory.md §S9` 收口系统设计）；复盘整合（SYNTH）是全部课程之后的收口活动。
 
 **建议修读顺序（唯一真源 = 站点 `/learn/` 线性阅读序）**：即 `course-structure.ts` 数组序 #1→#17（llm-timeline → 从零写 harness → Harness 架构 → RAG 与检索 → 系统设计 → 沙箱与凭据 → MCP 与供应链安全 → 评测工程化 → 多智能体编排 → durable execution → API 与多模型路由 → 可观测 → 长期记忆 → 数据飞轮 → 模型基础 → 框架生态 → 行业前线调研）。
 理由：线性序满足全部 `prereqs`（拓扑序已校验，见上依赖图），且每门课带「前置 / 参考样本 / 主线挂钩」；单链阅读不打散跨课依赖。若想换深入方向，只调整**本表内容权重**的侧重，不改 `/learn/` 线性序。

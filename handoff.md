@@ -51,8 +51,8 @@
 
 | 文件 | 内容 | 状态 |
 |---|---|---|
-| `notes/agent-harness.md` | **Harness 架构**：15 节（第 1-2 节回顾；地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
-| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 15 文件 + golden set recall@3=0.31,2026-10-12 锚点式复测;旧 1.00 已废） |
+| `notes/agent-harness.md` | **Harness 架构**：第 1–12 节 + 第 14 节（第 1-2 节回顾；地基→loop→工具协议→提示词→上下文工程→恢复→权限→多 agent→验证→总装→误区→pi 映射→题库）+ **第 15 节 JD 调研** | ✅ 讲完 |
+| `notes/rag.md` | **RAG 与检索**：12 节（embedding 机制→ANN→chunk→混合检索→rerank→生成→评测→替代方案→系统设计骨架→实操计划）+ **§13 实操复盘（rag-demo）** | ✅ 完成（2026-10-10 深夜 / 10-11 凌晨 实操：rag-demo 16 文件 + golden set recall@3=0.31,2026-10-12 锚点式复测;旧 1.00 已废） |
 | `notes/harness-from-scratch.md` | **从零写 harness**：10 节，含真实实测输出、白板骨架、练习题、代理故障实录 | ✅ 完成 |
 | `notes/knowledge-map.md` + 十三个编号课文件 | **知识点完整性构建（2026-10-10 深夜 / 10-11 凌晨）**：系统设计 / 可观测 / 沙箱与凭据 / 长期记忆 / durable execution / 评测工程化 / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 / 模型基础 / 框架生态——每课=分节知识点+面试点+练习题库+资产钩子；另有 `notes/interview-bank.md`（30 秒自我介绍框架/60 分钟模拟结构/项目深挖追问链/交叉题/JD 覆盖矩阵） | ✅ 知识结构建成，待开课 |
 
@@ -125,22 +125,22 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 
 | # | 知识域(课 · 文件) | 范围(S 节概要) | 状态 | 完成判据 |
 |---|---|---|---|---|
-| 1 | Harness 架构(`agent-harness.md`) | 15 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射 + §15 JD 调研 | ✅ 讲完 | 脱稿复述三条机制 + 指出一个自己实现里踩过的坑 |
+| 1 | Harness 架构(`agent-harness.md`) | 第 1–12 节 + 第 14 节:地基/loop/工具协议/提示词/上下文工程/恢复/权限/多 agent/验证/总装/误区/pi 映射/实战方向（第 1-2 节回顾；无 13/15 节） | ✅ 讲完 | 脱稿复述三条机制 + 指出一个自己实现里踩过的坑 |
 | 2 | 从零写 harness(`harness-from-scratch.md` + `harness-demo/`) | 10 节:loop/工具协议/流式三件事/policy 三道门/崩溃恢复/权限三层/压缩/mock 验证/代理实录/白板总装 | ✅ 讲完+实操(五模式实测) | 脱稿复述三条机制 + harness-demo 五种运行模式实测复现 |
 | 3 | RAG 与检索(`rag.md` + `rag-demo/`) | 12 节理论 + §13 实操复盘:embedding/ANN/chunk/混合检索/rerank/生成/评测/替代方案/设计骨架 | ✅ 讲完+实操(recall@3=0.31,2026-10-12 锚点式复测;2026-10-19 去面试化后复跑三值不变;旧 1.00 已废) | 脱稿复述三条机制 + `cd rag-demo && npm run demo:eval` 复现 recall@3=0.31 |
-| 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + 一个设计走查口头演练 |
-| 5 | 沙箱与凭据(`sandbox.md` + `sandbox-demo/`) | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(demo 已落地 2026-10-11) | 脱稿复述三条机制 + sandbox-demo 3 次重放逐字节一致(S2 demo 已验收) |
-| 6 | 评测工程化(`evaluation.md`) | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + rag-demo 评测链复现(judge 校准走查) |
-| 7 | durable execution(`durable-execution.md` + `durable-execution-demo/`) | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo 实录 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + S7 demo 已落地(2026-10-12,3 崩溃点×3 次验收) |
-| 8 | MCP 与供应链安全(`mcp.md`) | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo 实证 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + mcp-demo 投毒演示与四层防御消复现 |
-| 9 | API 与多模型路由(`api-engineering.md`) | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + api-demo 六模块 15 条断言自测复现 |
-| 10 | 数据飞轮(`data-flywheel.md`) | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 实战走查(真实三轮指标已回填)/ S7 常见错误 / S8 故事打磨 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + flywheel-demo 两轮降噪+门禁断言复现 |
-| 11 | 可观测(`observability.md`) | S1 agent≠微服务 / S2 OTel GenAI / S3 span 建模 / S4 成本归因 / S5 回放对比 / S6 工具版图 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + harness-demo demo:otel:mock 离线 15 spans/1 trace 复现 |
-| 12 | 长期记忆(`long-term-memory.md`) | S1 四类记忆 / S2 三层生命周期 / S3 写侧 / S4 读侧 / S5 冲突消解与遗忘 / S6 评测 / S7 记忆投毒 / S8 框架与学术 / S9 设计题 / S10 实战走查 / S11 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + memory-redteam 16/16 探针 + 逐层消融复现 |
-| 13 | 模型基础(`model-basics.md`) | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 / S7 速查表 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + model-basics-demo npm run demo 复现成本走查断言 |
-| 14 | 框架生态(`framework-ecosystem.md`) | S1 框架三族 / S2 框架版图 / S3 抽象泄漏 / S4 选型决策树 / S5 迁移路径 / S6 pi 深潜 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + framework-demo SDK 四能力跑通 |
-| 15 | 多智能体编排(`multi-agent.md`) | S1 何时多智能体 / S2 架构模式 / S3 通信与上下文隔离 / S4 单线程写 / S5 成本与评测 / S6 框架对照 / S7 子代理设计 / S8 实战走查 / S9 什么时候不要用多智能体 | 📐 讲义已展开(2026-10-11) | 脱稿复述三条机制 + 指出一种不该用多智能体的场景 |
-| — | 范围外：算法编码（LeetCode） | 需要时另轨自定，不在本教程范围 | ⚪ 不在教程范围 | 另轨，教程内不设判据 |
+| 4 | 系统设计(`system-design.md`) | S1 agent≠CRUD / S2 七步骨架 / S3 五模式 / S4 设计走查 / S5 FinHot 演练 / S6 客服演练 / S7 追问库 / S8 范式速查 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + 一个设计走查口头演练 |
+| 5 | 沙箱与凭据(`sandbox.md` + `sandbox-demo/`) | S1 权限≠沙箱 / S2 四通道 policy demo / S3 隔离谱系 / S4 凭据 / S5 漂移审计 / S6 可复现 / S7 实战走查 / S8 常见错误 | 🔄 讲义已展开(demo 已落地 2026-10-11) | 脱稿复述三条机制 + sandbox-demo 3 次重放逐字节一致(S2 demo 已验收) |
+| 6 | 评测工程化(`evaluation.md`) | S1 为什么 / S2 四层指标 / S3 judge 四偏差+校准 / S4 延迟奖励 / S5 golden set / S6 CI 门禁 / S7 demo 计划 / S8 指标四代 / S9 judge 校准实操 / S10 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + rag-demo 评测链复现(judge 校准走查) |
+| 7 | durable execution(`durable-execution.md` + `durable-execution-demo/`) | S1 三个随时 / S2 三机制 / S3 重放确定性 / S4 幂等三分法 / S5 long-horizon / S6 框架版图 / S7 demo 实录 / S8 实战走查 / S9 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + S7 demo 已落地(2026-10-12,3 崩溃点×3 次验收) |
+| 8 | MCP 与供应链安全(`mcp.md`) | S1 为什么 / S2 架构原语 / S3 认证分发 / S4 四攻击面 / S5 sampling 反转 / S6 demo 实证 / S7 实战走查 / S8 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + mcp-demo 投毒演示与四层防御消复现 |
+| 9 | API 与多模型路由(`api-engineering.md`) | S1 流式四件事 / S2 结构化三档 / S3 caching 经济学 / S4 失败分类学 / S5 路由三策略 / S6 成本工程 / S7 实战走查 / S8 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + api-demo 六模块 15 条断言自测复现 |
+| 10 | 数据飞轮(`data-flywheel.md`) | S1 定义+判据 / S2 轨迹数据模型 / S3 筛选 / S4 消融+T3.2 边界 / S5 微调意识 / S6 实战走查(真实三轮指标已回填) / S7 常见错误（该文件实为 S1–S7；「S8 故事打磨」为不存在的节号，2026-10-19 复审删去） | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + flywheel-demo 两轮降噪+门禁断言复现 |
+| 11 | 可观测(`observability.md`) | S1 agent≠微服务 / S2 OTel GenAI / S3 span 建模 / S4 成本归因 / S5 回放对比 / S6 工具版图 / S7 实战走查 / S8 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + harness-demo demo:otel:mock 离线 15 spans/1 trace 复现 |
+| 12 | 长期记忆(`long-term-memory.md`) | S1 四类记忆 / S2 三层生命周期 / S3 写侧 / S4 读侧 / S5 冲突消解与遗忘 / S6 评测 / S7 记忆投毒 / S8 框架与学术 / S9 设计题 / S10 实战走查 / S11 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + memory-redteam 16/16 探针 + 逐层消融复现 |
+| 13 | 模型基础(`model-basics.md`) | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识  / S6 能力漂移 / S8 实战走查 / S9 常见错误（原 S7 八股速查表已随练习题库移除，2026-10-19 复审删去该节号） | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + model-basics-demo npm run demo 复现成本走查断言 |
+| 14 | 框架生态(`framework-ecosystem.md`) | S1 框架三族 / S2 框架版图 / S3 抽象泄漏 / S4 选型决策树 / S5 迁移路径 / S6 pi 深潜 / S7 实战走查 / S8 常见错误 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + framework-demo SDK 四能力跑通 |
+| 15 | 多智能体编排(`multi-agent.md`) | S1 何时多智能体 / S2 架构模式 / S3 通信与上下文隔离 / S4 单线程写 / S5 成本与评测 / S6 框架对照 / S7 子代理设计 / S8 实战走查 / S9 什么时候不要用多智能体 | 🔄 讲义已展开(2026-10-11) | 脱稿复述三条机制 + 指出一种不该用多智能体的场景 |
+| — | 范围外：算法编码（LeetCode） | 需要时另轨自定，不在本教程范围 | —（范围外，不入三态） | 另轨，教程内不设判据 |
 
 ### 4.2 缺口补强清单（2026-10-11 面经检索底稿——**面经框架随 2026-10-19 去面试化退役**，本节保留仅为记录当时补强了什么，不再是待办）
 
@@ -190,7 +190,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 3. **模型 tool-calling 能力参差 + 模型列表会轮换**（2026-10-10 晚 实测）：`qwen3.8-flash` 已下架 → `qwen3.8-flash-next` ✅（tools+SSE）；`qwen3.8-max` ✅；`step-5-preview` 仍在但 ❌ 不支持 tool calling。我用的 OpenAI 兼容代理（litellm 网关）的模型列表随时间变，**跑 demo 前先看 `GET /v1/models`**。
 4. playwright 浏览器在 `~/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome`（无需下载）。
 5. pi 1.1.0 与 0.85.1 两份安装在机器上共存，引用 pi 文档结论时**必须标版本**。
-6. **数字引用规范（2026-10-12 立）**：评测数字只认实跑输出，其余位置一律抄录不另起数（附复跑命令与日期）；六个口径（15 域/17 页/18 卡/6 作品/205+37 题）以 knowledge-map 头部口径块为唯一参照、别处只引用不改写；rag.md 是 demo:eval 语料成员，划改后必须重跑核对（详见 rag.md §13 耦合警告）。
+6. **数字引用规范（2026-10-12 立）**：评测数字只认实跑输出，其余位置一律抄录不另起数（附复跑命令与日期）；现存口径（15 域/17 页/18 卡/6 作品；原「205+37 题」随练习题库与面试题库于 2026-10-19 移除而作废）以 knowledge-map 头部口径块为唯一参照、别处只引用不改写；rag.md 是 demo:eval 语料成员，划改后必须重跑核对（详见 rag.md §13 耦合警告）。
 
 ---
 

@@ -1,6 +1,6 @@
 # durable execution(长任务不丢不重)
 
-> 优先级 P1 · 状态：📐 讲义已展开，待提问演练
+> 优先级 P1 · 状态：🔄 讲义已展开（待脱稿复述演练）
 > 前置：从零写 harness §⑥⑦（harness-demo session.ts = 你已有的最小 durable journal）
 > 教学素材：FinHot backfill（1645 行、~10% 失败、断点续跑到次日凌晨）+ labeler（跨天异步）
 > 目标：把 从零写 harness"会话恢复"升级为"任务级 durable execution"，能答"设计一个跑 8 小时的 agent 任务，随时可能崩"

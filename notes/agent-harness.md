@@ -1,6 +1,6 @@
 # Harness 架构(完整教程)
 
-> 课程日志 · 2026-10-10 开课 · 完整教程版（先讲完，后续再练习提问）
+> 课程日志 · 2026-10-10 开课 · 完整教程版 · 状态：✅ 完成（讲完 + harness-demo 五模式实测）
 > 目标：**能清晰解释 agent harness 的架构**——分层、每层解决什么问题、设计取舍
 > 来源说明：通用架构取自 Anthropic 官方工程文章（Building Effective Agents 2024-12 / Effective Context Engineering 2025-09）+ 架构审校推理；pi 映射以本机 1.1.0 官方文档核验（未核验生产源码）
 
@@ -403,7 +403,7 @@ graph TD
 | 4 | **MCP 协议** | 2025-2026 生态热点，工具协议节的自然延伸 | P1 |
 | 5 | **评测体系** | 高级岗区分度；FinHot backtest/labeler 可重构为评测故事 | P1 |
 | 6 | **API 实操细节** | streaming SSE、结构化输出、prompt caching、重试/超时 | P1 |
-| 7 | 模型基础（KV cache、微调意识、推理成本） | 按岗位深度，基础够用 | P2 |
+| 7 | 模型基础（KV cache、微调意识、推理成本） | 按使用者深度，基础够用 | P2 |
 | 8 | 框架生态（LangGraph/Claude Agent SDK/OpenAI Agents SDK） | 懂原理即可，不背 API | P2 |
 
 ## 学习顺序（依赖图）
@@ -461,5 +461,5 @@ P2:模型基础、框架生态、A2A/agent 身份(观察)、computer use(认知)
 
 ## 待办
 
-- [ ] 人工补 20-30 条工业界团队公开材料（BOSS/官网，反爬绕不过；一手数据已在 `jd-research/`）
+- [x] ~~人工补 20-30 条工业界团队公开材料~~ **2026-10-19 作废**：随面试定位移除，JD 补盲三条一并作废（见 knowledge-map.md 待办清单的唯一事实源声明）；`jd-research/` 归档数据不再作为课程输入。
 - [ ] 确认深入方向（coding agent / 企业工作流 / 平台）→ 调整后续课程的展开深度

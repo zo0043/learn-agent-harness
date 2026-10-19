@@ -40,7 +40,7 @@
 
 - 2023.03 GPT-4 发布（32k 上下文）——agent 能力起点。
 - 2023.06★ OpenAI function calling 发布——工具调用开始标准化，一切 agent 的协议地基。
-- 2023.10 GPT-4 Turbo 128k——上下文窗口 4 倍，长任务成为可能。
+- 2023.11 GPT-4 Turbo 128k（2023-11-06 DevDay 宣布）——上下文窗口 4 倍，长任务成为可能。
 - 2024.02 Gemini 1.5 Pro（1M 上下文）——长上下文时代开启。
 - 2024.04★ Claude 3 家族 + Anthropic Tool Use GA——工具调用跨厂商趋同，agent 进入生产。
 - 2024.09★ o1 发布——推理模型开启：agent 设计从"多调用"转向"少而深"，重试/投票类模式价值下降。
@@ -82,7 +82,7 @@
 ## 已知缺口 / 待复核
 
 - ~~A2A spec 版本号未取得一手源~~ **2026-10-12 已补**：`a2a-protocol.org/latest/` 直连 HTTP 200（Linux Foundation 版权 2026）；`a2aproject/A2A` GitHub releases 最新 spec 发布 **v1.0.1**（2026-05-28）、v1.0.0（2026-03-12）、v0.3.0（2025-07-30）——详见下方核实台账。AgentKit GA 状态仍**无法确认**（未取得一手源）
-- 英文面经帖（LevelUpTutor/Blind 2025-2026）未逐帖复核（搜索轮数上限）
+- 英文讨论帖（LevelUpTutor/Blind 2025-2026）未逐帖复核（搜索轮数上限）
 - "writing tools for agents" URL 由引用推断，正文要点引自已验证的上下文工程文章
 - 2025 前时间线节点日期来自记忆（公认史实，如需逐条 URL 复核可再补一轮）
 

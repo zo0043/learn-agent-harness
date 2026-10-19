@@ -1,6 +1,6 @@
 # 从零写 harness(最小 Agent Harness 完整教程)
 
-> 课程日志 · 2026-10-10 开课 · 从零写 harness（实战导向：coding agent 方向）
+> 课程日志 · 2026-10-10 开课 · 从零写 harness（实战导向：coding agent 方向）· 状态：✅ 完成（讲完 + 白板版 178 行对应）
 > 目标：把"会讲架构"变成"能写出来"——手写一个可运行的最小 harness + 20 分钟白板版
 > 探测结论：TS+Python 双版本；流式从零讲
 > 作品位置：`harness-demo/`（TS 可运行版）+ `whiteboard/agent_whiteboard.py`（178 行纯标准库）
