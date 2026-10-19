@@ -139,6 +139,34 @@ flowchart TB
 
 > **生态规模数字的口径**：媒体转述（The Register, 2026-07-23，经 Wikipedia 转述）称「2026 年中 1 万+ MCP server 进入生产、SDK 月下载 9700 万+」——**无官方一手源，引用时须标「据媒体报道」**。可自查的一手口径是 npm 公开下载量（如 `@modelcontextprotocol/sdk` 2026-07 单月约 1.99 亿次，含 CI/镜像，**不等于**「生产 server 数」）。
 
+### S2.2 工具发现：协议给全量，裁剪是 host 的事 [2026现行]
+
+**这一节解决什么问题**：`tools/list` 的契约就是**返回全量清单**——协议层没有"按需给几个工具"这回事。所以"工具太多把上下文撑爆"这件事，**MCP 协议不解决，也解决不了**；它是 host/harness 的策略问题。本课此前只把代码执行当**攻击面**讲（S4 的 ASI05 Unexpected Code Execution），这里补上同一件事的另一面：**代码执行也是 2025-11 之后最有效的 token 优化手段之一**。
+
+**协议侧的事实（先说清边界）**：
+
+- 2026-07-28 spec 新增了 `server/discover`（服务发现），但那是发现 **server**，不是发现**单个工具**；单个工具仍走 `tools/list` 全量返回。
+- 官方 registry 处于 preview，机制是 DNS 命名空间 + `server.json` + REST 发现——**早期**，别当成熟基建规划。
+
+**host 侧的三种裁剪形态与实测数字**（详见 `notes/agent-harness.md` §3.4）：
+
+| 形态 | 做法 | Anthropic 实测 |
+|---|---|---|
+| Tool Search Tool | 定义全交但标 `defer_loading: true`，模型先只看到搜索工具 | 58 个工具 55K token → 8.7K（**-85%**）；Opus 4 选工具准确率 49%→74% |
+| Programmatic Tool Calling | 模型写代码编排调用，结果在代码环境里处理，只有最终输出进上下文 | 复杂研究任务 43,588→27,297 token（**-37%**），省 19+ 次推理往返 |
+| tool-as-code | 把 server 渲染成文件树，模型列目录/读文件来发现工具 | 150,000→2,000 token（**-98.7%**） |
+
+**对本课的直接后果——「代码执行」在威胁模型里要分两面看**：
+
+| 面 | 说明 |
+|---|---|
+| **攻击面**（S4 已讲） | 注入的指令落地为代码执行 = RCE；沙箱与凭据课的四通道 policy 就是拦这个 |
+| **优化面**（本节新增） | agent 主动写代码调 MCP，把中间结果挡在上下文外；顺带拿到隐私副产品（PII 令牌化后过工具、不过模型）与 state/skills |
+
+**代价不能省（Anthropic 原文明说）**：跑 agent 生成的代码**需要安全执行环境**（沙箱、资源限额、监控），这些基建是直接 tool call 避开的。所以选型是权衡，不是升级——**工具少的时候，全量预载仍然是对的**。这条也解释了为什么本课的 S4（安全全景）与沙箱课是前置：没有沙箱，③ 的收益兑现不了。
+
+来源：Anthropic《Code execution with MCP》2025-11-04、https://www.anthropic.com/engineering/code-execution-with-mcp ；《Introducing advanced tool use》2025-11-24、https://www.anthropic.com/engineering/advanced-tool-use 。
+
 ## S3 认证与分发
 
 **这一节解决什么问题**：MCP 把"装一个 server"变成了新的供应链动作——信任的落点从"运行时"前移到"安装时"。本地 server 没有网络面，但拿到的是你本机的进程权限；远程 server 有网络面、要第三方凭据，于是 MCP 必须引入 OAuth 2.1。分发的每一个渠道（registry、市场、包管理器）都是供应链攻击面。

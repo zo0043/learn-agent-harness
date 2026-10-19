@@ -41,6 +41,8 @@ while True:
 
 每次模型调用都附带工具定义：名称、描述、参数 JSON schema。**描述就是模型读的 API 文档**——Anthropic 称之为 agent-computer interface（ACI，对照 HCI）。
 
+> **边界条件（2026-10-19 补，Anthropic 2025-11-24 实测）**：这句话只在**工具数少**时成立。工具一多，"全量预载"本身就是故障源——Anthropic 报过 5 个 server（GitHub 35 个 + Slack 11 + Sentry 5 + Grafana 5 + Splunk 2 = 58 个工具）在对话开始前就吃掉约 55K token，其内部优化前一度到 134K。详见 3.4。
+
 两个实践事实（Anthropic 官方）：
 
 - 他们做 SWE-bench 时，**优化工具花的时间比优化整体提示词还多**。
@@ -68,6 +70,43 @@ while True:
 | 常见误区 | — | 假设本地审批流程对它生效 |
 
 **关键概念：工具输出是不可信数据。** 网页、README、邮件的内容会进入工具结果 → 进入模型上下文。其中可能藏着"指令"（见第七节 prompt injection）。模型天生分不清"指令"和"数据"，这是权限层存在的根本原因之一。
+
+## 3.4 工具发现：工具一多，全量预载就失效 [2026现行]
+
+**这一节解决什么问题**：3.1 的"每次调用都带工具定义"是**小工具集的默认做法**。工具数上去以后，它同时踩中两个坑——token 预付成本，和**选错工具**。这一节给三种按需加载的形态和各自的适用线。
+
+**坑 1 · token 预付**：见 3.1 边界条件。Anthropic 的账：58 个工具 ≈ 55K token（纯定义，不含任何对话）；Jira 一个 server 就 ~17K。
+
+**坑 2 · 选错工具（更隐蔽）**：名字相近时最常出错——`notification-send-user` vs `notification-send-channel`。Anthropic 实测开启 Tool Search Tool 后，Opus 4 的工具选择准确率 **49% → 74%**，Opus 4.5 **79.5% → 88.1%**。
+
+**三种形态**（按侵入性从低到高）：
+
+| 形态 | 做法 | 省的 | 代价 |
+|---|---|---|---|
+| **① Tool Search Tool** | 工具定义照常全部交给 API，但标 `defer_loading: true`；模型只先看到搜索工具本身（~500 token），需要时搜出 3-5 个相关工具再展开 | token **-85%**（77K → 8.7K，保住 95% 窗口） | 多一步搜索延迟；`<10` 个工具时不划算 |
+| **② Programmatic Tool Calling** | 模型写代码编排工具调用，结果在代码执行环境里被处理，**只有最终输出进上下文** | 复杂研究任务 token **-37%**（43,588 → 27,297）；20+ 次调用省掉 19+ 次推理往返 | 需要代码执行环境 |
+| **③ tool-as-code（code execution with MCP）** | 把 MCP server 渲染成**文件树**（`servers/<server>/<tool>.ts`），模型靠列目录、读文件来发现工具；数据也在代码里过滤后再回模型 | 实测 **150,000 → 2,000 token（-98.7%）** | 见下「别忽略的代价」 |
+
+**②③ 的共同点：把"中间结果过模型"这条默认路径掐掉。** 传统链式调用里，10,000 行表格要整份进上下文再由模型挑 5 行；写成代码后模型只看见 5 行。顺带两个副产品：**循环/条件/错误处理用代码写**（不用"调一次工具 + 睡一会"轮流问模型），以及 **TTFT 下降**（if 判断不必等一次推理）。
+
+**③ 的隐私副产品（与沙箱课直接接上）**：中间结果默认留在执行环境里，模型只看到你显式 log/return 的部分。更敏感的场景可以让 MCP client 在数据进模型前**做 PII 令牌化**、在发起下一次工具调用时还原——真实邮箱/电话从 Google Sheets 流到 Salesforce，**全程不过模型**。Anthropic 把这称为"确定性安全规则：规定数据能从哪流到哪"——这正是沙箱与凭据课 C/V/W 边界的协议层同款。
+
+**③ 的另一个副产品：state 与 skills。** 有文件系统就能把中间结果落盘、下次续跑；也能把跑通过的代码存成可复用函数，加一个 `SKILL.md` 就成了结构化 skill。
+
+**别忽略的代价（Anthropic 原文明说）**：执行 agent 生成的代码**需要安全的执行环境**——沙箱、资源限额、监控；这些基建开销和安全考量是直接 tool call 避开的。所以 ③ 不是"更先进的默认"，是**权衡**：token/延迟/组合能力的收益 vs 沙箱基建成本。工具数少、调用简单时，直接 tool call 仍然是对的。
+
+**怎么选（Anthropic 给的线）**：
+
+- 工具定义 > 10K token / 10+ 个工具 / 多 server → 上 ①
+- 大数据集只要聚合摘要 / 3+ 个有依赖的调用 / 并行操作 → 上 ②
+- 工具多达数百上千、且愿意建沙箱 → 考虑 ③
+- `<10` 个工具、每次会话都用、定义很紧凑 → **什么都别上**
+
+**独立佐证**：Cloudflare 的 "Code Mode" 与 ③ 结论一致（LLM 擅长写代码，就该用这个长处）；Cursor 对 >40 个工具直接告警 "Too many tools can degrade performance"。
+
+> **与 MCP 课的接缝**：①②③ 都发生在 host 侧，MCP 协议本身不管这些——`tools/list` 照样返回全量清单，发现与裁剪是 host 的策略。详见 `notes/mcp.md` S2.2。
+
+来源：Anthropic《Introducing advanced tool use》2025-11-24（https://www.anthropic.com/engineering/advanced-tool-use ）；《Code execution with MCP》2025-11-04（https://www.anthropic.com/engineering/code-execution-with-mcp ）；Cloudflare Code Mode（https://blog.cloudflare.com/code-mode/ ）。
 
 ---
 
