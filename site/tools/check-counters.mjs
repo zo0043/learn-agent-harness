@@ -54,6 +54,10 @@ const mdFiles = (dir) =>
 // ── 结果收集 ────────────────────────────────────────────────────────────────────
 const results = [];
 let hardError = null;
+/** D10 用：slug → status（在 courses.ts 解析块内赋值；块内声明会踩 ReferenceError，故上移） */
+let courseStatusMap = {};
+/** D10 用：15 个知识域笔记 slug（排除白板卡与 phase='—' 横向资产）；同上移防 ReferenceError */
+let courseNoteSlugs = [];
 
 /**
  * 登记一条判据。declared 与 actual 均为 null 表示该条无法解析（视为失败，避免门禁被静默绕过）。
@@ -157,6 +161,14 @@ if (!hardError) {
     act.domains = new Set(
       entries.filter((e) => e.slug !== whiteboard && e.phase !== horizontal).map((e) => e.domain),
     ).size;
+    // D10 真源：slug → status 字面量（与 StatusBadge/status.ts 同源口径）
+    courseStatusMap = Object.fromEntries(
+      [...arr.matchAll(/slug: '([^']*)', domain: '[^']*', phase: '[^']*', status: '([^']*)'/g)].map((m) => [m[1], m[2]]),
+    );
+    courseNoteSlugs = [...arr.matchAll(/slug: '([^']*)', domain: '[^']*', phase: '([^']*)', status: '([^']*)'/g)]
+      .map((m) => ({ slug: m[1], phase: m[2] }))
+      .filter((e) => e.slug !== whiteboard && e.phase !== horizontal)
+      .map((e) => e.slug);
 
     const exRaw = ts.match(/EXCLUDED_FROM_COURSE_ROUTE = new Set\(\[([^\]]*)\]\)/);
     if (!exRaw) {
@@ -203,6 +215,10 @@ if (!hardError) {
     for (const rel of files) {
       const abs = path.isAbsolute(rel) ? rel : path.join(ROOT, rel);
       if (!exists(abs)) continue;
+      // 自排除：门禁自身（与其余 tools）源码里的禁词是「文档在描述这条禁令」，
+      // 属元语言而非用户面残留。2026-10-19 复审补 site/tools/** 进扫描面时发现：
+      // 不排除会把 check-counters.mjs 自己的注释判红（它必须能写出这些词才能描述禁令）。
+      if (path.relative(ROOT, abs).startsWith('site/tools/')) continue;
       read(abs).split('\n').forEach((L, i) => {
         if (DECOM_PAT.test(L) && !DECOM_ALLOW.test(L)) hits.push(`${rel}:${i + 1}: ${L.trim().slice(0, 80)}`);
       });
@@ -219,12 +235,21 @@ if (!hardError) {
   const DEMO_SRC_DIRS = [
     'harness-demo/src', 'rag-demo/src', 'sandbox-demo/src', 'mcp-demo/src',
     'durable-execution-demo/src', 'framework-demo/src', 'memory-redteam/src',
+    // 2026-10-19 复审补：mvps.ts:13-17 声明这四个 demo 的产出被课程引用，属用户面
+    'api-demo/src', 'flywheel-demo/src', 'model-basics-demo/src', 'my-agent/src',
   ];
   const SURFACE_FILES = [
     ...mdFiles(P.notesDir).map((f) => path.join('notes', f)),
     ...mdFiles(path.join(ROOT, 'notes', 'details')).map((f) => path.join('notes', 'details', f)),
     ...['README.md', 'AGENTS.md'].filter((f) => exists(path.join(ROOT, f))),
     ...walkSrc(path.join(ROOT, 'site', 'src')),
+    // 2026-10-19 复审补：demo 的 README.md 是 GitHub 上直接渲染的用户面，此前整批逃网
+    //（memory-redteam / rag-demo / mcp-demo 三家 README 的面试化与题目残留，
+    //  都是这么漏过判据 A 的）；site/tools/** 同补（其 README 的死引用写法绕过了判据 B）
+    //（site/tools/README.md 的 /interview/ 字样双逃守卫：判据 B 要字面 "/interview/"，
+    //  而该文件写作 "/ `interview/`"）。
+    ...DEMO_SRC_DIRS.map((d) => path.join(ROOT, d, '..', 'README.md')).filter((f) => exists(f)),
+    ...walkSrc(path.join(ROOT, 'site', 'tools')),
     ...DEMO_SRC_DIRS.filter((d) => exists(path.join(ROOT, d))).flatMap((d) => walkSrc(path.join(ROOT, d))),
     ...['site/public/sitemap.xml', 'site/public/robots.txt'].filter((f) => exists(path.join(ROOT, f))),
   ];
@@ -236,6 +261,10 @@ if (!hardError) {
     if (!exists(dir)) return out;
     for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
       if (d.name === 'node_modules' || d.name === '.git' || d.name === 'dist') continue;
+      // 2026-10-19 复审：session-audit/ 是 DSH 会话运行时的审计流水（git 未跟踪，
+      // CI 干净检出里根本没有）。不跳过时，历史会话记录里出现过的旧措辞会把本判据判红
+      // ——本机与 CI 扫到不同文件集，正是「门禁不 hermetic」的一处实证。
+      if (d.name === 'session-audit') continue;
       const full = path.join(dir, d.name);
       const rel = path.relative(ROOT, full);
       if (d.isDirectory()) { walkAll(full, out); continue; }
@@ -398,7 +427,7 @@ grepNum(P.verifyYml, /nav\/index\.html/, 'verify.yml 关键页清单含 nav/inde
 // 但当时**无任何机器判据守着**（终审实测 check-counters.mjs 与 HEAD 逐字节一致）——P1 根因仍在。
 // 本节把它们升为判据。**纪律：只增约束、不放宽任何既有判据**；声明值一律从源码/口径块/仓外官方派生。
 const SCAN_SKIP = new Set(['node_modules', '.git', 'dist', 'analysis', 'reviews', '.state', 'out']);
-const TEXT_EXT = new Set(['.md', '.astro', '.ts', '.mjs', '.js', '.json', '.yml', '.yaml', '.sh', '.txt', '.xml']);
+const TEXT_EXT = new Set(['.md', '.astro', '.ts', '.mjs', '.js', '.json', '.yml', '.yaml', '.sh', '.txt', '.xml', '.py']);
 const walkText = (dir, out = []) => {
   if (!exists(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -411,6 +440,7 @@ const walkText = (dir, out = []) => {
 const SCAN_ROOTS = [
   'notes', 'site', 'harness-demo', 'rag-demo', 'sandbox-demo', 'mcp-demo',
   'durable-execution-demo', 'framework-demo', 'memory-redteam', 'viz', '.github',
+  'whiteboard', // 2026-10-19 复审补：白板是课程资产（works/map 渲染），此前整目录在扫描面外
   'README.md', 'handoff.md', 'AGENTS.md',
 ].map((r) => path.join(ROOT, r)).filter((p) => exists(p));
 const SELF = path.relative(ROOT, HERE + '/check-counters.mjs'); // 自排除：门禁自身代码里的正则字面量不得判自己
@@ -497,7 +527,9 @@ const grepLines = (re) => {
 };
 
 // D9.1 站点 html 旧值 33 清零（现行 32；沿革段/复测记录已豁免）
-const stale33 = grepLines(/33 个 html|html 33|HTML=33|站点 html 33|33 page/);
+// 2026-10-19 复审扩形态：原枚举只有 5 种写法，「33 页 / 33 个页面 / HTML 33」这类同义
+// 表述漏网——site/tools/README.md:12 的「33 页中的 10 条清单」就是这么活着逃过旧值扫描的。
+const stale33 = grepLines(/33\s*个?\s*(html|页面|页|静态页)|(html|HTML|页面|页)\s*33|HTML=33|33 page/i);
 check('旧值残留：站点 html 33', 0, stale33.length, stale33.slice(0, 4).join(' ') || '无（沿革段豁免）');
 
 // D9.2 白板行数：~180 清零（178 在位由 D5 守着）
@@ -512,9 +544,33 @@ check('旧值残留：durable 821 行', 0, grepLines(/821 行/).length, grepLine
 check('durable 831 行在位', true, grepRepo(/831 行/).length > 0, 'notes/durable-execution.md');
 
 // D9.5 demo 源码目录文件数（结构判据：漂移过的两个目录）
+// 2026-10-19 复审：声明值改为从 knowledge-map 资产表派生（原 16/9 硬编码在脚本里，
+// 违背本文件头 :18「脚本内不硬编码任何计数」——那把「改错能否被抓住」变成「改脚本才算数」）。
 const srcFileCount = (d) => (exists(path.join(ROOT, d)) ? fs.readdirSync(path.join(ROOT, d)).filter((f) => /\.(ts|mjs|js|tsx)$/.test(f)).length : 0);
-check('rag-demo src 文件 = 16', 16, srcFileCount('rag-demo/src'), 'rag-demo/src（2026-10-19 修复轮修正：README 写 15）');
-check('memory-redteam src 文件 = 9', 9, srcFileCount('memory-redteam/src'), 'memory-redteam/src');
+const assetTable = read(P.knowledgeMap);
+const claimNum = (re) => Number((assetTable.match(re) ?? [])[1] ?? NaN);
+const wbClaim = claimNum(/agent_whiteboard\.py`[（(](\d+) 行/);
+const ragSrcClaim = claimNum(/rag-demo\/\`[（(](\d+) 文件/);
+const mrSrcClaim = claimNum(/memory-redteam\/\`[（(](\d+) src/);
+check('rag-demo src 文件 = 资产表声明', ragSrcClaim, srcFileCount('rag-demo/src'), 'knowledge-map 资产表声明 vs 实测（2026-10-19 修复轮修正：README 写 15）');
+check('memory-redteam src 文件 = 资产表声明', mrSrcClaim, srcFileCount('memory-redteam/src'), 'knowledge-map 资产表声明 vs 实测');
+
+// D12（2026-10-19 复审新增）：**行数重算**判据——此前 D5/D9.4 只验「178 行/831 行」
+// 字符串在场 + 旧值不在，从不重算：白板文件自述「~150 行」而实际 178 行，门禁全绿
+// （whiteboard/ 不在扫描面、TEXT_EXT 不含 .py，双重遗漏）。现在按 wc -l 实算，
+// 声明值仍从 knowledge-map 资产表读（不硬编码）。
+const lineCount = (f) => (exists(f) ? read(f).split('\n').length - 1 : NaN);
+const wbActual = lineCount(path.join(ROOT, 'whiteboard', 'agent_whiteboard.py'));
+const durableClaim = claimNum(/durable-execution-demo\/\`[（(]9 src 文件\/(\d+) 行/);
+const durableActual = (() => {
+  const d = path.join(ROOT, 'durable-execution-demo', 'src');
+  if (!exists(d)) return NaN;
+  return fs.readdirSync(d).filter((f) => /\.(ts|mjs|js|tsx)$/.test(f))
+    .reduce((n, f) => n + lineCount(path.join(d, f)), 0);
+})();
+check('白板行数 = 资产表声明', wbClaim, wbActual, `whiteboard/agent_whiteboard.py 实测 ${wbActual} 行（资产表声明 ${wbClaim}）`);
+check('durable src 行数 = 资产表声明', durableClaim, durableActual, `durable-execution-demo/src 实测 ${durableActual} 行（资产表声明 ${durableClaim}）`);
+check('durable src 文件数 = 9', 9, exists(path.join(ROOT, 'durable-execution-demo', 'src')) ? fs.readdirSync(path.join(ROOT, 'durable-execution-demo', 'src')).filter((f) => /\.(ts|mjs|js|tsx)$/.test(f)).length : 0, '资产表声明 9 src 文件');
 
 // D9.6 StatusBadge 判定同源：三处（StatusBadge / learn.astro / DomainMap.astro）必须共用
 // utils/status.ts 的 statusKey——本轮事故：StatusBadge 用 includes('完成')/includes('进行')
@@ -552,6 +608,109 @@ const withRelated = detailFiles.filter((f) => /^related:/m.test(fs.readFileSync(
 check('details 篇目均带 related', detailFiles.length, withRelated.length, `notes/details/*.md（${detailFiles.length} 篇）`);
 check('c/[slug] 渲染延伸分水岭', true, /relatedDetails/.test(read(path.join(ROOT, 'site', 'src', 'pages', 'c', '[slug].astro'))), '课程页反查格');
 check('details/[slug] 渲染相关课程', true, /relatedCourses/.test(read(path.join(ROOT, 'site', 'src', 'pages', 'details', '[slug].astro'))), '详解页正查 chips');
+
+// ── D10 判据组（2026-10-19 复审新增）：笔记头部状态记号 vs courses.ts ──────────
+// 背景：复审发现「三态记号统一」只统一到 knowledge-map 口径块与 handoff:119 的声明，
+// 而 11 个课程笔记的头部状态行仍用已退役记号（📐 ×9、📖 ×2）、handoff §4.1 表格 12 行
+// 仍标 📐、3 篇（agent-harness / harness-from-scratch / rag）干脆没有状态行、
+// evaluation.md 标 ✅ 而 courses.ts 是 🔄——同一门课在笔记里读作「结构建成未开」、
+// 在 /learn/ 读作「讲义已展开」，与首轮修的「12 门课灰徽标」同属「同站多色」复发。
+// 纪律 #5：加判据守着，不只改显示值。首轮只修了站点侧，没管笔记自己的头部行。
+// 判据：① 15 个知识域笔记头部（前 6 行含「状态」的行）不得出现已退役记号；
+//       ② 该行必须出现现行三态记号，且与 courses.ts 同 slug 的 status 前缀一致；
+//       ③ handoff §4.1 表格行同样校验（表格是活表格，dated 归档段不在此范围）。
+// 范围说明：白板卡与两个横向资产（llm-timeline / industry-2026，phase='—'）不设判据——
+// 它们的头部是「参考素材」式描述而非三态状态，强行套记号会制造第二套假真源。
+const RETIRED_MARKERS = /📐|📖|⚪|🔶/;
+const NOW_MARKERS = ['✅', '🔄', '⏳'];
+const notesDir = path.join(ROOT, 'notes');
+const noteStatusLines = mdFiles(notesDir)
+  .filter((f) => f !== 'knowledge-map.md' && courseNoteSlugs.includes(f.replace(/\.md$/, '')))
+  .map((f) => path.join(notesDir, f));
+const markerMismatch = [];
+const retiredInNotes = [];
+for (const f of noteStatusLines) {
+  const slug = path.basename(f, '.md');
+  const want = courseStatusMap[slug];
+  if (!want) continue; // 非课程笔记（llm-timeline / industry-2026 / 横向资产）不设判据
+  const head = read(f).split('\n').slice(0, 6).filter((L) => L.includes('状态'));
+  if (head.length === 0) {
+    markerMismatch.push(`${path.relative(ROOT, f)}：头部无状态行（courses.ts = ${want}）`);
+    continue;
+  }
+  const line = head[0];
+  if (RETIRED_MARKERS.test(line)) {
+    retiredInNotes.push(`${path.relative(ROOT, f)}：${line.trim().slice(0, 40)}`);
+    continue;
+  }
+  const hit = NOW_MARKERS.find((m) => line.includes(m));
+  if (!hit || !want.startsWith(hit)) markerMismatch.push(`${path.relative(ROOT, f)}：笔记「${hit ?? '无记号'}」vs courses.ts「${want}」`);
+}
+// 2026-10-19 复审（B3）：恒真路径封堵。此前 courseStatusMap 解析不到条目时，
+// 下面两个循环全 continue → 空输入即通过，note 还打印「N 个顶层笔记逐个对齐」——
+// 实测把 courses.ts 的 status/phase 换序，匹配数 18→0、判据仍全绿。
+// 现在把「解析面本身」也变成判据：笔记集合为空、map 为空、或解析出的课程数
+// 与 courses.ts 的 slug 数不符，一律红。
+check('D10 解析面有效（courses.ts 条目可解析）', 18, Object.keys(courseStatusMap).length, '属性换序/改名导致匹配 0 时必须红（防恒真）');
+check('D10 笔记集合非空', true, noteStatusLines.length >= 15, `实际 ${noteStatusLines.length} 个知识域笔记进入校验`);
+check('笔记头部无退役记号', 0, retiredInNotes.length, retiredInNotes.join('；') || '📐/📖/⚪/🔶 已清零');
+check('笔记头部记号与 courses.ts 一致', 0, markerMismatch.length, markerMismatch.slice(0, 3).join('；') || `${noteStatusLines.length} 个顶层笔记逐个对齐`);
+
+// handoff §4.1 活表格（HISTORY_FILES 豁免的是 dated 记录段，§4.1 是活表格，单独校验）
+const handoffSrc = read(path.join(ROOT, 'handoff.md'));
+const sec41 = handoffSrc.slice(handoffSrc.indexOf('### 4.1'), handoffSrc.indexOf('### 4.2'));
+const tableRows = sec41.split('\n').filter((L) => /^\| \d+ \|/.test(L));
+const handoffMismatch = tableRows
+  .map((L) => {
+    const cells = L.split('|').map((c) => c.trim());
+    const slug = (cells[2].match(/`([\w-]+)\.md`/) ?? [])[1];
+    const want = courseStatusMap[slug];
+    if (!want) return null;
+    const hit = NOW_MARKERS.find((m) => cells[4].includes(m));
+    return hit && want.startsWith(hit) ? null : `handoff §4.1 第 ${cells[1]} 行「${cells[4].slice(0, 24)}」vs「${want}」`;
+  })
+  .filter(Boolean);
+// 同 B3：§4.1 标题改名/表格清空时 tableRows 为空 → 判据空转。封堵：行数为 0 即红。
+check('D10 handoff §4.1 表格行可解析', true, tableRows.length > 0, `实际 ${tableRows.length} 行进校验（0 行必须红）`);
+check('handoff §4.1 记号与 courses.ts 一致', 0, handoffMismatch.length, handoffMismatch.slice(0, 3).join('；') || `${tableRows.length} 行逐个对齐`);
+
+// ── D11 判据组（2026-10-19 复审新增）：内容面相对 .md 链接完整性 ─────────────────
+// 背景：复审时全仓扫相对链接，282 处「断链」绝大多数在 node_modules（第三方 README，
+// 与我们无关），但内容面 33 条里真有 2 条死引用，且都出在本轮自己的交付物上：
+//   · reviews/2026-10-19/02 报告 → ../details/01-context-rot.md（少跳一级目录）
+//   · reviews/2026-10-19/FIX-CHARTER:3 → 00-综述与整改建议.md（该文件在 2026-10-18/）
+// 去面试化守卫的判据 B 只查「指向已删除的 interview-bank / /interview/」这一类死引用，
+// 管不到普通路径写错。知识库的交叉引用是它最重要的导航面，故补这条机器判据。
+// 豁免与 D9 同思路，但**只吃 LINK_ALLOW 一套**，刻意不吃 isHistory 与 HIST_ALLOW：
+//   ① isHistory 把 reviews/ 整目录排除——而死链接恰恰出在本轮自己的报告里（02 报告
+//      少跳一级、FIX-CHARTER 指错目录），排除掉等于把判最主要的对象排除掉；
+//   ② HIST_ALLOW 含「任意日期」豁免（为放过「2026-10-14 实测 33 page(s)」这类记录），
+//      而报告行几乎都带日期——套用它会把所有断链一起放过去（实测：注入的死链被日期豁免吞掉）。
+//   链接完整性不受「保留历史语境」保护：路径写错就是写错，读者点过去就是 404。
+// 注意：DECOM_ALLOW 声明在去面试化守卫的 if 块内（块作用域），此处不可见——
+// 本文件 line 69-71 的教训（块内声明块外用 = ReferenceError）在这里第二次差点踩上，
+// 故 D11 自带一份同口径的正则，不去动别人的作用域。
+const LINK_ALLOW = /已删|已移除|去面试化|已整体移除|不再含题库|已删除/;
+const LINK_ROOTS = ['notes', 'reviews', 'README.md', 'handoff.md', 'AGENTS.md'].map((r) => path.join(ROOT, r));
+const linkFiles = [];
+for (const r of LINK_ROOTS) {
+  if (!exists(r)) continue;
+  if (fs.statSync(r).isDirectory()) linkFiles.push(...walkText(r));
+  else linkFiles.push(r);
+}
+const deadLinks = [];
+for (const f of linkFiles) {
+  const rel = path.relative(ROOT, f);
+  read(f).split('\n').forEach((L, i) => {
+    for (const m of L.matchAll(/\]\(([^)#]+\.md)(#[^)]*)?\)/g)) {
+      const t = m[1];
+      if (/^(https?:|mailto:|#)/.test(t)) continue;
+      if (LINK_ALLOW.test(L)) continue; // 记述删除本身的句子不是死引用
+      if (!exists(path.resolve(path.dirname(f), t))) deadLinks.push(`${rel}:${i + 1} → ${t}`);
+    }
+  });
+}
+check('内容面相对 md 链接无死引用', 0, deadLinks.length, deadLinks.slice(0, 3).join('；') || `${linkFiles.length} 个文件内链接全部落地`);
 
 // ── 4) 输出 ─────────────────────────────────────────────────────────────────────
 const pad = (v, w) => String(v ?? '∅').padStart(w);
