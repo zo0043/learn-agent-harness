@@ -257,7 +257,7 @@ const pass = recalls[2] === 1;                    // 判据：全部 gold chunk 
 
 **这段在讲什么**：golden set「版本化」的两个硬约束都在这段代码里——① gold 用**文本锚点**定位而非行号/id 指针（`rag.md#28` 这种指针一编辑就漂移，旧版曾静默算出「recall 0.13、宣称值 1.00」的假数据，见 evaluate.ts 头部注释）；② **锚点失配不是降级、是 fail-fast**——任一锚点匹配不到 chunk 就 `exit(1)` 拒绝出数，绝不拿漂移的评测集强行报指标。
 
-**实跑判据（S5）**：`cd rag-demo && npm run demo:eval`，输出 `recall@3=0.31`（125 chunks、PASS 3/8；范围外 2 题走拒答轨；若有锚点失配会以 ❌ + 退出码 1 终止）。这是「指标绑定某版 golden set」的可复现证据（clone 判据见 course-structure.ts 的 practicalOutput）。
+**实跑判据（S5）**：`cd rag-demo && npm run demo:eval`，输出 `recall@3=0.31`（134 chunks、PASS 3/8；范围外 2 题走拒答轨；若有锚点失配会以 ❌ + 退出码 1 终止）。这是「指标绑定某版 golden set」的可复现证据（clone 判据见 course-structure.ts 的 practicalOutput）。
 
 > **核心结论**："裸的指标数字没有意义；有意义的是'哪一版评测集上的哪个指标、分母是谁、对照是什么'。"
 

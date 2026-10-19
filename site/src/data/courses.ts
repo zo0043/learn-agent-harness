@@ -32,7 +32,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'rag', domain: 'RAG 与检索', phase: 'P0', status: '✅ 完成',
-    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=0.31（125 chunks，PASS 3/8）',
+    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=0.31（134 chunks，PASS 3/8）',
   },
   {
     slug: 'system-design', domain: '系统设计', phase: 'P0', status: '🔄 讲义已展开',

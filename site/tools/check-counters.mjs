@@ -480,9 +480,37 @@ check('nav.astro 同步截断标注', true, /止于 2025-01/.test(read(path.join
 check('旧值残留：白板 ~150 行', 0, grepRepo(/~150 行/).length, grepRepo(/~150 行/).map((f) => path.relative(ROOT, f)).join(', ') || '统一为 178 行');
 check('白板 178 行在位', true, grepRepo(/178 行/).length > 0, 'whiteboard/agent_whiteboard.py');
 
-// D6 recall@5 口径：README 与 rag.md 都必须写 0.44（HEAD 下可复现值；0.38/135 属脏工作区产物）
-check('README recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(P.readme)), '脏工作区值 0.38 不得回灌');
-check('rag.md recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(path.join(ROOT, 'notes', 'rag.md'))), 'rag.md §13 数字口径');
+// D6 recall@5 口径（2026-10-19 外部对标轮改判据：写死值 → 派生值）
+//
+// 原判据写死「README 与 rag.md 都必须写 0.44」，理由注的是「0.38/135 属脏工作区产物」。
+// 它违反本文件头【设计约束】2「脚本内不硬编码任何计数」——且 0.44 只是 2026-10-19
+// 去面试化那一次的干净树实测值，**语料一改它就失效**：本次 agent-harness.md 新增 §3.4
+// （工具发现）后，语料 125→134 chunks，干净树实跑 recall@5 = 0.38 / recall@10 = 0.56
+// （三语料成员与 HEAD 逐字一致后复跑，见 notes/rag.md §13 三度复跑对照）。
+//
+// 改为**派生**：从 notes/rag.md §13 解析 recall 三值组（与 site/src/utils/ragStats.ts
+// 同一定位方式：整组匹配，避免命中 §13 内的作废旧值叙述），再断言 README 与 rag.md
+// 都含该现值。证伪能力不减反增——原判据只抓「README 写 0.38」这一种漂移，
+// 现判据抓「README 与真源任意不一致」。
+//
+// 「声明值 = 干净树实跑值」这条**不由本脚本保**（它跑不了语料生成器），
+// 由 rag-demo 的 check:corpus 保——2026-10-19 同轮升级为真跑一遍评测、逐项比对。
+const ragNote = read(path.join(ROOT, 'notes', 'rag.md'));
+const ragSec13 = (() => {
+  const m = /^##\s*13\b[^\n]*$/m.exec(ragNote);
+  if (!m) return '';
+  const rest = ragNote.slice(m.index + m[0].length);
+  const next = /^##\s/m.exec(rest);
+  return next ? rest.slice(0, next.index) : rest;
+})();
+const ragRecall = /recall@3\s*=\s*([0-9.]+)\s*\/\s*recall@5\s*=\s*([0-9.]+)\s*\/\s*recall@10\s*=\s*([0-9.]+)/.exec(ragSec13);
+check('rag.md §13 recall 三值组可解析', true, !!ragRecall, 'parseRagStats 同款整组正则；解析不到说明 §13 结构已变，站点构建会先炸');
+if (ragRecall) {
+  const r5 = ragRecall[2];
+  const r5re = new RegExp(`@5[=: ]*${r5.replace('.', '\\.')}|recall@5[ =:]*${r5.replace('.', '\\.')}`);
+  check('README recall@5 = rag.md §13 真源', true, r5re.test(read(P.readme)), `真源现值 recall@5 = ${r5}（三值组 ${ragRecall[1]}/${r5}/${ragRecall[3]}）`);
+  check('rag.md recall@5 = §13 真源', true, r5re.test(ragNote), `§13 现值 recall@5 = ${r5}`);
+}
 
 // D7 sitemap：手写 site/public/sitemap.xml 的 url 数必须等于站点 html 数 − 1（404.html 不是内容页）
 // 2026-10-19 改判据：原判据「= 站点 html」把 404.html 收进 sitemap 这个坏做法钉成了门禁

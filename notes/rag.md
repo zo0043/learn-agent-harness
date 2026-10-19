@@ -280,7 +280,7 @@ corpus（几篇真实文档）
 ## 13 · 实操复盘：从零写一个最小 RAG（2026-10-10 深夜 / 10-11 凌晨）
 
 > §12 计划已执行。作品 = `learn-agent-harness/rag-demo/`（16 个 src 文件，零依赖，tsx 直跑）。
-> 语料 = 课程笔记自己（rag.md + agent-harness.md + handoff.md → 125 chunks）。
+> 语料 = 课程笔记自己（rag.md + agent-harness.md + handoff.md → 134 chunks，2026-10-19 外部对标轮复测；上一口径 125 chunks 因 agent-harness.md 新增 §3.4 工具发现而变，见下方耦合警告）。
 > 偏离计划：代理没有 embedding 模型（/v1/embeddings 实测 503）→ Embedder 接口 + hash 实现（FNV-1a → 768 维 → L2 归一）。刻意的教学选择：可复现、向量可打印、同义盲区变实证。换真语义模型 = 再实现接口 ~10 行。
 
 **pipeline**：corpus → chunker（heading 边界 + 500 字符兜底，挂 headingPath）→ tokenizer（拉丁整词 + CJK bigram）→ HashEmbedder → 暴力余弦 ∥ BM25（k1=1.5, b=0.75）→ RRF 融合（k=60）→ rerank 插槽（直通）→ 生成（强制引用 + 强制拒答，qwen3.8-flash-next）
@@ -290,11 +290,11 @@ corpus（几篇真实文档）
 2. **没有一路全面占优**：Q1（噪声词重灾）BM25 赢、Q3（话题聚簇）cosine 赢 → RRF 按 rank 融合（唯一无量纲公共货币）；`perListRanks` 列让"一路失明、另一路救回"可见。
 3. **bigram 代价两次显形**："上下文" 三字词拆成 上下 + 下文（靠碎片命中）；垃圾碎片 "么要" df=2 → 被当稀有信号定价 0.83。真实系统 = 正经分词器（jieba）或语义 embedding——tokenizer 和 Embedder 都是模块，pipeline 不动。
 
-**golden set（10 题：8 范围内 + 2 范围外）**：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50（PASS 3/8，2026-10-12 锚点式 golden set 复测；**2026-10-19 两度复跑 `npm run demo:eval`（去面试化删语料后 / 修复轮改 handoff.md §四后语料 123→125 chunks），三值与 PASS 数均不变、gold 锚点 16/16 全命中——锚点式 gold set 对笔记编辑不漂，这条本身是设计验证**）。
+**golden set（10 题：8 范围内 + 2 范围外）**：recall@3 = 0.31 / recall@5 = 0.38 / recall@10 = 0.56（PASS 3/8，2026-10-19 外部对标轮复测；gold 锚点 16/16 全命中）。**三度复跑对照**：2026-10-12 锚点式首测 0.31/0.44/0.50；2026-10-19 去面试化删语料后 0.31/0.44/0.50（chunk 数 123→125，三值不变）；2026-10-19 外部对标轮 agent-harness.md 加 §3.4 后 0.31/0.38/0.56（chunk 数 125→134，@5 与 @10 动）。——同一套锚点式 gold set 三次跨编辑复测，锚点 16/16 从不漂移，这条本身是设计验证；动的是排序不是锚点。
 
 > **数字口径（重要）**：旧版宣称的 recall@3=1.00 / @5=0.94 出自 2026-10-10 的「行号指针」golden set——gold 用 `lines: [28,31]` 指向笔记行号，笔记一编辑指针就漂、指错位置还**静默打 0.00**（同一次排序内 recall@k 单调不减，@3=1.00 与 @5=0.94 本就不可能同现，当年即为不同运行的拼接值）。2026-10-12 已把 gold 改为**文本锚点**（每题一个 distinctive 子串，运行时解析到 chunk），任一锚点匹配不到即 FAIL 退出。当前漏题定位到机制层：Q2（IDF 对数）是**语料缺口**——语料没有 IDF/对数的解释段；Q7/Q8（compact / paraphrase）是 compact 段检索短板。
 
-> **评测耦合警告**：本文件是 demo:eval 语料成员（corpus = rag.md + agent-harness.md + handoff.md），划改会扰动本节数字（W0-A 实测 132↔133 chunks、recall@5 0.44↔0.38、recall@10 0.50↔0.56 漂移）。凡划改必须重跑 `cd rag-demo && npm run demo:eval` 核对本节，不符以实跑为准或调整新文案回稳；§13 引述的探针问题原文是稳住排序的关键，严禁改动。
+> **评测耦合警告**：本文件是 demo:eval 语料成员（corpus = rag.md + agent-harness.md + handoff.md），**划改任一语料成员都会扰动本节数字**。历史实例三次：① W0-A 实测 chunk 数 132↔133、recall@5 0.44↔0.38、recall@10 0.50↔0.56 漂移；② 2026-10-19 去面试化删语料、chunk 数 123→125（三值不变）；③ **2026-10-19 外部对标轮 agent-harness.md 加 §3.4，chunk 数 125→134、recall@5 0.44→0.38**（干净树实测：三语料成员与 HEAD 逐字一致后复跑）。**纪律：凡划改语料成员，必须重跑 `cd rag-demo && npm run demo:eval` 核对本节，以实跑为准**；且必须在干净树上测（2026-10-18 曾因脏工作区测出 0.38/135 而误判声明过期，见 `reviews/2026-10-19/FIX-CHARTER.md`）。§13 引述的探针问题原文是稳住排序的关键，严禁改动。
 **5 题 FAIL 的机制归因**（2026-10-12 复测）：Q2（IDF 对数）= 语料缺口（语料没有 IDF/对数的解释段，两路都漏）；Q7（compact）= compact 段检索短板（漏 handoff.md#12：cosine#45 / bm25#12）；Q8（paraphrase 探针"系统怎么防止上下文溢出？"）= 表面形式盲区（漏 agent-harness.md#9：cosine#11 / bm25#13；handoff.md#12：cosine#122 / bm25#112）；Q1（k1 饱和）= 排序短板（rag.md#25 两路都在 top-10 外：cosine#73 / bm25#12）；Q3（headingPath）= 两路极端分裂（bm25 #1 vs cosine #54-60）。共同根因：词法路只能走表面形式重叠多远——**完全 paraphrase = 完全漏，这就是语义模型存在的理由**；Q2 还多一层教训：检索器修不了语料缺口。
 
 **拒答轨**："苹果的 CEO 是谁？" → 模型输出"材料不足" ✓（RAG 的失败模式不是不知道，是自信地编；拒答指令是第一道防线）。

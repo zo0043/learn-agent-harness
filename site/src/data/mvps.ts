@@ -54,7 +54,7 @@ export const MVPS: Mvp[] = [
     reuse: ['evaluation', 'system-design'],
     status: 'done',
     statusLabel: '✅ 已实现',
-    artifact: 'rag-demo/（125 chunks golden set，recall@3=0.31）',
+    artifact: 'rag-demo/（134 chunks golden set，recall@3=0.31）',
     note: 'system-design 为「参考」复用（设计模板参考检索链路，非代码扩展）',
   },
   {

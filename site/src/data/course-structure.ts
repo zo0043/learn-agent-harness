@@ -140,13 +140,13 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     stage: 'P0',
     domain: 'RAG 与检索',
     title: 'RAG 与检索',
-    intro: '检索 pipeline 每层为何存在；rag-demo 125 chunks golden set，recall@3=0.31',
+    intro: '检索 pipeline 每层为何存在；rag-demo 134 chunks golden set，recall@3=0.31',
     prereqs: ['harness-from-scratch'],
     next: ['system-design'],
     mvpSlug: 'rag-mvp',
     teachingFocus: 'chunking / 检索打分排序 / RRF 融合 / 强制引用与拒答',
     practicalOutput:
-      '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（125 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
+      '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（134 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
     prerequisiteNote: '已能跑通 harness-demo（前置课带入最小 loop 与工具协议直觉）；只需会读写文件、无需语义模型/向量库——「检索=打分排序」直觉随课建立',
     isHorizontal: false,
   },
@@ -214,7 +214,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'rag-mvp',
     teachingFocus: 'judge / golden set 版本化 / CI 门禁 / 评测污染与记忆投毒同源',
     practicalOutput:
-      '交付 = 一套评测体系方案（复用 rag-mvp 评测链，非新 MVP）：judge 校准 + golden set 版本化 + CI 门禁。判定 clone 能跑 = cd rag-demo && npm run demo:eval 复现 recall@3=0.31（125 chunks，PASS 3/8，10 题含 2 范围外拒答探针）；data-flywheel 复用它的「分母纪律 + 评测环节」，multi-agent 复用它的「轨迹级也要评」口径',
+      '交付 = 一套评测体系方案（复用 rag-mvp 评测链，非新 MVP）：judge 校准 + golden set 版本化 + CI 门禁。判定 clone 能跑 = cd rag-demo && npm run demo:eval 复现 recall@3=0.31（134 chunks，PASS 3/8，10 题含 2 范围外拒答探针）；data-flywheel 复用它的「分母纪律 + 评测环节」，multi-agent 复用它的「轨迹级也要评」口径',
     prerequisiteNote:
       '已上完 RAG 并跑过 rag-demo（前置课带入 recall@k / golden set / 错误归因三件直觉）；只需 precision/recall + 抽样统计的粗概念——judge 校准 / 分母纪律 / CI 门禁的具体机制随 rag-demo 的 demo:eval 边跑边建',
     isHorizontal: false,

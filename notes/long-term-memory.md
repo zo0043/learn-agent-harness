@@ -216,7 +216,7 @@ stateDiagram-v2
 
 **这一节解决什么问题**：记忆系统最常见的"看起来能用"——注入了几条事实，回答好像更贴心了。但**记忆错了比没有记忆更危险**：它会自信地把过期/被投毒的事实当真理跨会话传播。这一节给记忆的评测指标，并直接复用在 RAG 与检索 rag-demo 的黄金集与错误归因方法上。
 
-**检索层（复用 RAG 的方法）**：`rag-demo/` 已实测——125 chunks 语料、10 题黄金集（8 范围内 + 2 范围外走拒答轨），系统平均 **recall@3 = 0.31、recall@5 = 0.44、recall@10 = 0.50**（PASS 3/8，2026-10-12 锚点式 golden set 复测；旧值 recall@3=1.00 / @5=0.94 出行号指针期 gold set，**已废**，口径见 `notes/rag.md` §13「数字口径」）；5 题 FAIL 的机制归因：Q2 = 语料缺口，Q7/Q8 = compact 段检索短板，Q1 = 排序短板，Q3 = 两路极端分裂——共同根因是表面形式盲区（完全 paraphrase = 完全漏）。记忆检索的 query 更口语（"接着上次那个"），**recall@k 只会更差，所以必须按真实会话日志建黄金集，不能只测理想改写**。
+**检索层（复用 RAG 的方法）**：`rag-demo/` 已实测——134 chunks 语料、10 题黄金集（8 范围内 + 2 范围外走拒答轨），系统平均 **recall@3 = 0.31、recall@5 = 0.44、recall@10 = 0.50**（PASS 3/8，2026-10-12 锚点式 golden set 复测；旧值 recall@3=1.00 / @5=0.94 出行号指针期 gold set，**已废**，口径见 `notes/rag.md` §13「数字口径」）；5 题 FAIL 的机制归因：Q2 = 语料缺口，Q7/Q8 = compact 段检索短板，Q1 = 排序短板，Q3 = 两路极端分裂——共同根因是表面形式盲区（完全 paraphrase = 完全漏）。记忆检索的 query 更口语（"接着上次那个"），**recall@k 只会更差，所以必须按真实会话日志建黄金集，不能只测理想改写**。
 
 **记忆特有的四个指标（实战必须报名字）**：
 1. **一致性（consistency）**：同一主题是否只有一条当前有效事实。做法：对每个 scope+category 检查 active 条数，>1 即告警（coexisting 是合法例外，但要有时间戳）。目标：冲突主题 100% 消解。
@@ -463,7 +463,7 @@ export function write(store, candidate) {
 
 - 框架现状：Mem0/Letta/Zep 定位已核实（MemGPT 论文 2023；Letta=stateful agent server；Mem0 多层级；Zep/Graphiti 时序图谱）——S8 已回填
 - 学术方法：MemGPT（Packer et al. 2023, arXiv:2310.08560）、Generative Agents（Park et al. 2023, arXiv:2304.03442）、Reflexion（Shinn et al. 2023, arXiv:2303.11366）为已核实引用；**A-MEM 与 Zep/Graphiti 论文出处标 TODO，未核实前不写年份/编号**（见 S8 表内注释）
-- 仓库资产（本课与 RAG 与检索共享底层能力）：`rag-demo/` 16 src 文件实测——chunker（heading 边界 + 500 字符兜底）、tokenizer（拉丁整词 + CJK bigram）、HashEmbedder（FNV-1a→768 维→L2 归一）、暴力余弦 ∥ BM25（k1=1.5, b=0.75）、RRF（k=60）、rerank 直通插槽、生成（强制引用+强制拒答）；黄金集 recall@3=0.31 / @5=0.44 / @10=0.50（125 chunks，PASS 3/8；旧值 1.00/0.94 已废，口径见 `notes/rag.md` §13）——S4/S6 直接引用
+- 仓库资产（本课与 RAG 与检索共享底层能力）：`rag-demo/` 16 src 文件实测——chunker（heading 边界 + 500 字符兜底）、tokenizer（拉丁整词 + CJK bigram）、HashEmbedder（FNV-1a→768 维→L2 归一）、暴力余弦 ∥ BM25（k1=1.5, b=0.75）、RRF（k=60）、rerank 直通插槽、生成（强制引用+强制拒答）；黄金集 recall@3=0.31 / @5=0.44 / @10=0.50（134 chunks，PASS 3/8；旧值 1.00/0.94 已废，口径见 `notes/rag.md` §13）——S4/S6 直接引用
 - 我的锚点：pi Magic Context（project-memory/ctx_note/ctx_search 日常使用，#37 归档实践）、FinHot 教训条目（#33/#39=事故后程序记忆）、Harness 架构 §5（日志≠上下文）
 - 接回：系统设计(设计题模板 §S9)、沙箱与凭据(审计)、MCP 与供应链安全(注入检测复用)、数据飞轮(轨迹归档=情景记忆底座)、RAG 与检索(检索底层)
 
