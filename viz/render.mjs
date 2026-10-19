@@ -57,13 +57,10 @@ if (major < MIN_NODE) {
 async function main() {
   const { chromium } = await import("playwright-core");
 
-  const CHROME_CANDIDATES = [
-    process.env.CHROME_PATH,
-    `${process.env.HOME}/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome`,
-    `${process.env.HOME}/.cache/ms-playwright/chromium-1234/chrome-linux/chrome`,
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-  ].filter(Boolean);
+  // G0-4：浏览器候选表已抽到 viz/chrome.mjs（唯一解析点）。候选**顺序未变**：
+  //   CHROME_PATH → ms-playwright chromium-1234 ×2 → /usr/bin/google-chrome → /usr/bin/chromium，
+  // 仅在末尾追加了 revision 目录 glob 兜底——写死 1234 会在 playwright 升级后失效（原缺陷病因）。
+  const { resolveChrome, chromeNotFoundMessage } = await import("./chrome.mjs");
 
   const argv = process.argv.slice(2);
   const input = argv[0];
@@ -100,16 +97,9 @@ async function main() {
     else height = width;
   }
 
-  const chrome = CHROME_CANDIDATES.find((p) => {
-    try {
-      readFileSync(p);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  });
+  const chrome = resolveChrome();
   if (!chrome) {
-    console.error("no Chromium found — set CHROME_PATH to a chrome/chromium binary");
+    console.error(chromeNotFoundMessage());
     process.exit(1);
   }
 

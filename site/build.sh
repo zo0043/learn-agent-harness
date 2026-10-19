@@ -45,16 +45,48 @@ if ! node tools/check-counters.mjs; then
   exit 1
 fi
 
+# ── 类集合门禁（G0-5 / 纪律 #9）───────────────────────────────────────────────
+# 为什么需要：CSS 选择器可以挂在**从未存在的祖先类**下而静默失效（`.lf-count-note` vs
+# 页面实际输出的 `.lw-count-note` 只差一个字母前缀），这类缺陷不会被「页面里有没有这个
+# class」抓住，只能靠集合比对：CSS 定义的类集合 − 页面实际输出的类集合。差集非 0 即中止。
+# 输入面 = site/src/** 源码（**不读 site/dist**：dist 可能是 0 HTML 的残骸，拿它当基准
+# 会让门禁恒真）。与上面的口径门禁同构：fail fast、只读、秒级、`build:fast` 可绕过。
+if ! node tools/check-classes.mjs; then
+  echo "build.sh: 类集合门禁未通过，已中止构建（未产出 dist）。" >&2
+  echo "         上方清单 = CSS 定义了但页面从不输出的类（会静默失效）。" >&2
+  echo "         修好后重跑；确需跳过门禁做调试请用 npm run build:fast。" >&2
+  exit 1
+fi
+
 # 显式指定 V8 老生代上限。原因：在 cgroup 内存受限时 Node 会推导出一个很小的默认堆
 # （实测只到 ~450MB 就 FATAL "Ineffective mark-compacts near heap limit"），
 # 而本站构建实际需要 ~1GB。显式给 1GB 堆 + capped 的 1.5GB cgroup 上限即可稳定通过。
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=${BUILD_MAX_OLD_SPACE:-1024}"
 
-if command -v capped >/dev/null 2>&1; then
+# capped 探活（G0-1，2026-10-14）：本机 /usr/local/bin/capped 的「无 passwordless sudo」回退分支
+# 有 bug——`run_plain` 把原始命令丢在函数参数之外，回退时实际执行的是空命令列表
+# （报错 `nice: a command must be given with an adjustment`）并以 **exit 125** 静默终止，
+# 构建被整个吞掉、dist 一个文件都不产出（实测 2026-10-14：BUILD_EXIT=125，dist 不存在）。
+# 这是「89 文件 / 0 HTML 残骸」的一条现实成因路径，故这里先探活：`capped true` 真的能跑起来
+# 才用它；不能则打印明确告警后原样直跑（不加 caps，慢但产出 HTML）。
+CAPPED_USABLE=0
+if command -v capped >/dev/null 2>&1 && capped true >/dev/null 2>&1; then
+  CAPPED_USABLE=1
+fi
+
+if [ "$CAPPED_USABLE" = 1 ]; then
   export CAPPED_MEMORY_MAX="${CAPPED_MEMORY_MAX:-1800M}"
   capped "$ASTRO" build "$@"
 else
-  "$ASTRO" build "$@"
+  if command -v capped >/dev/null 2>&1; then
+    echo "build.sh: ⚠️ capped 存在但不可用（探活 'capped true' 非 0；本机 /usr/local/bin/capped 的" >&2
+    echo "          run_plain 回退分支会丢掉命令、以 exit 125 静默终止构建）——本次改为不限流直跑。" >&2
+  fi
+  if command -v nice >/dev/null 2>&1; then
+    nice -n 10 "$ASTRO" build "$@"
+  else
+    "$ASTRO" build "$@"
+  fi
 fi
 
 # ── pagefind：构建期全文索引（零服务端依赖）────────────────────

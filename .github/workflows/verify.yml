@@ -6,7 +6,10 @@
 #     可以在约 17 分钟内成功完成（首次 560s 超时被杀**非** OOM，dist HTML=32 含 404.html），
 #     但极慢/超时风险使其**不可依赖**——CI 仍是可靠回归路径。故本作业建立在 CI 上：
 #     CI（ubuntu-latest）构建站点 → headless Chromium 在 3 视口（375/768/1280）加载
-#     首页 /learn/ /works/ /interview/ /map/ /details/ 与课程页 /c/rag/
+#     10 条页面清单：首页 /learn/ /works/ /interview/ /map/ /details/ /nav/ /details/01-context-rot/ /c/rag/ 404
+#     （共 30 组合。**权威来源 = site/tools/visual-check.mjs 的 PAGES**，本行与 README 只是它的镜像）
+#     G0-2（2026-10-14）：`/nav/` 此前是 33 页里唯一没有任何几何回归的一页（本文件早已把它列为
+#     关键页，几何断言却漏了它）；`details/01-context-rot/` 此前详情页零几何覆盖（03-D16(a)）。
 #   - 只断言**结构与几何**：① 无横向溢出 ② 关键元素可见（header 导航/页标题/卡片容器）③ 无 console error
 #   - **不**断言视觉审美（配色/排版/美观）——像素级视觉仍留浏览器人工目检，本作业不覆盖、不冒充覆盖
 #   - 本机不保证能装 headless 浏览器——CI 实跑为证据；断言器本机预检走 `node site/tools/visual-check.mjs --selftest`（不依赖站点构建）
@@ -74,6 +77,19 @@ jobs:
       # Build sanity（dist 等值断言 33 + 关键页非空）与本作业后续的 3 视口 headless 断言覆盖。
       - name: Counter consistency gate (口径门禁)
         run: node site/tools/check-counters.mjs
+
+      # ── 类集合门禁（G0-5 / 纪律 #9，2026-10-14 新增）──────────────────────────
+      # 背景：CSS 选择器可以挂在**从未存在的祖先类**下而静默失效——实测 `learn.astro` 定义了
+      # `.lf-count-note`，而页面输出的是 `.lw-count-note`（只差一个字母前缀），浏览器里看不出任何
+      # 异常（这条规则本来只调字号/颜色）。这类缺陷**不会被「页面里有没有这个 class」抓住**，
+      # 必须做集合比对：`CSS 定义的类集合 − 页面实际输出的类集合`。
+      # 输入面 = **site/src 源码**（源码里同时给出「定义」与「输出」两侧，与构建无关）——
+      # **不读 site/dist**：dist 曾出现「89 文件 / 0 HTML」的残骸，拿它当基准 ⇒ 输出集为空 ⇒
+      # 门禁恒真（05 坑 18 / R12）。脚本内含「输入面为空即 exit 1」断言与白名单失效检测；
+      # 负路径自证 = `node site/tools/check-classes.mjs --self-test`（注入死选择器必须被抓，抓到即 exit 1）。
+      # 与口径门禁一样置于 `Build site` **之前**（廉价可判定、fail fast）。脚本只读，不写工作区。
+      - name: Class-set gate (类集合门禁)
+        run: node site/tools/check-classes.mjs
 
       - name: Build site
         working-directory: site

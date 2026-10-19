@@ -26,6 +26,13 @@
  * 本机预检（不依赖站点构建：用自带 fixture，验证断言器两条路径都会触发）：
  *   node tools/visual-check.mjs --selftest
  *
+ * ── 写盘约定（G0-3 明确化，别再靠读代码猜）──────────────────────────────────
+ *   · **主流程**（默认 / --fault 模式）：产物写 `--out`（默认 `<site>/tools/out`）——
+ *     这是 **CI artifact 契约**（verify.yml 的 `--out tools/out` 与 upload-artifact 路径），
+ *     根 `.gitignore:25` 已忽略 `site/tools/out/`，故不会污染工作区索引。
+ *   · **`--selftest`**：临时报告写 **`$TMPDIR/visual-check-selftest/`**（不进工作区、不入 artifact），
+ *     除非显式传 `--out`；加 `--selftest` 不再产生任何工作区文件（`--out` 仍是主流程默认值，未改）。
+ *
  * 退出码：0 = 全部断言通过（selftest 全部预期命中）；1 = 任一断言失败 /
  *   注入的故障未被检出（断言器过弱，同样算失败）/ 运行错误。
  *
@@ -35,6 +42,7 @@
  */
 import http from 'node:http';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,7 +56,11 @@ function arg(name, def = null) {
 }
 const HAS_SELFTEST = argv.includes('--selftest');
 const BASE = arg('base', 'http://127.0.0.1:4173/learn-agent-harness/');
+// 主流程产物目录 = CI artifact 契约（verify.yml 的 `--out tools/out` + upload-artifact）。
+// **不要**改这个默认值：`$TMPDIR` 只用于 --selftest（见下 TMP_OUT）。
 const OUT = arg('out', path.join(__dirname, 'out'));
+// G0-3：`--selftest` 是「本机预检」，其报告不进工作区也不入 artifact ⇒ 落系统临时目录。
+const TMP_OUT = path.join(os.tmpdir(), 'visual-check-selftest');
 const FAULT = arg('fault', process.env.VISUAL_FAULT || 'none'); // none | overflow | missing-element
 const TOLERANCE = Number(arg('tolerance', '4')); // px
 
@@ -58,8 +70,10 @@ if (FAULT !== 'none' && FAULT !== 'overflow' && FAULT !== 'missing-element') {
 }
 
 // ── 被测页面（选择器取自 site/src 的现行结构；改页面结构时需同步本表）───────
-// title = 页标题选择器；container + cardsMin = 卡片/容器断言。
+// title = 页标题选择器；container + cardsMin = 卡片/容器断言；mustHave = 额外必须命中的选择器
+// （正常模式下也会断言命中，见 checkOne 的 ②c —— 不是只在 fault 模式用）。
 // 课程页（c/rag）正文在 article.markdown 内（NotePageLayout），标题来自笔记 `# ` 渲染。
+// 条目数 10 × 3 视口 = 30 组合；页数由本表派生（README/CI 文案是它的镜像，不是第二份真源）。
 const PAGES = [
   { path: '', id: 'home', label: '首页', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'learn/', id: 'learn', label: '学习路线', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
@@ -68,6 +82,13 @@ const PAGES = [
   { path: 'map/', id: 'map', label: '知识地图', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'details/', id: 'details', label: '详解', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
   { path: 'c/rag/', id: 'course-rag', label: '课程页·RAG与检索', title: 'article.markdown h1', container: 'article.markdown', cardsMin: 1, course: true },
+  // G0-2 / 03-D16(a)（2026-10-14）：以下两页此前**没有任何几何回归**，本次纳入三视口断言。
+  // nav/ —— 33 页里唯一没进回归的一页（verify.yml 早已把它列为关键页，几何断言却漏了它）。
+  //   mustHave 选 `.cards .card`（LLM_EVOLUTION 派生的代际卡，数量稳定）；
+  //   **不要**选 `.nav-course-group`（5 个阶段数会变，会造成假红）。
+  // details/01-context-rot/ —— 详情页此前零几何覆盖（03-D16：现状「没有任何几何回归」）。
+  { path: 'nav/', id: 'nav', label: '学习导航', title: 'h1.page-title', container: '.cards .card', cardsMin: 1, mustHave: '.cards .card' },
+  { path: 'details/01-context-rot/', id: 'details-context-rot', label: '详解页·上下文腐化', title: 'article.markdown h1', container: 'article.markdown', cardsMin: 1, course: true },
   // t20：自定义 404 页纳入几何断言（2026-10-13 按用户决定实现，构建产物 32 页之一）。
   // cardsMin=3 对应三个引导入口（首页/课程/作品）——缺一即该页失败。
   { path: '404.html', id: 'not-found', label: '404 页', title: 'h1.page-title', container: '.cards .card', cardsMin: 3 },
@@ -198,6 +219,10 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true,
     await elem('页标题', pageDef.title);
     await elem(pageDef.course ? '课程正文' : '卡片容器', pageDef.container, { min: pageDef.cardsMin });
     if (pageDef.course) await elem('课程 meta 栏', 'header.course-meta-bar');
+    // ②c 页级额外断言点（mustHave）：**正常模式**下也真的断言命中，不是只在 fault 模式用。
+    // 加这条的原因（G0-2 加固）：只断言「容器存在 + 页面非空」抓不到「整段没渲染」——
+    // nav/ 的代际卡整段消失时别的断言仍可能通过；mustHave 钉死该页必须出现的结构。
+    if (pageDef.mustHave) await elem(`必需结构 ${pageDef.mustHave}`, pageDef.mustHave, { min: 1 });
 
     // ②b 搜索入口交互（强于「无 console error」：证明 SiteSearch 脚本真的初始化成功）
     // 触发按钮可见 → 点击 → dialog 打开（showModal）且输入框可见 → Esc 关闭还原现场。
@@ -251,6 +276,34 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true,
   return details;
 }
 
+// ── 浏览器启动（含本机回退）─────────────────────────────────────────────────
+// 主路径 = playwright 自带浏览器（CI 用 `npx playwright install --with-deps chromium` 装好，
+// 走到这里就成功）。回退路径 = 本机已有的 Chromium 候选表（viz/chrome.mjs，与 render.mjs 同源）：
+// 本机 2 核 3.4GB 上 `npx playwright install` 常装不起来，但 ~/.cache/ms-playwright 里
+// 已有别的 revision 的 chromium；`--selftest` 是**本机预检**，它必须能在本机跑起来，
+// 否则验收命令形同虚设。回退只在主路径抛错时发生，CI 行为不变。
+async function launchBrowser(chromium, opts = { headless: true }) {
+  try {
+    return await chromium.launch(opts);
+  } catch (err) {
+    let resolveChrome = null;
+    let notFound = null;
+    try {
+      ({ resolveChrome, chromeNotFoundMessage: notFound } = await import('../../viz/chrome.mjs'));
+    } catch {
+      /* viz/ 不存在（site 被单独拷出去时）：保留原始错误 */
+    }
+    const exe = resolveChrome ? resolveChrome() : null;
+    if (!exe) {
+      console.error(`[visual-check] playwright 自带浏览器不可用：${String(err.message).split('\n')[0]}`);
+      if (notFound) console.error(`[visual-check] 且候选表也没找到本机 Chromium：\n${notFound()}`);
+      throw err;
+    }
+    console.log(`[visual-check] ⚠️ playwright 自带浏览器不可用（${String(err.message).split('\n')[0]}）→ 回退本机 chromium：${exe}`);
+    return await chromium.launch({ ...opts, executablePath: exe });
+  }
+}
+
 // ── 主流程（CI）────────────────────────────────────────────────────────────
 async function runMain() {
   const { chromium } = await import('playwright');
@@ -259,7 +312,7 @@ async function runMain() {
   console.log(`[visual-check] base=${BASE} out=${OUT} fault=${FAULT} tolerance=${TOLERANCE}px`);
   console.log('[visual-check] 边界：只断言结构+几何（无横向溢出/关键元素可见/无 console error），不覆盖视觉审美（像素级仍留人工目检）');
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchBrowser(chromium);
   const all = [];
   try {
     for (const vp of VIEWPORTS) {
@@ -354,6 +407,16 @@ async function runSelftest() {
   const { chromium } = await import('playwright');
   const fixtures = path.join(__dirname, 'fixtures');
   const server = http.createServer((req, res) => {
+    // /favicon.ico：真实站点的 Base.astro 有 <link rel="icon">（不会请求这个路径），
+    // 而 fixture 页没有该 link —— 于是**部分浏览器**（完整 chrome，非 headless-shell）
+    // 会请求 /favicon.ico，拿到 404 后在 console 里打一条 error，把 good 页误判为失败。
+    // 这是 fixture 服务器的缺陷、不是页面缺陷，也与被测断言无关 ⇒ 显式返回 204。
+    // （实测：回退到本机 chromium-1234 时 good@375 会因此假红，26 项里错 1 项。）
+    if (req.url === '/favicon.ico') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     const file = path.join(fixtures, req.url === '/' ? 'good.html' : req.url.slice(1));
     if (!fs.existsSync(file)) {
       res.writeHead(404);
@@ -366,11 +429,12 @@ async function runSelftest() {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const base = `http://127.0.0.1:${port}/`;
-  const outDir = path.join(__dirname, 'out', 'selftest');
+  const outDir = arg('out', null) ? path.resolve(arg('out')) : TMP_OUT;
   fs.mkdirSync(outDir, { recursive: true });
   console.log(`[visual-check] selftest：fixture 服务器 ${base}（不依赖站点构建）`);
+  console.log(`[visual-check] selftest 写盘约定：报告 → ${outDir}（$TMPDIR，**不写工作区**；主流程 OUT=${OUT} 是 CI artifact 契约，未改）`);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchBrowser(chromium);
   const t0 = Date.now();
   const results = [];
   const expect = (name, cond, detail) => {
