@@ -6,8 +6,10 @@
 #     可以在约 17 分钟内成功完成（首次 560s 超时被杀**非** OOM，dist HTML=32 含 404.html），
 #     但极慢/超时风险使其**不可依赖**——CI 仍是可靠回归路径。故本作业建立在 CI 上：
 #     CI（ubuntu-latest）构建站点 → headless Chromium 在 3 视口（375/768/1280）加载
-#     10 条页面清单：首页 /learn/ /works/ /map/ /details/ /nav/ /details/01-context-rot/ /c/rag/ /c/rag/ 404
-#     （共 30 组合。**权威来源 = site/tools/visual-check.mjs 的 PAGES**，本行与 README 只是它的镜像）
+#     9 条页面清单：首页 /learn/ /works/ /map/ /details/ /nav/ /details/01-context-rot/ /c/rag/ 404
+#     （共 27 组合。**权威来源 = site/tools/visual-check.mjs 的 PAGES**，本行与 README 只是它的镜像）
+#     2026-10-19 更正：原写「10 条页面清单 / 共 30 组合」是已删除的 /interview/ 页留下的旧副本
+#     （清单里还把 /c/rag/ 写了两遍）——PAGES 实为 9 条 → 9 页 × 3 视口 = 27 组合。
 #     G0-2（2026-10-14）：`/nav/` 此前是 33 页里唯一没有任何几何回归的一页（本文件早已把它列为
 #     关键页，几何断言却漏了它）；`details/01-context-rot/` 此前详情页零几何覆盖（03-D16(a)）。
 #   - 只断言**结构与几何**：① 无横向溢出 ② 关键元素可见（header 导航/页标题/卡片容器）③ 无 console error
@@ -113,8 +115,9 @@ jobs:
       # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
       # 站点 html 口径（2026-10-14 结构重组实测更正，见 notes/knowledge-map.md 计数口径块）：
       #   32 = 7 静态页 + 17 课程页 + 8 专题页（三桶互斥且穷尽，成员逐一枚举）：
-      #      · 8 静态页（site/src/pages/**/*.astro 中的非动态页，即文件名不含 [ 参数者）：
+      #      · 7 静态页（site/src/pages/**/*.astro 中的非动态页，即文件名不含 [ 参数者）：
       #        index / learn / works / map / nav / 404 / details/index
+      #        （2026-10-19 更正：原写「8 静态页」是已删除的 /interview/ 页留下的旧副本，实为 7）
       #      · 17 课程页（site/src/pages/c/[slug].astro）
       #      · 8 专题页（site/src/pages/details/[slug].astro）
       #   等价写法：7 顶层页含 404 + 1 details/index + 17 + 8。
@@ -142,6 +145,21 @@ jobs:
       - name: Install headless browser (Chromium)
         working-directory: site
         run: npx playwright install --with-deps chromium
+
+      # ── mermaid 图渲染回归（2026-10-19 新增）────────────────────────────────
+      # 背景：站内 62 张 mermaid 图全部**客户端**渲染（mermaid.ts 动态 import bundle）。
+      # 渲染失败在结构/几何断言里完全隐形——图退化为显示源码时不溢出、容器在、
+      # console 无错（脚本有意 catch）。真实事故：W3-A 修复前 <br/> 换行全量退化
+      # （15 篇讲义 × 4 图），只有人眼看得见。
+      # 本步把「图到底渲没渲出来」变成断言；被测页面不手抄清单——运行时扫 dist 里
+      # 含 class="mermaid" 的 HTML（空清单即失败，防门禁恒真）。
+      # 边界诚实：只断言「每张图都渲成 <svg> 且无运行错误」，**不**校验图内容正确性
+      # （节点连对不对、文字全不全）——仍留浏览器人工目检。
+      # 自建服务器（node:http，按 base 前缀路由 dist），与下方 visual-check 的
+      # python http.server 互不干扰（端口 4174 vs 4173）。
+      - name: Mermaid render regression (mermaid 图渲染回归)
+        working-directory: site
+        run: node tools/mermaid-check.mjs --dist ../dist
 
       # 站点以 base=/learn-agent-harness/ 构建（astro 只改 URL 前缀，dist 仍是平铺结构），
       # 线上由反代把 /learn-agent-harness/ 前缀映射到 Pages 内容根。这里用符号链接目录

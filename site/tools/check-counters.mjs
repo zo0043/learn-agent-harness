@@ -63,6 +63,25 @@ function check(name, declared, actual, note = '') {
   results.push({ name, declared, actual, pass, note });
 }
 
+/**
+ * 内部历史：dated 工作日志 / 过程文档 / 审计归档。它们**不在站点渲染面**上，
+ * 保留当时语境是可追溯性的一部分；handoff.md 另有一条正向判据（文首必须声明当前定位）。
+ * 模块级声明（2026-10-19 从「重算」块内上移）：D9 旧值判据组也要用它排除归档目录，
+ * 放在 if (!hardError) 块内时块外不可见（首次实现踩过，ReferenceError）。
+ */
+const HISTORY_FILES = [
+  'handoff.md',
+  'notes/process/',
+  'reviews/',
+  'analysis/',
+  '.agent-teams/',
+  // 根目录的历史审计 / 结构重组报告：记录的是 2026-10-14 当时的真实状态，
+  // 与 reviews/ 同属归档（不得改写），故同样豁免。
+  'notes-restructure-plan.md',
+  'restructure-',
+];
+const isHistory = (rel) => HISTORY_FILES.some((h) => rel === h || rel.startsWith(h) || rel.includes(h));
+
 // ── 1) 解析口径块（声明值唯一来源）────────────────────────────────────────────────
 let block = '';
 try {
@@ -164,22 +183,12 @@ if (!hardError) {
   // 判据 B · 死引用 = 0：全仓活源码不得再指向已删除的 interview-bank.md / /interview/。
   //   允许记述「已删除」的句子，以及 §HISTORY 列出的内部历史文件。
   const DECOM_ALLOW = /已删|已移除|去面试化|已整体移除|一并移除|已随|不再含题库|已于 2026-10-19|原练习题库|当时的|已删除|作废|原落在/;
-  const DECOM_PAT = /面试|题库|interview|JD\s*关键词/;
+  // 2026-10-19 二扩：禁词表补「谈资 / 最常考 / 八股 / 备考」——去面试化第一轮只列了
+  // 面试|题库|interview|JD 关键词，这四个面试化措辞当时整批漏改（framework-ecosystem /
+  // llm-timeline / industry-2026 / details 索引页），且第二轮扫描面（见下）同样没覆盖。
+  const DECOM_PAT = /面试|题库|interview|JD\s*关键词|谈资|最常考|八股|备考/;
   const DEAD_PAT = /interview-bank|\/interview\//;
-  // 内部历史：dated 工作日志 / 过程文档 / 审计归档。它们**不在站点渲染面**上，
-  // 保留当时语境是可追溯性的一部分；handoff.md 另有一条正向判据（文首必须声明当前定位）。
-  const HISTORY_FILES = [
-    'handoff.md',
-    'notes/process/',
-    'reviews/',
-    'analysis/',
-    '.agent-teams/',
-    // 根目录的历史审计 / 结构重组报告：记录的是 2026-10-14 当时的真实状态，
-    // 与 reviews/ 同属归档（不得改写），故同样豁免。
-    'notes-restructure-plan.md',
-    'restructure-',
-  ];
-  const isHistory = (rel) => HISTORY_FILES.some((h) => rel === h || rel.startsWith(h) || rel.includes(h));
+  // HISTORY_FILES / isHistory 已上移到模块级（D9 旧值判据组复用，见上方声明处注释）。
 
   const walkSrc = (dir) => {
     if (!exists(dir)) return [];
@@ -202,11 +211,21 @@ if (!hardError) {
   };
 
   // 判据 A 的输入面 = 站点渲染面
+  // 2026-10-19 二扩：补 7 个 demo 的 src/ 目录注释。去面试化第一轮修了 11 处 demo
+  // 源码注释（harness-demo/src/{tools,test-compact,policy,context,llm}.ts、
+  // rag-demo/src/{corpus,bm25,evaluate,demo-bm25}.ts、sandbox-demo/src/policy.ts、
+  // mcp-demo/src/defense.ts、memory-redteam/src/demo.mjs），但扫描面只含 site/src，
+  // 修完无判据守着——与 P1「手抄副本不在门禁内」同根因。
+  const DEMO_SRC_DIRS = [
+    'harness-demo/src', 'rag-demo/src', 'sandbox-demo/src', 'mcp-demo/src',
+    'durable-execution-demo/src', 'framework-demo/src', 'memory-redteam/src',
+  ];
   const SURFACE_FILES = [
     ...mdFiles(P.notesDir).map((f) => path.join('notes', f)),
     ...mdFiles(path.join(ROOT, 'notes', 'details')).map((f) => path.join('notes', 'details', f)),
     ...['README.md', 'AGENTS.md'].filter((f) => exists(path.join(ROOT, f))),
     ...walkSrc(path.join(ROOT, 'site', 'src')),
+    ...DEMO_SRC_DIRS.filter((d) => exists(path.join(ROOT, d))).flatMap((d) => walkSrc(path.join(ROOT, d))),
     ...['site/public/sitemap.xml', 'site/public/robots.txt'].filter((f) => exists(path.join(ROOT, f))),
   ];
   act.surfaceResidue = scanLines(SURFACE_FILES);
@@ -435,9 +454,12 @@ check('白板 178 行在位', true, grepRepo(/178 行/).length > 0, 'whiteboard/
 check('README recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(P.readme)), '脏工作区值 0.38 不得回灌');
 check('rag.md recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(path.join(ROOT, 'notes', 'rag.md'))), 'rag.md §13 数字口径');
 
-// D7 sitemap：手写 site/public/sitemap.xml 的 url 数必须等于站点 html 数（否则新增页面会静默漏收）
+// D7 sitemap：手写 site/public/sitemap.xml 的 url 数必须等于站点 html 数 − 1（404.html 不是内容页）
+// 2026-10-19 改判据：原判据「= 站点 html」把 404.html 收进 sitemap 这个坏做法钉成了门禁
+// （404 进 sitemap 只会让爬虫收录一个 HTTP 404 响应；现已在 404.astro 加 noindex 双保险）。
 const sitemapXml = read(path.join(ROOT, 'site', 'public', 'sitemap.xml'));
-check('sitemap url 数 = 站点 html', dec.siteHtml, (sitemapXml.match(/<url>/g) ?? []).length, 'site/public/sitemap.xml（手写，未装 @astrojs/sitemap）');
+check('sitemap url 数 = 站点 html − 1', dec.siteHtml - 1, (sitemapXml.match(/<url>/g) ?? []).length, 'site/public/sitemap.xml（手写，未装 @astrojs/sitemap；404.html 不入表）');
+check('sitemap 不含 404.html', true, !/<loc>[^<]*404\.html/.test(sitemapXml), '防回潮：404 不是内容页（注释里的记述不算）');
 check('去面试化 A：站点渲染面不得残留 面试/题库/interview', 0, act.surfaceResidue.length, `命中 ${act.surfaceResidue.length} 处（样例：${act.surfaceSample.join(' ｜ ') || '无'}）`);
 check('去面试化 B：活源码不得残留指向已删文件/页的死引用', 0, act.deadRefs.length, `命中 ${act.deadRefs.length} 处（样例：${act.deadRefSample.join(' ｜ ') || '无'}）`);
 check('handoff.md 在首个 ## 标题前声明当前定位', 1, act.handoffNotice ?? 0, 'handoff.md 第一个 `## ` 标题之前须含「当前定位（2026-10-19 更新，以此为准）」——防读者从历史日志读入已作废的面试定位');
@@ -452,6 +474,84 @@ const staleTraj = grepRepo(/trajectories\/demo\.jsonl/).filter((f) => {
   return !t.split('\n').some((l) => /trajectories\/demo\.jsonl/.test(l) && exempt.test(l));
 });
 check('旧引用残留：trajectories/demo.jsonl（未带豁免说明）', 0, staleTraj.length, staleTraj.map((f) => path.relative(ROOT, f)).join(', ') || '无（余下均为带「未入库/本机产物」说明的正确用法）');
+
+// ── D9 判据组（2026-10-19 修复轮二）───────────────────────────────────────────
+// 背景：本轮审出「3 类漂移全部逃过绿门禁」——站点 html 33（真值 32）、白板 ~180 行
+// （真值 178）、rag 132 chunks（真值 123）。共同根因 = 修的是**显示值**、没有判据守着，
+// 下次任何人生成/手改都会静默回退（纪律 #5：修显示值不如修生成器/判据）。
+// 纪律同 D1–D8：只增约束、不放宽既有判据。
+// 旧值判据一律**行级**且豁免两类句子：① 记述本次更正的句子（改旧值=删历史=伪造）；
+// ② 带日期的记录行（「2026-10-14 实测 33 page(s)」这类现场记录）。另把 notes/process/、
+// reviews/、analysis/ 三个 dated 归档目录整体排除（与去面试化守卫的 HISTORY_FILES 同口径）。
+// 一条「不改谎话就无法满足」的判据是坏判据。
+const HIST_ALLOW = /原写|原为|原值|当时|曾|历史|已改|改为|更正|漂移|统一|形如|正则|旧值|此前|先前|之前|沿革|旧「|复测|实测|\d{4}-\d{2}-\d{2}/;
+const grepLines = (re) => {
+  const out = [];
+  for (const f of scanFiles) {
+    if (isHistory(path.relative(ROOT, f))) continue;
+    fs.readFileSync(f, 'utf8').split('\n').forEach((L, i) => {
+      if (re.test(L) && !HIST_ALLOW.test(L)) out.push(`${path.relative(ROOT, f)}:${i + 1}`);
+    });
+  }
+  return out;
+};
+
+// D9.1 站点 html 旧值 33 清零（现行 32；沿革段/复测记录已豁免）
+const stale33 = grepLines(/33 个 html|html 33|HTML=33|站点 html 33|33 page/);
+check('旧值残留：站点 html 33', 0, stale33.length, stale33.slice(0, 4).join(' ') || '无（沿革段豁免）');
+
+// D9.2 白板行数：~180 清零（178 在位由 D5 守着）
+check('旧值残留：白板 ~180 行', 0, grepLines(/~180 行/).length, grepLines(/~180 行/).slice(0, 4).join(' ') || '无（沿革段豁免）');
+
+// D9.3 rag 语料 chunk 数：132 清零、123 在位（parseRagStats 的形如示例行已豁免）
+check('旧值残留：rag 132 chunks', 0, grepLines(/132[- ]?chunks?/i).length, grepLines(/132[- ]?chunks?/i).slice(0, 4).join(' ') || '无（形如示例/沿革豁免）');
+check('rag 125 chunks 在位', true, /125 chunks/.test(read(path.join(ROOT, 'notes', 'rag.md'))), 'notes/rag.md §13 语料行（唯一真源，构建期由 ragStats.ts 解析；全副本扫描见 rag-demo/src/check-corpus.ts）');
+
+// D9.4 durable-execution 行数：821 清零、831 在位
+check('旧值残留：durable 821 行', 0, grepLines(/821 行/).length, grepLines(/821 行/).slice(0, 4).join(' ') || '无');
+check('durable 831 行在位', true, grepRepo(/831 行/).length > 0, 'notes/durable-execution.md');
+
+// D9.5 demo 源码目录文件数（结构判据：漂移过的两个目录）
+const srcFileCount = (d) => (exists(path.join(ROOT, d)) ? fs.readdirSync(path.join(ROOT, d)).filter((f) => /\.(ts|mjs|js|tsx)$/.test(f)).length : 0);
+check('rag-demo src 文件 = 16', 16, srcFileCount('rag-demo/src'), 'rag-demo/src（2026-10-19 修复轮修正：README 写 15）');
+check('memory-redteam src 文件 = 9', 9, srcFileCount('memory-redteam/src'), 'memory-redteam/src');
+
+// D9.6 StatusBadge 判定同源：三处（StatusBadge / learn.astro / DomainMap.astro）必须共用
+// utils/status.ts 的 statusKey——本轮事故：StatusBadge 用 includes('完成')/includes('进行')
+// 中文子串判定，而 12 门课状态串是「🔄 讲义已展开」，全落灰色徽标（同站三色）。
+const statusBadge = read(path.join(ROOT, 'site', 'src', 'components', 'StatusBadge.astro'));
+check('StatusBadge 判定同源 utils/status.ts', true,
+  /from '\.\.\/utils\/status'/.test(statusBadge) && !/includes\('完成'\)/.test(statusBadge),
+  'StatusBadge.astro 必须 import statusKey 且不得本地 includes 中文子串');
+for (const [f, label] of [
+  ['site/src/pages/learn.astro', 'learn.astro'],
+  ['site/src/components/DomainMap.astro', 'DomainMap.astro'],
+]) {
+  const src = read(path.join(ROOT, f));
+  check(`${label} 状态判定同源 utils/status.ts`, true,
+    /from '\.\.\/(\.\.\/)?utils\/status'/.test(src) && !/function statusKey\(/.test(src),
+    '不得再本地定义 statusKey');
+}
+
+// D9.7 visual-check 页数副本：PAGES 数组长度 vs README / verify.yml 的镜像文案
+// （2026-10-19 查出：脚本侧 9 页早已改对，README 与 verify.yml 两处镜像还写 10 页/30 组合）
+const vcSrc = read(path.join(ROOT, 'site', 'tools', 'visual-check.mjs'));
+// 只数 PAGES 数组块内的条目——文件里还有其他 `{ path:` 形态的对象（fault/视口描述），
+// 全文正则会把它们一起数进来（本轮首次实现就踩了这个坑：全文 17 vs 数组内 9）。
+const pagesBlock = (vcSrc.match(/const PAGES = \[([\s\S]*?)\n\];/) ?? [])[1] ?? '';
+const pagesCount = (pagesBlock.match(/\{ path:/g) ?? []).length;
+check('visual-check 页数 = 9', 9, pagesCount, 'site/tools/visual-check.mjs PAGES（权威来源）');
+check('README 镜像「9 页 / 27 组合」', true, /9 页/.test(read(P.readme)) && /27 组合/.test(read(P.readme)), 'README.md 站点回归段');
+check('verify.yml 镜像「9 条页面清单 / 27 组合」', true, /9 条页面清单/.test(read(P.verifyYml)) && /27 组合/.test(read(P.verifyYml)), '.github/workflows/verify.yml 头注');
+
+// D9.8 details↔课程双向链接：related frontmatter 与渲染端都在位
+// （渐进披露最大真实缺口：本地映射曾是纯文本、课程页无任何反向链接）
+const detailsDir = path.join(ROOT, 'notes', 'details');
+const detailFiles = exists(detailsDir) ? fs.readdirSync(detailsDir).filter((f) => f.endsWith('.md')) : [];
+const withRelated = detailFiles.filter((f) => /^related:/m.test(fs.readFileSync(path.join(detailsDir, f), 'utf8')));
+check('details 篇目均带 related', detailFiles.length, withRelated.length, `notes/details/*.md（${detailFiles.length} 篇）`);
+check('c/[slug] 渲染延伸分水岭', true, /relatedDetails/.test(read(path.join(ROOT, 'site', 'src', 'pages', 'c', '[slug].astro'))), '课程页反查格');
+check('details/[slug] 渲染相关课程', true, /relatedCourses/.test(read(path.join(ROOT, 'site', 'src', 'pages', 'details', '[slug].astro'))), '详解页正查 chips');
 
 // ── 4) 输出 ─────────────────────────────────────────────────────────────────────
 const pad = (v, w) => String(v ?? '∅').padStart(w);
