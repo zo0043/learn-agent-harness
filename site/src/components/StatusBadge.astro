@@ -8,11 +8,12 @@ const { status } = Astro.props;
 // 判定规则与 learn.astro / DomainMap.astro 共用 utils/status.ts（2026-10-19 修复：
 // 旧实现在本文件内用中文子串判状态，而 courses.ts 的状态串是「🔄 讲义已展开」——
 // 旧关键词不命中，12 门进行中课全被画成灰色「规划中」徽标）。
-const cls = statusKey(status) === 'done'
-  ? 'badge-ok'
-  : statusKey(status) === 'doing'
-    ? 'badge-doing'
-    : 'badge-todo';
+// 2026-10-19 复审补 'other' 分支：此前未登记状态（details 页的「2026现行 / 稳定历史」）
+// 落进 else 被画成 badge-todo——与「⏳ 规划中」同色，读作「还没做」，与事实相反。
+// status.ts 的注释本就承诺 'other' 不静默归档，但全仓没有组件/CSS 消费它（同源只做了一半）。
+// 中性色（--text-soft / --bg-soft）表达「既非完成也非进行中的登记项」。
+const key = statusKey(status);
+const cls = key === 'done' ? 'badge-ok' : key === 'doing' ? 'badge-doing' : key === 'planned' ? 'badge-todo' : 'badge-neutral';
 ---
 
 <span class={`badge ${cls}`}>{status}</span>

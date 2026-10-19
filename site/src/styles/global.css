@@ -406,6 +406,12 @@ a.card:hover {
   color: var(--todo);
   background: var(--todo-bg);
 }
+/* 2026-10-19 复审：未登记状态（details 的「2026现行 / 稳定历史」）用中性徽标，
+   不再落进 badge-todo 被读成「规划中」。对比度按 --text-soft on --bg-soft 实算。 */
+.badge-neutral {
+  color: var(--text-soft);
+  background: var(--bg-soft);
+}
 
 /* 小标签 chip */
 .chip {
@@ -1325,7 +1331,6 @@ a.domain-card:hover .dc-foot {
 .dm-title { font-size: 1.3rem; margin: 0 0 6px; }
 .dm-lead { color: var(--text-soft); font-size: 0.92rem; margin: 0 0 14px; }
 .dm-lead code { font-size: 0.88em; }
-.dm-count { margin-left: auto; color: var(--text-faint); }
 .dm-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
 .dm-nav a { text-decoration: none; }
 .dm-nav a:hover { border-color: var(--accent); color: var(--accent); }
@@ -1337,13 +1342,6 @@ a.domain-card:hover .dc-foot {
   font-size: 0.8rem;
   color: var(--text-faint);
   white-space: nowrap;
-}
-/* 导读默认收起，hover / 键盘聚焦展开；触屏设备（无 hover）常显 */
-.dm-angle { display: none; }
-.dm-card:hover .dm-angle,
-.dm-card:focus-within .dm-angle { display: block; }
-@media (hover: none) {
-  .dm-angle { display: block; }
 }
 
 /* 复习动线：pipe-step 可点击 */
@@ -1820,19 +1818,13 @@ a.pipe-step:hover {
   font-weight: 600;
 }
 
-/* ── 2026-10-19 新增：脚注区块 ────────────────────────────────────────
-   站点所有正文走自研片段管线 utils/md.ts（不过 remark-gfm / 不重排 DOM），
-   [^1] 引用与 [^1]: 定义都以裸文本形态漏出（如 notes/evaluation.md 的 [^1]–
-   [^4]）。此前全站无 .footnotes 规则，定义行黏在正文末尾无分隔。
-   本规则按 GitHub 渲染形态给脚注区加分隔线与缩进；[^n] 引用文本的显式样式
-   留待站点管线真正解析脚注语法后再加（现在只是兜底美化）。 */
-.footnotes {
-  margin-top: 28px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 0.88rem;
-  color: var(--text-soft);
-}
+/* 2026-10-19 复审删除：原「脚注区块」规则（类名 footnotes）。
+   删除理由有二——① 无输出点：notes 里已无 [^n] 脚注语法（evaluation.md 的
+   [^1]–[^4] 早前已改写成正文/链接），全站无任何模板输出 .footnotes；
+   ② 原注释对管线的事实描述是错的：课程页走 astro.config.mjs 的 markdown
+   主管线（含 remark-gfm），只有轨迹片段走 utils/md.ts。
+   若将来真的引入脚注，请连同输出点一起加回，并先确认走哪条管线。
+   （注释里不写 .类名 形式：类集合门禁靠文本匹配数定义，注释中的点号类名会被当成定义。） */
 
 /* ── 2026-10-19 新增：@media print ──────────────────────────────────
    课程页是「可打印的讲义」：打印时去掉导航/搜索/进度条/TOC/页脚，
