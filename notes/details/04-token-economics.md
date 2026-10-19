@@ -5,6 +5,7 @@ domain: "成本与架构取舍"
 source: "https://www.anthropic.com/engineering/multi-agent-research-system"
 status: "2026现行"
 kind: "cost-detail"
+related: ["harness-from-scratch", "agent-harness", "evaluation"]
 ---
 
 # 资深分水岭 4:token 经济学与延迟预算

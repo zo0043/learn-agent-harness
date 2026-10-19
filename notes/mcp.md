@@ -97,7 +97,7 @@ flowchart TB
 | **Client Features** | **elicitation** | server 请 client 向用户补问输入 | 现行 | 现场提问（S5 之外） |
 
 > **归属与状态的一手源（访问日 2026-10-19）**：官方规范导航把 **Roots / Sampling / Elicitation 列在 Client Features**，Server Features 只有 Overview(Discovery) / Prompts / Resources / Tools（https://modelcontextprotocol.io/specification/2026-07-28 ；deprecated 登记表 https://modelcontextprotocol.io/specification/2026-07-28/deprecated ：「Sampling … | SEP-2577 | Deprecated in `2026-07-28` | Integrate directly with LLM provider APIs」「Roots … | SEP-2577 | `2026-07-28` | Pass directories or files via tool parameters, resource URIs, or server configuration」）。
-> **旧写法警示**：把 sampling/roots 说成"server 能提供的原语"是**错的**——它们是 client 侧能力，server 只能**请求** client 提供；`MCP 四原语`这种说法在 2026-07-28 起也不再成立（Server 三原语 + Client 三特性，其中两个已 Deprecated）。
+> **旧写法警示**：把 sampling/roots 说成"server 能提供的原语"是**错的**——它们是 client 侧能力，server 只能**请求** client 提供；`MCP 四原语`这种说法在 2026-07-28 起也不再成立（Server 四特性 + Client 三特性，其中两个已 Deprecated）。
 
 **怎么读这张表**：前两行是"动词 / 名词"的分工——tools 让模型**做**事，resources 让模型**读**事；resources 存在的意义是不必把每个只读访问都包装成一次工具调用。prompts 是给用户的工作流捷径（注意：server 能塞进"用户可选"的模板，本身就构成一条内容通道）。discovery 是 2026-07-28 用**每请求 `_meta` 协商**取代 `initialize` 握手的落点（S2.1）。sampling/roots 属于 **Client Features**：方向是"server 反向请求 client"，因此决策权重容易从 host 侧滑向 server 侧（S5 详讲）——但 2026-07-28 起它们已 **Deprecated**，新实现不应再采用。七项的**共同点**：**全部内容都会进模型上下文或消耗 host 资源**，所以全部是安全边界上的输入。
 
@@ -121,7 +121,7 @@ flowchart TB
               [沙箱] ← MCP 不管
               └─▶ MCP server(本地 stdio) / 远程 HTTP
 ```
-**MCP 不解决：权限、沙箱、审计。** host 收到 MCP server 的工具列表后，照样过自己的 policy（Harness 架构 7.2：策略控制行为）。"接了 MCP 就安全了"= 最贵的一种误解。
+**MCP 不解决：权限、沙箱、审计。** host 收到 MCP server 的工具列表后，照样过自己的 policy（Harness 架构 §7.2：策略控制行为）。"接了 MCP 就安全了"= 最贵的一种误解。
 
 **S2 失败模式**：
 - **把 server 的工具清单当"已审核白名单"直接并入注册表** → 等于让每个 server 自己决定 host 能做什么；正确做法是并入后仍过 host 的校验 / 策略 / 沙箱三道门。

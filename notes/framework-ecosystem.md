@@ -86,11 +86,11 @@ flowchart TD
 - 控制循环本身是产品差异（如 FinHot 的 6 次调用固定结构+状态机=workflow 不是 agent loop，编排库够用，harness 级框架反而重）
 - 框架的默认恢复/权限语义与你的安全模型冲突（如默认 allow 的工具面 vs 你的默认 deny）
 - 依赖锁定（框架 API 漂移/停更）> 自维护成本
-- 教学/实战白板场景（从零写 harness 本身就证明了 150 行能覆盖核心层）
+- 教学/实战白板场景（从零写 harness 本身就证明了 178 行能覆盖核心层）
 
 ### S2.3 各家要点（定位级，2026-10 已核实）
 
-| 框架 | 一句话架构 | 实战谈资 |
+| 框架 | 一句话架构 | 实战要点 |
 |---|---|---|
 | **pi**（earendil/badlogic 谱系，1.1.0） | 极简核心+扩展系统（extensions/skills/TUI）；会话=JSONL（同 从零写 harness §⑥ 设计）；RPC 模式可当 worker 进程 | **我日常用它+用它跑多 agent（pi-agents-team）**；扩展机制=JS/TS 直接进运行时（skill 加载、工具扩展）——框架即文档 |
 | **Claude Agent SDK** | Claude Code 的编程化：把完整 harness 当库用（subagents/hooks/MCP/权限模式/skills/sessions） | **2025-09 由 Claude Code SDK 改名而来**（Python+TypeScript，Apache 2.0）；"Claude Code 的机制=官方参考实现"，SDK=机制的可编程面 |
@@ -98,7 +98,7 @@ flowchart TD
 | **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x（历史）；~~当前 1.0.1~~ ~~1.4.21~~ **截至 2026-10-13 全新缓存复核：npm registry latest = 1.5.0**（time.modified 2026-10-12T23:19:38.982Z；历史：2026-10-12 独立新缓存 `npm view` 复核 = 1.4.21（time.modified 2026-10-07），命令见 industry-2026.md 核实台账）；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 系统设计 §S3 的 workflow 模式显式化；checkpoint=durable execution 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
 | **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF；**A2A 入 AAIF 是另一件事、时点为 2026-08-27**（a2a-protocol.org 博文，非同期）——两者**不可合并成一句话**（评审 `FAC-F7`）。A2A **TSC 共 8 席**：Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、**IBM Research**（AAIF 自身技术委员会另为 8 家） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
 | **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（MCP 与供应链安全 §S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
-| **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 实战谈资："GUI agent 不再是边角方向"；追问见 系统设计 §S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
+| **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 实战要点："GUI agent 不再是边角方向"；追问见 系统设计 §S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据 2026-10-11 归档抓取快照 `jd-research/ashby_openai.json`——历史研究数据，非现行招聘页） |
 | **OpenAI Codex** [2026现行] | 由 CLI 转向 **agent 基础设施**：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；**AgentKit=低代码入口** | "OpenAI 在把 Codex 做成平台而不是产品"；https://developers.openai.com/codex |
 
 **共同点（比单家更值钱的要点）**：四家都在解同一组问题——会话持久化（JSONL/checkpoint）、子代理边界（上下文隔离）、工具标准化（MCP）、权限/护栏（guardrails/hooks/policy）。**框架生态的收敛=行业问题定义的收敛**——我在从零写 harness 里从零写过这些层，所以能看出四家在做同一件事。
@@ -264,7 +264,7 @@ flowchart LR
 
 **这个故事的实战价值**：把"框架使用者"升级成"harness 机制的活样本"——每个框架话题都能落回自己的日常实操。.pi-agents-team 里 orchestrator+workers 的路径范围、`<final_answer>` 摘要、relay 问答，正好对应 系统设计 §S3 的 orchestrator-workers 与 Harness 架构 §8 的上下文隔离（多智能体编排 §S6 框架对照可交叉引用）。
 
-**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（Harness 架构 §12）。
+**边界声明（要主动说）**：pi-agents-team 是**第三方扩展机制**，不是 pi 核心默认；pi核心默认不提供 sub-agent（Harness 架构 §8.3）。
 
 ---
 

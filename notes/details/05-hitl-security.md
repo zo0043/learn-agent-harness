@@ -5,6 +5,7 @@ domain: "沙箱安全"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "2026现行"
 kind: "mechanism-deepdive"
+related: ["harness-from-scratch", "agent-harness", "sandbox"]
 ---
 
 # 资深分水岭 5:HITL 审批与结构性安全边界

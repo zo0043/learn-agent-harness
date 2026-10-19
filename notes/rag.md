@@ -279,18 +279,18 @@ corpus（几篇真实文档）
 
 ## 13 · 实操复盘：从零写一个最小 RAG（2026-10-10 深夜 / 10-11 凌晨）
 
-> §12 计划已执行。作品 = `learn-agent-harness/rag-demo/`（15 个 src 文件，零依赖，tsx 直跑）。
-> 语料 = 课程笔记自己（rag.md + agent-harness.md + handoff.md → 123 chunks）。
+> §12 计划已执行。作品 = `learn-agent-harness/rag-demo/`（16 个 src 文件，零依赖，tsx 直跑）。
+> 语料 = 课程笔记自己（rag.md + agent-harness.md + handoff.md → 125 chunks）。
 > 偏离计划：代理没有 embedding 模型（/v1/embeddings 实测 503）→ Embedder 接口 + hash 实现（FNV-1a → 768 维 → L2 归一）。刻意的教学选择：可复现、向量可打印、同义盲区变实证。换真语义模型 = 再实现接口 ~10 行。
 
 **pipeline**：corpus → chunker（heading 边界 + 500 字符兜底，挂 headingPath）→ tokenizer（拉丁整词 + CJK bigram）→ HashEmbedder → 暴力余弦 ∥ BM25（k1=1.5, b=0.75）→ RRF 融合（k=60）→ rerank 插槽（直通）→ 生成（强制引用 + 强制拒答，qwen3.8-flash-next）
 
 **三个实证发现**：
-1. **定价 = 检索质量**（S2→S3）：cosine 给所有 token 统一定价 $1 → "什么"（df 78/85，idf 0.09；2026-10-10 快照，现行 132-chunk 语料未复算）噪声让塞满噪声词的 chunk 压过真正的解释 chunk（目标 #15）。换 BM25 价目表（IDF × tf 饱和 × 长度归一）→ 目标回 #1（11.7）。`explain()` 发票机制把每个 token 的收费打出来。
+1. **定价 = 检索质量**（S2→S3）：cosine 给所有 token 统一定价 $1 → "什么"（df 78/85，idf 0.09；2026-10-10 快照，当时为 132-chunk 语料；2026-10-19 去面试化删题库节后为 123-chunk；同日修复轮改 handoff.md §四后语料 125-chunk，df 未复算）噪声让塞满噪声词的 chunk 压过真正的解释 chunk（目标 #15）。换 BM25 价目表（IDF × tf 饱和 × 长度归一）→ 目标回 #1（11.7）。`explain()` 发票机制把每个 token 的收费打出来。
 2. **没有一路全面占优**：Q1（噪声词重灾）BM25 赢、Q3（话题聚簇）cosine 赢 → RRF 按 rank 融合（唯一无量纲公共货币）；`perListRanks` 列让"一路失明、另一路救回"可见。
 3. **bigram 代价两次显形**："上下文" 三字词拆成 上下 + 下文（靠碎片命中）；垃圾碎片 "么要" df=2 → 被当稀有信号定价 0.83。真实系统 = 正经分词器（jieba）或语义 embedding——tokenizer 和 Embedder 都是模块，pipeline 不动。
 
-**golden set（10 题：8 范围内 + 2 范围外）**：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50（PASS 3/8，2026-10-12 锚点式 golden set 复测）。
+**golden set（10 题：8 范围内 + 2 范围外）**：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50（PASS 3/8，2026-10-12 锚点式 golden set 复测；**2026-10-19 两度复跑 `npm run demo:eval`（去面试化删语料后 / 修复轮改 handoff.md §四后语料 123→125 chunks），三值与 PASS 数均不变、gold 锚点 16/16 全命中——锚点式 gold set 对笔记编辑不漂，这条本身是设计验证**）。
 
 > **数字口径（重要）**：旧版宣称的 recall@3=1.00 / @5=0.94 出自 2026-10-10 的「行号指针」golden set——gold 用 `lines: [28,31]` 指向笔记行号，笔记一编辑指针就漂、指错位置还**静默打 0.00**（同一次排序内 recall@k 单调不减，@3=1.00 与 @5=0.94 本就不可能同现，当年即为不同运行的拼接值）。2026-10-12 已把 gold 改为**文本锚点**（每题一个 distinctive 子串，运行时解析到 chunk），任一锚点匹配不到即 FAIL 退出。当前漏题定位到机制层：Q2（IDF 对数）是**语料缺口**——语料没有 IDF/对数的解释段；Q7/Q8（compact / paraphrase）是 compact 段检索短板。
 

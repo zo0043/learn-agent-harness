@@ -5,6 +5,7 @@ domain: "架构演化"
 source: "https://www.anthropic.com/engineering/managed-agents"
 status: "2026现行"
 kind: "design-detail"
+related: ["agent-harness", "harness-from-scratch", "sandbox"]
 ---
 
 # 资深分水岭 7:harness 假设会腐烂

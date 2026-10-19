@@ -63,7 +63,7 @@ golden set 复测值（照抄 `notes/rag.md` §13 与 `src/evaluate.ts`，2026-1
 | recall@5 | 0.44 |
 | recall@10 | 0.50 |
 
-PASS 3/8（判据：全部 gold chunk 进 top-10），语料 123 chunks。旧宣称值 recall@3=1.00 / @5=0.94 / @10=1.00（85 chunks）出自 2026-10-10 的「行号指针」golden set，指针漂移后静默打 0.00、且与 recall@k 单调性矛盾，**已废**；2026-10-12 起 gold 改为文本锚点（任一锚点匹配不到即 FAIL 退出）。完整口径说明见 `notes/rag.md` §13「数字口径」。
+PASS 3/8（判据：全部 gold chunk 进 top-10），语料 125 chunks。旧宣称值 recall@3=1.00 / @5=0.94 / @10=1.00（85 chunks）出自 2026-10-10 的「行号指针」golden set，指针漂移后静默打 0.00、且与 recall@k 单调性矛盾，**已废**；2026-10-12 起 gold 改为文本锚点（任一锚点匹配不到即 FAIL 退出）。完整口径说明见 `notes/rag.md` §13「数字口径」。
 
 5 题 FAIL 的机制归因：Q2（IDF 对数）= 语料缺口（语料没有 IDF/对数的解释段）；Q7、Q8（compact / paraphrase）= compact 段检索短板；Q1（k1 饱和）= 排序短板；Q3（headingPath）= 两路极端分裂（bm25 #1 vs cosine #54-60）。共同根因：词法路只能走表面形式重叠——完全 paraphrase = 完全漏，这就是语义模型存在的理由。
 拒答轨："苹果的 CEO 是谁？" → 模型输出"材料不足" ✓。

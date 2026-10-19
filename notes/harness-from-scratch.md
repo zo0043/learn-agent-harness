@@ -197,7 +197,7 @@ compactIfNeeded: 保 head(system+首user) + 尾 keepTail 条，中间 LLM 摘要
 
 mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**要点：mock provider 后每个控制层都能独立验证**）：`压缩前 tokens≈1378 → 摘要 3 条 → 压缩后 5 条，tokens≈426` ✅（2026-10-12 复跑值；更早测试版本的数字与当前断言矛盾、已废，修正经过见 handoff.md）。日志永远保留全量，压缩只改"送模型的视图"。
 
-## ⑨ 完整 demo（`src/demo.ts`，真实模型 qwen3.8-flash）
+## ⑨ 完整 demo（`src/demo.ts`，真实模型 qwen3.8-flash-next；2026-10-10 实测用 qwen3.8-flash，该模型已下架）
 
 任务（与 `src/demo.ts:42-46` 的 5 条编号一致）：① 查北京天气 → ② 列 docs 并读 `README.md` → ③ 写 `out/summary.md`（需审批）→ ④ 试 `run_shell`（会被拒）→ ⑤ 总结。
 

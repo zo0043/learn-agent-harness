@@ -5,6 +5,7 @@ domain: "多智能体协作"
 source: "https://cognition.ai/blog/multi-agents-working"
 status: "2026现行"
 kind: "mechanism-deepdive"
+related: ["agent-harness", "sandbox", "multi-agent"]
 ---
 
 # 资深分水岭 8:决策一致性·单线程写

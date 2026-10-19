@@ -5,6 +5,7 @@ domain: "恢复与可靠性"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "稳定历史"
 kind: "mechanism-deepdive"
+related: ["harness-from-scratch", "agent-harness"]
 ---
 
 # 资深分水岭 3:错误路径优先于快乐路径

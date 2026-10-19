@@ -5,6 +5,7 @@ domain: "上下文工程"
 source: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
 status: "2026现行"
 kind: "mechanism-deepdive"
+related: ["agent-harness", "harness-from-scratch"]
 ---
 
 # 资深分水岭 1:context rot(长上下文衰减)

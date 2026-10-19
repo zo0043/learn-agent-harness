@@ -5,6 +5,7 @@ domain: "可观测与评测"
 source: "https://www.anthropic.com/engineering/multi-agent-research-system"
 status: "2026现行"
 kind: "design-detail"
+related: ["harness-from-scratch", "agent-harness", "evaluation", "observability"]
 ---
 
 # 资深分水岭 6:可观测→可改进闭环

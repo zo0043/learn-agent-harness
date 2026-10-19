@@ -89,7 +89,7 @@ export function sha256(s: string): string { return createHash("sha256").update(s
 
 **这段在讲什么**：checkpoint 的「毒快照」防御靠两件事——① **临时文件 + `renameSync` 原子替换**（序列化到一半崩溃，留下的也是 `.tmp` 不是损坏的 `.json`）；② **校验和**（读回时验不过就退回上一个完好快照）。两者都指向同一个认知：**快照永远不是唯一事实源**，所以毒快照的代价只是「多重放一段日志」，不会数据错乱（S9.1 #2 / #6）。
 
-**你的锚点**：harness-demo 的 `session.ts`（appendFileSync JSONL：intent→exec）就是机制 1 的最小实现；从零写 harness §⑦ 的"只读重放 / 非只读摆状态给模型"就是机制 3 的 agent 版实现。**讲解思路：我不是背概念，是我 150 行白板 harness 里就有 journal 和幂等分类。**
+**你的锚点**：harness-demo 的 `session.ts`（appendFileSync JSONL：intent→exec）就是机制 1 的最小实现；从零写 harness §⑦ 的"只读重放 / 非只读摆状态给模型"就是机制 3 的 agent 版实现。**讲解思路：我不是背概念，是我 178 行白板 harness 里就有 journal 和幂等分类。**
 
 ---
 
@@ -216,7 +216,7 @@ FinHot 映射：backfill 1645 行跑一夜=long-horizon 批处理（日志 /tmp/
 
 **这一节解决什么问题**：把 S2-S4 的机制落成一个可运行的最小 runner，用"三种崩溃点 × 各跑 3 次、副作用计数恒=1"这个可证伪的验收标准来证明自己真懂。这张架构图也是讲解时可以画的"我手写过"证据。
 
-durable 任务 runner（设计规格，2026-10-12 已按此落地为 `durable-execution-demo/`，src 821 行）：
+durable 任务 runner（设计规格，2026-10-12 已按此落地为 `durable-execution-demo/`，src 831 行）：
 1. 任务=多步混合（只读×2 + 幂等写×1 + 非幂等"发消息"×1，mock 外部服务）
 2. 中途 `kill -9`（三种注入点：intent 前 / intent 后 exec 前 / exec 后）→ 重启
 3. 验证：只读步重放、幂等步重放无副作用、非幂等步**不重放**（摆状态/mock 人工确认）、消息只发一遍（idempotency key）
@@ -272,7 +272,7 @@ export function analyze(plan: StepSpec[], store: Store, ext: ExternalWorld): Rec
 
 **这段在讲什么**：恢复的正确性藏在这一步——`analyze` **只读、纯判定、不碰副作用**，把「该不该重放」与「重放了会不会重复」分开裁决。它先读 checkpoint（校验和通过才信）+ journal，再按决策树把每步归为 `skip / replay / unknown→confirm`；`unknown→confirm` 是**先只读问外部世界现状**再决定 exec 还是 skip（S3 决策树的 `U` 分支）。demo 首行的「规则自检」正是拿它把 S3 决策树**所有分支**都合成跑一遍（见 7.5 #3 —— 它不调模型、不联网，所以让恢复判定的正确性本身可证伪）。
 
-### 7.2 src 文件清单（821 行，全离线确定性：mock 外部服务 + 逻辑时钟，不调模型 / 不联网 / 不用墙钟）
+### 7.2 src 文件清单（831 行，全离线确定性：mock 外部服务 + 逻辑时钟，不调模型 / 不联网 / 不用墙钟）
 
 | 文件 | 行数 | 职责 |
 |---|---|---|
@@ -420,4 +420,4 @@ export function analyze(plan: StepSpec[], store: Store, ext: ExternalWorld): Rec
 - （注：原始 /tmp 日志已随临时目录清理不可取得；讲义中的行号 / ETA / 失败串为示意值，**不可当作逐字证据引用**）
 - 「at-least-once + 幂等 = 业务上恰好一次效果」是业界实战口径，但**不是任何官方文档的原词**。引用时用官方措辞更稳：**Temporal**——Activity 可能被多次执行，但 Temporal 保证它**「被观察为恰好完成一次」（observed as completed exactly once）**，因此要求 Activity 幂等（docs.temporal.io/activity-definition#activity-retry-policy）；**Google Cloud Dataflow**——记录**「至少处理一次，结果恰好提交一次」**（cloud.google.com/dataflow/docs/concepts/exactly-once）。若用 “effectively-once”，须标注为业界口语。
 - 已核实（2026-10）：术语无厂商一手源，按上述官方措辞引用
-- S7 demo 已落地（2026-10-12）：`durable-execution-demo/`（src 821 行），3 崩溃点 × 各 3 次真实 SIGKILL 恢复，副作用计数恒=1、恢复报告跨次逐字节一致；本节 S7 已从设计稿改写为实录（含跑法 / 文件清单 / 实测输出 / 崩溃点对照表）
+- S7 demo 已落地（2026-10-12）：`durable-execution-demo/`（src 831 行），3 崩溃点 × 各 3 次真实 SIGKILL 恢复，副作用计数恒=1、恢复报告跨次逐字节一致；本节 S7 已从设计稿改写为实录（含跑法 / 文件清单 / 实测输出 / 崩溃点对照表）

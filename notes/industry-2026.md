@@ -1,7 +1,7 @@
 # 行业前线调研(2026-10)
 
 > 调研素材（非课程正文）。两轮外部调研（2026-10-11），核心论断均实抓官方一手源；2025 前时间线节点为公认公开事件。
-> 用途:1 站点「2026 前线」「资深分水岭」板块底稿 2 MCP 与供应链安全 / 框架生态 / 系统设计 更新输入 3 实战谈资弹药库。
+> 用途:1 站点「2026 前线」「资深分水岭」板块底稿 2 MCP 与供应链安全 / 框架生态 / 系统设计 更新输入 3 实战要点弹药库。
 
 ---
 
@@ -36,7 +36,7 @@
 
 **必须会用**：MCP + 目标岗所属阵营一家 harness/SDK（Codex 系→Agents SDK+SandboxAgent，Claude 系→Agent SDK）；LangGraph 定位级；A2A/AG-UI 一句话。
 
-## 三、LLM 时间线（agent 开发者视角，12 节点，★=实战谈资必需）
+## 三、LLM 时间线（agent 开发者视角，12 节点，★=实战要点必备）
 
 - 2023.03 GPT-4 发布（32k 上下文）——agent 能力起点。
 - 2023.06★ OpenAI function calling 发布——工具调用开始标准化，一切 agent 的协议地基。
@@ -77,7 +77,7 @@
 - modelcontextprotocol.io/{specification/versioning, registry, specification/2026-07-28}
 - a2a-protocol.org/latest/ · docs.ag-ui.com · code.claude.com/docs/en/agent-sdk/overview · developers.openai.com/codex · github.com/langchain-ai/langgraph
 - en.wikipedia.org/wiki/Model_Context_Protocol（规模数据 reportedly 口径）
-- 本地：jd-research/ashby_openai.json（815 条 OpenAI 真实岗位）
+- 归档研究数据：jd-research/ashby_openai.json（815 条 OpenAI 岗位，2026-10-11 抓取快照，非现行招聘页）
 
 ## 已知缺口 / 待复核
 

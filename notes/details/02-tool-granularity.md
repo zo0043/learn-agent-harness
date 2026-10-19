@@ -5,6 +5,7 @@ domain: "工具设计"
 source: "https://www.anthropic.com/engineering/writing-tools-for-agents"
 status: "稳定历史"
 kind: "mechanism-deepdive"
+related: ["agent-harness", "harness-from-scratch"]
 ---
 
 # 资深分水岭 2:工具粒度与描述质量
