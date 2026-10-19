@@ -217,6 +217,23 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true,
       if (!toggleVisible) failures.push(`移动视口缺少可见的汉堡按钮（.nav-toggle）`);
     }
     await elem('页标题', pageDef.title);
+    // ②e 标题唯一性（2026-10-19 新增，PRES-F1/PRES-F2 的机器判据）。
+    // 为什么：原有断言只要求「**存在**一个 h1」（`title: 'h1'` / `'h1.page-title'`），
+    // 一页有 2 个甚至 4 个 h1 照样通过。线上实测两类漏网：
+    //   · /map/ 与 /interview/ 各 2 个 h1——上一轮的 demoteNoteH1 靠 vfile 文件名判断，
+    //     而 content 集合条目没有 filePath（见 astro.config.mjs 注释），插件恒走保守分支，
+    //     **静默 no-op**；终审只在隔离环境测过该函数，故误判为已修。
+    //   · /works/ 4 个 h1——内嵌 demo 文档与轨迹事件里的 `# 标题` 未降级（PRES-F2）。
+    // 多 h1 会让屏幕阅读器与文档大纲把内嵌/正文标题误当页标题。
+    const h1Texts = await page.evaluate(() =>
+      [...document.querySelectorAll('h1')].map((e) => (e.textContent || '').trim().slice(0, 60)),
+    );
+    const h1Unique = h1Texts.length === 1;
+    details.h1 = { count: h1Texts.length, texts: h1Texts, pass: h1Unique };
+    if (!h1Unique) {
+      failures.push(`h1 不唯一：共 ${h1Texts.length} 个 → ${JSON.stringify(h1Texts)}（每页只能有 1 个 h1）`);
+    }
+
     await elem(pageDef.course ? '课程正文' : '卡片容器', pageDef.container, { min: pageDef.cardsMin });
     if (pageDef.course) await elem('课程 meta 栏', 'header.course-meta-bar');
     // ②c 页级额外断言点（mustHave）：**正常模式**下也真的断言命中，不是只在 fault 模式用。
@@ -472,6 +489,15 @@ async function runSelftest() {
       const d = await checkOne(browser, base, { path: 'bad-missing-search.html', id: 'bad-missing-search', label: 'bad-missing-search', title: 'h1', container: '.cards .card', cardsMin: 3 }, vp, outDir, { screenshot: false, searchRequired: true });
       expect(`bad-missing-search @${vp.id} 搜索入口缺失断言失败`, !d.pass && d.failures.some((f) => f.includes('搜索入口缺失')), `failures=${JSON.stringify(d.failures)}`);
       expect(`bad-missing-search @${vp.id} 溢出断言不受牵连`, d.overflow.pass, `sw=${d.overflow.scrollWidth} cw=${d.overflow.clientWidth}`);
+    }
+    // 4b) 静态坏页：片段区多一个 h1 → 「h1 唯一性」断言必须被检出；
+    //     其余断言不受牵连（页标题 h1 仍存在，故 title 断言照过）——负路径自证：
+    //     断言器对「多 h1」这类缺陷不是恒真。
+    for (const vp of VIEWPORTS) {
+      const d = await checkOne(browser, base, { path: 'bad-multi-h1.html', id: 'bad-multi-h1', label: 'bad-multi-h1', title: 'h1', container: '.cards .card', cardsMin: 3 }, vp, outDir, { screenshot: false, searchRequired: true });
+      expect(`bad-multi-h1 @${vp.id} h1 唯一性断言失败`, d.h1 && d.h1.pass === false && d.h1.count === 2, `h1=${JSON.stringify(d.h1)}`);
+      const otherFail = d.failures.filter((f) => !f.includes('h1 不唯一'));
+      expect(`bad-multi-h1 @${vp.id} 其余断言不受牵连`, otherFail.length === 0, `其余失败：${otherFail.join('；')}`);
     }
     // 5) 运行时注入：good 页注入 overflow / missing，两条都必须被检出
     for (const fault of ['overflow', 'missing-element']) {

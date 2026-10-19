@@ -20,39 +20,27 @@ function remarkMermaid() {
 }
 
 /**
- * demoteNoteH1：把「笔记原文渲染页」正文的首个 h1 降级为 h2（C2/PRES-F1）。
+ * 关于「笔记正文首个 h1」的处理（2026-10-19 更正，PRES-F1）：
  *
- * 为什么：/map、/interview 走 NotePageLayout，该布局现在自己输出页面的 <h1>（排在 before 槽之前）；
- * 而 notes/knowledge-map.md、notes/interview-bank.md 正文首行是 `# 标题`——不降级就会出现两个 h1，
- * 且正文那个仍排在 before 槽的 h2 之后，大纲倒置未真正修好。
+ * 这里原先有一个 demoteNoteH1 插件，靠 `file.history[0]` 的**文件名**判断是不是
+ * knowledge-map.md / interview-bank.md，命中才把首个 h1 降为 h2。
  *
- * 为什么只对这两篇生效：其余笔记（/c/<slug>、/details/<slug>）的 markdown h1 就是页面的唯一标题；
- * 全局降级会让这 25 页失去 h1（visual-check 的 `article.markdown h1` 断言随即失败）。
+ * **它在真实构建里从未生效**：content 集合条目经 `content-entry-type.js` 渲染时是
+ * `fileURL: entry.filePath ? pathToFileURL(entry.filePath) : void 0`，而 glob 加载的条目
+ * **没有 `filePath`** ⇒ vfile 不带路径 ⇒ 插件走「路径缺失时不降级」的保守分支 ⇒ 静默 no-op。
+ * 线上实测：/map/ 与 /interview/ 各输出 **2 个 h1**（`h1.page-title` + 笔记自己的 h1），
+ * 而终审只在**隔离环境**里测过该函数（自造 vfile 带路径），所以当时判成「已修」。
  *
- * 识别方式：unified pipeline 传入的 vfile 带源文件路径（Astro 自身 rehype-collect-headings
- * 就依赖 file.history[0]）。**路径缺失时不降级**——保守回退，宁可保留旧行为，也不误伤 25 个课程页。
+ * 现改为**在源头修正**：这两篇笔记的首个标题本身已是 `## `（页面标题由 NotePageLayout
+ * 的 h1 承担），不再需要任何降级插件——没有「静默失效」这条路径，且由
+ * `site/tools/visual-check.mjs` 的「h1 唯一性」断言守着（多 h1 即 CI 红）。
  */
-function demoteNoteH1() {
-  const NOTE_PAGES = new Set(['knowledge-map.md', 'interview-bank.md']);
-  return (tree, file) => {
-    const src = file?.history?.[0] ?? file?.path ?? '';
-    const name = String(src).split(/[\\/]/).pop();
-    if (!NOTE_PAGES.has(name)) return;
-    let seenFirst = false;
-    visit(tree, 'heading', (node) => {
-      if (seenFirst) return;
-      seenFirst = true;
-      if (node.depth === 1) node.depth = 2;
-    });
-  };
-}
-
 export default defineConfig({
   site: 'https://blog.zero43.top/learn-agent-harness/',
   base: '/learn-agent-harness/',
   markdown: {
     remarkPlugins: [remarkGfm, remarkMath, remarkMermaid],
-    rehypePlugins: [demoteNoteH1, [rehypeKatex, { throwOnError: false, strict: false }]],
+    rehypePlugins: [[rehypeKatex, { throwOnError: false, strict: false }]],
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
     },

@@ -1,0 +1,67 @@
+<!doctype html>
+<!-- selftest fixture：结构完整的"好页面"（模拟站点关键结构）。
+     断言器对它的预期：3 视口全部通过（含搜索入口存在 + 交互，按真实页标准
+     searchRequired=true 检查——真实页的搜索入口是全站布局组件，缺失即回归）。
+     若这里失败 = 断言器冤枉好页面，selftest 报错。 -->
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>good fixture</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  .site-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #ccc; }
+  .brand { font-weight: bold; }
+  .site-nav { display: flex; gap: 8px; }
+  .site-nav a { text-decoration: none; color: #333; padding: 4px 8px; }
+  .nav-toggle { display: none; }
+  h1 { margin: 24px 16px 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 16px; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; }
+  @media (max-width: 720px) {
+    /* 与站点一致：≤720px 导航收起（display:none 是设计），汉堡按钮显示 */
+    .site-nav { display: none; }
+    .nav-toggle { display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <span class="brand">fixture-brand</span>
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <a href="#">首页</a>
+      <a href="#">题库</a>
+      <a href="#">学习路线</a>
+      <a href="#">详解</a>
+      <a href="#">作品</a>
+      <a href="#">知识地图</a>
+      <a href="#">时间线</a>
+    </nav>
+    <button class="nav-toggle" type="button" aria-label="打开导航菜单">≡</button>
+    <button type="button" data-search-open>🔍 搜索</button>
+  </header>
+  <dialog data-search-dialog style="border: 1px solid #999; border-radius: 8px; padding: 12px;">
+    <input data-search-input type="search" placeholder="搜索 fixture" style="width: 220px;" />
+  </dialog>
+  <h1>good fixture 页标题</h1>
+  <div class="cards">
+    <div class="card">card-1</div>
+    <div class="card">card-2</div>
+    <div class="card">card-3</div>
+  </div>
+  <script>
+    // 模拟站点 SiteSearch 的最小行为：点击入口 → dialog.showModal()；
+    // Esc 关闭为 <dialog> 原生行为（断言器点开后按 Esc 还原现场）。
+    document.querySelector('[data-search-open]')?.addEventListener('click', () => {
+      const d = document.querySelector('[data-search-dialog]');
+      try { d.showModal(); } catch { d.setAttribute('open', ''); }
+    });
+  </script>
+<!-- selftest fixture：good.html 的片段区多一个 <h1>（模拟内嵌文档/轨迹事件里的 `# 标题` 未降级，
+     即 PRES-F2 与「笔记首 h1 未降级」同类缺陷）。用来负路径自证 visual-check 的「h1 唯一性」断言。 -->
+<section class="md-inline">
+  <h1>内嵌文档标题（不该是 h1）</h1>
+  <p>片段正文。</p>
+</section>
+</body>
+</html>

@@ -59,6 +59,27 @@ function remarkMermaid() {
   };
 }
 
+/**
+ * demoteInlineHeadings：把**片段** markdown 的标题整体降一级（h1→h2 … h5→h6）（2026-10-19，PRES-F2）。
+ *
+ * 为什么：mdToHtml 渲染的是**页面内的片段**（demo 文档、轨迹事件内容），宿主页面自己已经有
+ * `<h1 class="page-title">`。片段里的 `# 标题` 若不降级，一页就会冒出多个 h1——线上实测
+ * /works/ 有 **4 个**：`作品详解`（页面自己的，正确）+ `FinHot（示例项目文档）`
+ * （来自 harness-demo/workspace/docs/README.md:1）+ `项目总结`×2（来自轨迹事件内容
+ * harness-demo/trajectories/demo.example.jsonl）。多 h1 会让屏幕阅读器与文档大纲
+ * 把内嵌文档标题误当页标题（上轮评审 PRES-F2，medium，复核时被标「未复核」）。
+ *
+ * 只降一级、不整段拍平：保留片段内部的层级关系（否则 h2/h3 的相对层级会丢失）。
+ */
+function demoteInlineHeadings() {
+  return (tree: any) => {
+    visit(tree, 'element', (node: any) => {
+      const m = /^h([1-6])$/.exec(node.tagName ?? '');
+      if (m) node.tagName = `h${Math.min(Number(m[1]) + 1, 6)}`;
+    });
+  };
+}
+
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -71,6 +92,7 @@ const processor = unified()
   // hast raw 节点（默认会被丢弃）；stringify 侧同名选项让 raw 原样输出，
   // 与站点主管线（Astro markdown）对内嵌 HTML 的行为一致。
   .use(remarkRehype, { footnotes: false, allowDangerousHtml: true })
+  .use(demoteInlineHeadings)
   .use(rehypeKatex, { throwOnError: false, strict: false })
   .use(rehypeStringify, { allowDangerousHtml: true });
 
