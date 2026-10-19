@@ -1,6 +1,12 @@
 /**
  * 五阶段课程编排（唯一真源，重建）。
  *
+ * **阶段口径（唯一真源声明）**：本文件的 `stage` ∈ `P0–P4` 是**教学阶段**（基础篇 / 工具与安全 /
+ * 生产可靠性 / 体系与数据 / 收口与前沿），也是站点 `/learn/` 的线性阅读序。
+ * `notes/knowledge-map.md` 课程总表里的 **W0–W2** 是**岗位权重**（备考优先级），两者**不是同一套标签、
+ * 不可互换**——2026-10-19 修复前该表用同一批 `P0–P2` 表达权重，导致 `/learn` 与 `/map` 对同一门课
+ * 给出相反顺序（评审 `PED-F1`）。阶段以本文件为准，权重以 knowledge-map 为准。
+ *
  * 唯一内容源：notes/process/site-refactor-plan.md §2/§3/§4/§5。17 项按 §3 线性阅读序排列
  * （order = 数组 index，不必显式存）；slug/stage/prereqs/next/mvpSlug/前置知识与 §2 主表
  * 逐字一致，无遗漏、无漂移。
@@ -124,8 +130,8 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'harness-mvp',
     teachingFocus: 'harness 分层 / 每层职责 / 权限门·恢复·压缩的架构落位',
     practicalOutput:
-      '交付 = harness 分层图 + 每层职责/组件清单（无独立代码，复用 harness-mvp 作解剖对象）；判定 = 能对照 harness-demo 画清分层并讲清每层为什么存在',
-    prerequisiteNote: '已理解最小 loop 的组成（权限门/恢复/压缩；来自上一课）',
+      '交付 = harness 分层图 + 每层职责/组件清单（无独立代码，复用 harness-mvp 作解剖对象）；判定（学习者自查）＝ 能对照 harness-demo 现场画出 5 层分层图（loop / 工具注册与执行 / 权限门 / 恢复与压缩 / 可观测），每层说出「为什么存在」+ 指出 FinHot 幽灵事故对应哪一层失守——可证伪：缺一层即未过',
+    prerequisiteNote: '已理解最小 loop 的组成（权限门/恢复/压缩；来自前置课）',
     isHorizontal: false,
   },
   {
@@ -141,7 +147,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     teachingFocus: 'chunking / 检索打分排序 / RRF 融合 / 强制引用与拒答',
     practicalOutput:
       '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（132 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
-    prerequisiteNote: '已能跑通 harness-demo（上一课带入最小 loop 与工具协议直觉）；只需会读写文件、无需语义模型/向量库——「检索=打分排序」直觉随课建立',
+    prerequisiteNote: '已能跑通 harness-demo（前置课带入最小 loop 与工具协议直觉）；只需会读写文件、无需语义模型/向量库——「检索=打分排序」直觉随课建立',
     isHorizontal: false,
   },
   {
@@ -156,7 +162,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'harness-mvp',
     teachingFocus: '需求→组件→权衡 / 设计模板 / 演练收口',
     practicalOutput:
-      '交付 = 30 分钟「设计一个 X agent」模板 + 演练答法（无独立代码，复用 harness-mvp + rag-mvp 作素材）；判定 = 拿到一个需求能套模板讲完整条「需求→组件→权衡」',
+      '交付 = 30 分钟「设计一个 X agent」模板 + 演练答法（无独立代码，复用 harness-mvp + rag-mvp 作素材）；判定（学习者自查）＝ 30 分钟内按七步骨架输出一份「需求→组件→权衡」模板（每步至少一个权衡点），并能对同一需求给出「改用 workflow 实现」的反例——可证伪：超时或缺任一骨架步骤即未过',
     prerequisiteNote: '无需额外技能：能画流程图、会讲「需求→组件→权衡」即可',
     isHorizontal: false,
   },
@@ -176,7 +182,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 sandbox-mvp（独占）：四通道 policy 引擎 + 幽灵事故重放剧本。判定 clone 能跑 = cd sandbox-demo && npm i && npm run demo 复现「A 组仅权限门→生产被替换 / B 组四通道+沙箱→生产正常」+ `✅ 重放一致性断言通过`（A/B 各 3 次逐字节一致，node ≥ 18）；mcp/durable-execution 复用它的 policy 门与「事故重放」方法论',
     prerequisiteNote:
-      '已能跑通 harness-demo（上一课带入最小 loop 与 policy 门直觉）；只需「进程/文件系统/容器隔离」的粗概念——四通道与三条边界（路径/env/网络）的具体机制随 sandbox-demo 边跑边建，不要求会写容器',
+      '已能跑通 harness-demo（前置课带入最小 loop 与 policy 门直觉）；只需「进程/文件系统/容器隔离」的粗概念——四通道与三条边界（路径/env/网络）的具体机制随 sandbox-demo 边跑边建，不要求会写容器',
     isHorizontal: false,
   },
   {
@@ -193,7 +199,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 mcp-mvp（独占）：MCP 投毒攻击 + 四层防御对照（全离线确定性）。判定 clone 能跑 = cd mcp-demo && npm i && npm run demo 复现「对照组 outbox 出现 attacker@evil.example 外泄 / 防御组 outbox 为空」+ 末行 `✅ demo 断言全部通过`（重放两次 digest 一致，node ≥ 18）；evaluation/multi-agent 复用它的「四层 defense-in-depth」与重放断言方法论',
     prerequisiteNote:
-      '已上完沙箱与凭据（上一课带入 policy 门/egress 直觉）；只需 HTTP/JSON-RPC 与客户端-服务器的粗概念——MCP 四原语与四层防御随 mcp-demo 边跑边建，不要求写过 MCP',
+      '已上完沙箱与凭据（前置课带入 policy 门/egress 直觉）；只需 HTTP/JSON-RPC 与客户端-服务器的粗概念——MCP 的 Client/Server 特性与四层防御随 mcp-demo 边跑边建，不要求写过 MCP',
     isHorizontal: false,
   },
   {
@@ -210,7 +216,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 = 一套评测体系方案（复用 rag-mvp 评测链，非新 MVP）：judge 校准 + golden set 版本化 + CI 门禁。判定 clone 能跑 = cd rag-demo && npm run demo:eval 复现 recall@3=0.31（132 chunks，PASS 3/8，10 题含 2 范围外拒答探针）；data-flywheel 复用它的「分母纪律 + 评测环节」，multi-agent 复用它的「轨迹级也要评」口径',
     prerequisiteNote:
-      '已上完 RAG 并跑过 rag-demo（上一课带入 recall@k / golden set / 错误归因三件直觉）；只需 precision/recall + 抽样统计的粗概念——judge 校准 / 分母纪律 / CI 门禁的具体机制随 rag-demo 的 demo:eval 边跑边建',
+      '已上完 RAG 并跑过 rag-demo（前置课带入 recall@k / golden set / 错误归因三件直觉）；只需 precision/recall + 抽样统计的粗概念——judge 校准 / 分母纪律 / CI 门禁的具体机制随 rag-demo 的 demo:eval 边跑边建',
     isHorizontal: false,
   },
   {
@@ -227,7 +233,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 = 一份子代理编排设计（复用 harness-mvp，非新 MVP；S7 四决策 walkthrough：进程内嵌套 / 节点健康 / 权限收紧 / 单线程写）。判定 clone 能跑 = cd harness-demo && npm run demo:reject 复现「单线程写 + 拒绝也是合法结果」+ npm run demo:otel:mock 复现 15 spans/1 trace（子代理 trace 埋点地基）；durable-execution 复用它的 loop / 恢复 / trajectory 骨架',
     prerequisiteNote:
-      '已上完系统设计（上一课带入「谁和谁说话 × 怎么想」与读写分治）并能跑通 harness-demo；只需「顺序执行 vs 并发」的粗概念，不要求写过编排框架——orchestrator-worker 与子代理四决的具体机制随 harness-demo 的 demo:reject / demo:otel:mock 边跑边建',
+      '已上完系统设计（前置课带入「谁和谁说话 × 怎么想」与读写分治）并能跑通 harness-demo；只需「顺序执行 vs 并发」的粗概念，不要求写过编排框架——orchestrator-worker 与子代理四决的具体机制随 harness-demo 的 demo:reject / demo:otel:mock 边跑边建',
     isHorizontal: false,
   },
 
@@ -246,7 +252,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 durable-execution-mvp（独占：durable-execution-demo/，src 821 行全离线确定性）。判定 clone 能跑 = cd durable-execution-demo && npm i && npm run demo 复现「3 崩溃点 × 各 3 次真实 SIGKILL → 副作用计数恒=1」+ 末尾 `✅ durable 验收通过`（恢复报告跨次 sha256 逐字节一致，node ≥ 18）；observability 复用它的「intent↔exec 配对 = 崩溃未知态」判据与确定性重放口径',
     prerequisiteNote:
-      '已能跑通 harness-demo（上一课带入 session.ts 的最小 durable journal：intent→exec）并上完评测工程化（轨迹级评测 = 恢复正确性的验证手段）；只需「幂等 / 事务 / checkpoint」的粗概念——journal 双锚点 / 原子写 / 未知态只读确认的具体机制随 durable-execution-demo 的 npm run demo 边跑边建',
+      '已能跑通 harness-demo（前置课带入 session.ts 的最小 durable journal：intent→exec）并上完评测工程化（轨迹级评测 = 恢复正确性的验证手段）；只需「幂等 / 事务 / checkpoint」的粗概念——journal 双锚点 / 原子写 / 未知态只读确认的具体机制随 durable-execution-demo 的 npm run demo 边跑边建',
     isHorizontal: false,
   },
   {
@@ -263,7 +269,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 api-mvp（独占：api-demo/，六模块最小闭环，规格 notes/process/api-mvp-spec.md）。判定 clone 能跑 = cd api-demo && npm i && npm run demo 复现六模块断言（SSE 分帧 / schema 校验 / cache 命中 / 4xx 不重试 / 能力路由 / 成本归因）+ 末尾 `✅ api 验收通过`（全离线零 key、确定性、断言自测）；observability 复用它的「成本归因 + gen_ai.response.model 埋点」作为可观测上游',
     prerequisiteNote:
-      '已能跑通 harness-demo（上一课带入 chatStream 的 SSE 三件事 + provider/context/压缩 + tc.name.trim() 防御性解析）；只需 HTTP 流式(SSE) / JSON 结构 / 基本成本概念的粗认知——六模块（流式 / 结构化 / caching / 重试分类 / 路由 / 成本）的具体机制随 api-demo 的 npm run demo 边跑边建，不要求用过 litellm / 真实多模型网关',
+      '已能跑通 harness-demo（前置课带入 chatStream 的 SSE 三件事 + provider/context/压缩 + tc.name.trim() 防御性解析）；只需 HTTP 流式(SSE) / JSON 结构 / 基本成本概念的粗认知——六模块（流式 / 结构化 / caching / 重试分类 / 路由 / 成本）的具体机制随 api-demo 的 npm run demo 边跑边建，不要求用过 litellm / 真实多模型网关',
     isHorizontal: false,
   },
   {
@@ -280,7 +286,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 obs-mvp（v0：harness-demo 的 demo:otel 埋点，复用 harness-mvp 非新 MVP）。判定 clone 能跑 = cd harness-demo && npm run demo:otel:mock 复现 15 spans/1 trace（invoke_agent×1 + chat×6 + execute_tool×8，全离线无 key）+ npm run demo:otel:assert 断言形态/计数（exit 0 = 过）；data-flywheel 复用它的「可观测=数据采集、评测=决策」数据管道口径',
     prerequisiteNote:
-      '已上完 API 与多模型路由（上一课带入「成本归因 = 路由决策输入」的账本意识）；只需 trace / span / metric 三个 OTel 术语的粗概念——OTel GenAI 属性族 / span 树建模 / burn-rate 告警的具体机制随 harness-demo 的 demo:otel:mock / demo:otel:assert 边跑边建',
+      '已上完 API 与多模型路由（前置课带入「成本归因 = 路由决策输入」的账本意识）；只需 trace / span / metric 三个 OTel 术语的粗概念——OTel GenAI 属性族 / span 树建模 / burn-rate 告警的具体机制随 harness-demo 的 demo:otel:mock / demo:otel:assert 边跑边建',
     isHorizontal: false,
   },
 
@@ -299,7 +305,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 memory-mvp（已实现：memory-redteam/，自研子系统零依赖）。判定 clone 能跑 = cd memory-redteam && npm run demo 复现「写入→召回→冲突消解→遗忘传播→跨会话持久化」全生命周期 + node test.mjs 正跑 16/16 条探针守住（exit 0）+ node test.mjs --ablate 逐层关防线探针须失败（18/18 层承重，exit 0）；rag 复用它的「混合检索 BM25∥向量 + RRF 融合」读路径底层，data-flywheel 复用它的「轨迹归档 = 情景记忆底座 + 评测/eval 结果分离」数据管道口径',
     prerequisiteNote:
-      '已上完 RAG 与检索（上一课带入余弦相似度 + BM25/RRF 混合检索的底层机制，记忆读路径直接复用这套轮子）；只需「会话上下文有窗口上限、进程/会话之间默认无状态」的粗概念——四类记忆的存储介质 / 写读遗忘状态机 / 四道投毒防线随 memory-redteam 的 npm run demo + node test.mjs --ablate 边跑边建，不要求会 pi/Letta/Mem0 任一产品',
+      '已上完 RAG 与检索（前置课带入余弦相似度 + BM25/RRF 混合检索的底层机制，记忆读路径直接复用这套轮子）；只需「会话上下文有窗口上限、进程/会话之间默认无状态」的粗概念——四类记忆的存储介质 / 写读遗忘状态机 / 四道投毒防线随 memory-redteam 的 npm run demo + node test.mjs --ablate 边跑边建，不要求会 pi/Letta/Mem0 任一产品',
     isHorizontal: false,
   },
   {
@@ -316,7 +322,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 flywheel-mvp（独占：flywheel-demo/，四模块最小闭环，规格 notes/process/flywheel-mvp-spec.md）。判定 clone 能跑 = cd flywheel-demo && npm run demo 复现「脱敏台账样本 → filter/label 两轮降噪 → 指标 precision/f1/errors 单调可解释」断言 + 末尾 `✅ flywheel 验收通过`（全离线零 key、脱敏样本不碰生产数据、确定性）；evaluation 复用它的「评测 = 飞轮仪表盘」口径做上游，model-basics 复用它的「指标可归因需版本字段」前置',
     prerequisiteNote:
-      '已上完评测工程化（上一课带入「评测 = 飞轮的仪表盘」+「golden set 版本化 + 指标基线 + CI 门禁」的对照意识）；只需「训练/评测数据要版本化、标签会有噪声」的粗概念——FinHot 台账字段 / 在线-离线数据通路 / labeler 两轮降噪闭环随 flywheel-demo 的 npm run demo 边跑边建，不要求会真实微调平台 / 数据平台',
+      '已上完评测工程化（前置课带入「评测 = 飞轮的仪表盘」+「golden set 版本化 + 指标基线 + CI 门禁」的对照意识）；只需「训练/评测数据要版本化、标签会有噪声」的粗概念——FinHot 台账字段 / 在线-离线数据通路 / labeler 两轮降噪闭环随 flywheel-demo 的 npm run demo 边跑边建，不要求会真实微调平台 / 数据平台',
     isHorizontal: false,
   },
   {
@@ -333,7 +339,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 model-basics-mvp（独占：model-basics-demo/，KV cache / 推理成本数值走查脚本，规格 notes/process/model-basics-mvp-spec.md）。判定 clone 能跑 = cd model-basics-demo && npm run demo 复现「输入上下文长/输出预算/单价 → KV 命中 savings / 首 token 时间估算 / 总成本拆分」断言 + 末尾 `✅ model-basics 验收通过`（全离线零 key、纯计算脚本不调模型、确定性）；api-engineering 复用它的「成本 = token×单价×步数」理论底座，data-flywheel 复用它的「微调时机/取舍」意识',
     prerequisiteNote:
-      '已上完 LLM 发展史与演进（上一课带入「模型是会持续换代的组件」时间轴：GPT 系 / o1 推理模型 / 开源系的代际差异）；只需「矩阵乘法 + softmax 是啥」的粗直觉——KV cache 机制 / prefill-decode 两阶段 / 推理成本构成 / 微调谱系随 model-basics-demo 的 npm run demo 边跑边建，不要求会 PyTorch / 推导 attention',
+      '已上完 LLM 时间线（序章横向；前置课带入「模型是会持续换代的组件」时间轴：GPT 系 / o1 推理模型的代际差异）；只需「矩阵乘法 + softmax 是啥」的粗直觉——KV cache 机制 / prefill-decode 两阶段 / 推理成本构成 / 微调谱系随 model-basics-demo 的 npm run demo 边跑边建，不要求会 PyTorch / 推导 attention',
     isHorizontal: false,
   },
 
@@ -352,7 +358,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     practicalOutput:
       '交付 framework-mvp（已实现：framework-demo/，三家 SDK 同任务离线 mock 对照 + Claude Agent SDK 四能力）。判定 clone 能跑 = cd framework-demo && npm run demo 复现四能力断言（10 条 ok() + demo 末行 1 条整体判定「4 个能力全部 ✅」，exit 0）+ npm run compare:assert 复现三家 16 条对照断言（exit 0，离线 mock 无 key）；系统设计/多智能体编排复用它的「三族坐标系 + 多智能体原语三条路」，observability 复用它的「可观测出口第四层」选型口径',
     prerequisiteNote:
-      '已上完从零写 harness 的 agent-harness 底座（上一课带入「loop / 工具 / 权限 / 会话是四层可拆卸预制件」的拆解语言，本课用它拆任何框架）；只需会读 TS 接口签名 + CLI 输出——三家 SDK 的调用形状 / 权限钩子 / 恢复语义随 framework-demo 的 npm run compare + compare:assert 边跑边建，不要求会 Python / 背任何框架 API',
+      '已上完从零写 harness 的 agent-harness 底座（前置课带入「loop / 工具 / 权限 / 会话是四层可拆卸预制件」的拆解语言，本课用它拆任何框架）；只需会读 TS 接口签名 + CLI 输出——三家 SDK 的调用形状 / 权限钩子 / 恢复语义随 framework-demo 的 npm run compare + compare:assert 边跑边建，不要求会 Python / 背任何框架 API',
     isHorizontal: false,
   },
   {

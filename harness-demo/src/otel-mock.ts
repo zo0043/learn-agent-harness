@@ -15,7 +15,7 @@ import { MOCK_MODEL, EXPECTED, renderCounts, renderSnapshot, renderTree, runMock
 const __dirname = dirname(fileURLToPath(import.meta.url)); // src/
 
 console.log("[otel:mock] 离线场景：本地 mock OpenAI 兼容端点（无外网、无 LLM key）");
-console.log(`[otel:mock] 场景定义：src/otel-mock-scenario.ts（8 个 tool_call 的名字与顺序抄自 trajectories/demo.jsonl；路径与 write_file 审批策略两处如实适配，见该文件头部注释）`);
+console.log(`[otel:mock] 场景定义：src/otel-mock-scenario.ts（8 个 tool_call 的名字与顺序抄自 trajectories/demo.jsonl（活端点本机产物，未入库；入库样例见 demo.example.jsonl）；路径与 write_file 审批策略两处如实适配，见该文件头部注释）`);
 console.log(`[otel:mock] mock 模型名：${MOCK_MODEL}\n`);
 
 const r = await runMockOtelScenario();

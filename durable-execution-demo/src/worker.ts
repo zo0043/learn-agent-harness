@@ -13,9 +13,19 @@ import { canonical } from "./state.js";
 import type { CrashPoint } from "./types.js";
 
 const argv = process.argv.slice(2);
+/**
+ * 命令行 flag 解析：同时支持 `--k v` 与 `--k=v` 两种形式（审计 TECHSTATE-F2）。
+ * 为什么必须两种都支持：本文件头部与 notes/durable-execution.md:256 的手工复现命令写的是
+ * `npx tsx src/worker.ts --mode=crash --crash=C`（等号形式），而旧实现只认 `--k v`——
+ * 于是照文档敲命令时 mode 退回默认 "resume"、crash 变 null，**注入点没命中、进程不崩溃**，
+ * 读者得到的是「一个看起来正常跑完的 resume」，而不是预期的 SIGKILL 自杀。
+ * 与 demo.ts:24-29 的 flag() 保持同一实现（demo.ts 自己两种都认，worker 才是缺口）。
+ */
 function flag(name: string): string | null {
+  const eq = argv.find((a) => a.startsWith(`--${name}=`));
+  if (eq) return eq.slice(`--${name}=`.length);
   const i = argv.indexOf(`--${name}`);
-  return i >= 0 && argv[i + 1] ? argv[i + 1] : null;
+  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[i + 1] : null;
 }
 
 const STATE_DIR = flag("state") ?? new URL("../.state", import.meta.url).pathname;

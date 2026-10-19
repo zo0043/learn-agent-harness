@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 手写 sitemap（未装 @astrojs/sitemap）；条数由 site/tools/check-counters.mjs 门禁守着 = 站点 html 数。新增课程/专题时须同步更新，否则门禁失败。 -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://blog.zero43.top/learn-agent-harness/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/learn/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/works/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/map/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/interview/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/nav/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/404.html</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/llm-timeline/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/harness-from-scratch/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/agent-harness/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/rag/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/system-design/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/sandbox/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/mcp/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/evaluation/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/multi-agent/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/durable-execution/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/api-engineering/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/observability/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/long-term-memory/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/data-flywheel/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/model-basics/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/framework-ecosystem/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/c/industry-2026/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/01-context-rot/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/02-tool-granularity/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/03-error-paths/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/04-token-economics/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/05-hitl-security/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/06-observability-loop/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/07-harness-rot/</loc></url>
+  <url><loc>https://blog.zero43.top/learn-agent-harness/details/08-single-threaded-write/</loc></url>
+</urlset>

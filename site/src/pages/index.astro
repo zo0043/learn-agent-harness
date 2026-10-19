@@ -31,6 +31,7 @@ const ragEntry = (await getCollection('courses')).find((e) => e.id === 'rag');
 const rag = parseRagStats(ragEntry?.body ?? '');
 
 // 题目计数口径见 notes/knowledge-map.md 头部「计数口径」块（课内嵌 205 + 面试题库精选 37）。
+const DETAIL_COUNT = (await getCollection('details')).length;
 const Q_IN_LESSON = 205;
 const Q_BANK = 37;
 
@@ -109,7 +110,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
       <h2 class="page-title">增量主线：亲手搭一个 agent</h2>
       <p class="page-lead">
         {MILESTONES.length} 个里程碑对应五个阶段，后段复用你亲手写的前段代码——
-        不是读完 17 个 demo 就结束，而是<strong>你自己写的代码能跑起来</strong>。
+        不是读完 17 门课的参考样本就结束，而是<strong>你自己写的代码能跑起来</strong>。
         {mDone === MILESTONES.length
           ? `当前 ${MILESTONES.length} 个里程碑全部就位，仓库根目录 my-agent/ 可直接 clone。`
           : `当前 ${mDone}/${MILESTONES.length} 个里程碑就位。`}
@@ -212,7 +213,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
     <!-- 3c. 详解 -->
     <div class="depth-block">
       <div class="depth-head">
-        <h3>详解：8 个资深分水岭</h3>
+        <h3>详解：{DETAIL_COUNT} 个资深分水岭</h3>
         <p>
           每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
           面试答到机制层时直接用的素材。
@@ -224,7 +225,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         <a href={base + 'details/07-harness-rot/'}>harness 假设会腐烂：为尚不存在的模型写稳定接口</a>
       </div>
       <p class="route-more">
-        <a class="btn" href={base + 'details/'}>查看全部 8 篇 →</a>
+        <a class="btn" href={base + 'details/'}>查看全部 {DETAIL_COUNT} 篇 →</a>
       </p>
     </div>
   </section>

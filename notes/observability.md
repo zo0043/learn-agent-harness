@@ -121,7 +121,7 @@ flowchart LR
     A --> TN["… 实测共 6 个 chat + 8 个 execute_tool"]
     A --> C6["chat · step6<br/>finish_reasons=[stop]"]
   end
-  subgraph JSONL["轨迹事件流（trajectories/demo.jsonl，22 行）"]
+  subgraph JSONL["轨迹事件流（trajectories/demo.example.jsonl，22 行）"]
     E0["init · system / user / startedAt"]
     E1["model_response · usage / ms / finishReason"]
     E2["tool_intent · id / name / args"]
@@ -136,7 +136,7 @@ flowchart LR
 
 **怎么读这张对照图**：左边是"运行时可观测"（span 由 SDK 管理，父子关系天然正确，但 span 结束才导出），右边是"持久化事实源"（逐行 `appendFileSync`，进程被 kill 也不丢，可崩溃后重建）。两者的字段不是一一对应：span 的 `gen_ai.tool.call.arguments` 截断 500 字符，JSONL 的 `tool_intent.args` 是全量对象；span 的 `harness.tool.status` 有 `ok/error/denied`，JSONL 的 `tool_exec.status` 还多一个 `unknown-state`（⑦ 恢复用）。**面试点**：不要把 span 当唯一事实源——trace 后端可能采样、可能丢导出；可恢复系统的唯一事实源永远是本地持久日志。
 
-**实测口径（务必分清 schema 与实测）**：`trajectories/demo.jsonl` 中真实出现的事件类型是 **`init` / `model_response` / `tool_intent` / `tool_exec` / `final`**（22 行：`init`×1、`model_response`×6、`tool_intent`×6、`tool_exec`×8、`final`×1）。`compaction` 与 `crash` **只在 `src/types.ts` 的 `TrajectoryEvent` schema 里定义、尚未出现在 demo 轨迹中**（分别由 `demo:compact` / `demo:crash` 模式单独触发）。另有一个容易看错的细节：`tool_exec` 比 `tool_intent` 多 2 条——`write_file` / `run_shell` 在策略判定为 `deny` / 审批未通过时，**先返回、未记 intent**，只留下 `status:"denied"` 的 `tool_exec`；所以"有 exec 无 intent"是拒绝路径，"有 intent 无 exec"才是崩溃未知状态（S7 会用到这个判据）。**不要把 schema 里定义的类型说成"实测出现"**。
+**实测口径（务必分清 schema 与实测）**：入库样本 `trajectories/demo.example.jsonl` 中真实出现的事件类型是 **`init` / `model_response` / `tool_intent` / `tool_exec` / `final`**（22 行：`init`×1、`model_response`×6、`tool_intent`×6、`tool_exec`×8、`final`×1）。本地跑 `npm run demo` 会另生成 `trajectories/demo.jsonl`（**未入库**，`.gitignore` 排除），事件分布与入库样本一致、逐次数字有波动。`compaction` 与 `crash` **只在 `src/types.ts` 的 `TrajectoryEvent` schema 里定义、尚未出现在 demo 轨迹中**（分别由 `demo:compact` / `demo:crash` 模式单独触发）。另有一个容易看错的细节：`tool_exec` 比 `tool_intent` 多 2 条——`write_file` / `run_shell` 在策略判定为 `deny` / 审批未通过时，**先返回、未记 intent**，只留下 `status:"denied"` 的 `tool_exec`；所以"有 exec 无 intent"是拒绝路径，"有 intent 无 exec"才是崩溃未知状态（S7 会用到这个判据）。**不要把 schema 里定义的类型说成"实测出现"**。
 
 ---
 
@@ -256,25 +256,25 @@ LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 �
 
 ## S7 实战走查：从一条 trace 定位一次 agent 异常
 
-**这一节解决什么问题**：把 S1-S6 串成一次真实排障。目标不是再讲一遍术语，而是练**从信号到加固的完整链路**，每一步都能说出"看哪个字段、期望值是多少、异常说明什么"。样本用 harness-demo 的真实产物 `trajectories/demo.jsonl`（`npm run demo:otel` 同源逻辑）——**数字全部来自这条真实轨迹**，异常假设部分会单独标注。
+**这一节解决什么问题**：把 S1-S6 串成一次真实排障。目标不是再讲一遍术语，而是练**从信号到加固的完整链路**，每一步都能说出"看哪个字段、期望值是多少、异常说明什么"。样本用 harness-demo 的**入库**产物 `trajectories/demo.example.jsonl`（与 `npm run demo:otel` 的活端点轨迹同源同分布）——**数字全部来自这条入库轨迹**（活端点重跑会有毫秒/±几 token 的波动），异常假设部分会单独标注。
 
-**样本事实（真实，来自 demo.jsonl）**：22 个事件；6 次 `model_response`；8 个 `tool_exec`（6 `ok` + 2 `denied`）；6 个 `tool_intent`；`final.totalMs = 26749`；累计 `usage` = **6736 in / 1127 out**（合计 7863 tokens）。各次 `model_response`：
+**样本事实（真实，来自 demo.example.jsonl）**：22 个事件；6 次 `model_response`；8 个 `tool_exec`（6 `ok` + 2 `denied`）；6 个 `tool_intent`；`final.totalMs = 26700`；累计 `usage` = **6740 in / 1130 out**（合计 7870 tokens）。各次 `model_response`：
 
 | step（按顺序） | prompt_tokens | completion_tokens | ms | finishReason |
 |---|---|---|---|---|
-| 1 | 765 | 104 | 6528 | tool_calls |
-| 2 | 875 | 68 | 1861 | tool_calls |
-| 3 | 1051 | 67 | 1592 | tool_calls |
-| 4 | 1173 | 257 | 4563 | tool_calls |
-| 5 | 1383 | 160 | 4614 | tool_calls |
-| 6 | 1489 | 471 | 7579 | stop |
+| 1 | 770 | 100 | 6500 | tool_calls |
+| 2 | 880 | 70 | 1900 | tool_calls |
+| 3 | 1050 | 70 | 1600 | tool_calls |
+| 4 | 1170 | 260 | 4600 | tool_calls |
+| 5 | 1380 | 160 | 4600 | tool_calls |
+| 6 | 1490 | 470 | 7600 | stop |
 
 **走查（假设：该任务 P95 延迟翻倍、成本告警触发）**：
 
 1. **① 信号出现（metrics 层）**：告警规则"单任务 P95 墙钟 > 20s 或单任务 token > 7000"触发。此时只看得到"慢 + 贵"，看不到原因——metrics 只能告诉你"出事了"。
-2. **② 拉 trace**：`npm run demo:otel` 收尾的 span 摘要会打印 `收到 N 个 span（M 个 trace）`；也可直接读 `trajectories/demo.jsonl`。按 `gen_ai.conversation.id`（代码里是 `gen_ai.session.id=demo`）拿到这一整棵 span 树。
+2. **② 拉 trace**：`npm run demo:otel` 收尾的 span 摘要会打印 `收到 N 个 span（M 个 trace）`；也可直接读入库样本 `trajectories/demo.example.jsonl`。按 `gen_ai.conversation.id`（代码里是 `gen_ai.session.id=demo`）拿到这一整棵 span 树。
 3. **③ 按 span 归因（三类分诊）**：
-   - **prefill 还是 decode？** 看 `chat` span 的 `gen_ai.usage.input_tokens` 增长曲线：step-1 = 765，step-6 = 1489，**输入 token 涨到近 2×**——prompt 随历史累积，prefill 成本在涨；但真正拉高单次墙钟的是 step-6 的 `output_tokens=471` 与 `ms=7579`（decode 慢）。**结论方向：既要压缩上下文（治 prefill），也要给终态输出限长（治 decode）。**
+   - **prefill 还是 decode？** 看 `chat` span 的 `gen_ai.usage.input_tokens` 增长曲线：step-1 = 770，step-6 = 1490，**输入 token 涨到近 2×**——prompt 随历史累积，prefill 成本在涨；但真正拉高单次墙钟的是 step-6 的 `output_tokens=470` 与 `ms=7600`（decode 慢）。**结论方向：既要压缩上下文（治 prefill），也要给终态输出限长（治 decode）。**
    - **工具？** `execute_tool` span 全部 `harness.tool.status=ok`（get_weather / list_dir 0ms，read_file 0-1ms）——**工具不是瓶颈**，排除。
    - **重试？** 6 个 `tool_intent` 与 6 个成功 `tool_exec` 一一对应，无重复 id——**没有重试放大**，排除。
 4. **④ 定位到具体 step**：step-4 的 `model_response`（ms=4563，prompt_tokens=1173）一次性请求了 `write_file` + `run_shell` 两个高风险动作，**双双被拒**（`tool_exec.status="denied"`：write_file 审批未过，run_shell 命中 deny）；模型随后不得不用 step-5 的 read_file 重新核对现状。**慢的一部分来自"被拒 → 重新核对"的额外步骤**——这正是可观测才能看出来的"策略拒绝造成的隐性成本"。
@@ -288,15 +288,15 @@ LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 �
 
 | 判断 | 看哪个字段 | 真实示例值 | 异常含义 |
 |---|---|---|---|
-| 输入成本 | `model_response.usage.prompt_tokens` / span 的 `gen_ai.usage.input_tokens` | 765 → 1489 | 上下文累积、prefill 变贵 |
-| 输出成本 | `completion_tokens` / `gen_ai.usage.output_tokens` | step-6 = 471 | 终态长文本、decode 慢 |
-| 单步延迟 | `model_response.ms` | step-6 = 7579 | 定位到慢在哪次调用 |
+| 输入成本 | `model_response.usage.prompt_tokens` / span 的 `gen_ai.usage.input_tokens` | 770 → 1490 | 上下文累积、prefill 变贵 |
+| 输出成本 | `completion_tokens` / `gen_ai.usage.output_tokens` | step-6 = 470 | 终态长文本、decode 慢 |
+| 单步延迟 | `model_response.ms` | step-6 = 7600 | 定位到慢在哪次调用 |
 | 工具健康 | `tool_exec.status` / `harness.tool.status` | 6 ok + 2 denied | 工具慢/错/被拒 |
 | 重试 | `tool_intent.id` 与 `tool_exec.id` 对照 | 6↔6，无重复 | 有重复=重试放大 |
 | 崩溃未知态 | `intent` 有无配对 `exec` | 本例无 | 有 intent 无 exec = 崩溃点 |
-| 终态 | `final.totalMs` / `final.content` | 26749 / 有总结 | 任务是否正常收尾 |
+| 终态 | `final.totalMs` / `final.content` | 26700 / 有总结 | 任务是否正常收尾 |
 
-**反面对照 · FinHot 幽灵事故：没有可观测性时会怎样**。2026-10-09 的幽灵事故里，一个并行会话在错误的目录执行了"构建并启动"，生产 worker/api 被幽灵代码替换了 24 分钟——**因为当时没有 task 级 trace，只有零散日志，定位靠猜**：不知道是哪条会话、哪一步、哪个工具触发，只能等人肉比对容器创建时间。同一时期的 backfill 长任务（**1645 行**、~10% 失败）也只有一个 `/tmp/finhot-backfill-direction.log` 作为"手工版可观测"，失败分类靠人读文本。**如果当时有本课的 trace**：一次按 `conversation.id` 拉树就能看到"某会话 → 某 execute_tool(bash) → 某命令"，成本和耗时按 step 归因，"幽灵代码替换"会以"非预期路径的写/执行 span"形式直接暴露。这就是"**可观测是评测/安全/成本三条线的共同数据管道**"的生产注脚。
+**反面对照 · FinHot 幽灵事故：没有可观测性时会怎样**。2026-10-09 的幽灵事故里，一个并行会话在错误的目录执行了"构建并启动"，生产 worker/api 被幽灵代码替换了 25 分钟——**因为当时没有 task 级 trace，只有零散日志，定位靠猜**：不知道是哪条会话、哪一步、哪个工具触发，只能等人肉比对容器创建时间。同一时期的 backfill 长任务（**1645 行**、~10% 失败）也只有一个 `/tmp/finhot-backfill-direction.log` 作为"手工版可观测"，失败分类靠人读文本。**如果当时有本课的 trace**：一次按 `conversation.id` 拉树就能看到"某会话 → 某 execute_tool(bash) → 某命令"，成本和耗时按 step 归因，"幽灵代码替换"会以"非预期路径的写/执行 span"形式直接暴露。这就是"**可观测是评测/安全/成本三条线的共同数据管道**"的生产注脚。
 
 **面试信号**：走查时先报"信号 → trace → 分诊（prefill/decode/工具/重试）→ step → 加固 → 验证"的节奏，再用一个真实字段值收口（如"输入 token 从 765 涨到 1489，说明 prefill 在累积"）——比罗列工具名更有说服力。
 
@@ -323,29 +323,32 @@ LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 �
 ---
 
 ## 练习题库（后续提问用）
+> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
+> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
+> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
 
-| # | 题目 | 考察 |
-|---|---|---|
-| 1 | 为什么"每个 LLM 调用一个 trace"是错的粒度？成本归因会怎么坏？ | S3 |
-| 2 | 重试 3 次的工具调用，错误率指标怎么记才不被重试污染？ | S3 |
-| 3 | 老板问"这个月 agent 功能花了多少"。列出你需要的四个维度+查询路径 | S4 |
-| 4 | 轨迹里要存全量 prompt。合规团队反对。设计三档折中 | S3/S5 |
-| 5 | 子 agent 跑在另一个进程/服务。trace 怎么不断？ | S3 多 agent |
-| 6 | OTel GenAI 约定里 usage 属性缺失（provider 不报 token）。成本归因怎么办？ | S2+S4 |
-| 7 | 语义失败（全 200 答案错）怎么进告警？和 评测工程化 judge 怎么分工？ | S1+S5 |
-| 8 | 回放一次生产轨迹，换 prompt 重跑结果不同。排三个可疑的非确定源 | S5（沙箱与凭据 §S6 联动） |
-| 9 | OTel GenAI 现在的稳定状态是什么？把 `gen_ai.system` / `gen_ai.session.id` 迁到当前约定，各要改成哪个属性名？ | S2 |
-| 10 | SLI / SLO / 错误预算三者关系是什么？99% 的 30 天错误预算约多少？为什么 fast burn 用 14.4x / 1h？ | S4 SLO |
-| 11 | 实战走查：同样 6 次 LLM 调用，输入 token 从 765 涨到 1489、step-6 输出 471。你怎么判断是 prefill 贵还是 decode 慢、分别给什么动作？ | S7/S4 |
-| 12 | 实战走查：demo 轨迹里 8 个 `tool_exec` 但只有 6 个 `tool_intent`，多出的 2 个是什么？"有 intent 无 exec"又说明什么？ | S7/S3 |
-| 13 | FinHot 幽灵事故如果当时有 task 级 trace，最先暴露问题的是哪类 span / 属性？为什么 log-only 会靠猜？ | S7+S1 |
-| 14 | 面试官说"我们 OTel GenAI 埋点全上 stable 契约"。这句话哪里有问题？你会怎么设计属性改名的适配层？ | S8/S2 |
+| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
+|---|---|---|---|
+| 1 | 为什么"每个 LLM 调用一个 trace"是错的粒度？成本归因会怎么坏？ | S3 | ≥3 点：①粒度认任务不认调用，一次任务被拆成几十个孤立 trace；②成本只得总账，答不出哪步烧钱；③按 trace_id 回放不出任务链（S3） |
+| 2 | 重试 3 次的工具调用，错误率指标怎么记才不被重试污染？ | S3 | ≥3 点：①重试记为同父 child span 或 span 内事件，不新开 trace；②失败率分母=逻辑调用数，非物理调用数；③否则 3 重试+1 成功=75% 失败率（S3） |
+| 3 | 老板问"这个月 agent 功能花了多少"。列出你需要的四个维度+查询路径 | S4 | ≥3 点：①四维：用户/功能/模型/任务类型，逐维 token×单价；②路径：chat span 的 usage 求和后按维 group；③须能下钻 step/工具，区分 prefill/decode（S4） |
+| 4 | 轨迹里要存全量 prompt。合规团队反对。设计三档折中 | S3/S5 | ≥3 点：①摘要档：只存 span 元数据+对象存储指针，最合规；②全文本地档：payload 留本地/对象存储，限权可回放；③全文上云档：加密+审计+按敏感度分级，成本最高（S3/S5） |
+| 5 | 子 agent 跑在另一个进程/服务。trace 怎么不断？ | S3 多 agent | ≥3 点：①显式传 traceparent，把 worker span 挂回父任务；②worker 独立 trace 时用 task id 关联汇总；③不传则主任务视角断链，成本成黑洞（S3） |
+| 6 | OTel GenAI 约定里 usage 属性缺失（provider 不报 token）。成本归因怎么办？ | S2+S4 | ≥3 点：①本地按字符/分词估算 token，属性标 estimated；②归因用相对量+单价表，记录估算误差；③把 provider 不报 usage 当选型约束（S2+S4） |
+| 7 | 语义失败（全 200 答案错）怎么进告警？和 评测工程化 judge 怎么分工？ | S1+S5 | ≥3 点：①失败率分子=传输失败+语义失败（judge 抽审不达标率）；②judge 产出标签、观测侧聚合成 SLI 驱动告警；③只报 HTTP 错误率面板永远绿（S1+S5） |
+| 8 | 回放一次生产轨迹，换 prompt 重跑结果不同。排三个可疑的非确定源 | S5（沙箱与凭据 §S6 联动） | ≥3 点：①温度/seed 未固定，或模型版本静默漂移；②外部状态（时间/文件/网络）泄漏进 prompt；③上游数据或并发导致输入不同；先单变量固定再 diff（S5） |
+| 9 | OTel GenAI 现在的稳定状态是什么？把 `gen_ai.system` / `gen_ai.session.id` 迁到当前约定，各要改成哪个属性名？ | S2 | ≥3 点：①仍是 Development，已迁独立仓库，不是 stable；②gen_ai.system→gen_ai.provider.name；③gen_ai.session.id→conversation.id（S2） |
+| 10 | SLI / SLO / 错误预算三者关系是什么？99% 的 30 天错误预算约多少？为什么 fast burn 用 14.4x / 1h？ | S4 SLO | ≥3 点：①SLI 信号→SLO 目标→错误预算=1−SLO；②99% 的 30 天预算约 7.2h；③14.4x/1h=1 小时烧月度预算 2%，须立即 page（S4） |
+| 11 | 实战走查：同样 6 次 LLM 调用，输入 token 从 765 涨到 1489、step-6 输出 471。你怎么判断是 prefill 贵还是 decode 慢、分别给什么动作？ | S7/S4 | ≥3 点：①input 765→1489 是 prefill 累积，压缩上下文或加缓存；②out=471/ms=7579 是 decode 慢，动作限输出或换小模型；③两者须分开归因（S7） |
+| 12 | 实战走查：demo 轨迹里 8 个 `tool_exec` 但只有 6 个 `tool_intent`，多出的 2 个是什么？"有 intent 无 exec"又说明什么？ | S7/S3 | ≥3 点：①多的 2 个是 denied 的 exec：取拒路径先返回，未记 intent；②有 intent 无 exec=崩溃未知态，先核对现状；③两者判据不同，不可混用（S7） |
+| 13 | FinHot 幽灵事故如果当时有 task 级 trace，最先暴露问题的是哪类 span / 属性？为什么 log-only 会靠猜？ | S7+S1 | ≥3 点：①最先异常的是非预期路径的 write/bash 调用 span；②按 conversation.id 拉树可定位会话与步号；③log-only 无任务级父子关系，只能人肉比对（S7） |
+| 14 | 面试官说"我们 OTel GenAI 埋点全上 stable 契约"。这句话哪里有问题？你会怎么设计属性改名的适配层？ | S8/S2 | ≥3 点：①GenAI semconv 仍是 Development，不是 stable；②适配层：埋点收敛到单一 adapter，业务只调它；③改名只动 adapter 一层，留双写过渡期（S8） |
 
 ## 来源与锚点（2026-10 核实回填）
 
 - **OTel GenAI**：状态=**Development**、GenAI 语义约定**已迁至独立仓库** `open-telemetry/semantic-conventions-genai`（主站 `opentelemetry.io/docs/specs/semconv/gen-ai/` 已标注 moved）；属性名核实自该仓库 `docs/registry/attributes/gen-ai.md` 与 `docs/gen-ai/*`（核心 semconv v1.44.0 线）：`gen_ai.provider.name`、`gen_ai.request.model` / `gen_ai.response.model`、`gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens`、`gen_ai.agent.name` / `gen_ai.agent.id`、`gen_ai.conversation.id`、`gen_ai.tool.name` / `gen_ai.tool.call.id` / `gen_ai.tool.call.arguments` / `gen_ai.tool.call.result`。**与旧讲义的差异**：旧文写 `experimental / v1.39.0`、`gen_ai.system`、`gen_ai.session.id`——应分别修正为 Development/独立仓库、`gen_ai.provider.name`、`gen_ai.conversation.id`（harness-demo 代码暂未改名，见 S2/S8）。
 - **采用方**：LangSmith / Langfuse / Phoenix / Helicone 官方文档（2026-10 核实均为 OTel 原生接入）
 - **burn-rate 告警阶梯**：Google SRE Workbook 多窗口多倍率燃烧率的思路（14.4x/1h 烧 2% 月度预算、6x/6h 烧 5%、1x/3d 烧 10%）
-- **harness-demo 实测**：`harness-demo/src/otel.ts`（SDK + console 导出，`OTEL_EXPORT_OTLP=1` 才开 OTLP）、`src/agent.ts`（`invoke_agent`→`chat`/`execute_tool` span 树）、`src/llm.ts`（流式 usage/model 回填）、`trajectories/demo.jsonl`（22 事件：init×1 / model_response×6 / tool_intent×6 / tool_exec×8 / final×1）；复现 `npm run demo:otel`。`compaction` / `crash` 仅 schema 定义、未在该轨迹出现。
+- **harness-demo 实测**：`harness-demo/src/otel.ts`（SDK + console 导出，`OTEL_EXPORT_OTLP=1` 才开 OTLP）、`src/agent.ts`（`invoke_agent`→`chat`/`execute_tool` span 树）、`src/llm.ts`（流式 usage/model 回填）、`trajectories/demo.example.jsonl`（22 事件：init×1 / model_response×6 / tool_intent×6 / tool_exec×8 / final×1；本地 `npm run demo` 生成的 `demo.jsonl` 未入库、分布一致）；复现 `npm run demo:otel`。`compaction` / `crash` 仅 schema 定义、未在该轨迹出现。
 - **我的锚点**：从零写 harness §⑥ JSONL（最小 trace 存储）、FinHot backfill 日志（手工版可观测，#11/#35）、labeler 原因分类、pi-agents-team 多 agent trace 边界（日常在用）
 - **接回**：评测工程化(采集→决策)、沙箱与凭据(审计=同一份数据)、API 与多模型路由(成本归因→路由)、数据飞轮(飞轮的输入端)

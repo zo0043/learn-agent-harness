@@ -17,9 +17,9 @@ kind: "interview-question"
 
 初级把工具当附属品（写个函数、随手写段描述）；资深把工具设计当一等公民。因为描述就是模型读的"API 文档"（Anthropic 称之为 ACI，agent-computer interface），粒度或边界出错会表现为模型选错工具、传错参数、反复试错，而且这类失败发生在轨迹深处，事后极难归因。Anthropic 的官方口径：做 SWE-bench 时，优化工具花的时间比优化整体提示词还多——这条第一手数据说明了这个分水岭的分量。
 
-## 行业一手源
+## 行业来源（URL 由引用推断，待核）
 
-Anthropic《Writing Tools for Agents》：工具定义即契约——名称与文档要精确、功能不重叠、返回要 token 高效。（注：此 URL 由引用推断，要点已对照已核验的上下文工程文章与《Building Effective Agents》。）
+Anthropic《Writing Tools for Agents》：此 URL 由引用推断（要点已对照已核验的上下文工程文章与《Building Effective Agents》）。工具定义即契约——名称与文档要精确、功能不重叠、返回要 token 高效。
 
 ## 本地映射
 

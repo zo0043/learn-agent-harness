@@ -12,7 +12,7 @@
 
 - **课程依赖（prereqs）**：`sandbox`（沙箱与凭据）——上完它，policy 门 / egress / 事故重放这三样直觉直接复用，本课的「四层防御」就是它们的 MCP 投影。
 - **技能门槛**：会「客户端-服务器 + JSON-RPC」的粗概念即可（一句话：client 发一段 JSON 请求、server 回一段 JSON 结果）。
-- **不需要提前会**：写过 MCP server、OAuth 2.1 细节、stdio 帧格式、JSON-RPC 批处理——一律不用。MCP 四原语与四层防御，随 `mcp-demo`（`npm run demo`）边跑边建。
+- **不需要提前会**：写过 MCP server、OAuth 2.1 细节、stdio 帧格式、JSON-RPC 批处理——一律不用。MCP 的 Client/Server 特性与四层防御，随 `mcp-demo`（`npm run demo`）边跑边建。
 
 ---
 
@@ -78,33 +78,39 @@ flowchart TB
   H --> C2["MCP Client B · 1:1"]
   C1 <-->|stdio / streamable HTTP| S1["MCP Server A"]
   C2 <-->|streamable HTTP| S2["MCP Server B"]
-  S1 --> P1["四原语 · tools / resources / prompts / sampling"]
-  S2 --> P2["四原语 · tools / resources / prompts / sampling"]
-  MOD -.->|"sampling · server 反向请求 host 调模型"| S1
+  S1 --> P1["Server Features（3）· tools / resources / prompts（+ Discovery）"]
+  S2 --> P2["Server Features（3）· tools / resources / prompts（+ Discovery）"]
+  MOD -.->|"Client Features · sampling / roots / elicitation（server 反向问 client）"| S1
   style GATE fill:#ffe0e0
 ```
 
-**原语（server 能提供的四类）**：
+**原语（按 2026-07-28 规范的角色归属分两类）**：
 
-| 原语 | 方向 | 对应 从零写 harness/Harness 架构概念 |
-|---|---|---|
-| **tools** | 模型可调用的函数（name+JSON Schema+执行） | 从零写 harness §③ ToolSpec 的标准化 |
-| **resources** | 只读数据（文件/DB 行/文档，URI 寻址） | 把"读世界"从工具调用降为数据引用 |
-| **prompts** | 模板（用户可选的工作流模板） | 系统提示词工程的复用 |
-| **sampling** | **server 反向请求 host 调模型** | 权限反转点（见 S5 安全） |
+| 归属 | 原语 | 方向 | 状态 | 对应 从零写 harness/Harness 架构概念 |
+|---|---|---|---|---|
+| **Server Features** | **tools** | 模型可调用的函数（name+JSON Schema+执行） | 现行 | 从零写 harness §③ ToolSpec 的标准化 |
+| **Server Features** | **resources** | 只读数据（文件/DB 行/文档，URI 寻址） | 现行 | 把"读世界"从工具调用降为数据引用 |
+| **Server Features** | **prompts** | 模板（用户可选的工作流模板） | 现行 | 系统提示词工程的复用 |
+| **Server Features** | **discovery**（`server/discover`） | server 一次性声明自己支持的协议版本/能力/身份 | 现行（2026-07-28 新增，**MUST** 实现） | 能力协商取代旧的 `initialize` 握手 |
+| **Client Features** | **sampling** | **server 反向请 client 调模型**（装进 `InputRequiredResult.inputRequests` 由 client 重试回填） | ⚠️ **Deprecated（2026-07-28，SEP-2577）** | 权限反转点（见 S5 安全） |
+| **Client Features** | **roots** | **client 向 server 暴露路径根**（server 可请求 `roots/list`；规范明示它**不是**访问控制机制） | ⚠️ **Deprecated（2026-07-28，SEP-2577）** | 与 host 端 policy 互补的**弱声明** |
+| **Client Features** | **elicitation** | server 请 client 向用户补问输入 | 现行 | 现场提问（S5 之外） |
 
-**怎么读这张表**：前两行是"动词 / 名词"的分工——tools 让模型**做**事，resources 让模型**读**事；resources 存在的意义是不必把每个只读访问都包装成一次工具调用。prompts 是给用户的工作流捷径（注意：server 能塞进"用户可选"的模板，本身就构成一条内容通道）。sampling 方向相反，是唯一"server 发起、host 执行"的原语，因此在信任模型里最特殊（S5 详讲）。四类原语的共同点：**全部内容都会进模型上下文或消耗 host 资源**，所以全部是安全边界上的输入。
+> **归属与状态的一手源（访问日 2026-10-19）**：官方规范导航把 **Roots / Sampling / Elicitation 列在 Client Features**，Server Features 只有 Overview(Discovery) / Prompts / Resources / Tools（https://modelcontextprotocol.io/specification/2026-07-28 ；deprecated 登记表 https://modelcontextprotocol.io/specification/2026-07-28/deprecated ：「Sampling … | SEP-2577 | Deprecated in `2026-07-28` | Integrate directly with LLM provider APIs」「Roots … | SEP-2577 | `2026-07-28` | Pass directories or files via tool parameters, resource URIs, or server configuration」）。
+> **旧写法警示**：把 sampling/roots 说成"server 能提供的原语"是**错的**——它们是 client 侧能力，server 只能**请求** client 提供；`MCP 四原语`这种说法在 2026-07-28 起也不再成立（Server 三原语 + Client 三特性，其中两个已 Deprecated）。
 
-扩展机制：roots（server 声明它能碰的路径根——**server 端的 scope 声明**，与 host 端的 policy 互补）、elicitation（server 向用户要补充输入）。
+**怎么读这张表**：前两行是"动词 / 名词"的分工——tools 让模型**做**事，resources 让模型**读**事；resources 存在的意义是不必把每个只读访问都包装成一次工具调用。prompts 是给用户的工作流捷径（注意：server 能塞进"用户可选"的模板，本身就构成一条内容通道）。discovery 是 2026-07-28 用**每请求 `_meta` 协商**取代 `initialize` 握手的落点（S2.1）。sampling/roots 属于 **Client Features**：方向是"server 反向请求 client"，因此决策权重容易从 host 侧滑向 server 侧（S5 详讲）——但 2026-07-28 起它们已 **Deprecated**，新实现不应再采用。七项的**共同点**：**全部内容都会进模型上下文或消耗 host 资源**，所以全部是安全边界上的输入。
 
-> 记法：roots 是 server 的"自我声明"，elicitation 是 server 向用户的"现场提问"。二者都**不是强制机制**——真正的边界必须落在 host 侧（见 S8.2）。
+扩展机制：roots（**client 向 server 暴露**的路径根——server 可请求 `roots/list` 拿到它；规范明示这是"informational guidance rather than an access-control mechanism"，**不是访问控制**）、elicitation（server 向用户要补充输入）。
+
+> 记法：roots 是 **client 的弱声明**（host 说"我大概只会碰这些"，server 也应尊重），elicitation 是 server 向用户的"现场提问"。二者都**不是强制机制**——真正的边界必须落在 host 侧（见 S8.2）。
 
 **spec 版本线（2026-10 核实；2026-10-12 复核：官方 versioning 页确认 "The current protocol version is 2026-07-28"，面试要能报版本节奏）**
 - 2024-11-05（初版）：JSON-RPC 2.0 + stdio / HTTP+SSE，含 tools / resources / prompts / sampling / roots。
 - **2025-03-26**：引入 **OAuth 2.1 授权框架**，并以 **Streamable HTTP 取代 HTTP+SSE**（HTTP+SSE 自此废弃）；另加 JSON-RPC 批处理与工具 annotations。
 - **2025-06-18**：OAuth 资源服务器分类 + RFC 8707 资源指示器；工具结构化输出；加入 **elicitation**；移除 JSON-RPC 批处理。
 - **2025-11-25**：OIDC 发现（授权服务器发现）、增量 scope 同意、ElicitResult/EnumSchema 与 URL 模式 elicitation、sampling 支持 tool calling、实验性 tasks。
-- **2026-07-28**：**去状态化**——移除 initialize 握手与 Mcp-Session-Id，新增 **server/discover**、**subscriptions/listen 订阅**、**MRTR（多轮请求）**。
+- **2026-07-28**：**去状态化**——移除 initialize 握手与 Mcp-Session-Id，新增 **server/discover**、**subscriptions/listen 订阅**、**MRTR（Multi Round-Trip Requests 多轮请求）**；**并把 Roots / Sampling / Logging 标为 Deprecated（SEP-2577，最早 2027-07-28 之后才可移除）**。MRTR 的具体形态：server 不再主动发 `sampling/createMessage`、`roots/list`、`elicitation/create`，而是返回 `resultType:"input_required"` 的 **`InputRequiredResult`**，把请求放进 `inputRequests`，**client 带 `inputResponses` 重试原请求**完成回填；所有结果新增必填 `resultType` 字段（`"complete"` / `"input_required"`）。
 
 **传输**：stdio（本地进程，最常见）/ **Streamable HTTP**（远程标准传输；自 **2025-03-26** 起取代旧 HTTP+SSE，后者已列 Deprecated）。（规范允许自定义传输，Streamable HTTP 是标准之一。）
 
@@ -125,8 +131,8 @@ flowchart TB
 ### S2.1 2026 更新 [2026现行]
 
 **治理**：2025.12 Anthropic 将 MCP 捐给 **Linux 基金会旗下 Agentic AI Foundation（AAIF）**——完成"事实标准→基金会治理"跃迁。
-**最新 spec：2026-07-28**（第 2025-11-25 之后的版本线）：核心是**去状态化**（移除 initialize/Mcp-Session-Id）、新增 **server/discover**、**subscriptions/listen 订阅**与 **MRTR 多轮请求**；授权服务器发现（OIDC Discovery）在 2025-11-25 已加入。协议仍在快速演进。https://modelcontextprotocol.io/specification/versioning
-**协议三分**（MCP 定位收敛，不再包打天下）：**MCP = agent↔工具、A2A = agent↔agent**（A2A 同入 AAIF，**TSC 共 8 席**：Google、Microsoft、Cisco、Amazon Web Services、Salesforce、ServiceNow、SAP、IBM（GOVERNANCE.md：「The Committee has eight seats」））、**AG-UI = agent↔前端**。
+**最新 spec：2026-07-28**（第 2025-11-25 之后的版本线）：核心是**去状态化**（移除 initialize/Mcp-Session-Id）、新增 **server/discover**、**subscriptions/listen 订阅**与 **MRTR 多轮请求**；授权服务器发现（OIDC Discovery）在 2025-11-25 已加入。**同一版还把 Roots / Sampling / Logging 标为 Deprecated（SEP-2577），并把原先的 server 主动请求（`sampling/createMessage`、`roots/list`、`elicitation/create`）改为 MRTR：server 返回 `InputRequiredResult`，client 带 `inputResponses` 重试**。协议仍在快速演进。https://modelcontextprotocol.io/specification/versioning
+**协议三分**（MCP 定位收敛，不再包打天下）：**MCP = agent↔工具、A2A = agent↔agent**（A2A 同入 AAIF，**TSC 共 8 席**：Google、Microsoft、Cisco、Amazon Web Services、Salesforce、ServiceNow、SAP、IBM Research（GOVERNANCE.md：「The Committee has eight seats」））、**AG-UI = agent↔前端**。
 **标准成熟度曲线**（面试要能报）：2024.11 发布（Anthropic，"AI 的 USB-C"）→ 2025.3 OpenAI、Google 先后采纳（de facto 标准确立）→ 2025.12 捐给 AAIF（基金会治理）→ 2026.7 最新 spec 修订。
 **MCP Registry**：官方 registry 仍在 **preview**（未 GA），Anthropic/GitHub/Microsoft/PulseMCP 背书；机制=**DNS 命名空间 + server.json + REST 发现**——生态规范化真实但早期。https://modelcontextprotocol.io/registry
 **安全批评（NSA）**："扩散速度超出安全模型"——代表案例 **CVE-2025-6514（mcp-remote 的 OS 命令注入致 RCE，CVSS 3.1 = 9.6，NVD）**；spec 已补安全要求应对 → "变味"信号是**治理滞后，而非路线失败**。https://modelcontextprotocol.io/specification/versioning
@@ -538,23 +544,25 @@ const raw = await tool.execute(call.arguments);            // 全过 → 才真�
 ## 练习题库（后续提问用）
 
 > 前 10 题对应 S1-S6；11-14 是新增，覆盖 S7 实战走查、`mcp-demo` 代码核对与 S8 陷阱区。提问时按"考察"列回查对应小节。
+> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
+> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
 
-| # | 题目 | 考察 |
-|---|---|---|
-| 1 | "我们接了 MCP 就统一了工具管理"——列出 MCP 不管的四件事 | S2 |
-| 2 | 画出 tool poisoning 的完整攻击链（从安装到 payload 外发），标出三个可拦截点 | S4 |
-| 3 | 公司要求"已批准的 MCP server 自动更新"。你反对，给出 rug pull 的具体时序 | S4 |
-| 4 | sampling 原语为什么需要 host 侧预算？恶意 server 能拿到什么？ | S5 |
-| 5 | MCP server 的 tools 和你自研工具注册表（从零写 harness §③）合并后，policy 怎么写才不出现"标准工具免检"漏洞？ | S2+S4 |
-| 6 | 远程 MCP server 要用户的 GitHub token。存储/授权/审计三点怎么设计？ | S3（接 沙箱与凭据 §S4） |
-| 7 | 设计一个 MCP server 准入流水线（从提交到上架），五道关卡 | S4 Guardrails |
-| 8 | roots 原语是"声明"不是"强制"。强制在哪一层实现？ | S2（scope 声明 vs host 强制） |
-| 9 | OWASP LLM Top 10 从 2025 版升到 2026 版，Excessive Agency 从 #6 升到 #3。解释变动背后的行业变化；被"取代"的 System Prompt Leakage→Hidden Context Exposure 为什么算扩大？ | S4.2 |
-| 10 | 为 coding agent 设计执行层防御：Intent Gate、沙箱、egress、工具预算四者的检查顺序与短路逻辑？哪层能挡 ASI05、哪层挡不住？ | S4.4（沙箱与凭据联动） |
-| 11 | 实战走查：`mcp-demo` 防御组里 L2（审批表）判 deny、L3（egress 白名单）也判拦截。为什么说 L3 是"独立 backstop"？举一个 L2 被磨穿而 L3 仍拦住的场景。 | S7 + S4.4 |
-| 12 | 拿掉 L1 单独跑，攻击仍然得逞——这是否说明 L1 无用？给出 L1 真实价值的两个场景（提示：合规模型 / 审计取证）。 | S7 + S4.4 |
-| 13 | `mcp-demo` 的投毒藏在 `web_search` 的**返回**里，而不是工具 `description` 里。换成 description 投毒，S4.1 的三个拦截点哪个先触发？要改 demo 的哪个文件、加哪一层？ | S4.1 + S6 |
-| 14 | 面试官说"我们用了官方 MCP registry 白名单，所以供应链是安全的"。用 rug pull 时序 + 一个 registry 覆盖不到的通道反驳。 | S3 + S4.1 + S8.3 |
+| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
+|---|---|---|---|
+| 1 | "我们接了 MCP 就统一了工具管理"——列出 MCP 不管的四件事 | S2 | ≥4 点：①权限与审批仍在 host，MCP 不管；②沙箱/执行边界不管；③审计与漂移检测不管；④编排与策略统一不管，接口统一≠策略统一（S2） |
+| 2 | 画出 tool poisoning 的完整攻击链（从安装到 payload 外发），标出三个可拦截点 | S4 | ≥3 点：①链=安装→描述埋指令→模型读到→发起高危调用→外发；②拦截点=准入选源、加载前检测+最小工具集、执行前 policy+egress；③点 3 是唯一不依赖模型听话的确定性层（S4.1） |
+| 3 | 公司要求"已批准的 MCP server 自动更新"。你反对，给出 rug pull 的具体时序 | S4 | ≥3 点：①v1 良性过审记指纹，v2 更新后语义变（查天气→读 env）；②批准的是旧指纹，更新不重审就带着旧信任跑；③对策：版本 pin + 指纹变更重审（S4.1） |
+| 4 | sampling 原语为什么需要 host 侧预算？恶意 server 能拿到什么？ | S5 | ≥3 点：①方向反转：server 决定花不花、花多少模型额度，无上限=成本 DoS；②恶意 server 可把任意提示词塞进你的模型额度；③若实现误带会话上下文，还能越权读上下文（S5） |
+| 5 | MCP server 的 tools 和你自研工具注册表（从零写 harness §③）合并后，policy 怎么写才不出现"标准工具免检"漏洞？ | S2+S4 | ≥3 点：①并入后一律过 host 三道门（校验/策略/沙箱），不因来自 MCP 而免检；②工具身份用全限定名，防同名覆盖/typosquatting；③policy 按风险分级 + 默认 deny（S2+S4） |
+| 6 | 远程 MCP server 要用户的 GitHub token。存储/授权/审计三点怎么设计？ | S3（接 沙箱与凭据 §S4） | ≥3 点：①存储：凭据留 vault/宿主侧，不进 agent env 或挂载；②授权：OAuth 2.1 + 最小 scope + 短过期，代理代签；③审计：每次使用留痕，异常外发=最高级告警（S3） |
+| 7 | 设计一个 MCP server 准入流水线（从提交到上架），五道关卡 | S4 Guardrails | ≥5 点：①来源与发布者核验；②描述/权限声明审查+注入扫描；③沙箱试跑看系统调用与出网；④记工具指纹（名称+schema+描述 hash）；⑤上架后漂移检测+更新重审（S4.1） |
+| 8 | roots 原语是"声明"不是"强制"。强制在哪一层实现？ | S2（scope 声明 vs host 强制） | ≥3 点：①roots 是 **client 向 server 暴露**的弱声明，规范明示"informational guidance rather than an access-control mechanism"，server 可无视（2026-07-28 起已 Deprecated，SEP-2577）；②强制在 host 侧：canonicalize + 边界 + 沙箱；③弱声明不能当强边界，host 必须独立校验（S2） |
+| 9 | OWASP LLM Top 10 从 2025 版升到 2026 版，Excessive Agency 从 #6 升到 #3。解释变动背后的行业变化；被"取代"的 System Prompt Leakage→Hidden Context Exposure 为什么算扩大？ | S4.2 | ≥3 点：①Excessive Agency #6→#3：agent 化放大自主权风险；②改名=暴露面从 system prompt 扩到隐藏上下文；③报 2026-08-04 当前版，混版本号是硬伤（S4.2） |
+| 10 | 为 coding agent 设计执行层防御：Intent Gate、沙箱、egress、工具预算四者的检查顺序与短路逻辑？哪层能挡 ASI05、哪层挡不住？ | S4.4（沙箱与凭据联动） | ≥3 点：①序：校验→Intent Gate→沙箱+egress→预算，硬层不过即短路；②沙箱+egress 是 ASI05（RCE）的第一道缓解；③Intent Gate 挡不住 RCE，沙箱挡不住被批准的外发（S4.4） |
+| 11 | 实战走查：`mcp-demo` 防御组里 L2（审批表）判 deny、L3（egress 白名单）也判拦截。为什么说 L3 是"独立 backstop"？举一个 L2 被磨穿而 L3 仍拦住的场景。 | S7 + S4.4 | ≥3 点：①L3 不看审批结果，独立用域白名单复算这次外发；②场景：社工把 attacker 域加进审批白名单→L2 放行，L3 仍拦；③消融显示仅 L2 或仅 L3 都能拦（S7） |
+| 12 | 拿掉 L1 单独跑，攻击仍然得逞——这是否说明 L1 无用？给出 L1 真实价值的两个场景（提示：合规模型 / 审计取证）。 | S7 + S4.4 | ≥3 点：①L1 是软防线，只标记不拦截（passed=true），拿掉它当然照样泄；②价值一：合规模型看到围栏就不跟进，攻击在模型侧断链；③价值二：hits/quarantined 进审计（S7） |
+| 13 | `mcp-demo` 的投毒藏在 `web_search` 的**返回**里，而不是工具 `description` 里。换成 description 投毒，S4.1 的三个拦截点哪个先触发？要改 demo 的哪个文件、加哪一层？ | S4.1 + S6 | ≥3 点：①描述投毒在加载前被点 2 拦（host 注入检测+最小集），早于点 3；②改 server.ts：POISON_LINE 移进 description；③demo 未实现描述投毒（S4.1+S6） |
+| 14 | 面试官说"我们用了官方 MCP registry 白名单，所以供应链是安全的"。用 rug pull 时序 + 一个 registry 覆盖不到的通道反驳。 | S3 + S4.1 + S8.3 | ≥3 点：①rug pull：白名单批的是 v1 指纹，v2 语义可变，审核只管上架那刻；②覆盖不到：本地 stdio、内网私服、手动 git clone、npm 直装；③对策：版本 pin+指纹变更重审（S8.3） |
 
 ## 来源与锚点（2026-10 核实回填）
 

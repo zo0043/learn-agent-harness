@@ -97,7 +97,7 @@ flowchart TD
 | **Claude Agent SDK** | Claude Code 的编程化：把完整 harness 当库用（subagents/hooks/MCP/权限模式/skills/sessions） | **2025-09 由 Claude Code SDK 改名而来**（Python+TypeScript，Apache 2.0）；"Claude Code 的机制=官方参考实现"，SDK=机制的可编程面 |
 | **OpenAI Agents SDK** | **Swarm 的官方后继**（官方公告口径 2025 GA，Apache 2.0——**该时点本轮未能取得一手源，标"无法确认"**；registry 实测 2026-10-12 仍为 0.x 线：latest 0.20.0，即 registry 版本号未背书 1.0，见 industry-2026.md 核实台账）：agents+handoffs（交接）+guardrails（输入/输出校验）+sessions（内置记忆）+tracing | handoffs=多 agent 的"函数调用"形态，与 orchestrator-worker 对比着讲（系统设计 §S3）；guardrails=MCP 与供应链安全 Guardrails 的框架版 |
 | **LangGraph** | 1.x 系（2025-10 出 1.0 alpha，随后稳定 1.0.x（历史）；~~当前 1.0.1~~ ~~1.4.21~~ **截至 2026-10-13 全新缓存复核：npm registry latest = 1.5.0**（time.modified 2026-10-12T23:19:38.982Z；历史：2026-10-12 独立新缓存 `npm view` 复核 = 1.4.21（time.modified 2026-10-07），命令见 industry-2026.md 核实台账）；唯一 breaking 面=create_react_agent 废弃、迁入 langchain.agents.create_agent）：显式图：节点（函数）+边（条件）+状态（typed schema）+checkpoint 持久化 | 图=把 系统设计 §S3 的 workflow 模式显式化；checkpoint=durable execution 的框架版；"为什么不用图"=自由 agent 任务分解不可预知，画不出图 |
-| **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF，A2A 同入（A2A **TSC 共 8 席**：Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM；AAIF 自身技术委员会另为 8 家） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
+| **AAIF**（Agentic AI Foundation，Linux 基金会旗下）[2026现行] | 中立基金会治理主场：2025.12 Anthropic 将 MCP 捐给 AAIF；**A2A 入 AAIF 是另一件事、时点为 2026-08-27**（a2a-protocol.org 博文，非同期）——两者**不可合并成一句话**（评审 `FAC-F7`）。A2A **TSC 共 8 席**：Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、**IBM Research**（AAIF 自身技术委员会另为 8 家） | "MCP 完成事实标准→基金会治理跃迁——应用端唯一有真实规模的互操作标准"；https://modelcontextprotocol.io/specification/versioning + https://a2a-protocol.org/latest/ |
 | **MCP Registry**（官方 registry）[2026现行] | 官方 registry 仍在 **preview**（未 GA）：DNS 命名空间 + server.json + REST 发现；Anthropic/GitHub/Microsoft/PulseMCP 背书 | 生态规范化真实但早期；registry≠安全保证（MCP 与供应链安全 §S3/S4 同一原则）；https://modelcontextprotocol.io/registry |
 | **computer use / GUI agent** [2026现行] | 升为一等（高重要度候选域信号）：Claude Code 扩到 desktop/mobile/cloud/computer use；OpenAI 设 Computer Use/Context Research 专岗 | 面试谈资："GUI agent 不再是边角方向"；追问见 系统设计 §S7（权限与观察）；https://code.claude.com/docs/en/agent-sdk/overview（OpenAI 专岗据本地 jd-research/ashby_openai.json） |
 | **OpenAI Codex** [2026现行] | 由 CLI 转向 **agent 基础设施**：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；**AgentKit=低代码入口** | "OpenAI 在把 Codex 做成平台而不是产品"；https://developers.openai.com/codex |
@@ -396,24 +396,28 @@ ok(/拒绝|被拒|不许|禁止|不能|无法|政策|策略|denied/i.test(r.fina
 
 ## 练习题库（后续提问用）
 
+> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
+> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
+> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
+
 > 1-8 为原有基础题；9-14 为新增，覆盖 S3 抽象泄漏、S5 迁移路径、S7 实战走查与 S8 陷阱区。提问时按"考察"列回查对应小节。
 
-| # | 题目 | 考察 |
-|---|---|---|
-| 1 | "LangGraph 是不是比自研 loop 好？"——给出让它成立的两个条件+两个不成立的条件 | S2 |
-| 2 | pi 的 JSONL 会话 vs LangGraph checkpoint：恢复语义差在哪？ | S2（durable execution联动） |
-| 3 | 一个需求："客服 agent，10 个意图分支，分支内 2-3 步固定操作"。选哪族框架？为什么不是 harness 级？ | S1/S2 |
-| 4 | 框架默认把工具结果直接进上下文。你的安全模型要求"工具结果隔离渲染"。改框架还是弃框架？判据？ | S2 |
-| 5 | 用 pi 跑过的 pi-agents-team 编排里，worker 之间的 trace 怎么关联？框架给了什么、缺什么？ | S6（可观测联动） |
-| 6 | Claude Agent SDK 和自研 harness 的边界在哪——什么功能你宁可自研也不等 SDK？ | S2 |
-| 7 | 框架停更了，你在上面有 3 年生产系统。迁移决策树？ | S1 锁定 |
-| 8 | 为什么"编排库"（LangGraph 类）和"harness 级"（pi 类）的恢复默认值会不同？ | S1/S2 |
-| 9 | `framework-demo` 的权限能力为什么必须把 Bash 排除在 `allowedTools` 之外才演示得成？这说明框架的哪个抽象漏了？ | S3 方向一 |
-| 10 | 面试官说"我给所有工具都放了 allowedTools，同时挂了 canUseTool，所以审批很严"。用 S3 方向一拆穿它，并给出正确的权限配置原则 | S3 + S8.2 |
-| 11 | 一个用 SDK 跑了半年的系统要迁到另一家。列出"能带走/要重写/沉没成本"三类，并说明为什么评测资产最关键 | S5 |
-| 12 | 实战走查：给定"30 分钟/人工审批/子任务并行"的 coding agent，用 S4 决策树说出前两步判断，并给三条你会在 framework-demo 上跑的断言 | S4 + S7 |
-| 13 | 框架把子代理对话默认藏在事件流外（要 forwardSubagentText 才看得到）。这对可观测闭环意味着什么？选型第几层要问它？ | S3 方向三 + S4.1 |
-| 14 | 面试官说"这个框架 star 最多、支持多智能体，所以选它"。用 S8.2 + S8.3 反驳，并给出一条你会先看的抽象边界 | S8.2/S8.3 |
+| # | 题目 | 考察 | 合格线（讲出 ≥N 点即通过） |
+|---|---|---|---|
+| 1 | "LangGraph 是不是比自研 loop 好？"——给出让它成立的两个条件+两个不成立的条件 | S2 | ≥2 点：①成立：任务能用图/状态机表达、需要显式 checkpoint 与 HITL；②不成立：控制流不可预知、循环本身是产品差异（S2/S4）。 |
+| 2 | pi 的 JSONL 会话 vs LangGraph checkpoint：恢复语义差在哪？ | S2（durable execution联动） | ≥2 点：①pi=事件日志条目树，按日志重建上下文；②LangGraph=图状态序列化，从 checkpoint 恢复；语义与可迁移性不同（S2）。 |
+| 3 | 一个需求："客服 agent，10 个意图分支，分支内 2-3 步固定操作"。选哪族框架？为什么不是 harness 级？ | S1/S2 | ≥3 点：①步骤可预定义→选编排库/图引擎；②loop 自由度用不到，不值得买；③框架默认 allow 与你的安全模型打架（S1/S2）。 |
+| 4 | 框架默认把工具结果直接进上下文。你的安全模型要求"工具结果隔离渲染"。改框架还是弃框架？判据？ | S2 | ≥2 点：①判据=抽象边界能否覆盖你的安全模型；②能用自己的执行层拦就走钩子，否则退回自研 loop（S2）。 |
+| 5 | 用 pi 跑过的 pi-agents-team 编排里，worker 之间的 trace 怎么关联？框架给了什么、缺什么？ | S6（可观测联动） | ≥2 点：①给：事件流与 RPC 会话心跳；②缺：子代理文本默认不转发，OTel 出口要自建（S3）。 |
+| 6 | Claude Agent SDK 和自研 harness 的边界在哪——什么功能你宁可自研也不等 SDK？ | S2 | ≥2 点：①自研：权限判据与执行层拦截、关键状态事件日志、评测与失败分类；②交框架：loop、流式解析、会话持久化、重试（S2/S5）。 |
+| 7 | 框架停更了，你在上面有 3 年生产系统。迁移决策树？ | S1 锁定 | ≥3 点：①先冻结 golden set 与轨迹断言，重跑比指标；②pin 版本+适配层隔离；③关键状态自留事件日志，避免格式锁死（S1/S5）。 |
+| 8 | 为什么"编排库"（LangGraph 类）和"harness 级"（pi 类）的恢复默认值会不同？ | S1/S2 | ≥2 点：①编排库假设控制流已建模好，checkpoint=图状态；②harness 级要覆盖不可预知 loop，按事件日志重建；默认值来自各自抽象（S1/S2）。 |
+| 9 | `framework-demo` 的权限能力为什么必须把 Bash 排除在 `allowedTools` 之外才演示得成？这说明框架的哪个抽象漏了？ | S3 方向一 | ≥2 点：①allowedTools 裸名会抢在 canUseTool 前 auto-approve 整个工具；②所以待审批的 Bash 必须留在名单外才走回调（S3 方向一）。 |
+| 10 | 面试官说"我给所有工具都放了 allowedTools，同时挂了 canUseTool，所以审批很严"。用 S3 方向一拆穿它，并给出正确的权限配置原则 | S3 + S8.2 | ≥2 点：①allowedTools 命中即 auto-approve，回调被静默跳过，rm 与 df 一起放行；②原则：白名单只放该放行的（S3）。 |
+| 11 | 一个用 SDK 跑了半年的系统要迁到另一家。列出"能带走/要重写/沉没成本"三类，并说明为什么评测资产最关键 | S5 | ≥3 点：①带走：接口设计与权限判据、评测 golden set；②重写：权限门与可观测实现；③沉没成本：自研 loop 控制流（S5）。 |
+| 12 | 实战走查：给定"30 分钟/人工审批/子任务并行"的 coding agent，用 S4 决策树说出前两步判断，并给三条你会在 framework-demo 上跑的断言 | S4 + S7 | ≥3 点：①先问"workflow 能表达吗"→不能；②再问"loop 是产品差异吗"+团队能否维护→走 harness 级；③断言：真调工具、子代理带 parent_id、deny 真发生（S4/S7）。 |
+| 13 | 框架把子代理对话默认藏在事件流外（要 forwardSubagentText 才看得到）。这对可观测闭环意味着什么？选型第几层要问它？ | S3 方向三 + S4.1 | ≥2 点：①默认不给子代理文本=可观测出口不全，失败归因定位不到；②在选型第 4 层单问：OTel 轨迹导出在哪层（S3）。 |
+| 14 | 面试官说"这个框架 star 最多、支持多智能体，所以选它"。用 S8.2 + S8.3 反驳，并给出一条你会先看的抽象边界 | S8.2/S8.3 | ≥2 点：①star 只是生态信号，不是抽象边界；②多智能体买的是上下文隔离+并行，不是"更聪明"（S8.2/S8.3）。 |
 
 ## 来源与锚点（2026-10 核实回填）
 

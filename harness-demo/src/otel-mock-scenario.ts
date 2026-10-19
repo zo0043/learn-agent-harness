@@ -14,12 +14,20 @@
 //
 // 冻结脚本的来源（重要：数字不是"挑"出来的，是从仓内证据派生的）
 //   8 个 tool_call 的**名字与顺序**逐条抄自仓内唯一的活端点端到端轨迹
+//   （`trajectories/demo.jsonl`，活端点本机产物，**未入库**；入库样例是 `demo.example.jsonl`）
 //   `trajectories/demo.jsonl`（22 行：1 init / 6 model_response / 6 tool_intent /
 //   8 tool_exec / 1 final——其中 2 次被拒调用在活端点日志里没有对应 tool_intent）。
-//   两处**如实适配**（不是照抄，改在哪也写清楚）：
+//   三处**如实适配**（不是照抄，改在哪也写清楚）：
 //     a) 读写路径改为 out/otel-mock-run.md（活轨迹写的是 out/summary.md，避免 mock 覆盖活跑产物）；
 //     b) write_file 在 demo 默认策略下自动批准（活轨迹里该步被操作者拒批 → denied），
 //        所以 mock 实跑状态 = ok×7 / denied×1（run_shell），活轨迹 = ok×6 / denied×2。
+//     c) **场景自洽性（审计 TECH-A-F1 修复）**：第 2 轮 `list_dir out`、第 3 轮 `read_file out/otel.md`
+//        都需要 `workspace/out/` 已在场。而该目录被 `.gitignore` 的 `harness-demo/workspace/out/`
+//        排除、只有跑过 demo 才存在——干净树上这两次调用必然 error，
+//        于是 ok:7 / error:0 的契约在干净树上不成立（实测 ok=5 / error=2）。
+//        修法：场景在 runAgent **之前**自己物化 `workspace/out/otel.md`（见下文 ensureOtelFixture），
+//        让"读现状"有确定输入，不再依赖本机是否跑过活端点。
+//        ⇒ 制造这个 fixture **不是**新增工具调用，故 8 次 tool_call 与 15 spans 的契约一位不动。
 //   即 package.json `demo:otel` 同款任务形状；模型侧换成 mock，harness 侧一行不改。
 //   ⇒ 期望 span 数 = 1 invoke_agent + 6 chat + 8 execute_tool = **15**，1 个 trace。
 //
@@ -30,6 +38,7 @@
 //   3. 若未来改了这个冻结脚本，otel-assert.ts 的 EXPECTED 常量会**失败**，必须显式改契约。
 // ============================================================
 import http from "node:http";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
@@ -179,6 +188,34 @@ export interface RunResult {
 }
 
 /**
+ * 场景自洽性：物化 `workspace/out/otel.md`（见文件头适配说明 (c)）。
+ * 为什么必须由场景自己写：干净树上 `workspace/out/` 整个目录都不存在（.gitignore 排除、运行时才生成），
+ * 第 2 轮 `list_dir out` 与第 3 轮 `read_file out/otel.md` 会双双 error，使 ok:7 / error:0 契约失效。
+ * 这里只做文件系统准备（不新增任何 tool_call），span 契约一位不变。
+ */
+export const OTEL_FIXTURE_PATH = resolve(__dirname, "..", "workspace", "out", "otel.md");
+
+const OTEL_FIXTURE_BODY = [
+  "# out/otel.md（mock 场景 fixture）",
+  "",
+  "本文件不是手写文档，而是 `src/otel-mock-scenario.ts` 为了让离线场景自洽而物化的输入：",
+  "冻结脚本第 3 轮要 `read_file out/otel.md`，但干净树上 `workspace/out/` 并不存在",
+  "（被 .gitignore 排除，只有跑过 demo 才生成），那次 read 会变成 error，",
+  "ok:7 / error:0 的契约随即不成立（审计 TECH-A-F1，实测 ok=5 / error=2）。",
+  "",
+  "故场景先在 runAgent 之前写这份 fixture，再让模型读它——全程不依赖本机历史产物。",
+  "真实埋点结论见同目录 `otel-spans.md`（`npm run demo:otel:mock` 生成，勿手改）。",
+  "",
+  "当前阶段：mock（离线）。",
+].join("\n") + "\n";
+
+/** 建目录 + 写 fixture（幂等：重复运行覆盖为同一内容，输出逐字节确定）。 */
+export function ensureOtelFixture(): void {
+  mkdirSync(resolve(OTEL_FIXTURE_PATH, ".."), { recursive: true });
+  writeFileSync(OTEL_FIXTURE_PATH, OTEL_FIXTURE_BODY, "utf8");
+}
+
+/**
  * 跑一次离线场景并返回 span。
  * 关键：**先**起 mock 端点、**后**用 dynamic import 加载 llm.ts/agent.ts——
  * 因为 src/llm.ts:22-24 在模块求值时就固化 BASE/KEY（ES import 提升问题）。
@@ -203,6 +240,9 @@ export async function runMockOtelScenario(): Promise<RunResult> {
   const sessionDir = resolve(__dirname, "..", "trajectories");
   const session = new Session(sessionDir, "otel-mock");
   if (session.exists()) session.remove(); // 每次全新，保证确定性
+
+  // 场景自洽性（适配说明 (c)）：先把 out/otel.md 物化，第 2/3 轮的 list_dir/read_file 才有确定输入。
+  ensureOtelFixture();
 
   const { final } = await runAgent({
     system: "你是一个文件处理 agent（本次由 mock 模型驱动，离线）。",
@@ -327,7 +367,7 @@ export function renderSnapshot(sh: SpanShape, meta: { port: number; requests: nu
 - 生成时间（UTC）：\`${now}\`
 - 生成主机：\`${meta.node}\`
 - 模型：**本地 mock 端点**（\`${MOCK_MODEL}\`，127.0.0.1:${meta.port}）——**不联网、不需要任何 LLM key**
-- 场景：\`src/otel-mock-scenario.ts\` 的冻结脚本（8 个 tool_call 的名字与顺序抄自 \`trajectories/demo.jsonl\`；路径与 write_file 审批策略两处如实适配，见该文件头部注释）
+- 场景：\`src/otel-mock-scenario.ts\` 的冻结脚本（8 个 tool_call 的名字与顺序抄自 \`trajectories/demo.jsonl\`（活端点本机产物，未入库；入库样例见 demo.example.jsonl）；路径与 write_file 审批策略两处如实适配，见该文件头部注释）
 - mock 端点收到的请求数：${meta.requests}
 
 ## span 树

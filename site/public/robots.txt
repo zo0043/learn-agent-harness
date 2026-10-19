@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 本子站挂在 https://blog.zero43.top/learn-agent-harness/ 前缀下
+Sitemap: https://blog.zero43.top/learn-agent-harness/sitemap.xml

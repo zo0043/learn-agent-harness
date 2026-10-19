@@ -11,7 +11,7 @@ src/session.ts   ⑥ JSONL 轨迹日志 = 唯一事实源，上下文由日志�
 src/context.ts   ⑧ token 估算 + 压缩（保头尾、中间 LLM 摘要）
 src/agent.ts     ②⑥⑦⑧ agent loop + guarded_tool_step（intent→执行→result）
 src/otel.ts      可观测 §S2 OTel GenAI 埋点（invoke_agent→chat/execute_tool span 树，console 导出，OTEL_EXPORT_OTLP=1 开 OTLP）
-src/otel-mock-scenario.ts  U-23 离线判据：冻结场景（本地 mock 端点 6 轮脚本，tool 名字/顺序抄自 trajectories/demo.jsonl）+ EXPECTED 契约常量
+src/otel-mock-scenario.ts  U-23 离线判据：冻结场景（本地 mock 端点 6 轮脚本，tool 名字/顺序抄自 trajectories/demo.jsonl（活端点本机产物，**未入库**；入库样例是 demo.example.jsonl））+ EXPECTED 契约常量
 src/otel-mock.ts   U-23 离线复跑入口（demo:otel:mock：打印确定性 span 树 + 生成快照 workspace/out/otel-spans.md）
 src/otel-assert.ts U-23 离线断言入口（demo:otel:assert：断言 span 树形态/计数，不符即非 0 退出）
 src/demo.ts      ⑨ demo 入口（五种模式）
@@ -44,7 +44,7 @@ npx tsx src/test-compact.ts   # 压缩逻辑的 mock 测试（不依赖代理）
 
 ## 轨迹日志
 
-`trajectories/demo.jsonl`：一行一个事件（init / model_response / tool_intent / tool_exec / compaction / final）。崩溃恢复就靠它：`tool_intent` 在、对应 `tool_exec` 不在 = 未知状态。
+`trajectories/demo.example.jsonl`（已入库）/ `demo.jsonl`（`npm run demo` 本地产物，被 .gitignore 排除）：一行一个事件（init / model_response / tool_intent / tool_exec / compaction / final）。崩溃恢复就靠它：`tool_intent` 在、对应 `tool_exec` 不在 = 未知状态。
 
 ## 已知边界（教学刻意不做）
 

@@ -28,7 +28,7 @@ const base = import.meta.env.BASE_URL;
   <section class="phase-section">
     <div class="phase-head">
       <h2>LLM 发展历史</h2>
-      <span class="phase-desc">2017 Transformer → 2025 DeepSeek-R1 · {LLM_HISTORY.length} 节点带权威出处</span>
+      <span class="phase-desc">2017 Transformer → 2025-01 DeepSeek-R1 · {LLM_HISTORY.length} 节点（每条带 source 与 verified 字段，整体为「部分核实」，非逐条核实）——**本表止于 2025-01**，之后代际见 <a href={base + 'c/llm-timeline/'}>/c/llm-timeline/</a></span>
     </div>
     <ol class="llm-timeline">
       {LLM_HISTORY.map((item) => (

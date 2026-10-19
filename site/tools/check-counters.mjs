@@ -350,6 +350,83 @@ grepNum(P.coursesTs, new RegExp(`= ${dec.cards}(\\D|$)`), `courses.ts 注释声�
 grepNum(P.verifyYml, new RegExp(`-eq ${dec.siteHtml}\\b`), `verify.yml 等值断言 -eq ${dec.siteHtml}`);
 grepNum(P.verifyYml, /nav\/index\.html/, 'verify.yml 关键页清单含 nav/index.html');
 
+// ── 3c) 口径 B1 判据组（2026-10-19 新增；修复 2026-10-18 评审 Top-1 根因「手抄副本不在门禁内」）──
+// 背景：2026-10-18 评审的 Top-1 根因是「同一事实有 2–4 份手抄副本，而门禁只覆盖其中 12 条」。
+// 2026-10-19 修复轮已就地改正 demo 数 / span 数 / 事故时长 / 时间线截断 / 白板行数 / 轨迹文件引用，
+// 但当时**无任何机器判据守着**（终审实测 check-counters.mjs 与 HEAD 逐字节一致）——P1 根因仍在。
+// 本节把它们升为判据。**纪律：只增约束、不放宽任何既有判据**；声明值一律从源码/口径块/仓外官方派生。
+const SCAN_SKIP = new Set(['node_modules', '.git', 'dist', 'analysis', 'reviews', '.state', 'out']);
+const TEXT_EXT = new Set(['.md', '.astro', '.ts', '.mjs', '.js', '.json', '.yml', '.yaml', '.sh', '.txt', '.xml']);
+const walkText = (dir, out = []) => {
+  if (!exists(dir)) return out;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) { if (!SCAN_SKIP.has(e.name)) walkText(full, out); }
+    else if (TEXT_EXT.has(path.extname(e.name))) out.push(full);
+  }
+  return out;
+};
+const SCAN_ROOTS = [
+  'notes', 'site', 'harness-demo', 'rag-demo', 'sandbox-demo', 'mcp-demo',
+  'durable-execution-demo', 'framework-demo', 'memory-redteam', 'viz', '.github',
+  'README.md', 'handoff.md', 'AGENTS.md',
+].map((r) => path.join(ROOT, r)).filter((p) => exists(p));
+const SELF = path.relative(ROOT, HERE + '/check-counters.mjs'); // 自排除：门禁自身代码里的正则字面量不得判自己
+const scanFiles = [];
+for (const r of SCAN_ROOTS) {
+  if (fs.statSync(r).isDirectory()) scanFiles.push(...walkText(r).filter((f) => path.relative(ROOT, f) !== SELF));
+  else if (path.relative(ROOT, r) !== SELF) scanFiles.push(r);
+}
+const grepRepo = (re) => scanFiles.filter((f) => re.test(fs.readFileSync(f, 'utf8')));
+
+// D1 可运行 demo 作品数：口径块枚举的六个具名目录 vs README 作品表实际列出的行
+const workDirs = ['harness-demo', 'rag-demo', 'sandbox-demo', 'mcp-demo', 'durable-execution-demo', 'framework-demo'];
+const missing = workDirs.filter((d) => !exists(path.join(ROOT, d)));
+check('可运行 demo 作品（口径块 6 个目录全存在）', 0, missing.length, missing.join(', ') || '六个目录均在');
+const readmeWorks = (read(P.readme).match(/^\| \[`([\w.-]+)\/`\]\([\w.\/-]+\)/gm) ?? [])
+  .map((row) => row.match(/\[`([\w.-]+)\/`\]/)[1])
+  .filter((d) => workDirs.includes(d));
+check('可运行 demo 作品（README 作品表列全 6）', 6, readmeWorks.length, `README 列出：${readmeWorks.join(', ')}`);
+
+// D2 OTel span 判据：mock 契约 spanTotal vs 站内声明，且旧值「实测 11 spans」必须清零
+const scenarioTs = read(path.join(ROOT, 'harness-demo', 'src', 'otel-mock-scenario.ts'));
+check('OTel mock 判据 spanTotal = 15', 15, Number((scenarioTs.match(/spanTotal:\s*(\d+)/) ?? [])[1]), 'harness-demo/src/otel-mock-scenario.ts');
+const staleSpan = grepRepo(/实测 11 spans/);
+check('旧值残留：实测 11 spans', 0, staleSpan.length, staleSpan.map((f) => path.relative(ROOT, f)).join(', ') || '无');
+
+// D3 幽灵事故时长：旧值 24 分钟清零、25 分钟在位
+check('旧值残留：24 分钟', 0, grepRepo(/24 分钟/).length, '统一为 25 分钟（agent-harness.md）');
+check('事故时长 25 分钟在位', true, grepRepo(/25 分钟/).length > 0, 'notes/agent-harness.md');
+
+// D4 时间线截断：llm-history.ts 必须自带截断声明且末节点为 2025-01；nav.astro 须同步标注
+const llmHistoryTs = read(path.join(ROOT, 'site', 'src', 'data', 'llm-history.ts'));
+check('llm-history.ts 截断声明在位', true, /止于 2025-01/.test(llmHistoryTs), '防「被读成最新进展」');
+check('llm-history.ts 末节点 = 2025-01', true, /date: '2025-01'/.test(llmHistoryTs), 'DeepSeek-R1');
+check('nav.astro 同步截断标注', true, /止于 2025-01/.test(read(path.join(ROOT, 'site', 'src', 'pages', 'nav.astro'))), 'FAC-F1 波及点');
+
+// D5 白板行数：旧值 ~150 行清零、178 行在位
+check('旧值残留：白板 ~150 行', 0, grepRepo(/~150 行/).length, grepRepo(/~150 行/).map((f) => path.relative(ROOT, f)).join(', ') || '统一为 178 行');
+check('白板 178 行在位', true, grepRepo(/178 行/).length > 0, 'whiteboard/agent_whiteboard.py');
+
+// D6 recall@5 口径：README 与 rag.md 都必须写 0.44（HEAD 下可复现值；0.38/135 属脏工作区产物）
+check('README recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(P.readme)), '脏工作区值 0.38 不得回灌');
+check('rag.md recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(read(path.join(ROOT, 'notes', 'rag.md'))), 'rag.md §13 数字口径');
+
+// D7 sitemap：手写 site/public/sitemap.xml 的 url 数必须等于站点 html 数（否则新增页面会静默漏收）
+const sitemapXml = read(path.join(ROOT, 'site', 'public', 'sitemap.xml'));
+check('sitemap url 数 = 站点 html', dec.siteHtml, (sitemapXml.match(/<url>/g) ?? []).length, 'site/public/sitemap.xml（手写，未装 @astrojs/sitemap）');
+
+// D8 旧写法/旧引用残留（豁免词同句出现时不算残留——那是「主动说明已废弃」的正确用法）
+const staleIBM = grepRepo(/SAP、IBM[^ ]/);
+check('旧写法残留：SAP、IBM（应为 IBM Research）', 0, staleIBM.length, staleIBM.map((f) => path.relative(ROOT, f)).join(', ') || '无');
+check('旧写法残留：MCP 四原语与四层防御', 0, grepRepo(/四原语与四层防御/).length, '已改为「MCP 的 Client/Server 特性」');
+const exempt = /未入库|本机产物|本地跑|入库样本|demo\.example\.jsonl/;
+const staleTraj = grepRepo(/trajectories\/demo\.jsonl/).filter((f) => {
+  const t = fs.readFileSync(f, 'utf8');
+  return !t.split('\n').some((l) => /trajectories\/demo\.jsonl/.test(l) && exempt.test(l));
+});
+check('旧引用残留：trajectories/demo.jsonl（未带豁免说明）', 0, staleTraj.length, staleTraj.map((f) => path.relative(ROOT, f)).join(', ') || '无（余下均为带「未入库/本机产物」说明的正确用法）');
+
 // ── 4) 输出 ─────────────────────────────────────────────────────────────────────
 const pad = (v, w) => String(v ?? '∅').padStart(w);
 console.log('\n═══ 口径一致性门禁（notes/knowledge-map.md 计数口径块 vs 实数重算）═══\n');

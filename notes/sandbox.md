@@ -183,8 +183,8 @@ npm run typecheck     # tsc --noEmit（实测 exit 0）
 ```
 
 - 环境要求：**Node ≥ 18**（本机默认 `/usr/bin/node` 是 v12，tsx 会报 `SyntaxError: Unexpected token '.'`；用 `~/.nvm/versions/node/v22.23.2/bin/node` 实测通过）。仓库 README 已写明"作品要求 node ≥ 18"。
-- 实测 sha256（本机、Node v22.23.2、2026-10-11）：
-  - A（仅权限门）`ecbabb3a901ff81aab6404c800eb49d3ef6e3722dce9db98507e9adda1777aca`
+- 实测 sha256（Node v22.23.2；**A 组 2026-10-19 复核更新**，B 组沿用 2026-10-11 原值）：
+  - A（仅权限门）`df9a4e2406109a675aca5390a73d9e175f0e5703ebe4bddee0510095099e5536`（2026-10-19 重跑，`npm run demo` 输出逐字一致；旧值 `ecbabb3a…` 为 2026-10-11 的旧版 demo 产物，已作废）
   - B（四通道+沙箱）`9c0d52aa6d5812440b8c0045d97ae793351d34a1c5207ecc486a1130b614246c`
   - 说明：hash 是转录内容的 sha256，随 demo 版本变化；这是"逐字节可复现"的机器可验证锚点。
 
@@ -231,30 +231,45 @@ FinHot 映射：那台机器上"4 个 docker 项目共享宿主"就是**没有�
 
 ---
 
-## S3.5 Kernel 四层校验：路径 canonicalize → 许可 → lockdown → 审计
+## S3.5 Kernel 四层校验：**许可 → 执行 → 路径边界 → 审计**（2026-10-19 按代码就地改写）
 
-沙箱不是一道开关，而是一条**校验流水线**。把 `sandbox-demo` 的执行路径拆开，正好是四层（本课归纳，术语借自通用的"check → authorize → confine → audit"安全流水线）：
+> **⚠️ 2026-10-19 复核改正（原写反了）**：本节原写「① 路径 canonicalize → ② 许可 → ③ lockdown → ④ 审计」。
+> 逐行核 `sandbox-demo/src/replay.ts` 后发现**顺序是反的**，且原描述漏了一个更关键的事实：
+> **`policy.decide` 在最前**（`replay.ts:60`，每一步都先判），路径边界**不在最前**、也**不是每条调用都有**。
+> 详见下方「按代码的真实顺序」。
+
+**按代码的真实顺序**（`src/replay.ts:60` 起逐步核过）：
 
 ```mermaid
 flowchart TD
-  S["工具调用 (tool, args)"] --> L1["① 路径 canonicalize<br/>拒绝空/绝对路径/NUL；解析 ../ 且不许越根<br/>assertInWorkspace"]
-  L1 -->|越界| D["denied / blocked（结果回写）"]
-  L1 -->|规范化 OK| L2["② 许可 permission<br/>Policy.decide：allow / approve / deny / sandbox<br/>默认 deny"]
-  L2 -->|deny| D
-  L2 -->|approve| AP["人工审批 makeApprover"]
+  S["工具调用 (tool, args)"] --> L1["① 许可 permission（最前）<br/>policy.decide：allow / approve / deny / sandbox，默认 deny"]
+  L1 -->|deny| D["denied（结果回写）"]
+  L1 -->|approve| AP["人工审批 makeApprover"]
   AP -->|拒绝 / 超时| D
-  L2 -->|allow / sandbox| L3["③ lockdown 锁定边界<br/>隔离命名空间 makeSandboxWorld<br/>env 白名单 + egress 关闭"]
-  AP -->|批准| L3
+  L1 -->|allow / sandbox| L2["② 执行<br/>runExec(() => execTool(...))"]
+  AP -->|批准| L2
+  L2 -->|"有沙箱实例时（ctx.sandbox 非空）"| L3["③ 路径边界 + lockdown 锁定<br/>ctx.sandbox.path() 解析路径；越根抛 BoundaryViolation<br/>隔离命名空间 + env 白名单 + egress 关闭"]
+  L2 -->|"无沙箱实例（A 组仅权限门）"| L3b["路径**原样透传**：pth() = ctx.sandbox ? path() : str(args)<br/>→ A 组根本没有路径边界层"]
   L3 -->|边界违规| B["blocked（BoundaryViolation）"]
-  L3 -->|通过| L4["④ 审计 audit<br/>World.log + 逐条转录 + OTel span"]
+  L3b --> L4["④ 审计 audit<br/>World.log + 逐条转录 + OTel span"]
+  L3 --> L4
   L4 --> R["结果回写 ok / denied / blocked / error"]
   D --> L4
   B --> L4
 ```
 
-四层各自的失败模式（面试常追问"你最担心哪层"）：
+**四个必须讲清的事实**（面试答"沙箱是怎么拦的"时最容易说错的就是顺序）：
 
-1. **canonicalize 失败**：路径校验被绕过——`..` 编码、符号链接、Unicode 归一化、Windows 短名 / 8.3 名。demo 里 `assertInWorkspace` 是纯字符串逻辑（教学用），真实系统要靠 `realpath`/`openat` 在内核侧判定，并防 TOCTOU（见 S8）。
+1. **许可在最前，不是最后**：`replay.ts:60` 对每一步先 `cfg.policy.decide(call.tool, call.args)`，`deny` 通道**根本不进执行**（直接 `denied` 回写）。所以"先授权、后执行"成立；但"先规范化路径、再授权"**不成立**。
+2. **路径边界在"执行内"，不是执行前**：`assertInWorkspace` 由 `execTool → spec.execute → pth()` 触发，而 `pth()`（`tools.ts:27-28`）是 `ctx.sandbox ? ctx.sandbox.path(...) : str(args, k)`——**有沙箱实例才走 `sandbox.path()`**。
+3. **A 组（仅权限门）没有路径边界层**：`replay.ts` 的 A 组配置 `sandbox: null`，于是 `ctx.sandbox` 恒为 null，路径**原样透传**（注释直书「动作面 = 本机 root」）。讲义旧图把 canonicalize 画成"所有工具调用的第一道门"，与 A 组实测行为矛盾——**看图会得出"所有调用都被路径校验拦过"的错误结论**。
+4. **lockdown 与路径边界同属沙箱实例，不在策略门**：隔离命名空间 / env 白名单 / egress 关闭都来自 `makeSandboxWorld`，由 `ctx.sandbox` 携带；`sandbox` 通道无沙箱实例时 `replay.ts` 直接判 `blocked`（配置错误）。
+
+**四层各自的失败模式**（面试常追问"你最担心哪层"）：
+
+1. **路径校验被绕过**：`..` 编码、符号链接、Unicode 归一化、Windows 短名 / 8.3 名。demo 里 `assertInWorkspace` 是纯字符串逻辑（教学用），真实系统要靠 `realpath`/`openat` 在内核侧判定，并防 TOCTOU（见 S8）。
+2. **把 A 组行为当"有路径边界"**：A 组 `sandbox: null` 时 `pth()` 原样透传——这是本课最容易被图误导的一处（见上第 3 条）。
+
 
 ```ts
 // src/sandbox.ts —— L1 路径 canonicalize（教学版：纯字符串；真实系统换 realpath/openat）
@@ -500,25 +515,28 @@ flowchart LR
 ---
 
 ## 练习题库（后续提问用）
+> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
+> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
+> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
 
-| # | 题目 | 考察 |
-|---|---|---|
-| 1 | 权限门、沙箱、提示词三层各给一个"单独存在必被绕"的攻击链 | S1 |
-| 2 | Codex CLI 本地为什么敢用进程级而不是容器？什么条件下这个选择错了？ | S3 |
-| 3 | agent 环境里必须有一个 GitHub token 才能推 PR。给出三档收紧方案（从弱到强） | S4 |
-| 4 | 你的沙箱关死了网络，agent 需要 `pip install` 怎么办？ | S3 egress |
-| 5 | "容器创建时间检查"这条规则，沙箱化之前/之后分别是什么性质的防线？ | S5 |
-| 6 | 轨迹重放两次，输出差了一个文件名的字母。列四个可能的隐藏非确定源 | S6 |
-| 7 | 多租户 agent 平台：沙箱池怎么设计（复用/隔离/凭据注入时机）？ | S3+S4 |
-| 8 | 幽灵事故里，如果只有权限门没有沙箱，最小拦截点在哪一步？为什么当时没拦住？ | S1+S2 |
-| 9 | sandbox 通道与 deny 通道语义有什么不同？画出同一 `docker compose up` 在两条通道下的审计/恢复差异 | S2/S2.5 |
-| 10 | 一个会话在工具调用里 `cd` 到别的目录后，下次用相对路径——哪一层该发现 cwd 漂移？怎么设计？ | S1 + S8.1 |
-| 11 | 路径 canonicalize 已通过，到真正写入之间被换成符号链接。这是什么问题？怎么消掉窗口？ | S3.5 + S8.2 |
-| 12 | 并行会话共享宿主，两个 compose 项目都映射宿主 80 端口。会发生什么？沙箱化后怎么避免？ | S3 + S8.3 |
-| 13 | 为了让 agent 装私有依赖，把 `~/.netrc` 挂进沙箱——重新引入了什么问题？替代方案？ | S4 + S8.4 |
-| 14 | 对正在运行的 microVM 拍快照，恢复后进程状态与磁盘不一致。怎么保证一致快照？ | S6.1 + S8.5 |
-| 15 | 审计要求工具结果全量留存，合规要求脱敏。设计三档折中（含成本与可回放性） | S5 + S8.6 |
-| 16 | Kernel 四层校验（canonicalize/许可/lockdown/审计）里，哪一层"静默失败"最危险？为什么？ | S3.5 |
+| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
+|---|---|---|---|
+| 1 | 权限门、沙箱、提示词三层各给一个"单独存在必被绕"的攻击链 | S1 | ≥3 点：①权限门只管「允不允许」，合法工具越界仍过；②沙箱只关影响范围，边界配错即漏；③提示词是软约束，注入一绕就穿（S1） |
+| 2 | Codex CLI 本地为什么敢用进程级而不是容器？什么条件下这个选择错了？ | S3 | ≥3 点：①单用户本地、代码可信，进程级毫秒启动够用；②前提是默认边界真配了（网络默认关、文件白名单）；③多租户/不可信代码就错，该上 microVM（S3） |
+| 3 | agent 环境里必须有一个 GitHub token 才能推 PR。给出三档收紧方案（从弱到强） | S4 | ≥3 点：①最弱：全局长期 token，一次外发全仓失守；②中间：scoped token（单 repo、短过期）；③最强：零常驻，按需注入+结束回收或 harness 代执行（S4） |
+| 4 | 你的沙箱关死了网络，agent 需要 `pip install` 怎么办？ | S3 egress | ≥3 点：①egress 默认关，只对包源域名开白名单；②私有源认证由代理在出网边界注入，不进 agent env；③优先预构建镜像/离线 wheel，不在运行时装包（S3） |
+| 5 | "容器创建时间检查"这条规则，沙箱化之前/之后分别是什么性质的防线？ | S5 | ≥3 点：①沙箱前是事后校验：能发现不能阻止（跑了 25 分钟）；②沙箱后降级为双保险，前置是 W 层事前边界；③所以它不能替代隔离（S5） |
+| 6 | 轨迹重放两次，输出差了一个文件名的字母。列四个可能的隐藏非确定源 | S6 | ≥4 点：①时间戳/随机数直接进输出（未用逻辑时钟）；②模型版本静默漂移或 temperature≠0、seed 未固定；③外部状态（文件/环境/网络）泄漏进提示词；④cwd 残留或并发导致路径解析不同（S6） |
+| 7 | 多租户 agent 平台：沙箱池怎么设计（复用/隔离/凭据注入时机）？ | S3+S4 | ≥3 点：①隔离：每任务独立命名空间，不可信代码用 microVM；②复用：预热池领取，结束即重置，不跨租户；③凭据：任务开始注入短期 token、结束回收（S3+S4） |
+| 8 | 幽灵事故里，如果只有权限门没有沙箱，最小拦截点在哪一步？为什么当时没拦住？ | S1+S2 | ≥3 点：①最小拦截点=step 3 的 compose up，改走 sandbox 通道；②没拦住因其为合法工具+合法命令；③缺的是执行环境边界，权限门看不见（S1+S2） |
+| 9 | sandbox 通道与 deny 通道语义有什么不同？画出同一 `docker compose up` 在两条通道下的审计/恢复差异 | S2/S2.5 | ≥3 点：①deny=不做，结果「没发生」；sandbox=隔离世界内执行成功；②审计：deny 记拒绝判定，sandbox 记 ns 内执行转录；③恢复：deny 无需回滚，sandbox 清理隔离环境（S2/S2.5） |
+| 10 | 一个会话在工具调用里 `cd` 到别的目录后，下次用相对路径——哪一层该发现 cwd 漂移？怎么设计？ | S1 + S8.1 | ≥3 点：①W 层路径解析：一律解析到 workspace 根，不读 cwd；②工具契约强制绝对/根相对路径，cwd 只作显示信息；③持久 shell 固定 cwd，并行会话各自 worktree（S8.1） |
+| 11 | 路径 canonicalize 已通过，到真正写入之间被换成符号链接。这是什么问题？怎么消掉窗口？ | S3.5 + S8.2 | ≥3 点：①这是 TOCTOU——check 与 use 间存在时间窗口；②对策：内核侧 openat+O_NOFOLLOW，在同一 fd 上操作；③check+use 原子化，不信任已解析的字符串（S3.5+S8.2） |
+| 12 | 并行会话共享宿主，两个 compose 项目都映射宿主 80 端口。会发生什么？沙箱化后怎么避免？ | S3 + S8.3 | ≥3 点：①后起项目顶掉先起服务，4 项目共享宿主=无执行边界；②每会话独立 network namespace + project 前缀；③不直绑宿主端口，动态分配或 harness 代理（S3+S8.3） |
+| 13 | 为了让 agent 装私有依赖，把 `~/.netrc` 挂进沙箱——重新引入了什么问题？替代方案？ | S4 + S8.4 | ≥3 点：①挂载=撤销 S4 全部工作，凭据即出圈钥匙；②替代：凭据留 vault/宿主侧，代理在出网边界注入短期 token；③沙箱内进程结构性拿不到长期凭据（S4+S8.4） |
+| 14 | 对正在运行的 microVM 拍快照，恢复后进程状态与磁盘不一致。怎么保证一致快照？ | S6.1 + S8.5 | ≥3 点：①先 quiesce 暂停写入，或用 COW 文件系统原子快照；②写入侧临时文件 + 原子 rename，消除 torn write；③microVM 用整机快照并保设备一致，恢复前先核对（S6.1+S8.5） |
+| 15 | 审计要求工具结果全量留存，合规要求脱敏。设计三档折中（含成本与可回放性） | S5 + S8.6 | ≥3 点：①摘要+指针：日志存摘要与 payload 指针，回放按指针取原文；②敏感字段 token 化 + 限权可逆映射，保住可回放性；③全量落加密对象存储 + 限权访问，成本最高（S5+S8.6） |
+| 16 | Kernel 四层校验（canonicalize/许可/lockdown/审计）里，哪一层"静默失败"最危险？为什么？ | S3.5 | ≥3 点：①最危险是 lockdown 静默失败：声明了却没生效，动作照过；②审计静默失败次之：拦了没留痕，无法取证/漂移检测/重放；③所以拒绝与拦截一律回写模型（S3.5） |
 
 ## 来源与锚点（2026-10 核实回填）
 

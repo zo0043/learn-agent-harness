@@ -113,7 +113,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
           <tr><td>context.ts</td><td class="sec">⑧ 预算 / 压缩</td><td>token 估算 + 教学压缩策略</td></tr>
           <tr><td>demo.ts</td><td class="sec">⑨ 轨迹 / 演示</td><td>多步任务 + 五种运行模式</td></tr>
           <tr><td>otel.ts</td><td class="sec">⑨ 轨迹 / 演示 · 可观测 §S2</td><td>OTel GenAI span 树（invoke_agent → chat / execute_tool）+ console 导出；<code>OTEL_EXPORT_OTLP=1</code> 时追加 OTLP/HTTP</td></tr>
-          <tr><td>otel-mock-scenario.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线判据</td><td>冻结场景（本地 mock 端点 6 轮脚本）+ EXPECTED 契约常量；tool 名字/顺序抄自 <code>trajectories/demo.jsonl</code></td></tr>
+          <tr><td>otel-mock-scenario.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线判据</td><td>冻结场景（本地 mock 端点 6 轮脚本）+ EXPECTED 契约常量；tool 名字/顺序抄自 <code>trajectories/demo.example.jsonl</code>（入库样例；真实产物 <code>demo.jsonl</code> 未入库）</td></tr>
           <tr><td>otel-mock.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线复跑</td><td>入口 <code>npm run demo:otel:mock</code>：打印确定性 span 树 + 生成快照 <code>workspace/out/otel-spans.md</code></td></tr>
           <tr><td>otel-assert.ts</td><td class="sec">⑨ 轨迹 / 演示 · U-23 离线断言</td><td>入口 <code>npm run demo:otel:assert</code>：断言 span 树形态/计数，不符即非 0 退出</td></tr>
           <tr><td>test-compact.ts</td><td class="sec">⑧ 压缩验证</td><td>本地 mock 模型单独验证压缩逻辑（不依赖外部代理）</td></tr>
@@ -130,7 +130,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
           <tr><td class="sec">崩溃恢复</td><td><code>npm run demo:crash</code></td><td>write_file intent 后模拟崩溃 → 重启从 JSONL 恢复，处理“未知状态”</td></tr>
           <tr><td class="sec">审批拒绝</td><td><code>npm run demo:reject</code></td><td>policy = approve 且用户拒绝的路径</td></tr>
           <tr><td class="sec">压缩</td><td><code>npm run demo:compact</code></td><td>低预算阈值触发上下文压缩</td></tr>
-          <tr><td class="sec">OTel 埋点</td><td><code>npm run demo:otel</code></td><td>OTel GenAI span 实测 11 spans / 1 trace</td></tr>
+          <tr><td class="sec">OTel 埋点</td><td><code>npm run demo:otel</code></td><td>OTel GenAI span 树：<code>demo:otel:mock</code> 离线判据 15 spans / 1 trace（历史活端点值 11 spans 未验证、不作判据）</td></tr>
         </tbody>
       </table>
 
@@ -390,7 +390,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
       </div>
       <div class="roadmap-item">
         <span class="rm-name">OTLP 端到端</span>
-        <span class="rm-desc">harness-demo otel.ts 已 console 导出（demo:otel 实测 11 spans/1 trace）；下一步 OTEL_EXPORT_OTLP=1 接真实 collector，spans → OTLP → 可视化 · 可观测</span>
+        <span class="rm-desc">harness-demo otel.ts 已 console 导出（`demo:otel:mock` 离线判据 15 spans/1 trace；历史活端点 11 spans 未验证、不作判据）；下一步 OTEL_EXPORT_OTLP=1 接真实 collector，spans → OTLP → 可视化 · 可观测</span>
         <span class="badge badge-dev">规划中</span>
       </div>
       <div class="roadmap-item">

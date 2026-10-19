@@ -22,6 +22,20 @@ const pageTitle = title ? `${title} · learn-agent-harness` : 'learn-agent-harne
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {/* C2/PRES-F3：canonical + 最小 og/twitter 组。
+        canonical = Astro.site（含 base 的绝对前缀，带尾斜杠）+ 当前 pathname；
+        `new URL('/learn-agent-harness/map/', 'https://blog.zero43.top/learn-agent-harness/')`
+        会解析成 https://blog.zero43.top/learn-agent-harness/map/，正是想要的绝对地址。 */}
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="learn-agent-harness" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href={import.meta.env.BASE_URL + "favicon.svg"} type="image/svg+xml" />
     <title>{pageTitle}</title>

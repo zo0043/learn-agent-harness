@@ -1,6 +1,7 @@
 ---
 /**
- * 轨迹可视化：harness-demo/trajectories/demo.jsonl → 竖向事件流时间线。
+ * 轨迹可视化：harness-demo/trajectories/demo.jsonl（本机产物，未入库）
+ * → 本地不存在时回退 demo.example.jsonl（已入库）→ 竖向事件流时间线；实际渲染哪份见下方 source 标注。
  * build 时静态导入（见 src/data/trajectory.ts），按 kind 着色：
  * init / model_response / tool_intent / tool_exec / compaction / final；
  * tool_exec 按 status 标 ✅（ok）/ ⏸（denied 等非 ok）。
@@ -8,7 +9,7 @@
 import { trajectory } from '../data/trajectory';
 import { esc, mdToHtml } from '../utils/md';
 
-const { events, available } = trajectory;
+const { events, available, source, file } = trajectory;
 
 interface Row {
   cls: string;
@@ -138,6 +139,9 @@ function fmtMs(ms?: number): string {
         <span><i class="dot ev-final"></i>final</span>
         <span class="chip">tool_exec：✅ ok / ⏸ 被拒</span>
       </p>
+      <p class="traj-source">
+        数据源：<code>{file ?? '∅'}</code>（{source === 'real' ? '本机真实产物，未入库' : '已入库脱敏样例'}）
+      </p>
       <div class="traj-stats">
         <span class="chip chip-strong">{events.length} 个事件</span>
         {
@@ -173,8 +177,10 @@ function fmtMs(ms?: number): string {
       <p class="empty-icon">🗂️</p>
       <p>
         <strong>轨迹文件不在仓库中</strong>
-        —— <code>harness-demo/trajectories/demo.jsonl</code> 是 demo 运行产物（被 <code>.gitignore</code>
-        排除），CI 构建时不存在。
+        —— 当前渲染的数据源是 <code>{file ?? 'harness-demo/trajectories/demo.jsonl'}</code>：
+        {source === 'real'
+          ? '本机 demo 运行产物（被 .gitignore 排除，CI 构建时不存在）'
+          : '已入库的脱敏样例（真实产物 demo.jsonl 由 npm run demo 本机生成，未入库）'}。
       </p>
       <p>
         本地跑一次即可生成并在此看到完整事件流：<br />

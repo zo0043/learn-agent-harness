@@ -1,8 +1,11 @@
 /**
  * LLM 发展史与演进（横向知识导航页数据源，重建）。
  *
- * 唯一内容源：notes/process/site-refactor-plan.md §7（alex 审计后的权威事实表——已逐条 web 核实，
- * 附 URL + 日期；臆测项「Agent 2.0 / Self-improvement / Multi-agent collaboration /
+ * 唯一内容源：notes/process/site-refactor-plan.md §7（alex 审计后的权威事实表）。
+ * **核实状态（2026-10-19 更正）**：该表**不是**"逐条 web 核实"——2026-10-18 的独立复核判定其为
+ * 「部分核实」：每条自带 `source` + `verified('exact'|'month')`，其中标 `month` 的仅为月份级成立、
+ * 精确日待复核。引用时按字段级 `verified` 判断，**不要把整表当成已逐条核实**（评审 `FAC-F8`）。
+ * 臆测项「Agent 2.0 / Self-improvement / Multi-agent collaboration /
  * 2026 Next-gen」已全部删除，不进入数据层）。
  *
  * 旧草稿字段（year/model/key/summary）与本文件 §8.2 规范字段的对应关系：
@@ -22,6 +25,12 @@ export type HistoryVerified = 'exact' | 'month';
 
 /**
  * LLM 发展历史时间线（§7.3 权威事实列表，10 节点）。
+ *
+ * **截断声明（2026-10-19）**：本表**止于 2025-01**（末节点 DeepSeek-R1）。它是一份"截至该时点"
+ * 的事实快照，**不代表最新进展**——2025 年之后的代际见课程页 `notes/llm-timeline.md`
+ * （12 节点，到 2026.07）。`/nav` 与首页引用本表时须一并说明截断日期，
+ * 否则会被读成"站点认为 2025-01 之后没有进展"（评审 `FAC-F1`）。
+ *
  * `verified: 'exact'` = 精确日期已核实（Wikipedia/arXiv 给出具体日）；
  * `verified: 'month'` = 月份级事实成立、精确日待复核（不得标成已核实，§8.2）。
  */

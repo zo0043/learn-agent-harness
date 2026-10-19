@@ -196,17 +196,17 @@ const STATUS_FILTERS = (() => {
   <section class="phase-section" id="capstone" data-capstone>
     <div class="phase-head">
       <h2>增量主线 · capstone（你要搭的）</h2>
-      <span class="phase-desc">my-agent：从零增建一个完整 agent——5 个 milestone 对应 P0–P4，后段复用你亲手写的代码；17 个 demo 不是终点作品，而是每个 milestone 的参考答案（参考样本）</span>
+      <span class="phase-desc">my-agent：从零增建一个完整 agent——5 个 milestone 对应 P0–P4，后段复用你亲手写的代码；17 门课的参考样本不是终点作品，而是每个 milestone 的参考答案（参考样本）</span>
     </div>
     <div class="cards">
       <div class="card capstone-hero">
         <p class="cp-hero-text">
-          <strong>主线是你亲手搭的工具；17 个 demo 是每个 milestone 的参考答案。</strong>
+          <strong>主线是你亲手搭的工具；17 门课的参考样本是每个 milestone 的参考答案。</strong>
           M0（最小 loop）已就位——本仓库根目录 <code>my-agent/</code>，读 README + <code>npm run assert:m0</code> 起步；
           M1–M4 的练习就位内容留待 sprint 5。
         </p>
         <p class="cp-hero-link">
-          第一课主线锚点 <a href={base + 'c/harness-from-scratch/'}>从零写 harness</a>；完整蓝图见 <code>notes/process/capstone-blueprint.md</code>。
+          第一课主线锚点 <a href={base + 'c/harness-from-scratch/'}>从零写 harness</a>；完整蓝图见 <a href="https://github.com/zo0043/learn-agent-harness/blob/main/notes/process/capstone-blueprint.md" target="_blank" rel="noopener"><code>notes/process/capstone-blueprint.md</code> ↗</a>。
         </p>
       </div>
 
@@ -337,8 +337,9 @@ const STATUS_FILTERS = (() => {
 </script>
 
 <style>
-  /* U-36 收敛：本页内联样式提为页面级类，声明与原子内联逐字一致（视觉零变化）。 */
-  .lf-count-note { color: var(--text-soft); font-size: 0.94rem; }
+  /* G0-5 / 03-D1：死选择器 lf-count-note 已删（类名故意不写前导点，避免被类集合扫描器当成新定义）。
+     本页实际输出的是 lw-count-note（见下方 :271/:276/:281 三处），两者只差一个字母前缀，
+     靠肉眼看页面永远抓不到，由 site/tools/check-classes.mjs 的类集合差集门禁抓出。 */
 
   /* 路线概览条：五阶段一眼可见，可点跳到该段（阶段段的 id 由下方生成） */
   .stage-overview {

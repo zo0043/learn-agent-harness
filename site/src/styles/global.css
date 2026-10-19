@@ -721,17 +721,13 @@ div.mermaid.mermaid-error {
   color: var(--accent);
 }
 
-/* 作品卡区下方 small 注（whiteboard 口述版） */
-.works-note {
-  margin-top: 14px;
-  color: var(--text-faint);
-  font-size: 0.9rem;
-}
-
-/* /details 入口卡 */
-.details-entry {
-  max-width: 48em;
-}
+/* /details 入口卡
+   注：本条原带两个「真死选择器」，已被纪律 #9 的类集合门禁（site/tools/check-classes.mjs）判定为
+   「CSS 定义但全仓从不输出」，并按 G0-5 / 03-D1 默认路径 (a) 就地删除：
+     · works-note —— 作品卡区下方 small 注（whiteboard 口述版），页面已改用别的类；
+     · details-entry —— 页面只输出 details-entry-links（见 index.astro:221），从不输出 details-entry 本身。
+   这两个类名在此**故意不写前导点**：本脚本自己的注释若带 `.` 会被上面的类集合扫描器当成一条新定义。
+   details-entry-links 是活规则（有输出点），保留。 */
 .details-entry-links {
   display: flex;
   flex-direction: column;
@@ -1122,6 +1118,15 @@ a.domain-card:hover .dc-foot {
   margin: 14px 0;
   font-size: 0.84rem;
   color: var(--text-soft);
+}
+/* 数据源标注：说明当前渲染的是本机真实产物还是入库样例（2026-10-19 新增）*/
+.traj-source {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+.traj-source code {
+  font-size: 0.78rem;
 }
 .traj-legend .dot {
   display: inline-block;

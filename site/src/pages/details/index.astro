@@ -51,11 +51,11 @@ function oneLiner(body: string | undefined): string {
     （哪些课已覆盖 / 哪些没覆盖），面试答到机制层时直接可用。
   </p>
 
-  <!-- ── 全景索引：先给「这 8 个分水岭分别属于哪个领域」──────
+  <!-- ── 全景索引：先给「这些分水岭分别属于哪个领域」──────
        读者来本页的第一诉求是「资深分水岭有哪些、我需要补哪个」，
-       故把 8 篇按领域铺成一张紧凑索引表，再往下才是正文卡片。 -->
+       故按领域铺成一张紧凑索引表，再往下才是正文卡片。 -->
   <section class="dx-index">
-    <h2 class="dx-index-title">8 个分水岭一览</h2>
+    <h2 class="dx-index-title">{items.length} 个分水岭一览</h2>
     <ul class="dx-list">
       {
         items.map((item) => {

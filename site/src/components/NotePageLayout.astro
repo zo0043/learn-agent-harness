@@ -44,8 +44,10 @@ export interface FootLink {
 }
 
 interface Props {
-  /** <title> 用的页面名 */
+  /** <title> 与页面 <h1> 用的页面名 */
   title: string;
+  /** meta description；省略时按 title 派生（避免全站共用同一条摘要） */
+  description?: string;
   /** 元信息条徽章 */
   chips: MetaChip[];
   /** 面包屑；最后一项通常省略 href（= 当前页） */
@@ -59,7 +61,7 @@ interface Props {
   footLinks?: FootLink[];
 }
 
-const { title, chips, crumbs, toc, relatedQuestions = [], footLinks } = Astro.props;
+const { title, description, chips, crumbs, toc, relatedQuestions = [], footLinks } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const DEFAULT_FOOT: FootLink[] = [
@@ -69,9 +71,19 @@ const DEFAULT_FOOT: FootLink[] = [
   { label: '知识地图', href: base + 'map/' },
 ];
 const foot = footLinks ?? DEFAULT_FOOT;
+
+/**
+ * C2/PRES-F3：把 description 转发给 <Base>。
+ * 此前本 layout 调用 `<Base title={title}>` 不带 description，于是 8 个课程页 + 8 个专题页
+ * 以及 /map、/interview 全都落到 Base 的同一条默认摘要上（33 页里 31 页共用一条 meta description）。
+ * 调用方未显式传时按 title 派生一条，仍保证每页摘要可区分。
+ */
+const desc =
+  description ??
+  `${title} —— learn-agent-harness 学习站点（coding agent 五阶段课程体系）的「${title}」页：笔记原文渲染，含元信息条、面包屑与本页目录。`;
 ---
 
-<Base title={title}>
+<Base title={title} description={desc}>
   <div class="course-layout">
     <article class="markdown">
       <header class="course-meta-bar">
@@ -93,6 +105,14 @@ const foot = footLinks ?? DEFAULT_FOOT;
           }
         </nav>
       </header>
+
+      {/* C2/PRES-F1：页面自身的 <h1>。
+          此前本 layout 不输出 h1，页标题只能由 markdown 正文首行的 `#` 提供；而 `before` 槽
+          （/map 的 DomainMap、/interview 的复习主区）会先输出 h2–h4，于是 /map、/interview 的 h1
+          被挤到十几个标题之后（文档大纲倒置）。现在 h1 由 layout 在 meta-bar 之后、before 槽之前
+          输出；正文首个 h1 由 astro.config.mjs 的 demoteNoteH1 降级为 h2，保证全页唯一 h1 且排在
+          所有 h2 之前。类名复用既有 `.page-title`（global.css:670，其他页已在用，不新增死选择器）。 */}
+      <h1 class="page-title">{title}</h1>
 
       <slot name="before" />
 

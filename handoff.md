@@ -11,7 +11,7 @@
 >
 > **2026-10-11 四次整理（内容补完，系统时钟）**：🔶1-5 五项全部写入——系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 §S4 升级为 Agent 安全全景 / 模型基础 §S7 八股速查表 16 题 / interview-bank §8 行为面 5 题；核实时点事实：OWASP LLM Top 10 已更新到 **2026 版**（2026-08-04 发布；8 项变动：Excessive Agency #6→#3、System Prompt Leakage 被 Hidden Context Exposure 取代等，笔记已按 2026 版回填）、OWASP Agentic Top 10（2026，2025-12-09 发布）全文、LangGraph 1.0.x 稳定版（2025-10 alpha → ~~当前 1.0.1~~ **1.4.21**，2026-10-12 registry 复核）。每课题库 +2 题。⚠️ 日期口径：前两轮标为 "10-17"，机器时钟 = 2026-10-11（周日，星期自洽；rag-demo mtime=10-11 00:06），本轮起用系统时钟，口径待确认。
 >
-> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 离线 mock 实测 15 spans/1 trace，2026-10-12；历史活端点 11 spans 未验证）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（GitHub Actions→Pages，build 零错误，上线时 9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
+> **2026-10-11 站点+内容扩充（本轮，已推 GitHub）**：① 日期口径归一完成（"10-17" 为未来日期误写，11 文件 28 处按 mtime 证据改回系统时钟）② 行业前线调研底稿 `notes/industry-2026.md`（MCP→AAIF 治理/spec 2026-07-28/协议三分、Managed Agents "harness 假设会腐烂"、Cognition 单线程写、computer use 升一等、LLM 时间线 12 节点、分水岭 8 细节，全部实抓官方一手源）③ 课程前线回填：MCP 与供应链安全 §S2.1 / 框架生态 §S3+4 行 / 系统设计 §S2 沙箱+评测闭环 / 新增 多智能体编排 `multi-agent.md`（多智能体编排，一等域，S1-S7）+ `llm-timeline.md` + `details/` 分水岭 8 页（knowledge-map 升 16 域；后以 **15 域**冻结口径为准，见 knowledge-map 口径块）④ interview-bank 待实操 4 项全部落地：`sandbox-demo/`（四通道 policy+幽灵事故重放，600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 离线 mock 实测 15 spans/1 trace，2026-10-12；历史活端点 11 spans 未验证）/ `mcp-demo/`（投毒+四层防御+消融）/ `framework-demo/`（Claude Agent SDK 四能力，主路线直连代理成功，副产发现 SDK allowedTools 会抢在 canUseTool 前 auto-approve 的坑）⑤ Astro 站 `site/` 已上线 **https://blog.zero43.top/learn-agent-harness/**（GitHub Actions→Pages，build 零错误，上线时 9 页全 200；P4 文案已完成（808d580））⑥ 提交 845628c 已推 main，secret 扫描干净。
 
 ---
 
@@ -61,8 +61,8 @@ harness-demo/                       TS 可运行版
   src/types.ts llm.ts tools.ts policy.ts session.ts context.ts agent.ts demo.ts
   src/test-compact.ts               压缩逻辑的本地 mock 测试（不依赖代理）
   workspace/docs/...                demo 测试语料
-  trajectories/demo.jsonl           轨迹日志（演示崩溃恢复）
-whiteboard/agent_whiteboard.py      ~150 行纯标准库白板版（面试现场手写用）
+  trajectories/demo.example.jsonl 轨迹日志样例（已入库；`demo.jsonl` 由 npm run demo 本地生成，被 .gitignore 排除）
+whiteboard/agent_whiteboard.py      178 行纯标准库白板版（面试现场手写用）
 viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core）
 ```
 
@@ -196,7 +196,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 
 1. ~~核对 FinHot/.env~~ ✅、~~demo:compact 活体~~ ✅ —— 已完成，无需再动
 2. 出练习题：`notes/*.md` 里题库已扩充（原 16 题 + 各编号课各 8 题 + interview-bank 交叉 10 道）；本次修的 5 个 bug（见待办 1）本身就能出 2-3 道好题（import 提升、wire 格式）；提问另约时间（用户要求整理阶段不急着考）
-3. 下一步：按 §四 学习总纲执行 **Phase 1**：系统设计 → 沙箱与凭据续 §S2（写 sandbox-demo src）→ 评测工程化；**🔶1-5 已全部写入（2026-10-11 四次整理：系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代 / MCP 与供应链安全 §S4.2-4.4 OWASP 2026 双清单 / 模型基础 §S7 八股速查表 / interview §8 行为面 5 题）**，十六个知识域知识结构已建成，开课 = 展开讲解 + 提问演练（用户要求整理阶段不急着考，提问另约时间）
+3. 下一步：按 §四 学习总纲执行 **Phase 1**：系统设计 → 沙箱与凭据续 §S2（写 sandbox-demo src）→ 评测工程化；**🔶1-5 已全部写入（2026-10-11 四次整理：系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代 / MCP 与供应链安全 §S4.2-4.4 OWASP 2026 双清单 / 模型基础 §S7 八股速查表 / interview §8 行为面 5 题）**，15 个知识域知识结构已建成，开课 = 展开讲解 + 提问演练（用户要求整理阶段不急着考，提问另约时间）
 4. 补强优先级（interview-bank.md 覆盖矩阵 🟡→🟢）：① sandbox-demo src ② harness-demo 加 OTel 埋点导出 ③ 本地 MCP server 投毒演示
 5. 若用户提供目标 JD（字节等），重新校准 P1/P2 权重（一手数据在 `jd-research/`）
 

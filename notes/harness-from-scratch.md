@@ -3,7 +3,7 @@
 > 课程日志 · 2026-10-10 开课 · 从零写 harness（面试导向：coding agent 方向）
 > 目标：把"会讲架构"变成"能写出来"——手写一个可运行的最小 harness + 20 分钟白板版
 > 探测结论：TS+Python 双版本；流式从零讲
-> 作品位置：`harness-demo/`（TS 可运行版）+ `whiteboard/agent_whiteboard.py`（~150 行纯标准库）
+> 作品位置：`harness-demo/`（TS 可运行版）+ `whiteboard/agent_whiteboard.py`（178 行纯标准库）
 
 ---
 
@@ -78,7 +78,7 @@ function scoped(p: string): string {            // 路径范围 = 沙箱的执�
 }
 ```
 
-**任何失败（校验错/越界/执行异常）都抛错 → agent 层转成回写的错误结果。** 实测：模型调用未注册工具 `city` → "未知工具: city" 回写 → 模型自己改调 `get_weather`。**拒绝/错误也是合法结果。**
+**任何失败（校验错/越界/执行异常）都抛错 → agent 层转成回写的错误结果。** 实测（`policy` 兜底先于校验）：**未注册**的工具名根本走不到校验层——`DEMO_POLICY.decide("city")` → `deny（无匹配规则，默认拒绝）`，模型收到的是「[策略拒绝] 无匹配规则」，不是「未知工具」；`callTool` 里的 `未知工具:` 分支是 defense-in-depth（策略放行了一个注册表里没有的名字时才会命中）。**拒绝/错误也是合法结果**，都会被回写。
 
 ## ④ SSE 流式（`src/llm.ts`）
 
@@ -127,17 +127,19 @@ decide(tool) → 优先级 deny > approve > allow；fallback = "deny"
 
 ```mermaid
 flowchart TD
-  TC["模型工具调用请求"] --> V{"校验<br/>名称已注册？参数合法？"}
-  V -->|"否"| ERR1["抛错 → 转成回写的错误结果"]
-  V -->|"是"| P{"policy.decide<br/>优先级 deny > approve > allow<br/>fallback = deny"}
-  P -->|"deny（如 run_shell）"| D["策略拒绝 → 结果回写<br/>（拒绝也是合法结果）"]
+  TC["模型工具调用请求"] --> P{"policy.decide<br/>优先级 deny > approve > allow<br/>fallback = deny"}
+  P -->|"deny（run_shell / 未注册工具名）"| D["策略拒绝 → 结果回写<br/>（拒绝也是合法结果；此路径不记 intent）"]
   P -->|"approve（如 write_file）"| A{"人工审批<br/>human-in-the-loop"}
   A -->|"未批准"| D
   A -->|"批准"| I["记 tool_intent<br/>（先记 intent 再执行）"]
   P -->|"allow（只读）"| I
-  I --> E["执行工具（限定路径范围内）"]
+  I --> V{"callTool 内校验<br/>名称已注册？参数合法？"}
+  V -->|"否"| ERR1["抛 ToolError → 转成回写的错误结果"]
+  V -->|"是"| E["执行工具（限定路径范围内）"]
   E --> WB["记 tool_exec + 结果回写 messages<br/>（执行异常也回写）"]
 ```
+
+**门序注意（对照 `src/agent.ts` / `src/tools.ts`，2026-10-19 复核）**：权限门在**前**、参数校验在 `callTool` 内、`tool_intent` 夹在两者之间。所以「未注册工具名」的失败语义是 **策略拒绝**（`fallback=deny`）而不是「未知工具」；拒绝路径**不写 `tool_intent`**（只留下 `status:"denied"` 的 `tool_exec`），这正是「有 exec 无 intent = 拒绝路径 / 有 intent 无 exec = 崩溃未知状态」那条判据的来源。
 
 ## ⑥ 会话持久化（`src/session.ts`）
 
@@ -174,7 +176,7 @@ flowchart TD
   DECIDE --> GO
 ```
 
-**实测输出（真实崩溃 + 真实恢复）**：
+**实测输出（模拟崩溃：harness 内 `process.exit(137)` 自触发 + 真实恢复）**：
 ```
 [崩溃演示] 模拟进程崩溃（日志里有 intent，没有 result）   ← 第一次运行 exit 137
 [恢复] 从日志重建 7 条消息，未知状态工具调用 1 个         ← 第二次运行
@@ -197,7 +199,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 
 ## ⑨ 完整 demo（`src/demo.ts`，真实模型 qwen3.8-flash）
 
-任务：查北京天气 → 列 docs → 读 README → 写 out/summary.md（需审批）→ 试 run_shell（会被拒）→ 总结。
+任务（与 `src/demo.ts:42-46` 的 5 条编号一致）：① 查北京天气 → ② 列 docs 并读 `README.md` → ③ 写 `out/summary.md`（需审批）→ ④ 试 `run_shell`（会被拒）→ ⑤ 总结。
 
 **五种运行模式（正常 / 崩溃恢复 / 审批拒绝 / 压缩 / 可观测）**：
 
@@ -211,7 +213,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 
 **代理不稳定实录（真实可靠性故事）**：19:25-19:33 全部正常，19:33 起该代理持续 400（`"functions parameter of the code model must be provided"`——代理把请求路由到了要求旧版 functions 格式的 code 模型后端）；期间还出现工具名带不可见字符（`unknown tool: get_weather` 假错）→ 加了一行防御 `tc.name.trim()`。**面试点：provider 也是不可靠组件；重试/降级/防御性解析属于 API 层职责。**
 
-## ⑩ 白板蒸馏（`whiteboard/agent_whiteboard.py`，~150 行纯标准库）
+## ⑩ 白板蒸馏（`whiteboard/agent_whiteboard.py`，178 行纯标准库）
 
 与 TS 版 1:1：`llm()` 一次调用 → `TOOLS` 注册表+校验 → `check()` 权限门（deny>approve>allow 默认 deny）→ `log_append`/`rebuild` 会话恢复（未知状态=只读重放/非只读摆状态）→ `est_tokens` 预算。白板讲解 60 秒骨架：
 
@@ -220,17 +222,20 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 ---
 
 ## 练习题库（后续提问用）
+> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
+> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
+> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
 
-| # | 题目 | 考察 |
-|---|---|---|
-| 1 | 为什么 tool_calls 流式解析要"拼接后整体 parse"而不能逐片段 parse？ | ④ |
-| 2 | intent/exec 之间崩溃，工具是"转账"（非只读、非幂等）。恢复时该怎么办？如果工具是"查余额"呢？ | ⑦ |
-| 3 | policy 默认 allow 会怎样？举一个"默认 allow + 模型被注入"的事故链 | ⑤ |
-| 4 | 压缩后模型忘了最初目标的约束（"不许改生产目录"），会发生什么？压缩策略怎么改？ | ⑧ |
-| 5 | 日志里有 3 条 tool_intent 都没有 exec，其中 2 个是只读工具。恢复流程具体怎么走？ | ⑥⑦ |
-| 6 | 为什么"loop 正常结束"不能当验收？你 demo 里的 final 消息证明了什么、没证明什么？ | ⑨（Harness 架构） |
-| 7 | 模型连续 3 次调用同一被拒工具，harness 该在哪一层拦？ | ⑤ |
-| 8 | 白板 20 分钟版你会砍掉哪三样、保留哪三样？为什么？ | 综合 |
+| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
+|---|---|---|---|
+| 1 | 为什么 tool_calls 流式解析要"拼接后整体 parse"而不能逐片段 parse？ | ④ | ≥3 点：①后续帧只带 arguments 的不完整片段，单帧 parse 必抛异常；②需按 index 分槽拼接、流结束才整体 parse；③content 与 tool_calls 是两套拼接逻辑（④） |
+| 2 | intent/exec 之间崩溃，工具是"转账"（非只读、非幂等）。恢复时该怎么办？如果工具是"查余额"呢？ | ⑦ | ≥3 点：①转账=非只读非幂等，绝不盲目重放；②把 [未知状态] 摆给模型，先用只读工具核对现状再决定；③查余额=只读，可安全重放并补记 tool_exec（⑦） |
+| 3 | policy 默认 allow 会怎样？举一个"默认 allow + 模型被注入"的事故链 | ⑤ | ≥3 点：①默认 allow=没写规则的工具全部放行，权限门形同不存在；②链：注入让模型调 run_shell 删数据→无规则→直接执行；③默认 deny 才是安全默认，规则是白名单（⑤） |
+| 4 | 压缩后模型忘了最初目标的约束（"不许改生产目录"），会发生什么？压缩策略怎么改？ | ⑧ | ≥3 点：①中间被摘要替换，最初约束若没进 head 就会丢失；②会把生产目录当普通目录写；③策略：head 固定保 system+首 user（⑧） |
+| 5 | 日志里有 3 条 tool_intent 都没有 exec，其中 2 个是只读工具。恢复流程具体怎么走？ | ⑥⑦ | ≥3 点：①先 loadAll+rebuild 从 JSONL 重建上下文；②2 个只读工具→安全重放补记 exec；③非只读那个→摆 [未知状态] 让模型先只读核对再决定（⑥⑦） |
+| 6 | 为什么"loop 正常结束"不能当验收？你 demo 里的 final 消息证明了什么、没证明什么？ | ⑨（Harness 架构） | ≥3 点：①loop 结束只证明模型不再请求工具，不证明任务正确；②final 证明了流程走完、工具结果已回写；③没证明答案对、范围对，验收靠可复查产物（⑨） |
+| 7 | 模型连续 3 次调用同一被拒工具，harness 该在哪一层拦？ | ⑤ | ≥3 点：①该在 policy 门拦：同一被拒工具反复调用=判定仍 deny，结果照样回写；②不在提示词里求它别调；③可加重试预算/重复调用熔断，防无谓烧钱（⑤） |
+| 8 | 白板 20 分钟版你会砍掉哪三样、保留哪三样？为什么？ | 综合 | ≥3 点：①保留：loop 与结果回写、先记 intent 再执行、默认 deny；②可砍：压缩摘要细节、OTel 埋点、多模式 demo；③理由：白板讲清三道门与两个纪律即可（综合） |
 
 ## 来源
 

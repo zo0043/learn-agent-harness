@@ -50,22 +50,24 @@
 
 ## 课程总表
 
-| 主题 | 优先级 | 状态 | 课程文件 | 完成后你能做到 |
+| 主题 | 岗位权重 | 状态 | 课程文件 | 完成后你能做到 |
 |---|---|---|---|---|
-| 从零写 harness | P0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
-| RAG 与检索 | P0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 132-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
-| Agent 系统设计模板 | P0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
-| Agent 可观测 | P2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：提问演练 + 题库 14 题通过） |
-| 沙箱与凭据·可复现 | P0 | 📐 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
-| 长期记忆 | P2 | 📐 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：提问演练 + 题库 14 题通过） |
-| durable execution | P1 | 📐 | `durable-execution.md`(`durable-execution-demo/`,S7 demo 已落地) | 讲清长任务不丢不重（journal/checkpoint/幂等） |
-| 评测工程化 | P0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
-| MCP 协议 + 供应链安全 | P1 | 📐 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
-| API 实操 + 多模型路由 | P1 | 📐 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
-| 数据飞轮 | P1 | 📐 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成“生产数据飞轮”故事 |
-| 模型基础 | P2 | 📐 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：提问演练 + 题库 14 题通过） |
-| 框架生态 | P2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：提问演练 + 题库 14 题通过） |
-| 多智能体编排 | P0 | 📐 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
+| 从零写 harness | W0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
+| RAG 与检索 | W0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 132-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
+| Agent 系统设计模板 | W0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
+| Agent 可观测 | W2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：提问演练 + 题库 14 题通过） |
+| 沙箱与凭据·可复现 | W0 | 📐 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
+| 长期记忆 | W2 | 📐 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：提问演练 + 题库 14 题通过） |
+| durable execution | W1 | 📐 | `durable-execution.md`(`durable-execution-demo/`,S7 demo 已落地) | 讲清长任务不丢不重（journal/checkpoint/幂等） |
+| 评测工程化 | W0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
+| MCP 协议 + 供应链安全 | W1 | 📐 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
+| API 实操 + 多模型路由 | W1 | 📐 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
+| 数据飞轮 | W1 | 📐 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成“生产数据飞轮”故事 |
+| 模型基础 | W2 | 📐 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：提问演练 + 题库 14 题通过） |
+| 框架生态 | W2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：提问演练 + 题库 14 题通过） |
+| 多智能体编排 | W0 | 📐 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
+
+> **第 2 列口径（2026-10-19 改名）**：`W0/W1/W2` 是**岗位权重**，由旧列名「优先级」及其旧值 `P0/P1/P2` 改名而来（一一对应：P0→W0、P1→W1、P2→W2）。**它不是教学阶段、不是阅读序**——阶段标签 `P0–P4` 与线性阅读序见站点 `/learn/`（唯一真源 `site/src/data/course-structure.ts` 的 `stage` 与数组序）。历史上两套 `P0/P1/P2` 曾同名不同义（旧优先级 vs 站点阶段），改名为消歧。
 
 横向资产:`interview-bank.md`(模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵)· `llm-timeline.md`(LLM 时间线 12 节点)· `industry-2026.md`(2026-10 行业前线调研,MCP 与供应链安全 / 框架生态 / 系统设计 / 多智能体编排 一手源)· `details/`(资深分水岭 8 细节页)
 
@@ -73,7 +75,11 @@
 
 > 2026-10-11 前线回填（industry-2026 → 课程）：MCP 与供应链安全 §S2.1（AAIF 治理/spec 2026-07-28/协议三分）· 框架生态 §S3 表 +4 行 · 系统设计 §S2 两个必答题模块 + 1 追问 · 从零写 harness §8 → 多智能体编排入口。课程状态(⏳/📐/✅)指"开课/实操"进度，不含内容回填。
 
-## 依赖图（按 handoff 优先级）
+## 依赖图（实线 = `course-structure.ts` 的 `prereqs`，2026-10-19 对齐）
+
+> 本图实线只表示「先修课 → 后修课」，与 `site/src/data/course-structure.ts` 的 `prereqs` 字段**逐条一致**（取值源只读，比对命令与输出见本轮修复日志 `reviews/2026-10-19/fix-knowledge-map.md` 的 P2 条）。
+> `INTERVIEW`（面试演练）是**收口活动、不是课程**，无 `prereqs`，因此不画前置边；原「加深 / 进设计题」的虚线语义改为图下文字（勿读成依赖）。
+> 阶段标签 `P0–P4` 与线性阅读序不在本图呈现，见站点 `/learn/`。
 
 ```mermaid
 graph TD
@@ -82,51 +88,48 @@ graph TD
   classDef todo fill:#6e7681,stroke:#57606a,color:#fff
   classDef hub fill:#0f766e,stroke:#0d5f59,color:#fff
 
-  HARNESS["✅ 从零写 harness · P0"]:::done
-  RAG["✅ RAG 与检索 · P0"]:::done
-  SYSDESIGN["📐 系统设计 · P0"]:::doing
-  SANDBOX["📐 沙箱与凭据 · P0"]:::doing
-  EVAL["📐 评测工程化 · P0"]:::doing
-  DURABLE["📐 durable execution · P1"]:::doing
-  MCP["📐 MCP 与供应链安全 · P1"]:::doing
-  API["📐 API 与多模型路由 · P1"]:::doing
-  FLYWHEEL["📐 数据飞轮 · P1"]:::doing
-  OBS["📐 可观测 · P2"]:::doing
-  MEMORY["📐 长期记忆 · P2"]:::doing
-  MODEL["📐 模型基础 · P2"]:::doing
-  FRAMEWORK["📐 框架生态 · P2"]:::doing
-  MULTIAGENT["📐 多智能体编排 · P0"]:::doing
+  HARNESS["✅ 从零写 harness · W0"]:::done
+  AGENTH["✅ Harness 架构 · 主线"]:::done
+  RAG["✅ RAG 与检索 · W0"]:::done
+  SYSDESIGN["📐 系统设计 · W0"]:::doing
+  SANDBOX["📐 沙箱与凭据 · W0"]:::doing
+  EVAL["📐 评测工程化 · W0"]:::doing
+  DURABLE["📐 durable execution · W1"]:::doing
+  MCP["📐 MCP 与供应链安全 · W1"]:::doing
+  API["📐 API 与多模型路由 · W1"]:::doing
+  FLYWHEEL["📐 数据飞轮 · W1"]:::doing
+  OBS["📐 可观测 · W2"]:::doing
+  MEMORY["📐 长期记忆 · W2"]:::doing
+  MODEL["📐 模型基础 · W2"]:::doing
+  FRAMEWORK["📐 框架生态 · W2"]:::doing
+  MULTIAGENT["📐 多智能体编排 · W0"]:::doing
   TIMELINE["✅ LLM 时间线 · 横向资产"]:::done
   INDUSTRY["✅ 行业前线调研 · 横向资产"]:::done
-  INTERVIEW["🎯 面试演练 · P0 末"]:::hub
+  INTERVIEW["🎯 面试演练 · 收口活动（非课程·无前置边）"]:::hub
 
+  HARNESS --> AGENTH
+  HARNESS --> RAG
   HARNESS --> SYSDESIGN
   RAG --> SYSDESIGN
   HARNESS --> SANDBOX
+  SANDBOX --> MCP
   RAG --> EVAL
+  SYSDESIGN --> MULTIAGENT
+  HARNESS --> MULTIAGENT
   HARNESS --> DURABLE
   EVAL --> DURABLE
-  HARNESS --> MCP
-  SYSDESIGN --> MULTIAGENT
-  EVAL --> MULTIAGENT
-  MULTIAGENT --> INTERVIEW
   HARNESS --> API
+  API --> OBS
+  RAG --> MEMORY
   EVAL --> FLYWHEEL
-  SYSDESIGN --> INTERVIEW
-  SANDBOX --> INTERVIEW
-  EVAL --> INTERVIEW
-  DURABLE --> INTERVIEW
-  MCP --> INTERVIEW
-  API --> INTERVIEW
-  FLYWHEEL --> INTERVIEW
-  OBS -.->|加深 评测工程化| INTERVIEW
-  MEMORY -.->|进 系统设计 设计题| INTERVIEW
-  MODEL -.-> INTERVIEW
-  FRAMEWORK -.-> INTERVIEW
+  TIMELINE --> MODEL
+  AGENTH --> FRAMEWORK
 ```
 
-**建议开课顺序**:系统设计 → 多智能体编排 → 沙箱与凭据(续 §S2)→ 评测工程化 → durable execution → MCP 与供应链安全 → API 与多模型路由 → 数据飞轮 →(P2 四课按目标岗位权重排)。
-理由:系统设计把「从零写 harness / RAG 与检索」收口成"设计能力";多智能体编排依赖系统设计模板 + 从零写 harness 的子代理概念,2026 行业实践已收敛(单线程写),开课成本低;沙箱与凭据讲义已展开且 demo 已落地;评测工程化是 P1 三课(durable execution / MCP 与供应链安全 / 数据飞轮)的公共地基。
+图外补充（**非前置边**，勿读成依赖）：可观测加深评测工程化（指标的数据管道上游）；长期记忆进系统设计设计题（`long-term-memory.md §S9` 收口系统设计）；面试演练是全部课程之后的收口活动。
+
+**建议修读顺序（唯一真源 = 站点 `/learn/` 线性阅读序）**：即 `course-structure.ts` 数组序 #1→#17（llm-timeline → 从零写 harness → Harness 架构 → RAG 与检索 → 系统设计 → 沙箱与凭据 → MCP 与供应链安全 → 评测工程化 → 多智能体编排 → durable execution → API 与多模型路由 → 可观测 → 长期记忆 → 数据飞轮 → 模型基础 → 框架生态 → 行业前线调研）。
+理由：线性序满足全部 `prereqs`（拓扑序已校验，见上依赖图），且每门课带「前置 / 参考样本 / 主线挂钩」；单链阅读不打散跨课依赖。若按目标岗位调先后，只调整**本表岗位权重**的排法，不改 `/learn/` 线性序。
 
 ## 横切知识点（多课重复出现，面试时按"一个主题三个锚点"讲）
 
@@ -143,13 +146,46 @@ graph TD
 | 资产 | 证明的能力 | 被哪些课引用 |
 |---|---|---|
 | `harness-demo/`(13 源文件 = 9 运行时 + 3 OTel 离线判据/断言(`otel-mock.ts`/`otel-assert.ts`/`otel-mock-scenario.ts`) + 1 压缩自测；+ trajectories 落盘，覆盖 harness-from-scratch ①-⑩ 十节；5 种运行模式实测) | loop/工具协议/流式/权限/恢复/压缩 | 系统设计(coding agent 设计)、沙箱与凭据(policy 层)、durable execution(session.ts=最小 journal)、评测工程化(mock 评测)、多智能体编排(§S7 子代理设计练习) |
-| `whiteboard/agent_whiteboard.py`(~180 行) | 白板手写 | 系统设计、面试演练 |
+| `whiteboard/agent_whiteboard.py`(178 行，2026-10-19 统一，原写 ~180 行) | 白板手写 | 系统设计、面试演练 |
 | `rag-demo/`(15 文件 + golden set) | 检索全 pipeline + 评测 | 系统设计(KB 设计题)、评测工程化(检索层评测)、数据飞轮(指标驱动) |
 | `durable-execution-demo/`(9 src 文件/821 行,3 崩溃点×各 3 次真实 SIGKILL 恢复:副作用恒=1、恢复报告逐字节一致,含负向测试) | journal/checkpoint/幂等三机制 + 未知态处置实操 | durable execution §S7、沙箱与凭据(崩溃恢复)、系统设计(长任务设计题) |
 | `sandbox-demo/`(7 个 src 文件 + README,3 次重放逐字节一致) | 四通道 policy + 事故重放 | 沙箱与凭据 §S2 |
+| `mcp-demo/`(投毒 + 四层防御 + 消融，全离线确定性) | MCP 协议原语 / 供应链投毒 / 四层 defense-in-depth 与重放断言方法论 | MCP 与供应链安全 §S6/S7、评测工程化(消融方法) |
+| `framework-demo/`(Claude Agent SDK 四能力 + 三家 SDK 同任务离线 mock 对照) | 框架抽象边界 / 权限钩子 / 恢复语义 / 三族坐标系 | 框架生态 §S3/S4、系统设计、多智能体编排(§S6 框架对照)、可观测(出口选型) |
+| `api-demo/`(六模块最小闭环 + 15 条断言自测，全离线零 key) | SSE 分帧 / schema 校验 / caching / 重试分类 / 多模型路由 / 成本归因 | API 与多模型路由 §S1-S6、可观测(成本归因埋点)、模型基础(成本公式底座) |
+| `flywheel-demo/`(脱敏台账样本 → filter/label 两轮降噪 → 指标 → 门禁，四模块 + 10 断言自测，全离线零 key) | 数据版本化 / 两轮降噪 / 可归因门禁 | 数据飞轮 §S3/S4、评测工程化(门禁) |
+| `model-basics-demo/`(KV cache / 推理成本数值走查脚本，四模块 + 10 断言 + S8 六步走查，纯计算不调模型) | KV cache / prefill-decode / 推理成本拆分 | 模型基础 §S1/S4/S8、API 与多模型路由(成本理论底座) |
 | `memory-redteam/`（7 src 文件，零依赖；16 条探针 + 逐层消融 18/18 层 + `npm run demo` 端到端走查 + JSONL 跨进程重建断言） | **自研长期记忆**：写/读/遗忘三路径 + 冲突消解/时效/血缘传播 + 四道投毒防线 + 跨会话持久化 | 长期记忆 §S3/S4/S5/S6/S7/S10（§S7 回归框给出逐条映射表） |
+| `my-agent/`(增量主线起点：M0 minimal-loop starter，`npm run assert:m0` 过关) | 主线 capstone 的**动手对象**（学生自建，不是参考样本） | /learn/ 增量主线（capstone） |
+| `final-project/`(毕业项目：生成层收口——grade.mjs / rubric.mjs + 自由命题 subjects) | 从模糊需求独立设计并实现 agent 的终局判据 | /learn/ 增量主线「毕业项目」卡 |
 | FinHot(生产) | 长任务/批量评测/事故/数据飞轮 | 沙箱与凭据、durable execution、评测工程化、API 与多模型路由、数据飞轮 |
 | pi + pi-agents-team(日常在用) | 多 agent 编排/框架源码级 | 系统设计、框架生态 |
+
+> 本表是索引；**「课程 → 参考样本」的权威映射与现况三态在 `site/src/data/mvps.ts`**（13 个 mvpSlug，含 owner/reuse/状态）。`my-agent/` 与 `final-project/` 是**主线 capstone 的动手对象与终局判据**，不是「参考样本」，因此**不计入「可运行 demo 作品 6」**（作品 6 = harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo，见上方计数口径）。2026-10-19 补登 mcp-demo / framework-demo / api-demo / flywheel-demo / model-basics-demo / my-agent / final-project 七行（原表漏登，其中 5 个已有课程在用它们的实操证据）。
+
+## 术语表（中英对照与首选写法，2026-10-19 新增）
+
+> 用途：全站口径统一。**首选写法**一列是写课件/README/面试口径时的统一说法；同义词只列一次，不再另造。
+
+| 术语 | 英文 | 首选写法与备注 |
+|---|---|---|
+| harness | harness | 保留英文（不译「马具」）；指「模型外面那层 agent 运行环境」。相关：`agent-harness` 写「Harness 架构」（主线课） |
+| agent 循环 | agent loop | 首选「agent loop」；写「最小 loop」时指 `my-agent` M0 的最小骨架 |
+| 轨迹 | trajectory | 首选「轨迹 trajectory」；文件名为 `trajectories/*.jsonl`，引用入库样本时写 `demo.example.jsonl` |
+| 权限门 | policy gate | 首选「权限门」；四通道 policy = `deny > approve > sandbox > allow`，默认 deny |
+| 沙箱 | sandbox | 首选「沙箱」；与权限门是**两道独立的门**（权限管「能不能做」、沙箱管「做了能炸多大」） |
+| 拒绝 | deny / rejection | 首选「拒绝」；「拒绝也是合法结果」指 policy 判定 deny 后回写轨迹 |
+| 拒答 | refusal / abstention | 首选「拒答」，指检索/回答层主动回答「不知道」（与权限「拒绝」不同义，勿混用） |
+| 评测 | evaluation | 首选「评测」；四层指标体系、LLM-as-judge、golden set、CI 门禁均归此域 |
+| 检查点 | checkpoint | 首选「检查点 checkpoint」；与「journal（意图/执行双锚点）」配合实现长任务不丢不重 |
+| 幂等 | idempotency | 首选「幂等」；幂等键（idempotency key）是断点续跑不重复的判据 |
+| 倒数排序融合 | RRF（Reciprocal Rank Fusion） | 首选「RRF 融合」；混合检索 `BM25 ∥ 向量` 的融合算子 |
+| 词频检索 | BM25 | 首选「BM25」；词法路检索，与向量路互补 |
+| 人工审批 | HITL（human-in-the-loop） | 首选「人工审批 HITL」；`approve` 通道=挂起等人工批准 |
+| 可观测性 | observability / OTel | 首选「可观测」；`OTel GenAI` 语义约定（trace/span/metric） |
+| 模型上下文协议 | MCP（Model Context Protocol） | 首选「MCP」；与 A2A、agent 身份等并列时注明「协议」以免与产品混 |
+| 数据飞轮 | data flywheel | 首选「数据飞轮」；指标变化须可归因（一次只动一个变量） |
+| 幽灵事故 | phantom incident | 首选「幽灵事故」，指 2026-10-09 并行会话污染生产容器事件；时长口径 **25 分钟**（18:00–18:25） |
 
 ## 未结事项（非课程，来自 handoff）
 
@@ -159,7 +195,7 @@ graph TD
 - [x] 讲义展开（2026-10-11 Phase 2）：durable execution / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 四课 →"开课版讲义"（各 4-5 张 mermaid、实战走查节、题库各 14 题）；引用一手源复核修正 8 处；数据飞轮回填 FinHot 真实三轮评测指标
 - [x] 讲义展开（2026-10-11 Phase 3）：可观测 / 长期记忆 / 模型基础 / 框架生态 四课 →"开课版讲义"（各 4 张 mermaid、实战走查节、题库扩充）
 - [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）；[handoff 待办 5 并入] 2 场 60 分钟模拟：Phase 1 完成后排初验、全部完成后排终验
-- [ ] [interview-bank §7 并入] 开课顺序确认（当前建议：系统设计 → 沙箱与凭据（续 S2）→ 评测工程化 → durable execution → MCP 与供应链安全 → API 与多模型路由 → 数据飞轮 → P2 四课按目标岗位权重排）
+- [ ] [interview-bank §7 并入] 开课顺序确认（**唯一真源 = 站点 `/learn/` 线性阅读序**，即 `site/src/data/course-structure.ts` 数组序 #1→#17；本文件不再另列顺序清单——原此处与「依赖图」节各有一份重复列表，2026-10-19 已删并为上方单一指针）
 - [ ] [interview-bank §7 并入] 旧课遗留确认题自测（不混入新课，另约时间；题已存档）：从零写 harness 练习题库 8 题 / 从零写 harness §S2-S4+白板题 / RAG S1 五道确认题（2026-10-12 已写入 `rag.md` 文末题库节）
 - [x] 项目打磨（2026-10-12）：rag-demo / harness-demo README 补齐（harness-demo 模型名同步为 qwen3.8-flash-next）；durable-execution S7 demo 落地（durable-execution-demo/，3 崩溃点×3 次真实 SIGKILL 验收）
 - [x] 实操补强 ×4（2026-10-11 完成）：sandbox-demo 四通道 policy+幽灵重放（600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 离线 mock 实测 **15 spans/1 trace**，2026-10-12；历史活端点「11 spans」未验证、不作判据）/ mcp-demo 投毒+四层防御+消融 / framework-demo Claude Agent SDK（10 条 `ok()` 断言 + 1 条整体判定；「11/11」混口径已按 U-24 废弃）
@@ -167,8 +203,8 @@ graph TD
 - [x] **自研长期记忆子系统**（2026-10-12，`memory-redteam/` 原地升级，**不新增作品目录**）：从"投毒回归脚本"补全为可演示的自研记忆子系统——写路径 7 项能力（信任分级/注入扫描/高危独立审批/审计留痕/冲突消解/时效窗口/遗忘传播）、读路径（scope 过滤 + BM25∥字符三元组 hash 向量 → RRF 融合 + 逐条注入理由审计）、跨会话持久化（JSONL 事件日志 → 新进程重建，写入进程/重建进程/本进程三方 digest 逐字节一致）、`npm run demo` 端到端走查（§S10 步骤 1-7）。`node test.mjs` 16/16 守住（单元级 R1-R11 + 端到端 E1-E5）、`--ablate` 15 条探针/18 层逐层关防线全部失败（runner 对多防线探针改为**逐层**验证）、`--persist` 4/4 通过。实现期还修掉四处真缺陷：污染率口径把"命中签名"当污染（虚报 33%）、遗忘后派生物状态仍 `active`、原 R7 声称的 `ttlWindow` 从未被触发、`write()` 缺省走墙钟 `new Date()` 破坏可复现性——逐条记在 `memory-redteam/README.md`
 - [x] 作品口径就地更正（2026-10-12）：`memory-redteam/` 加了 `npm run demo`，计数口径块原措辞"（有 `npm run demo` 的目录）"随即失真——已改为"六个**具名作品**目录"，**数字 6 不变**，并显式声明 memory-redteam 按回归套件计、不计入作品数（site 作品页与 README 作品表均未改动）
 - [x] 日期口径确认（2026-10-11）：归一到系统时钟，11 文件 27 行 28 处修正
-- [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 https://blog.zero43.top/learn-agent-harness/（**33 个 html**，构成见上方计数口径「站点 html 33」条——2026-10-14 实测更正，原写 32 因枚举漏 `nav`；历史链：旧「32」当初是凑数（404.html 不存在）→ 审计查出后 2026-10-13 曾就地更正为 31（t16）→ 用户决定实现自定义 404 页后 32 真正成立（t20，CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)「dist HTML 文件数 = 32」））
+- [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 [https://blog.zero43.top/learn-agent-harness/](https://blog.zero43.top/learn-agent-harness/)（**33 个 html**，构成见上方计数口径「站点 html 33」条——2026-10-14 实测更正，原写 32 因枚举漏 `nav`；历史链：旧「32」当初是凑数（404.html 不存在）→ 审计查出后 2026-10-13 曾就地更正为 31（t16）→ 用户决定实现自定义 404 页后 32 真正成立（t20，CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)「dist HTML 文件数 = 32」））
 - [x] CI 结构与几何回归（W4/t5，2026-10-12；2026-10-13 t16 按 t12 评审加固 F3 搜索断言 + F2 fault 失败现场截图；t20 新增自定义 404 页并纳入断言——8 页×3 视口=24、sanity 下界 ≥32）：`Verify site (structure + 3-viewport)` 作业（`.github/workflows/verify.yml` + `site/tools/visual-check.mjs`）——CI（ubuntu-latest）构建站点 → headless Chromium 3 视口（375/768/1280）× 8 页（含自定义 404 页）：① 无横向溢出（容差 4px）② 关键元素可见（header 导航/页标题/卡片容器/课程正文+meta 栏；404 页=标题+3 个引导卡片）③ 无 console error + 搜索入口交互（**入口必须存在、缺失即失败**；点击开 dialog/Esc 关）+ 负路径自证（注入 overflow/missing-element 必须被检出且作业必须失败）。绿基线 [run 38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346)（21/21 + selftest）/ 注入负路径 [run 38282852860](https://github.com/zo0043/learn-agent-harness/actions/runs/38282852860)（按设计失败）/ 加固后 [run 38345995909](https://github.com/zo0043/learn-agent-harness/actions/runs/38345995909)（21/21，dist HTML=31）/ 含 404 页后 [run 38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)（24/24，dist HTML=32）。**边界：只断言结构+几何，不覆盖视觉审美——像素级仍留浏览器人工目检**
-- [ ] JD 关键词覆盖：见 `interview-bank.md` 矩阵（目标全 🟢）
+- [ ] JD 关键词覆盖：见 `interview-bank.md` §6 矩阵。**判据（2026-10-19 改，原写「目标全 🟢」不可达）：除 ⚪ 观察项外全 🟢**。已知豁免行（矩阵自带、不计入判据）：`A2A / agent 身份 → —（观察级）｜未排课｜⚪ 按 roadmap 保持观察`；其余 11 行目标全 🟢。
 - [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过；一手数据已在 `jd-research/`，其余六家已抓 1799 条）[handoff 待办 3 / interview-bank §7 并入]
-- [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 P1/P2 权重 [interview-bank §7 并入]
+- [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 W1/W2 岗位权重 [interview-bank §7 并入]
