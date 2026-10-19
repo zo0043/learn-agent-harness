@@ -56,13 +56,13 @@ for (const ev of events) {
       parts.push(`<div class="chips">${chips}</div>`);
     }
     if (finishReason) parts.push(`<div class="chips"><span class="chip">finish: ${esc(finishReason)}</span></div>`);
-    rows.push({ cls: 'ev-model_response', kind, head: '模型响应', ms, bodyHtml: parts.join('') });
+    rows.push({ cls: 'ev-model_response', kind, headHtml: '模型响应', ms, bodyHtml: parts.join('') });
   } else if (kind === 'tool_intent') {
     const args = ev.args === undefined ? '' : ` <code>${esc(JSON.stringify(ev.args))}</code>`;
     rows.push({
       cls: 'ev-tool_intent',
       kind,
-      head: `intent → ${String(ev.name ?? '?')}${args}`,
+      headHtml: `intent → ${String(ev.name ?? '?')}${args}`,
       bodyHtml: '',
     });
   } else if (kind === 'tool_exec') {
@@ -76,7 +76,7 @@ for (const ev of events) {
     rows.push({
       cls: `ev-tool_exec${ok ? '' : ' ev-deny'}`,
       kind,
-      head: `exec → ${String(ev.name ?? '?')} <span class="exec-status ${ok ? 'ok' : 'deny'}">${ok ? '✅ ok' : `⏸ ${esc(status)}`}</span>`,
+      headHtml: `exec → ${String(ev.name ?? '?')} <span class="exec-status ${ok ? 'ok' : 'deny'}">${ok ? '✅ ok' : `⏸ ${esc(status)}`}</span>`,
       ms,
       bodyHtml: resultHtml,
     });
@@ -85,7 +85,7 @@ for (const ev of events) {
     rows.push({
       cls: 'ev-compaction',
       kind,
-      head: '上下文压缩',
+      headHtml: '上下文压缩',
       bodyHtml: `<div class="md-inline">${await mdToHtml(text)}</div>`,
     });
   } else if (kind === 'final') {
@@ -94,7 +94,7 @@ for (const ev of events) {
     rows.push({
       cls: 'ev-final',
       kind,
-      head: '最终总结',
+      headHtml: '最终总结',
       ms: totalMs,
       bodyHtml: `<div class="md-inline">${await mdToHtml(content)}</div>`,
     });
@@ -103,7 +103,7 @@ for (const ev of events) {
     rows.push({
       cls: 'ev-init',
       kind,
-      head: kind,
+      headText: kind,
       bodyHtml: `<div class="ev-result">${esc(JSON.stringify(ev, null, 2))}</div>`,
     });
   }
@@ -165,7 +165,12 @@ function fmtMs(ms?: number): string {
               <span class="ev-dot" aria-hidden="true"></span>
               <div class="ev-head">
                 <span class="ev-kind">{r.kind}</span>
-                <span>{r.head}</span>
+                {/* 2026-10-19 复审：head 一律是 HTML 片段（intent 的 <code> 参数、exec 的
+                    .exec-status 状态徽标），走 set:html 输出。此前 {r.head} 被 Astro 的
+                    escapeHTML 二次转义，/works/ 上 14 个事件标题显示成字面 <code>…</code>，
+                    global.css 里 .exec-status 的 ok/deny 双色也从未生效（线上实证：
+                    curl /works/ | grep -c '&lt;code&gt;' = 3）。纯文本走 headText。 */}
+                {r.headText ? <span>{r.headText}</span> : <span set:html={r.headHtml} />}
                 {r.ms != null && <span class="ev-ms">{fmtMs(r.ms)}</span>}
               </div>
               {r.bodyHtml && <div class="ev-body" set:html={r.bodyHtml} />}
