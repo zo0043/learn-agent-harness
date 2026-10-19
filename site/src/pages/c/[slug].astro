@@ -10,7 +10,6 @@ import { getCollection, render } from 'astro:content';
 import { courseMeta, EXCLUDED_FROM_COURSE_ROUTE } from '../../data/courses';
 import { courseBySlug, orderOf, prevCourse, nextCourse } from '../../data/course-structure';
 import { mvpBySlug } from '../../data/mvps';
-import { extractToc } from '../../utils/toc';
 
 export async function getStaticPaths() {
   const entries = await getCollection('courses');
@@ -20,9 +19,15 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const meta = courseMeta(entry.id);
-const toc = extractToc(entry.body ?? '');
+// TOC 锚点直接取 render() 的 headings（2026-10-19 复审改）：此前用 utils/toc.ts 的
+// 自带 slugify 复刻 github-slugger，三处偏差（①–⑫ 属 \p{N} 被保留而 slugger 删除、
+// 折叠连字符、`_`→`-`）导致 87/385 条目录点了不跳转——rag.md 13/15、
+// harness-from-scratch.md 10/12 全中。id 由渲染同一条 remark 管线产出，从根上同源。
+const toc = (headings ?? [])
+  .filter((h) => h.depth >= 2 && h.depth <= 3)
+  .map((h) => ({ id: h.slug, text: h.text, depth: h.depth as 2 | 3 }));
 
 // 学习路径（course-structure.ts §3 线性序）：课程在结构表中缺失时 structure=undefined，
 // 模块与五阶段阶段标签优雅降级（不渲染/回退 courses.ts phase），不报错。
@@ -40,16 +45,23 @@ const relatedDetails = (await getCollection('details'))
   .filter((d) => (d.data.related ?? []).includes(entry.id))
   .map((d) => ({ slug: d.data.slug ?? d.id, title: d.data.title ?? d.id }));
 
+// 阶段标签（2026-10-19 复审提取为单一表达式）：structure 缺失时回退 courses.ts 的
+// phase，'—' 显示「未分阶段」——与下方 meta-bar 的 chip 同源，避免两份漂移。
+// ⚠️ 首轮给 Base description 直接写了 structure.stage（无守卫）：若哪天新增了笔记却
+// 忘了加 course-structure 条目，构建会在 description 这一行先炸（TypeError），
+// 而本文件 27-28 行的注释明明写了「structure 可能 undefined」。已按同一表达式收敛。
+const stageLabel = structure ? structure.stage : meta.phase === '—' ? '未分阶段' : meta.phase;
+
 ---
 
-<Base title={meta.domain} description={`${meta.domain}（${structure.stage}）：${meta.intro}——前置知识、独占参考样本与增量主线挂钩见学习路径卡。`}>
+<Base title={meta.domain} description={`${meta.domain}（${stageLabel}）：${meta.intro}——前置知识、独占参考样本与增量主线挂钩见学习路径卡。`}>
   <div class="course-layout">
     <article class="markdown">
       <header class="course-meta-bar">
         <div class="meta-row">
           <span class="chip chip-strong">{meta.domain}</span>
           <span class="chip">notes/{entry.id}.md</span>
-          <span class="chip">{structure ? structure.stage : meta.phase === '—' ? '未分阶段' : meta.phase}</span>
+          <span class="chip">{stageLabel}</span>
           <StatusBadge status={meta.status} />
         </div>
         <nav class="crumbs" aria-label="面包屑">

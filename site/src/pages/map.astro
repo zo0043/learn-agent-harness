@@ -13,12 +13,14 @@
 import NotePageLayout from '../components/NotePageLayout.astro';
 import DomainMap from '../components/DomainMap.astro';
 import { getCollection, render } from 'astro:content';
-import { extractToc } from '../utils/toc';
 
 const entries = await getCollection('courses');
 const entry = entries.find((e) => e.id === 'knowledge-map');
 const rendered = entry ? await render(entry) : null;
-const toc = entry ? extractToc(entry.body ?? '') : [];
+// 同 c/[slug].astro：TOC 取 render() 的 headings，不再用自带 slugify 复刻（2026-10-19 复审）
+const toc = (rendered?.headings ?? [])
+  .filter((h) => h.depth >= 2 && h.depth <= 3)
+  .map((h) => ({ id: h.slug, text: h.text, depth: h.depth as 2 | 3 }));
 const base = import.meta.env.BASE_URL;
 ---
 

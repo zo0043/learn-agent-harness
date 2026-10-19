@@ -1,44 +1,19 @@
 /**
- * 从 markdown 正文提取 h2/h3 目录，id 算法与 github-slugger 对齐
- * （Astro 默认 heading id 生成器），保证 TOC 锚点可跳转。
+ * TOC 条目类型。
+ *
+ * 2026-10-19 复审：本文件原有的 `extractToc()` 与自带 `slugify()` **已删除**——
+ * 那是一个对 github-slugger 的手工复刻，三处偏差（①–⑫ 属 `\p{N}` 被保留而 slugger
+ * 删除、折叠连字符、`_`→`-`）让 87/385 条目录锚点与 Astro 真实 heading id 不一致，
+ * 点了不跳转（rag.md 13/15、harness-from-scratch.md 10/12 全中），而三道门禁全绿。
+ *
+ * 现在 id 一律取 `await render(entry)` 返回的 `headings[].slug`——与渲染用的
+ * **同一条 remark 管线**（rehype-collect-headings + github-slugger）产出，
+ * 从根上同源，不再有第二份实现需要同步。用法见 c/[slug].astro / map.astro。
+ *
+ * 不要再往这里加 slug 算法：复刻一次漂一次。
  */
 export interface TocItem {
   id: string;
   text: string;
   depth: 2 | 3;
-}
-
-function slugify(text: string): string {
-  return text
-    .trim()
-    .toLowerCase()
-    // 只保留 Unicode 字母（含中文）/数字/组合符/空白/连字符
-    .replace(/[^\p{L}\p{N}\p{M}\s-]/gu, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-export function extractToc(body: string): TocItem[] {
-  const items: TocItem[] = [];
-  const counts = new Map<string, number>();
-  let inFence = false;
-
-  for (const line of body.split('\n')) {
-    if (/^\s*(```|~~~)/.test(line)) {
-      inFence = !inFence;
-      continue;
-    }
-    if (inFence) continue;
-    const m = /^(#{2,3})\s+(.*)$/.exec(line);
-    if (!m) continue;
-    const raw = m[2].trim();
-    const text = raw.replace(/[*_`~[\]()]/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').trim();
-    let id = slugify(raw);
-    const n = counts.get(id) ?? 0;
-    counts.set(id, n + 1);
-    if (n > 0) id = `${id}-${n}`;
-    items.push({ id, text, depth: m[1].length as 2 | 3 });
-  }
-  return items;
 }
