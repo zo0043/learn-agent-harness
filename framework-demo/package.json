@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "框架实操（框架生态 P2.4）：① Claude Agent SDK 四能力实操（指向本地双格式代理，需 .env）；② 三家 SDK 同白板任务离线 mock 对照（compare / compare:assert，无 key 可跑）",
+  "description": "框架实操（框架生态 P4）：① Claude Agent SDK 四能力实操（指向本地双格式代理，需 .env）；② 三家 SDK 同白板任务离线 mock 对照（compare / compare:assert，无 key 可跑）",
   "scripts": {
     "smoke": "tsx src/smoke.ts",
     "demo": "tsx src/demo.ts",

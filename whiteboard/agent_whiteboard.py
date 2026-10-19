@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-agent_whiteboard.py —— 白板版最小 harness（~150 行，仅标准库）
+agent_whiteboard.py —— 白板版最小 harness（178 行，仅标准库）
 与 TS 版（harness-demo/src/）架构 1:1 对应：
   ② loop  ③ 工具协议  ⑤ 权限门  ⑥⑦ 会话与恢复  ⑧ 预算
 简化（白板上的取舍说明）：

@@ -18,7 +18,7 @@
 | L2 policy 门（高危走审批，离线预置审批表） | S4.4 执行层（Least-Agency / Intent Gate；从零写 harness四通道 policy 是自研版） |
 | L3 沙箱断言（外发通道白名单，默认 deny） | S4.4 执行层（沙箱 + egress） |
 | L4 审计日志（全程记录 + 摘要可重放） | S4.1 运行时 Guardrails"事后" + S4.4 数据层；同 harness-demo trajectory 思想 |
-| 整体演示 | S6 投毒演示计划（已实现版）+ 练习题 2（攻击链 + 拦截点） |
+| 整体演示 | S6 投毒演示计划（已实现版：攻击链 + 拦截点） |
 
 S4.1 第 1 行 **tool poisoning**（description 埋指令）与第 2 行 **rug pull**（批准后变语义）
 与结果注入同属"server 内容进上下文"通道，本轮以返回投毒实例化；二者见文末扩展方向。

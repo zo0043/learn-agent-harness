@@ -8,7 +8,7 @@ corpus → chunker → tokenizer → HashEmbedder → 暴力余弦 ∥ BM25 → 
 
 ```
 src/types.ts        核心类型：Chunk / Embedder 接口 / ScoredChunk
-src/corpus.ts       语料加载（读 notes/*.md + handoff.md → 切成 chunk）
+src/corpus.ts       语料加载（读 rag.md + agent-harness.md + handoff.md → 切成 chunk）
 src/chunker.ts      heading 边界两级切分 + headingPath metadata（MAX_CHARS=500 兜底）
 src/tokenizer.ts    拉丁整词（保留 . _ -）+ CJK 字符 bigram
 src/embed.ts        HashEmbedder：FNV-1a → 768 维计数 → L2 归一（离线、确定性）
@@ -46,7 +46,7 @@ npm run demo:eval       # S5 golden set + recall@k
 
 ## 三个实证发现
 
-1. **定价 = 检索质量**：cosine 给所有 token 统一定价 $1 → 塞满噪声词的题库 chunk 压过真正的解释 chunk；换 BM25 价目表（IDF × tf 饱和 × 长度归一）目标回 #1。`explain()` 把每个 token 的收费打出来。
+1. **定价 = 检索质量**：cosine 给所有 token 统一定价 $1 → 塞满噪声词的 chunk 压过真正的解释 chunk；换 BM25 价目表（IDF × tf 饱和 × 长度归一）目标回 #1。`explain()` 把每个 token 的收费打出来。
 2. **没有一路全面占优**：噪声词重灾 BM25 赢、话题聚簇 cosine 赢 → RRF 按 rank 融合（唯一无量纲公共货币）；`perListRanks` 让"一路失明、另一路救回"可见。
 3. **bigram 代价**：CJK bigram 是近似词单元，"上下文"三字词会拆、垃圾碎片会被当稀有信号定价 → 真实系统用正经分词器或语义 embedding（Tokenizer / Embedder 都是模块，pipeline 不动）。
 

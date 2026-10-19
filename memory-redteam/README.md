@@ -2,7 +2,7 @@
 
 一套**可跑的**跨会话记忆实现与回归，零依赖（node 原生 ESM，不需要 `npm install`）。
 它把 `notes/long-term-memory.md` 里**已成文的判定**变成可执行代码与断言，并且**不依赖 pi 的 Magic Context**——
-面试里被问"你自研过长期记忆吗"，`npm run demo` 就是答案，`node test.mjs --ablate` 是它"有牙"的证明。
+被问"你自研过长期记忆吗"，`npm run demo` 就是答案，`node test.mjs --ablate` 是它"有牙"的证明。
 
 对齐的笔记章节（代码里以 `[Sx]` 标注，笔记 §S7 回归框给出反向映射表）：
 
