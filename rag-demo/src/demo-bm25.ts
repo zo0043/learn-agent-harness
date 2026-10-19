@@ -49,7 +49,7 @@ for (const { q, relevant, label } of queries) {
 }
 
 // —— 发票：Q1 在「目标 chunk」和「cosine 榜首的非目标 chunk」上各收多少钱
-// 2026-10-19：原实现按 headingPath.includes("练习题库") 找噪声 chunk；该节随题库移除后
+// 2026-10-19：原实现按 headingPath.includes("练习题库") 找噪声 chunk；该节已随题库移除后
 // bank 恒为 undefined，第二条发票被 `idx < 0 → continue` 静默跳过（有兜底所以不报错，但演示少了一半）。
 // 改为**不依赖具体小节名**的通用定义：cosine 排名里第一个不是目标的 chunk = 「噪声压过解释」的那一块。
 // 这样语料任何增删都不影响这条演示（修生成器，而不是修死值）。

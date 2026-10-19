@@ -1,6 +1,6 @@
 // test-compact.ts — 用本地 mock 模型验证压缩逻辑（不依赖外部代理）
 // 跑法：npm run demo 环境里 npx tsx src/test-compact.ts
-// 面试点：mock 掉 provider，harness 的每个控制层都能独立验证
+// 教学点：mock 掉 provider，harness 的每个控制层都能独立验证
 import http from "node:http";
 
 process.env.LLM_BASE_URL = "http://127.0.0.1:8787/v1";

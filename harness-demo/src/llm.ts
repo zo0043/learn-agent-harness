@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 
 const BASE = (process.env.LLM_BASE_URL ?? "").replace(/\/+$/, "");
 const KEY = process.env.LLM_API_KEY ?? "";
-export const MODEL = process.env.LLM_MODEL ?? "qwen3.8-flash";
+export const MODEL = process.env.LLM_MODEL ?? "qwen3.8-flash-next";
 
 /**
  * 历史里的 assistant.tool_calls 要按 OpenAI wire 协议回写：
@@ -89,7 +89,7 @@ export async function chat(opts: ChatOpts): Promise<ChatResult> {
 }
 
 /**
- * ④ SSE 流式。三件必须处理的事（面试要能口述）：
+ * ④ SSE 流式。三件必须处理的事（要能讲清每件在防什么）：
  *  1. 帧以 \n\n 分隔，每行 `data: {json}`，结束帧 `data: [DONE]`
  *  2. content 是碎片，边收边拼
  *  3. tool_calls 也是碎片：首块带 id+name，后续块带 arguments 的

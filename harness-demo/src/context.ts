@@ -6,7 +6,7 @@ import type { Message } from "./types.js";
 
 /**
  * 估算：不做精确 tokenization——总字符数/3.5 足够（英文 ~4 字符/token，中文 ~1.5-2）。
- * 面试点：预算检查用估算即可；精确计数只在计费/归因时需要。
+ * 教学点：预算检查用估算即可；精确计数只在计费/归因时需要。
  */
 export function estimateTokens(messages: unknown[]): number {
   return Math.ceil(JSON.stringify(messages).length / 3.5);

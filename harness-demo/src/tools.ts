@@ -14,8 +14,8 @@ export const WORKSPACE_ROOT = resolve(__dirname, "..", "workspace");
 export class ToolError extends Error {}
 
 /**
- * 简化 JSON schema 校验（面试版：required + type + enum，不引 zod）。
- * 生产用 zod/ajv，但面试要能手写这三层检查。
+ * 简化 JSON schema 校验（教学版：required + type + enum，不引 zod）。
+ * 生产用 zod/ajv，但手写这三层检查才能看清每层在挡什么。
  */
 export function validateArgs(schema: Record<string, unknown>, args: Record<string, unknown>): string[] {
   const errors: string[] = [];

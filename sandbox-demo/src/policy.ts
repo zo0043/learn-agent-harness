@@ -9,7 +9,7 @@ import { CHANNEL_PRIORITY } from "./types.js";
 export class Policy {
   constructor(
     private rules: Rule[],
-    private fallback: Channel = "deny", // 默认 deny：没写规则的工具一律不放行（A⑤ 面试点）
+    private fallback: Channel = "deny", // 默认 deny：没写规则的工具一律不放行（安全默认，教学点）
   ) {}
 
   decide(tool: string, args: Record<string, unknown>): Verdict {

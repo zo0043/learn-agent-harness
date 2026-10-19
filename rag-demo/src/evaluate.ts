@@ -12,7 +12,7 @@
  *
  * gold 定位机制（2026-10-12 修；旧指针漂移的教训）：
  *   旧版 gold = chunk id 指针（"rag.md#28"，由某次快照的行号拼成）。语料一次编辑指针就漂移：
- *   rag.md 新增 4 张 mermaid + S1 题库节之后，rag.md#33 / rag.md#38 已不存在，rag.md#28/#29
+ *   rag.md 新增 4 张 mermaid + S1 扩写之后，rag.md#33 / rag.md#38 已不存在，rag.md#28/#29
  *   指向的是"实操复盘/确认题"段——相关 chunk 命中 0，却仍静默算出 recall 0.13（宣称值 1.00）。
  *   新版 gold = **文本锚点**：每个 gold 跨度一个 distinctive 中文子串（8-20 字、从
  *   notes/rag.md、notes/agent-harness.md、handoff.md 的现行内容 grep 得到、不含 markdown 符号）。

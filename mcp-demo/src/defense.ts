@@ -47,7 +47,7 @@ export type PolicyDecision = "allow" | "approve" | "deny";
 export function classifyTool(tool: ToolSpec): PolicyDecision {
   if (tool.risk === "read") return "allow";
   if (tool.risk === "egress" || tool.risk === "write") return "approve";
-  return "deny"; // 未分级 = 默认 deny（安全默认，面试点）
+  return "deny"; // 未分级 = 默认 deny（安全默认，教学点）
 }
 
 /** 离线预置审批表（= mock"人审"，确定性；生产里是 IM/UI 里的人，可能等几分钟） */
