@@ -12,6 +12,7 @@ import {
 import { courseMeta } from '../data/courses';
 import { mvpBySlug } from '../data/mvps';
 import { MILESTONES } from '../data/capstone';
+import { statusKey } from '../utils/status';
 import {
   GENERATIVE_DISCIPLINE,
   FINAL_SUBJECTS,
@@ -40,13 +41,10 @@ const items = COURSE_STRUCTURE.map((c) => ({
   exists: slugSet.has(c.slug),
 }));
 
-/** 状态徽标 key（与 StatusBadge 判定同源：emoji 前缀） */
-function statusKey(status: string): string {
-  if (status.startsWith('✅')) return 'done';
-  if (status.startsWith('🔄') || status.startsWith('🚧')) return 'doing';
-  if (status.startsWith('⏳')) return 'planned';
-  return 'other';
-}
+/** 状态徽标 key——单一真源在 utils/status.ts（StatusBadge / DomainMap 共用）。
+ *  历史教训：本页曾自带一份 statusKey()，与 StatusBadge 的中文子串判定口径不一，
+ * 导致 12 门「🔄 讲义已展开」的课在卡片上显灰色、在本行统计里显「进行中」。
+ *  import 统一放在文件顶部 import 块（ESM 会提升，放这里只为贴近使用处）。 */
 
 // 完成/进行/规划计数（17 门课口径，whiteboard 白板卡不在此表——见站点 nav/ 或 /map）。
 const doneCount = items.filter((it) => statusKey(it.meta.status) === 'done').length;
@@ -59,9 +57,15 @@ const STATUS_FILTERS = (() => {
   for (const it of items) seen.set(statusKey(it.meta.status), it.meta.status);
   return [...seen.entries()].map(([key, label]) => ({ key, label }));
 })();
+
+// 增量主线就位数（与首页同款派生；不手抄「M0 已就位 / M1–M4 留待」——那正是漂移过的文案）
+const mDone = MILESTONES.filter((m) => m.status === 'done').length;
 ---
 
-<Base title="学习路线">
+<Base
+  title="学习路线"
+  description="五阶段 × 17 门课线性阅读序：每课带前置知识、独占可运行参考样本与增量主线（my-agent M0–M4）挂钩；按阶段/状态/作品筛选，无 JS 也可全可见。"
+>
   <h1 class="page-title">学习路线</h1>
   <p class="page-lead">
     P0–P4 五阶段 × <strong>{COURSE_STRUCTURE.length} 门课</strong>，线性阅读序，每课带
@@ -84,7 +88,7 @@ const STATUS_FILTERS = (() => {
   </nav>
 
   <p class="stage-progress">
-    ✅ 完成 {doneCount} · 🔄 进行中 {doingCount} · ⏳ 规划 {plannedCount}
+    ✅ 完成 {doneCount} · 🔄 讲义已展开 {doingCount} · ⏳ 规划 {plannedCount}
   </p>
 
   <!-- ── 筛选（渐进增强）──────────────────────────────────
@@ -199,8 +203,11 @@ const STATUS_FILTERS = (() => {
       <div class="card capstone-hero">
         <p class="cp-hero-text">
           <strong>主线是你亲手搭的工具；17 门课的参考样本是每个 milestone 的参考答案。</strong>
-          M0（最小 loop）已就位——本仓库根目录 <code>my-agent/</code>，读 README + <code>npm run assert:m0</code> 起步；
-          M1–M4 的练习就位内容留待 sprint 5。
+          {mDone === MILESTONES.length
+            ? `M0–M4 全部就位（${mDone}/${MILESTONES.length}）——本仓库根目录 `
+            : `当前 ${mDone}/${MILESTONES.length} 个里程碑就位——本仓库根目录 `}
+          <code>my-agent/</code>，读 README 起步，逐级 <code>npm run assert:m0</code> … <code>npm run assert:m4</code> 过关
+          （状态由 <code>capstone.ts</code> 的 MILESTONES 派生，与本页下方里程碑轨同源）。
         </p>
         <p class="cp-hero-link">
           第一课主线锚点 <a href={base + 'c/harness-from-scratch/'}>从零写 harness</a>；完整蓝图见 <a href="https://github.com/zo0043/learn-agent-harness/blob/main/notes/process/capstone-blueprint.md" target="_blank" rel="noopener"><code>notes/process/capstone-blueprint.md</code> ↗</a>。

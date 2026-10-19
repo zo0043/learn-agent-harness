@@ -17,7 +17,10 @@ const courses = defineCollection({
 /**
  * 详解内容集合：notes/details/*.md。
  * 并行 worker 正在新增，frontmatter 约定：title/slug/domain/source/status。
- * 目录可能不存在或文件写到一半 → 全部字段 optional + passthrough，build 不报错。
+ * `related`（2026-10-19 新增）：本页「本地映射」涉及的课程 slug 列表——由它派生
+ * ① 详情页「相关课程」chip ② 课程页「延伸分水岭」反查格，修复 details↔课程双向断链
+ * （此前本地映射是纯文本、课程页无任何反向链接）。目录可能不存在或文件写到一半
+ * → 全部字段 optional + passthrough，build 不报错。
  */
 const details = defineCollection({
   loader: glob({ pattern: '**/*.md', base: '../notes/details' }),
@@ -28,6 +31,7 @@ const details = defineCollection({
       domain: z.string().optional(),
       source: z.string().optional(),
       status: z.string().optional(),
+      related: z.array(z.string()).optional(),
     })
     .passthrough(),
 });

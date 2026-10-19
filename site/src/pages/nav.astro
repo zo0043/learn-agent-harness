@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL;
 >
   <h1 class="page-title">学习导航</h1>
   <p class="page-lead">
-    LLM 发展史与演进是贯穿全站的<strong>横向知识</strong>（位于 P0 之前）——
+    LLM 发展史与演进是贯穿全站的<strong>横向知识</strong>（序章，排在五阶段最前）——
     先给一条<strong>带出处的时间线</strong>与<strong>五代演进总览</strong>，
     再给<strong>五阶段（P0–P4）课程地图</strong>；点开任一课程进入正文。
     深度正文见 <a href={base + "c/llm-timeline/"}>LLM 时间线课程页 →</a>
@@ -310,13 +310,11 @@ const base = import.meta.env.BASE_URL;
     margin: 0;
     font-size: 1.15rem;
   }
-  .dc-foot code {
-    font-size: 0.82rem;
-    background: var(--bg-code);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 0 5px;
-  }
+  /* 2026-10-19：删除 7 行死规则 `.dc-foot code { … }`——/nav 模板只输出
+     .llm-evo-* / .nav-course-* / .nc-* / .dc-top，从不输出 .dc-foot（那是 learn.astro
+     与 DomainMap.astro 的类）。Astro 会给页面级 <style> 规则加 [data-astro-cid-*] scope，
+     故该规则在 /nav 永不匹配；仓库级类集合门禁（check-classes.mjs）做的是全仓集合差集，
+     .dc-foot 在语料里存在，结构性抓不到单页死规则——只能人工审。 */
 
   @media (max-width: 560px) {
     .llm-tl-item {

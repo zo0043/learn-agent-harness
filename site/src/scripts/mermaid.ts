@@ -63,7 +63,18 @@ export async function renderAllMermaid(): Promise<void> {
     // <br/> 换行标签分布在 flowchart / stateDiagram-v2 等多种图型，只有全局开启
     // 能全覆盖（本次修复前 <br/> 全部退化的根因是 msrc 采集丢了标签，见下）。
     htmlLabels: true,
-    flowchart: { curve: 'basis' },
+    // 2026-10-19：宽图改为容器内横滚，不再等比缩小到不可读。
+    // ⚠️ v12 起 useMaxWidth 是**逐图型**的配置项（顶层 MermaidConfig 类型里已没有它，
+    //    传顶层会被 TS 拒且运行时不生效——mermaid.esm 里零处读顶层值）。
+    //    旧行为（默认 true）：svg 被写 `width="100%" style="max-width: <原始宽>px"`，
+    //    窄视口下整图等比缩小（375/768 下文字被压到 ~4-6px），容器 overflow-x:auto
+    //    永不触发。置 false 后 svg 用固有宽度、由 global.css 的
+    //    `div.mermaid svg { max-width: none }` + 容器 overflow-x:auto 横滚展示。
+    //    覆盖面 = notes 里实际出现的图型；`graph` 是 flowchart 的别名（同一渲染器），
+    //    由 flowchart 配置覆盖；v12 的 MermaidConfig 里对应键名是 sequence / state。
+    flowchart: { curve: 'basis', useMaxWidth: false },
+    sequence: { useMaxWidth: false },
+    state: { useMaxWidth: false },
   });
   for (const [ordinal, el] of nodes.entries()) {
     // 首次：用 innerHTML 记住源码（序列化保留 <br/> 元素），但必须 entityDecode——

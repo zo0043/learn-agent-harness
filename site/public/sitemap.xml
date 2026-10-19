@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 手写 sitemap（未装 @astrojs/sitemap）；条数由 site/tools/check-counters.mjs 门禁守着 = 站点 html 数。新增课程/专题时须同步更新，否则门禁失败。 -->
+<!-- 手写 sitemap（未装 @astrojs/sitemap）；条数由 site/tools/check-counters.mjs 门禁守着 = 站点 html 数 − 1。新增课程/专题时须同步更新，否则门禁失败。
+     2026-10-19：移除 404.html 条目（404 不是内容页，进 sitemap 只会让爬虫收录一个 HTTP 404 响应）；
+     门禁判据同步改为「sitemap 条数 = 站点 html − 1」，不再钉坏做法。 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://blog.zero43.top/learn-agent-harness/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/learn/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/works/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/map/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/nav/</loc></url>
-  <url><loc>https://blog.zero43.top/learn-agent-harness/404.html</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/details/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/c/llm-timeline/</loc></url>
   <url><loc>https://blog.zero43.top/learn-agent-harness/c/harness-from-scratch/</loc></url>

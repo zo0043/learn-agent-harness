@@ -7,6 +7,7 @@
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import { getCollection, render } from 'astro:content';
+import { courseBySlug } from '../../data/course-structure';
 
 export async function getStaticPaths() {
   const items = await getCollection('details');
@@ -36,9 +37,21 @@ const sourceHost = (() => {
     return sourceUrl;
   }
 })();
+
+/** 相关课程（2026-10-19 新增）：frontmatter `related` 列的课程 slug → 域名。
+ *  与 c/[slug].astro 的「延伸分水岭」反查格共用同一真源（related 字段），构成双向链接。 */
+const relatedCourses = (() => {
+  const slugs = entry.data.related ?? [];
+  return slugs
+    .map((slug) => {
+      const s = courseBySlug(slug);
+      return s ? { slug: s.slug, domain: s.domain } : null;
+    })
+    .filter((c): c is { slug: string; domain: string } => c !== null);
+})();
 ---
 
-<Base title={title}>
+<Base title={title} description={`${entry.data.domain ?? '资深分水岭'}：${title}${kind ? `（${KIND_LABEL[kind]}）` : ''}——行业一手源 + 课程本地映射（已覆盖 / 未覆盖）。`}>
   <article class="markdown">
     <header class="course-meta-bar">
       <div class="meta-row">
@@ -56,6 +69,21 @@ const sourceHost = (() => {
         <a href={import.meta.env.BASE_URL + ""}>首页</a> / <a href={import.meta.env.BASE_URL + "details/"}>详解</a> / <span>{title}</span>
       </nav>
     </header>
+
+    {
+      /* 相关课程（2026-10-19 新增）：由本页 frontmatter 的 related 字段派生——
+         修复「本地映射纯文本、无法点回课程」的断链。slug 不在课程集合的静默过滤。 */
+      relatedCourses.length > 0 && (
+        <section class="related-courses" aria-label="相关课程">
+          <h2 class="rd-title">相关课程</h2>
+          <div class="dc-top">
+            {relatedCourses.map((c) => (
+              <a class="chip" href={import.meta.env.BASE_URL + 'c/' + c.slug + '/'}>{c.domain}</a>
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     <Content />
 

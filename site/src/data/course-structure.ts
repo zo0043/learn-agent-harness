@@ -140,13 +140,13 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     stage: 'P0',
     domain: 'RAG 与检索',
     title: 'RAG 与检索',
-    intro: '检索 pipeline 每层为何存在；rag-demo 123 chunks golden set，recall@3=0.31',
+    intro: '检索 pipeline 每层为何存在；rag-demo 125 chunks golden set，recall@3=0.31',
     prereqs: ['harness-from-scratch'],
     next: ['system-design'],
     mvpSlug: 'rag-mvp',
     teachingFocus: 'chunking / 检索打分排序 / RRF 融合 / 强制引用与拒答',
     practicalOutput:
-      '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（132 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
+      '交付 rag-mvp（独占）：检索 pipeline（chunk/打分/RRF/强制引用）。判定 clone 能跑 = cd rag-demo && npx tsx src/evaluate.ts 复现 recall@3=0.31（125 chunks，PASS 3/8）；evaluation/system-design 复用它的评测链与检索取舍',
     prerequisiteNote: '已能跑通 harness-demo（前置课带入最小 loop 与工具协议直觉）；只需会读写文件、无需语义模型/向量库——「检索=打分排序」直觉随课建立',
     isHorizontal: false,
   },
@@ -214,7 +214,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'rag-mvp',
     teachingFocus: 'judge / golden set 版本化 / CI 门禁 / 评测污染与记忆投毒同源',
     practicalOutput:
-      '交付 = 一套评测体系方案（复用 rag-mvp 评测链，非新 MVP）：judge 校准 + golden set 版本化 + CI 门禁。判定 clone 能跑 = cd rag-demo && npm run demo:eval 复现 recall@3=0.31（132 chunks，PASS 3/8，10 题含 2 范围外拒答探针）；data-flywheel 复用它的「分母纪律 + 评测环节」，multi-agent 复用它的「轨迹级也要评」口径',
+      '交付 = 一套评测体系方案（复用 rag-mvp 评测链，非新 MVP）：judge 校准 + golden set 版本化 + CI 门禁。判定 clone 能跑 = cd rag-demo && npm run demo:eval 复现 recall@3=0.31（125 chunks，PASS 3/8，10 题含 2 范围外拒答探针）；data-flywheel 复用它的「分母纪律 + 评测环节」，multi-agent 复用它的「轨迹级也要评」口径',
     prerequisiteNote:
       '已上完 RAG 并跑过 rag-demo（前置课带入 recall@k / golden set / 错误归因三件直觉）；只需 precision/recall + 抽样统计的粗概念——judge 校准 / 分母纪律 / CI 门禁的具体机制随 rag-demo 的 demo:eval 边跑边建',
     isHorizontal: false,
@@ -250,7 +250,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'durable-execution-mvp',
     teachingFocus: 'journal 双锚点 / checkpoint 原子写 / 幂等键 / 未知态只读确认',
     practicalOutput:
-      '交付 durable-execution-mvp（独占：durable-execution-demo/，src 821 行全离线确定性）。判定 clone 能跑 = cd durable-execution-demo && npm i && npm run demo 复现「3 崩溃点 × 各 3 次真实 SIGKILL → 副作用计数恒=1」+ 末尾 `✅ durable 验收通过`（恢复报告跨次 sha256 逐字节一致，node ≥ 18）；observability 复用它的「intent↔exec 配对 = 崩溃未知态」判据与确定性重放口径',
+      '交付 durable-execution-mvp（独占：durable-execution-demo/，src 831 行全离线确定性）。判定 clone 能跑 = cd durable-execution-demo && npm i && npm run demo 复现「3 崩溃点 × 各 3 次真实 SIGKILL → 副作用计数恒=1」+ 末尾 `✅ durable 验收通过`（恢复报告跨次 sha256 逐字节一致，node ≥ 18）；observability 复用它的「intent↔exec 配对 = 崩溃未知态」判据与确定性重放口径',
     prerequisiteNote:
       '已能跑通 harness-demo（前置课带入 session.ts 的最小 durable journal：intent→exec）并上完评测工程化（轨迹级评测 = 恢复正确性的验证手段）；只需「幂等 / 事务 / checkpoint」的粗概念——journal 双锚点 / 原子写 / 未知态只读确认的具体机制随 durable-execution-demo 的 npm run demo 边跑边建',
     isHorizontal: false,

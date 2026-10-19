@@ -1,11 +1,16 @@
 ---
+import { statusKey } from '../utils/status';
+
 interface Props {
   status: string;
 }
 const { status } = Astro.props;
-const cls = status.includes('完成')
+// 判定规则与 learn.astro / DomainMap.astro 共用 utils/status.ts（2026-10-19 修复：
+// 旧实现在本文件内用中文子串判状态，而 courses.ts 的状态串是「🔄 讲义已展开」——
+// 旧关键词不命中，12 门进行中课全被画成灰色「规划中」徽标）。
+const cls = statusKey(status) === 'done'
   ? 'badge-ok'
-  : status.includes('进行')
+  : statusKey(status) === 'doing'
     ? 'badge-doing'
     : 'badge-todo';
 ---

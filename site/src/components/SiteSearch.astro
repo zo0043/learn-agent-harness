@@ -14,7 +14,7 @@
 const base = import.meta.env.BASE_URL;
 ---
 
-<button class="search-trigger" type="button" data-search-open aria-label="搜索全站（快捷键 /）" title="搜索全站（快捷键 /）">
+<button class="search-trigger" type="button" data-search-open data-pagefind-ignore aria-label="搜索全站（快捷键 /）" title="搜索全站（快捷键 /）">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="11" cy="11" r="7"></circle>
     <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
@@ -23,7 +23,7 @@ const base = import.meta.env.BASE_URL;
   <kbd class="search-kbd" aria-hidden="true">/</kbd>
 </button>
 
-<dialog class="search-dialog" data-search-dialog aria-label="全站搜索">
+<dialog class="search-dialog" data-search-dialog data-pagefind-ignore aria-label="全站搜索">
   <div class="search-panel">
     <div class="search-head">
       <svg class="search-head-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -43,7 +43,7 @@ const base = import.meta.env.BASE_URL;
       <kbd class="search-kbd" data-search-close aria-hidden="true">Esc</kbd>
     </div>
     <div class="search-results" id="site-search-results" data-search-results role="region" aria-live="polite">
-      <p class="search-hint">输入关键词开始检索；索引覆盖全部笔记正文。</p>
+      <p class="search-hint" data-pagefind-ignore>输入关键词开始检索；索引覆盖全部笔记正文。</p>
     </div>
   </div>
 </dialog>
@@ -74,6 +74,13 @@ const base = import.meta.env.BASE_URL;
   }
 
   let debounce;
+  /** HTML 转义（2026-10-19 补）：结果经 innerHTML 注入，而 pagefind 回填的
+   *  d.meta.title / d.excerpt 来自页面 meta 与正文摘录——站内 markdown 的
+   *  < > & " ' 会原样进入字符串（例：harness-demo README 的 `<A⑤>`），
+   *  未转义即把内容当标签解析（XSS 面：搜索框渲染站内自身内容，仍按转义处理）。 */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
   /** pagefind 的 url 相对 dist 根（如 /learn/），本站有 base（/learn-agent-harness/）需拼接；
    *  已含 base 时不重复拼——防御 pagefind 版本间「是否回填 base」的行为差异。 */
   function hitUrl(url) {
@@ -101,9 +108,9 @@ const base = import.meta.env.BASE_URL;
       results.innerHTML = data
         .map((d) => {
           const title = d.meta?.title ?? d.url;
-          return `<a class="search-hit" href="${hitUrl(d.url)}">
-            <span class="search-hit-title">${title}</span>
-            <span class="search-hit-excerpt">${d.excerpt}</span>
+          return `<a class="search-hit" href="${esc(hitUrl(d.url))}">
+            <span class="search-hit-title">${esc(title)}</span>
+            <span class="search-hit-excerpt">${esc(d.excerpt)}</span>
           </a>`;
         })
         .join('');

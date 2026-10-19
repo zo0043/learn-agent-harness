@@ -32,7 +32,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'rag', domain: 'RAG 与检索', phase: 'P0', status: '✅ 完成',
-    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=0.31（132 chunks，PASS 3/8）',
+    intro: '12 节 + §13 实操复盘：pipeline 每层为什么存在；rag-demo golden set recall@3=0.31（125 chunks，PASS 3/8）',
   },
   {
     slug: 'system-design', domain: '系统设计', phase: 'P0', status: '🔄 讲义已展开',
@@ -60,7 +60,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'whiteboard', domain: '从零写 harness（白板版）', phase: 'P0', status: '✅ 完成',
-    intro: '~180 行纯标准库 Python 白板版 agent，与 harness-demo 1:1 对应，20 分钟白板题骨架',
+    intro: '178 行纯标准库 Python 白板版 agent，与 harness-demo 1:1 对应，20 分钟白板题骨架',
   },
   // ── P1 ──────────────────────────────────────────────
   {
@@ -123,7 +123,7 @@ const HORIZONTAL_PHASE = '—' as const;
 
 /**
  * 课程页口径：站点 /c/<slug>/ 实生成路由数（notes 顶层 18 − knowledge-map）= **17**。
- * 18 = 17 课程正文 + `knowledge-map.md`（须留顶层：/map 从 courses 集合按 id 取正文）；
+ * 18 = 17 个课程页（含 2 个横向资产路由）+ `knowledge-map.md`（须留顶层：/map 从 courses 集合按 id 取正文）；
  * 2026-10-19 去面试化：`interview-bank.md` 已删除，顶层由 19 降为 18，算式随之自洽（18 − 1 = 17）。
  * 20 份设计/过程文档在 `notes/process/`，被 `pattern:'*.md'` 挡在集合外，故不计入 19。
  * 取证：`ls notes/*.md | wc -l` → 19；`ls notes/process/*.md | wc -l` → 20。

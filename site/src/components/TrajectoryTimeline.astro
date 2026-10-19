@@ -130,7 +130,9 @@ function fmtMs(ms?: number): string {
 {
   available && events.length > 0 ? (
     <div>
-      <p class="traj-legend" aria-label="事件类型图例">
+      {/* 2026-10-19：<p> 的 role 是 paragraph，不允许 author name，aria-label 不暴露——
+          改 div + role="group"（flex 布局不变）。 */}
+      <div class="traj-legend" role="group" aria-label="事件类型图例">
         <span><i class="dot ev-init"></i>init</span>
         <span><i class="dot ev-model"></i>model_response</span>
         <span><i class="dot ev-intent"></i>tool_intent</span>
@@ -138,7 +140,7 @@ function fmtMs(ms?: number): string {
         <span><i class="dot ev-compaction"></i>compaction</span>
         <span><i class="dot ev-final"></i>final</span>
         <span class="chip">tool_exec：✅ ok / ⏸ 被拒</span>
-      </p>
+      </div>
       <p class="traj-source">
         数据源：<code>{file ?? '∅'}</code>（{source === 'real' ? '本机真实产物，未入库' : '已入库脱敏样例'}）
       </p>

@@ -28,6 +28,17 @@ const top3 = TOP3_SLUGS.map(
 /** 其余详解 = 全部条目去掉 top3 三篇（top3 已在上方单列，避免同页双渲染） */
 const rest = items.filter((i) => !top3Set.has(i.data.slug ?? i.id));
 
+/** 来源 URL → 可读域名（与 /details/[slug] 同款：meta 条放完整 URL 会在窄屏撑破布局，
+ *  实测 375px 溢出 197px；完整 URL 留 title 属性，悬停可见）。 */
+const sourceHost = (url: string | undefined) => {
+  if (!url) return undefined;
+  try {
+    return new URL(url).host.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+};
+
 /** 取正文“## 一句话定义”下第一段作为卡片摘要 */
 function oneLiner(body: string | undefined): string {
   if (!body) return '';
@@ -44,11 +55,11 @@ function oneLiner(body: string | undefined): string {
 }
 ---
 
-<Base title="详解">
+<Base title="详解" description={`${items.length} 个资深分水岭详解：每篇带行业一手源与课程本地映射（哪些课已覆盖 / 哪些没覆盖），讲到机制层时可直接查用。`}>
   <h1 class="page-title">详解</h1>
   <p class="page-lead">
     课程之外的延伸详解：<strong>{items.length} 个资深分水岭</strong>——每篇带行业一手源 + 本地映射
-    （哪些课已覆盖 / 哪些没覆盖），答到机制层时直接可用。
+    （哪些课已覆盖 / 哪些没覆盖），讲到机制层时可直接查用。
   </p>
 
   <!-- ── 全景索引：先给「这些分水岭分别属于哪个领域」──────
@@ -68,7 +79,7 @@ function oneLiner(body: string | undefined): string {
                 <span class="dx-title">{item.data.title ?? slug}</span>
                 <span class="dx-meta">
                   {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
-                  {top3Set.has(slug) && <span class="chip chip-strong">最常考</span>}
+                  {top3Set.has(slug) && <span class="chip chip-strong">最该先读</span>}
                 </span>
               </a>
             </li>
@@ -116,7 +127,7 @@ function oneLiner(body: string | undefined): string {
                 <div class="dc-top">
                   {kind && <span class={`chip kind-${kind}`}>{KIND_LABEL[kind]}</span>}
                   {item.data.domain && <span class="chip">{item.data.domain}</span>}
-                  {item.data.source && <span class="chip">来源：{item.data.source}</span>}
+                  {item.data.source && <span class="chip" title={item.data.source}>来源：{sourceHost(item.data.source)}</span>}
                 </div>
                 {oneLiner(item.body) && <p class="dc-intro">{oneLiner(item.body)}</p>}
                 {item.data.status && <StatusBadge status={item.data.status} />}

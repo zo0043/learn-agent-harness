@@ -22,7 +22,7 @@
   --accent: #0f766e;
   --accent-contrast: #ffffff;
   --accent-soft: #e0f2f0;
-  --ok: #1a7f37;
+  --ok: #137333;
   --ok-bg: #e6f4ea;
   --doing: #9a6700;
   --doing-bg: #fff8e1;
@@ -92,13 +92,20 @@
 
 /* 轨迹事件类型色（明暗共用，按对比度微调） */
 :root {
-  --ev-init: #64748b;
-  --ev-model: #7c6fd0;
-  --ev-intent: #b06ab3;
-  --ev-exec: #3f9e5f;
-  --ev-exec-deny: #d29922;
-  --ev-compaction: #d16ba5;
-  --ev-final: #2dd4bf;
+  /* W4-B 对比度修复（2026-10-19，node 按 WCAG 2.1 相对亮度实算）：
+     旧值同时被当作 .ev-kind 文字色（0.78rem/600 小文本，需 4.5:1）与 .ev-dot 填充色
+     （图形对象 3:1）使用，而明色值是按「圆点」挑的——对 --bg-soft #f3f1ea 实算
+     init 4.21 / model 3.69 / intent 3.34 / exec 2.96 / exec-deny 2.23 /
+     compaction 2.92 / final 1.65（近乎不可见），**文字用途全线不达 AA**。
+     修法（单族变量、暗化到文字档）：下列明色值全部按 ≥4.5:1（最差背景 bg-soft）重算，
+     圆点沿用同值（更深只提高 3:1 余量）。暗色值本就 ≥6.0，不动。 */
+  --ev-init: #606f85;
+  --ev-model: #6d62b7;
+  --ev-intent: #945996;
+  --ev-exec: #317b4a;
+  --ev-exec-deny: #8b6516;
+  --ev-compaction: #a35381;
+  --ev-final: #1a7b6f;
   /* W4-B 布局常量：--header-offset = sticky 小顶栏高度（无 JS 兜底值 76px，
      与站内既有 scroll-margin 约定一致；works 页脚本会按实测高度覆写）。
      --work-tabs-h = /works sticky 标签栏高度（固定值，供锚点 offset 计算）。 */
@@ -138,7 +145,11 @@ body {
   line-height: 1.75;
   letter-spacing: 0.01em;
   word-break: break-word;
-  overflow-wrap: anywhere;
+  /* 2026-10-19：anywhere → break-word。anywhere 会影响 min-content 内在尺寸计算，
+     英文词/URL 会在任意字符处断行；站内已有针对性 anywhere（nav 链接、
+     .chip-tool / .dc-top .chip / .dc-foot .chip、.llm-tl-src a、.file-table 首列），
+     不需要 body 级兜底。 */
+  overflow-wrap: break-word;
 }
 
 img,
@@ -166,11 +177,20 @@ li {
   hanging-punctuation: allow-end;
 }
 
+/* 2026-10-19：text-wrap: balance 收敛到短标题。旧规则作用于所有标题，含含 <br/> 的
+   超长标题（如 works.astro 的文件↔节对照表 h3）——规范上 balance 只平衡前几行，
+   对它们无收益、只增加排版抖动面；其余标题用 pretty（防孤字）。 */
 h1, h2, h3, h4, h5, h6 {
   line-height: 1.4;
   letter-spacing: 0.015em;
-  text-wrap: balance;
+  text-wrap: pretty;
   font-weight: 700;
+}
+.hero h1,
+.page-title,
+.markdown h1,
+.markdown h2 {
+  text-wrap: balance;
 }
 
 code,
@@ -405,8 +425,14 @@ a.card:hover {
      - .chip-tool（works 轨迹里内联 JSON 的工具参数 chip）与
      - .dc-top 内的 chip（details 卡片的来源 URL chip）
    换行断字；其余短 chip 的 nowrap 与渲染零变化。 */
+/* 2026-10-19：chip 换行豁免扩到 .dc-foot .chip（learn 页「主线挂钩」chip）。
+   最长值 capstoneHook 'M3 · durable（journal/checkpoint/幂等）' 按 0.8rem 实算 ≈311.5px，
+   而 1280 视口三列时卡内容宽仅 ~296px——white-space:nowrap 下 overflow-wrap 不生效
+   （规范：仅当允许折行时才生效），超出内容盒 ~15px（恰在卡片 border 内，故文档级
+   断言抓不到）。W4/t5 当时只放开了 .chip-tool 与 .dc-top .chip 两类。 */
 .chip-tool,
-.dc-top .chip {
+.dc-top .chip,
+.dc-foot .chip {
   white-space: normal;
   overflow-wrap: anywhere;
 }
@@ -580,8 +606,10 @@ pre.astro-code code {
 }
 
 /* KaTeX */
+/* 2026-10-19：1.04em → 0.96em。旧值把行内公式放大 4%，与 notes/evaluation.md 的
+   行内 \sum 上下限直立展开叠加后撑高行盒、与相邻行视觉压叠；display 公式仍 1.12em。 */
 .markdown .katex {
-  font-size: 1.04em;
+  font-size: 0.96em;
 }
 .markdown .katex-display {
   margin: 1.2em 0;
@@ -624,9 +652,18 @@ div.mermaid {
   min-height: 2em;
   line-height: 1.4;
 }
+/* 2026-10-19：mermaid 宽图改为容器内横滚，不再等比缩小到不可读。
+   旧规则 `div.mermaid svg { max-width: 100% }` 与 mermaid 默认 useMaxWidth:true 的
+   **内联** style 叠加后，宽图（如 notes/sandbox.md:66 最长不可断标签 123 字符）整体
+   缩小，375/768 视口下文字被压到 ~4-6px；容器 overflow-x:auto 反而永不触发。 */
 div.mermaid svg {
-  max-width: 100%;
+  max-width: none;
   height: auto;
+  /* 横滚生效的兜底：div.mermaid 是 flex 容器，宽图 svg 作为 flex item 默认
+     flex-shrink:1——某些引擎下仍会被压回容器宽（max-width:none 管不住 flex 收缩）。
+     锁死 0 0 auto 后 svg 保持固有宽度，由容器 overflow-x:auto 横滚。
+     窄图不受影响（仍被 justify-content:center 居中）。 */
+  flex: 0 0 auto;
 }
 div.mermaid.mermaid-error {
   justify-content: flex-start;
@@ -837,7 +874,10 @@ a.domain-card:hover .dc-foot {
 
 .toc {
   position: sticky;
-  top: 76px;
+  /* 2026-10-19：硬编码 76px → calc(var(--header-offset) + 8px)。Base.astro 的
+     syncHeaderOffset 会把 --header-offset 同步成实测顶栏高度（单行实算约 55px），
+     旧值在桌面下与顶栏间留 21px 空洞。 */
+  top: calc(var(--header-offset) + 8px);
   max-height: calc(100vh - 100px);
   overflow-y: auto;
 }
@@ -1009,7 +1049,7 @@ a.domain-card:hover .dc-foot {
 .eval-stat .num {
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--ok);
+  color: var(--ok); /* #137333 on --ok-bg #e6f4ea = 5.24:1（2026-10-19 node 实算；旧值 #1a7f37 为 4.47，差 0.03 不达 AA） */
   font-family: ui-monospace, Menlo, Consolas, monospace;
 }
 .eval-stat .lbl {
@@ -1099,7 +1139,9 @@ a.domain-card:hover .dc-foot {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 3px solid var(--bg);
+  /* 2026-10-19：外环用 --bg-card 而非 --bg——时间线渲染在 .card work-card 内，
+     暗色下 --bg(#101418) 与卡片底(--bg-card #1a2027)不同色，旧值露出一圈 halo。 */
+  border: 3px solid var(--bg-card);
   box-shadow: 0 0 0 1.5px currentColor;
   color: var(--ev-init);
   background: currentColor;
@@ -1166,6 +1208,23 @@ a.domain-card:hover .dc-foot {
   padding: 0.05em 0.35em;
   font-size: 0.85em;
 }
+/* 2026-10-19：宽内容约束补到 .md-inline（此前只有 .markdown pre/table 有 overflow-x:auto）。
+   轨迹事件内容经 mdToHtml() 走的是自研片段管线（md.ts，开 remarkGfm 但不过 shiki），
+   一旦含代码块/表格就是裸 <pre>/<table>——无约束即文档级横向溢出。 */
+.ev-body .md-inline pre {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.ev-body .md-inline table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
 
 .ev-system {
   margin: 4px 0;
@@ -1203,7 +1262,9 @@ a.domain-card:hover .dc-foot {
   font-weight: 700;
 }
 .exec-status.ok { color: var(--ok); }
-.exec-status.deny { color: var(--exec-deny, var(--ev-exec-deny)); }
+/* 2026-10-19：旧写法 var(--exec-deny, var(--ev-exec-deny)) 的回退分支永真——
+   全仓不存在 --exec-deny 定义（只有 --ev-exec-deny），属死代码，直接写实参。 */
+.exec-status.deny { color: var(--ev-exec-deny); }
 
 .ev-result {
   margin-top: 6px;
@@ -1213,6 +1274,10 @@ a.domain-card:hover .dc-foot {
   padding: 8px 12px;
   font-size: 0.85rem;
   color: var(--text-soft);
+  /* 2026-10-19：未知轨迹事件在此排 JSON.stringify(ev, null, 2)——HTML 折叠空白会把
+     多行缩进 JSON 压成一行（TrajectoryTimeline.astro 的 esc() 也不转 \n）。 */
+  white-space: pre-wrap;
+  overflow-x: auto;
 }
 .ev-tool_exec.ev-deny .ev-result {
   background: var(--deny-bg);
@@ -1737,5 +1802,81 @@ a.pipe-step:hover {
   }
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* ── 2026-10-19 新增：details ↔ 课程双向链接的呈现 ─────────────────────
+   .related-details（课程页「延伸分水岭」反查格）与 .related-courses
+   （详解页「相关课程」）同为「域/标题 chip 行」形态，共用 .dc-top 的 flex 布局，
+   这里只补区块间距与标题（chip 样式走全局 .chip / .dc-top .chip 换行豁免）。 */
+.related-details,
+.related-courses {
+  margin: 0 0 24px;
+}
+.rd-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+/* ── 2026-10-19 新增：脚注区块 ────────────────────────────────────────
+   站点所有正文走自研片段管线 utils/md.ts（不过 remark-gfm / 不重排 DOM），
+   [^1] 引用与 [^1]: 定义都以裸文本形态漏出（如 notes/evaluation.md 的 [^1]–
+   [^4]）。此前全站无 .footnotes 规则，定义行黏在正文末尾无分隔。
+   本规则按 GitHub 渲染形态给脚注区加分隔线与缩进；[^n] 引用文本的显式样式
+   留待站点管线真正解析脚注语法后再加（现在只是兜底美化）。 */
+.footnotes {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text-soft);
+}
+
+/* ── 2026-10-19 新增：@media print ──────────────────────────────────
+   课程页是「可打印的讲义」：打印时去掉导航/搜索/进度条/TOC/页脚，
+   展开折叠内容，正文黑白高对比。 */
+@media print {
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .search-trigger,
+  .search-dialog,
+  .reading-progress,
+  .work-tabs,
+  .toc,
+  .stage-overview,
+  .hero-actions,
+  .page-foot {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+  .markdown a {
+    color: #000;
+    text-decoration: underline;
+  }
+  /* 课程页两栏布局在打印时回落单栏 */
+  .course-layout {
+    display: block;
+  }
+  .learning-path,
+  .related-details,
+  .related-courses {
+    border: 1px solid #999;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  details:not([open]) > *:not(summary) {
+    display: revert;
+  }
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #555;
   }
 }

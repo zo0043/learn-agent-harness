@@ -6,6 +6,10 @@
  * 审计 U-22 / C-13 查出后，t16 曾据此把口径就地更正为 31。2026-10-13 用户决定
  * 实际实现本页，32 才第一次**真正成立**（构建产物实测 32，CI 日志为准）。
  *
+ * 2026-10-19 更新：本页曾同时进 sitemap.xml（把坏做法钉进门禁判据）。现已
+ * ① 从 sitemap.xml 移除（条数判据改为「站点 html − 1」）② 加 noindex。
+ * 构建产物 404.html 仍计入「站点 html 32」（它真实存在），只是不再对外暴露入口。
+ *
  * 布局：复用 Base（Header 七导航 + 搜索入口 / Footer），不引入新依赖、不 import
  * site/src/data（out of scope）。误路径落到本页时观感不再断裂（替代 GitHub Pages 默认 404）。
  * GitHub Pages 约定：pages/404.astro → dist/404.html，未知路径由平台托管到本页。
@@ -18,6 +22,7 @@ const base = import.meta.env.BASE_URL;
 <Base
   title="404 · 未找到"
   description="未找到——你要的路径在 learn-agent-harness 站点上不存在。回到首页、浏览课程或作品。"
+  noindex
 >
   <section>
     <h1 class="page-title">404 · 未找到</h1>
@@ -43,7 +48,7 @@ const base = import.meta.env.BASE_URL;
       </a>
     </div>
     <p class="page-lead">
-      或者用顶栏右侧的 <strong>🔍 搜索</strong> 全站查找，或直接点顶栏八个导航项。
+      或者用顶栏右侧的 <strong>🔍 搜索</strong> 全站查找，或直接点顶栏七个导航项。
     </p>
   </section>
 </Base>

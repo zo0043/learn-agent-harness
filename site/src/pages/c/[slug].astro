@@ -33,9 +33,16 @@ const order = orderOf(entry.id);
 const prev = prevCourse(entry.id);
 const next = nextCourse(entry.id);
 
+// 延伸分水岭（2026-10-19 新增）：从 details 集合的 `related` frontmatter **反查**引用本课的
+// 详解页——修复「details ↔ 课程双向断链」（此前本地映射是纯文本、课程页无任何反向链接）。
+// 单一真源 = notes/details/*.md 的 related 字段；slug 不存在的条目静默过滤（容错手写错）。
+const relatedDetails = (await getCollection('details'))
+  .filter((d) => (d.data.related ?? []).includes(entry.id))
+  .map((d) => ({ slug: d.data.slug ?? d.id, title: d.data.title ?? d.id }));
+
 ---
 
-<Base title={meta.domain}>
+<Base title={meta.domain} description={`${meta.domain}（${structure.stage}）：${meta.intro}——前置知识、独占参考样本与增量主线挂钩见学习路径卡。`}>
   <div class="course-layout">
     <article class="markdown">
       <header class="course-meta-bar">
@@ -116,6 +123,20 @@ const next = nextCourse(entry.id);
         )
       }
 
+      {
+        /* 延伸分水岭（details 反查）：本课机制在资深分水岭里的行业对照。 */
+        relatedDetails.length > 0 && (
+          <section class="related-details" aria-label="延伸分水岭">
+            <h2 class="rd-title">延伸分水岭</h2>
+            <div class="dc-top">
+              {relatedDetails.map((d) => (
+                <a class="chip" href={import.meta.env.BASE_URL + 'details/' + d.slug + '/'}>{d.title}</a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
       <Content />
 
       {
@@ -172,7 +193,10 @@ const next = nextCourse(entry.id);
     {
       toc.length > 0 && (
         <aside class="toc" aria-label="本页目录">
-          <details open>
+          {/* 2026-10-19：去掉硬编码 open。≤900px 时 .toc 失去 max-height 限制又常开，
+              20+ 条目录整块铺在正文上方，把正文首屏推走（/c/rag/、/map/ 尤明显）。
+              改由脚本按视口决定：桌面展开、窄屏收起；无 JS 时默认收起（内容仍可达）。 */}
+          <details data-toc-details>
             <summary>本页目录</summary>
             <ul>
               {
@@ -189,6 +213,20 @@ const next = nextCourse(entry.id);
     }
   </div>
 </Base>
+
+<script>
+  // TOC 渐进展开（2026-10-19）：桌面（≥901px，与 global.css 的 .toc sticky 断点一致）
+  // 展开目录，窄屏默认收起——修复旧版 <details open> 在移动端把正文推出首屏的问题。
+  // 无 JS 时保持收起（内容仍可通过 summary 展开），属可接受降级。
+  const mq = window.matchMedia('(min-width: 901px)');
+  const sync = () => {
+    for (const d of document.querySelectorAll<HTMLDetailsElement>('details[data-toc-details]')) {
+      d.open = mq.matches;
+    }
+  };
+  sync();
+  mq.addEventListener('change', sync);
+</script>
 
 <style>
   /* 学习路径模块：图卡式四象限（前置 / 教学重点 / 实际输出 / 后续）。

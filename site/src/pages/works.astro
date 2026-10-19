@@ -44,9 +44,22 @@ const DEMO_RUN_MODE: Record<string, keyof typeof RUN_MODES> = {
 // P-08 works sticky 标签栏：六个 demo 锚点从 DEMO_RUN_MODE 派生（插入序 = 页面 section 序），
 // 不另起一份手抄列表；纯 HTML/CSS（sticky + 锚点），零 JS——禁用脚本时标签照样能点。
 const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
+
+// 阶段标签单一真源 = course-structure.ts 的 stage（五阶段）。
+// 历史教训：各节 work-tag 曾手抄旧三档 phase（courses.ts 的 P0/P1/P2），与五阶段漂移
+// （sandbox 标 P0 实为 P1、durable 标 P1 实为 P2、framework 标 P2 实为 P4，三处标错）。
+// 改为从「demo 目录名 → MVPS.artifact 前缀 → mvp.owner → COURSE_STRUCTURE.stage」派生。
+const stageOf = (id: string) => {
+  const mvp = MVPS.find((m) => (m.artifact ?? '').startsWith(id + '/'));
+  const course = mvp ? COURSE_STRUCTURE.find((c) => c.slug === mvp.owner) : undefined;
+  return course?.stage ?? '';
+};
 ---
 
-<Base title="作品详解">
+<Base
+  title="作品详解"
+  description="六个可运行作品与课程一一对应：实跑前提（离线/需端点）、文件↔课程节映射、复现命令与断言；另有白板版 agent 与 Roadmap。"
+>
   <h1 class="page-title">作品详解</h1>
   <p class="page-lead">
     每个作品都是课程的可运行证据：文件 ↔ 课程节一一对应，本地可跑、可复现。
@@ -91,7 +104,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── harness-demo ─────────────────────────────────── -->
   <section class="work" id="harness-demo">
     <h2>harness-demo · 从零手写 agent harness</h2>
-    <p class="work-tag">从零写 harness（P0 · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['harness-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['harness-demo']].label}</span></p>
+    <p class="work-tag">从零写 harness（{stageOf('harness-demo')} · ✅ 完成）· TypeScript · OpenAI 兼容端点（支持 tool calling + SSE） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['harness-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['harness-demo']].label}</span></p>
     <div class="card card-block work-card">
       <p class="work-lesson">
         一句话教训：<strong>错误恢复是成功率的第一决定因素</strong>——被拒 / 崩溃都是正常路径，
@@ -146,7 +159,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── rag-demo ─────────────────────────────────────── -->
   <section class="work" id="rag-demo">
     <h2>rag-demo · 零依赖 RAG</h2>
-    <p class="work-tag">RAG 与检索（P0 · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['rag-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['rag-demo']].label}</span></p>
+    <p class="work-tag">RAG 与检索（{stageOf('rag-demo')} · ✅ 完成）· TypeScript · 零运行时依赖（仅 tsx 跑） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['rag-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['rag-demo']].label}</span></p>
     <div class="card card-block work-card">
       <p class="work-lesson">
         一句话教训：<strong>词法检索只走表面形式重叠</strong>——cosine 给所有 token 统一定价让噪声词压过解释 chunk，
@@ -195,7 +208,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
 
   <!-- ── whiteboard ───────────────────────────────────── -->
   <section class="work" id="whiteboard">
-    <h2>whiteboard · 白板版 agent（~180 行 Python）</h2>
+    <h2>whiteboard · 白板版 agent（178 行 Python）</h2>
     <p class="work-tag">纯标准库单文件 · 与 TS 版架构 1:1 对应</p>
     <div class="card card-block work-card">
       <p>
@@ -221,7 +234,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── sandbox-demo ──────────────────────────────────── -->
   <section class="work" id="sandbox-demo">
     <h2>sandbox-demo · 四通道 policy 引擎 + 幽灵事故重放</h2>
-    <p class="work-tag">沙箱与凭据（P0 · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].label}</span></p>
+    <p class="work-tag">沙箱与凭据（{stageOf('sandbox-demo')} · 🔄 S2 已实现）· TypeScript · 全离线确定性（不调模型 / 不联网 / 不碰真实 FS / 不用墙钟） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['sandbox-demo']].label}</span></p>
     <div class="card card-block work-card">
       <p class="work-lesson">
         一句话教训：<strong>权限门回答“能不能做”，沙箱回答“能炸多大”</strong>——幽灵事故里每个动作都“能”（合法工具、合法命令），
@@ -259,7 +272,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── mcp-demo ────────────────────────────────────────── -->
   <section class="work" id="mcp-demo">
     <h2>mcp-demo · MCP 供应链投毒演示</h2>
-    <p class="work-tag">MCP 与供应链安全（P1 · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['mcp-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['mcp-demo']].label}</span></p>
+    <p class="work-tag">MCP 与供应链安全（{stageOf('mcp-demo')} · 🔄 投毒演示已实现）· TypeScript · 全离线（零网络、零 key，“MCP server”与“LLM”均为本地 mock） <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['mcp-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['mcp-demo']].label}</span></p>
     <div class="card card-block work-card">
       <p class="work-lesson">
         一句话教训：<strong>模型意图可被改写，硬边界不可</strong>——单层消融：仅 L1 输入消毒仍泄（输入层是软防线，挡不住不合规的模型），
@@ -293,7 +306,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── durable-execution-demo ───────────────────────── -->
   <section class="work" id="durable-execution-demo">
     <h2>durable-execution-demo · 长任务崩溃恢复实操</h2>
-    <p class="work-tag">durable execution（P1 · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].label}</span></p>
+    <p class="work-tag">durable execution（{stageOf('durable-execution-demo')} · ✅ S7 demo 已落地 2026-10-12）· TypeScript · 零依赖全离线 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['durable-execution-demo']].label}</span></p>
     <div class="card work-card">
       <p class="work-lesson">
         一句话教训：<strong>副作用只认「外部确认」，不认自己的日志</strong>——intent 在、exec 不在的未知态，先只读问外部服务「这个幂等 key 送达过吗」再决定执行还是跳过；盲目重放会双发，盲目跳过可能漏发。
@@ -327,7 +340,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── framework-demo ──────────────────────────────────── -->
   <section class="work" id="framework-demo">
     <h2>framework-demo · Claude Agent SDK 四能力实操</h2>
-    <p class="work-tag">框架生态（P2 · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['framework-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['framework-demo']].label}</span></p>
+    <p class="work-tag">框架生态（{stageOf('framework-demo')} · 🔄 SDK 实操已落地）· TypeScript · @anthropic-ai/claude-agent-sdk + 本地双格式代理 <span class={`chip run-chip ${RUN_MODES[DEMO_RUN_MODE['framework-demo']].cls}`} title="实跑前提：见该 demo 的 README">{RUN_MODES[DEMO_RUN_MODE['framework-demo']].label}</span></p>
     <div class="card card-block work-card">
       <p class="work-lesson">
         一句话教训：<strong>SDK 替你管了 loop，但把 canUseTool 的坑藏得更深</strong>——<code>allowedTools</code>
@@ -381,7 +394,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── Roadmap ──────────────────────────────────────── -->
   <section class="work" id="roadmap">
     <h2>Roadmap</h2>
-    <p class="work-tag">计划中的作品 / 演示（P1/P2 段；sandbox-demo / MCP 投毒 / 框架实操 / OTel console 埋点 / durable 崩溃恢复已移入上方作品）</p>
+    <p class="work-tag">计划中的作品 / 演示（剩余三项分属多智能体编排 / 可观测 / 行业前线；sandbox-demo / MCP 投毒 / 框架实操 / OTel console 埋点 / durable 崩溃恢复已移入上方作品）</p>
     <div class="card work-card">
       <div class="roadmap-item">
         <span class="rm-name">双 agent demo</span>

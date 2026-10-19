@@ -99,8 +99,9 @@ const desc =
           此前本 layout 不输出 h1，页标题只能由 markdown 正文首行的 `#` 提供；而 `before` 槽
           （如 /map 的 DomainMap）会先输出 h2–h4，于是 /map 的 h1
           被挤到十几个标题之后（文档大纲倒置）。现在 h1 由 layout 在 meta-bar 之后、before 槽之前
-          输出；正文首个 h1 由 astro.config.mjs 的 demoteNoteH1 降级为 h2，保证全页唯一 h1 且排在
-          所有 h2 之前。类名复用既有 `.page-title`（global.css:670，其他页已在用，不新增死选择器）。 */}
+          输出；正文首个 h1 的降級由自研片段管线 utils/md.ts 的 demoteInlineHeadings 完成
+          （**2026-10-19 更正**：旧注释写「astro.config.mjs 的 demoteNoteH1 插件」——该插件已删
+          且从未生效，说明见 astro.config.mjs:22-37），保证全页唯一 h1 且排在所有 h2 之前。类名复用既有 `.page-title`（global.css:670，其他页已在用，不新增死选择器）。 */}
       <h1 class="page-title">{title}</h1>
 
       <slot name="before" />
@@ -118,7 +119,9 @@ const desc =
     {
       toc.length > 0 && (
         <aside class="toc" aria-label="本页目录">
-          <details open>
+          {/* 2026-10-19：去掉硬编码 open（同 c/[slug].astro）——窄屏整册展开会把正文
+              推出首屏；桌面展开/窄屏收齐由下方脚本按 matchMedia 决定。 */}
+          <details data-toc-details>
             <summary>本页目录</summary>
             <ul>
               {
@@ -135,3 +138,15 @@ const desc =
     }
   </div>
 </Base>
+
+<script>
+  // TOC 渐进展开（2026-10-19，与 c/[slug].astro 同款）：桌面展开、窄屏收起。
+  const mq = window.matchMedia('(min-width: 901px)');
+  const sync = () => {
+    for (const d of document.querySelectorAll<HTMLDetailsElement>('details[data-toc-details]')) {
+      d.open = mq.matches;
+    }
+  };
+  sync();
+  mq.addEventListener('change', sync);
+</script>

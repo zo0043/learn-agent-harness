@@ -48,13 +48,14 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
     <h1>从 0 到能写 agent 工具</h1>
     <p class="hero-sub">
       <strong>{COURSE_COUNT} 课 · 五个阶段 · {DOMAIN_COUNT} 个知识域</strong>，每门课都带
-      <strong>可运行的参考样本</strong>（clone 下来就能跑，全离线零 key）。课程之外还有一条
+      <strong>可运行的参考样本</strong>（多数全离线零 key；harness-demo / framework-demo 需 LLM 端点，
+      rag-demo 评测路径零 key——逐作品实跑前提见<a href={base + 'works/'}>作品页</a>）。课程之外还有一条
       <strong>增量主线</strong>：跟着 {MILESTONES.length} 个里程碑，亲手搭出你自己的 agent 工具——
       每个里程碑的参考答案，就是前面那门课的 demo。
     </p>
     <div class="hero-actions">
       <a class="btn btn-primary" href={base + 'learn/'}>查看五阶段路线 →</a>
-      <a class="btn" href={base + 'c/harness-from-scratch/'}>从第一课开始</a>
+      <a class="btn" href={base + 'c/' + COURSE_STRUCTURE[0].slug + '/'}>从第一课开始</a>
       <a class="btn" href={repo} target="_blank" rel="noopener">GitHub 仓库 ↗</a>
     </div>
   </section>
@@ -143,7 +144,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
       <div class="depth-head">
         <h3>{WORK_COUNT} 个可运行作品</h3>
         <p>
-          每个作品对应一门课，clone 下来即可跑（全离线零 key、逐字节可复现）。
+          每个作品对应一门课，clone 下来即可跑（运行前提逐作品不同：sandbox / mcp / durable / memory-redteam 全离线零 key，harness-demo / framework-demo 需 LLM 端点，rag-demo 评测路径零 key）。
           完整详解见 <a href={base + 'works/'}>作品页 →</a>
         </p>
       </div>
@@ -192,7 +193,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         </a>
       </div>
       <p class="depth-foot">
-        <a href={base + 'works/#whiteboard'}>whiteboard/</a>：180 行 Python 纯标准库实现 · 全部作品见
+        <a href={base + 'works/#whiteboard'}>whiteboard/</a>：178 行 Python 纯标准库实现 · 全部作品见
         <a href={base + 'works/'}>作品页 →</a>
       </p>
     </div>
@@ -204,7 +205,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         <h3>详解：{DETAIL_COUNT} 个资深分水岭</h3>
         <p>
           每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
-          答到机制层时直接用的素材。
+          讲到机制层时可直接查用的素材。
         </p>
       </div>
       <div class="details-entry-links">
@@ -287,7 +288,16 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
       grid-template-columns: repeat(2, 1fr);
     }
   }
+  /* 2026-10-19：1000px 的 5 列下移（改 3 列），新增 1240px 档回 5 列。
+     旧断点把 5 列闸刀设在 1000px：999→1000px 单卡宽从 460px 断崖到 181px，
+     而第二阶段含「系统设计 / 沙箱与凭据 / 评测工程化 / 多智能体编排」4 门课
+     +「两门课无前置」行，181px 卡片把阶段说明压成 2-4px 碎片。 */
   @media (min-width: 1000px) {
+    .route-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1240px) {
     .route-grid {
       grid-template-columns: repeat(5, 1fr);
     }

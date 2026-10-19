@@ -7,11 +7,15 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title?: string;
   description?: string;
+  /** noindex：仅 /404 使用（2026-10-19 新增）——404 页不是内容页，
+   *  进 sitemap 只会让爬虫收录一个 HTTP 404 响应；本 meta 是第二道闸。 */
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'learn-agent-harness —— coding agent 工程方向的五阶段课程体系：17 课 · P0–P4 线性路线 · 每课带可运行参考样本 · 增量主线 my-agent · 知识地图与资深详解。本站为构建时快照。',
+  noindex = false,
 } = Astro.props;
 const pageTitle = title ? `${title} · learn-agent-harness` : 'learn-agent-harness · coding agent 五阶段课程体系';
 ---
@@ -22,6 +26,7 @@ const pageTitle = title ? `${title} · learn-agent-harness` : 'learn-agent-harne
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     {/* C2/PRES-F3：canonical + 最小 og/twitter 组。
         canonical = Astro.site（含 base 的绝对前缀，带尾斜杠）+ 当前 pathname；
         `new URL('/learn-agent-harness/map/', 'https://blog.zero43.top/learn-agent-harness/')`

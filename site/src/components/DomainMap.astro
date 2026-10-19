@@ -1,4 +1,6 @@
 ---
+import { statusKey } from '../utils/status';
+
 /**
  * DomainMap：/map 顶部的交互式知识域视图（P-05 知识地图交互化）。
  *
@@ -54,11 +56,12 @@ const groups = STAGES.map((stage) => ({
   cards: domains.filter((d) => d.stage === stage),
 }));
 
-/** 状态 → legend 三色（与笔记 mermaid classDef 同色：done #2ea043 / doing #bb8009 / todo #6e7681） */
+/** 状态 → legend 三色（与笔记 mermaid classDef 同色：done #2ea043 / doing #bb8009 / todo #6e7681）。
+ *  判定规则单一真源 = utils/status.ts（StatusBadge / learn.astro 共用；2026-10-19 前三处口径不一）。 */
 function statusDot(status: string): { cls: string; label: string } {
-  if (status.startsWith('✅')) return { cls: 'ok', label: status.replace(/^✅\s*/, '') };
-  if (status.startsWith('🔄')) return { cls: 'doing', label: status.replace(/^🔄\s*/, '') };
-  return { cls: 'todo', label: status.replace(/^⏳\s*/, '') };
+  const key = statusKey(status);
+  const cls = key === 'done' ? 'ok' : key === 'doing' ? 'doing' : 'todo';
+  return { cls, label: status.replace(/^(✅|🔄|🚧|⏳)\s*/, '') };
 }
 
 const base = import.meta.env.BASE_URL;

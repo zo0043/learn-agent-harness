@@ -13,8 +13,10 @@
  * ⚠️ 可运行 demo 作品数（WORK_COUNT = 6）与「本词表 size = 13」是两个不同口径：
  *    6 = 六个具名作品目录（harness-demo / rag-demo / sandbox-demo / mcp-demo /
  *        durable-execution-demo / framework-demo），口径见 notes/knowledge-map.md 头部；
- *    本表同时登记了横向资产（llm-history / industry-research）与规划态（api / flywheel /
- *        model-basics），以及 memory-redteam（回归套件，不计入作品数）。
+ *    本表同时登记了横向资产（llm-history / industry-research）与 memory-redteam
+ *        （回归套件，不计入作品数）。**2026-10-19 更正**：旧注释称 api / flywheel /
+ *        model-basics 为「规划态」——三者实际均已 done（api-demo 六模块+15 断言 /
+ *        flywheel-demo 四模块+10 断言 / model-basics-demo 四模块+10 断言，见各条目 status）。
  */
 
 /** MVP 现况三态（与 §8.1 的 mvpStatus 共用同一枚举族，done/planned/asset）。 */
@@ -52,7 +54,7 @@ export const MVPS: Mvp[] = [
     reuse: ['evaluation', 'system-design'],
     status: 'done',
     statusLabel: '✅ 已实现',
-    artifact: 'rag-demo/（123 chunks golden set，recall@3=0.31）',
+    artifact: 'rag-demo/（125 chunks golden set，recall@3=0.31）',
     note: 'system-design 为「参考」复用（设计模板参考检索链路，非代码扩展）',
   },
   {

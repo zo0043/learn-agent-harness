@@ -29,7 +29,7 @@ export interface Milestone {
   reference: string[];
   /** 本 milestone 断言的 clone 判据命令 */
   assertCmd: string;
-  /** 就位状态：m0 已建，m1–m4 留待后续 sprint */
+  /** 就位状态：m0–m4 均已就位（exercises/m<N>/ + assert/m<N>.assert.ts 在库；旧注释「m1–m4 留待后续 sprint」已于 2026-10-19 更正） */
   status: 'done' | 'building';
   /** 状态中文标注 */
   statusLabel: string;
