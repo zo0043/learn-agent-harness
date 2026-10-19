@@ -109,7 +109,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
       <h2 class="page-title">增量主线：亲手搭一个 agent</h2>
       <p class="page-lead">
         {MILESTONES.length} 个里程碑对应五个阶段，后段复用你亲手写的前段代码——
-        不是读完 17 门课的参考样本就结束，而是<strong>你自己写的代码能跑起来</strong>。
+        不是读完 {COURSE_STRUCTURE.length} 门课的参考样本就结束，而是<strong>你自己写的代码能跑起来</strong>。
         {mDone === MILESTONES.length
           ? `当前 ${MILESTONES.length} 个里程碑全部就位，仓库根目录 my-agent/ 可直接 clone。`
           : `当前 ${mDone}/${MILESTONES.length} 个里程碑就位。`}
@@ -199,7 +199,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
     </div>
 
 
-    <!-- 3c. 详解 -->
+    <!-- 3b. 详解（原 3b 面试题库区已随去面试化删除，2026-10-19 复审把断档的 3c 就地改回 3b） -->
     <div class="depth-block">
       <div class="depth-head">
         <h3>详解：{DETAIL_COUNT} 个资深分水岭</h3>

@@ -69,6 +69,11 @@ function remarkMermaid() {
  * harness-demo/trajectories/demo.example.jsonl）。多 h1 会让屏幕阅读器与文档大纲
  * 把内嵌文档标题误当页标题（上轮评审 PRES-F2，medium，复核时被标「未复核」）。
  *
+ * 2026-10-19 复审划改：原文写 4 个 h1 的第二个来自
+ * `harness-demo/workspace/docs/README.md:1`——works.astro 现已不内嵌 demo 文档，
+ * mdToHtml 的调用方只有 TrajectoryTimeline（轨迹片段），那个 h1 实际也来自
+ * 轨迹 jsonl 的 `# FinHot（示例项目文档）`。降级逻辑本身不变，出处记账更正。
+ *
  * 只降一级、不整段拍平：保留片段内部的层级关系（否则 h2/h3 的相对层级会丢失）。
  */
 function demoteInlineHeadings() {

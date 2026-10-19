@@ -97,16 +97,16 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
   <div class="learn-filters" data-learn-filters>
     <div class="lf-group" role="group" aria-label="按阶段筛选">
       <span class="lf-label">阶段</span>
-      <button type="button" class="chip lf-chip is-on" data-lf-stage="">全部</button>
+      <button type="button" class="chip lf-chip is-on" data-lf-stage="" aria-pressed="true">全部</button>
       {STAGES.map((stage) => (
-        <button type="button" class="chip lf-chip" data-lf-stage={stage}>{stage}</button>
+        <button type="button" class="chip lf-chip" data-lf-stage={stage} aria-pressed="false">{stage}</button>
       ))}
     </div>
     <div class="lf-group" role="group" aria-label="按状态筛选">
       <span class="lf-label">状态</span>
-      <button type="button" class="chip lf-chip is-on" data-lf-status="">全部</button>
+      <button type="button" class="chip lf-chip is-on" data-lf-status="" aria-pressed="true">全部</button>
       {STATUS_FILTERS.map(({ key, label }) => (
-        <button type="button" class="chip lf-chip" data-lf-status={key}>{label}</button>
+        <button type="button" class="chip lf-chip" data-lf-status={key} aria-pressed="false">{label}</button>
       ))}
     </div>
     <span class="lf-count" data-lf-count aria-live="polite"></span>
@@ -329,7 +329,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
       for (const chip of chips) {
         chip.addEventListener('click', () => {
           set(chip.dataset.lfStage ?? chip.dataset.lfStatus ?? '');
-          for (const c of chips) c.classList.toggle('is-on', c === chip);
+          for (const c of chips) { c.classList.toggle('is-on', c === chip); c.setAttribute('aria-pressed', String(c === chip)); }
           apply();
         });
       }

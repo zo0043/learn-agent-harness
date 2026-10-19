@@ -4,7 +4,7 @@
  *
  * 背景（P-06）：/map、/timeline 等多个「笔记原文渲染」页曾各写一遍框架，
  * 且能力不对等——有的有 meta-bar + TOC + page-foot，有的只有 meta-bar + 手写区
- * 但**调了 extractToc 却从不渲染目录**，/timeline 更只有 meta-bar（无 TOC / 无 page-foot）。
+ * 但**从不渲染目录**，/timeline 更只有 meta-bar（无 TOC / 无 page-foot）。
  * 本组件把「meta-bar + 面包屑 + 正文 + TOC 侧栏 + page-foot + 可选相关题区」收敛成一处，
  * 与 /c/[slug] 课程页同一套 CSS 类（.course-layout / .markdown / .toc / .page-foot）。
  *
@@ -45,7 +45,7 @@ interface Props {
   chips: MetaChip[];
   /** 面包屑；最后一项通常省略 href（= 当前页） */
   crumbs: Crumb[];
-  /** 本页目录（extractToc 产物）；空数组 = 不渲染侧栏 */
+  /** 本页目录（调用方从 render() 的 headings 派生）；空数组 = 不渲染侧栏 */
   toc: TocItem[];
   /** page-foot 横向链接；省略则用站点默认四项 */
   footLinks?: FootLink[];

@@ -56,7 +56,7 @@ export const COURSES: CourseMeta[] = [
   },
   {
     slug: 'agent-harness', domain: 'Harness 架构', phase: 'P0', status: '✅ 完成',
-    intro: '15 节完整教程：harness 分层与每层解决什么问题，FinHot 幽灵事故是现成案例',
+    intro: '第 1–12 节 + 第 14 节完整教程：harness 分层与每层解决什么问题，FinHot 幽灵事故是现成案例',
   },
   {
     slug: 'whiteboard', domain: '从零写 harness（白板版）', phase: 'P0', status: '✅ 完成',
@@ -131,6 +131,10 @@ const HORIZONTAL_PHASE = '—' as const;
 export const COURSE_COUNT = COURSES.filter((c) => c.slug !== NON_COURSE_CARD_SLUG).length;
 
 /** 课程卡口径：courses.ts 全部条目数（含 whiteboard 白板卡，故比课程页多 1）= 18 */
+// 2026-10-19 复审：本导出当前无 import（死导出），但**保留**——它是「18 卡」口径的
+// 自文档锚点，且提醒一条脆弱设计：whiteboard 条目没有对应 notes 文件、也没有
+// courseMeta('whiteboard') 调用方，它只为被 COURSE_PAGES 减去而存在。
+// 删它会让「课程卡 18」静默变 17；要动先动 knowledge-map 口径块与门禁判据。
 export const CARD_COUNT = COURSES.length;
 
 /**
@@ -161,12 +165,11 @@ export const WORK_COUNT = 6;
 
 /** （收口，t36）旧三档「PHASE_COUNTS」已删除（t18）；五阶段计数单一真源在 course-structure.ts 的 STAGE_COUNTS。courses.ts 的 `phase` 字段已降为 legacy：P0/P1/P2 无读方（DomainMap.astro 已迁五档 stage，t36），仅 '—' 仍被两处消费——① DOMAIN_COUNT 过滤（下文 `c.phase !== HORIZONTAL_PHASE`）② c/[slug].astro:61 兜底 chip（`meta.phase === '—'` → '未分阶段'）。阶段定位一律以 course-structure.ts `stage` 为准，勿再依据 phase 呈现三档。 */
 
-/** 按状态分组的课程卡数（从 learn.astro 原有逻辑抽出共享）。 */
-export const STATUS_COUNTS = {
-  done: COURSES.filter((c) => c.status.startsWith('✅')).length,
-  doing: COURSES.filter((c) => c.status.startsWith('🔄') || c.status.startsWith('🚧')).length,
-  planned: COURSES.filter((c) => c.status.startsWith('⏳')).length,
-};
+/** 2026-10-19 复审删除：原 STATUS_COUNTS（按状态分组的课程卡数）。
+   删除理由——① 无消费方（全仓无 import，与 CARD_COUNT 一样是死导出）；
+   ② 它是状态判定的第 4 份手抄副本（内联 startsWith ✅/🔄/⏳，与 utils/status.ts 的
+   statusKey 逐字等价）。要按状态计数就 import statusKey，别再抄一份：
+   learn.astro:91 的三态计数已经那么做了。 */
 
 export const DEFAULT_META: CourseMeta = {
   slug: '',

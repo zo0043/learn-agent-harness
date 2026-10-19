@@ -137,3 +137,7 @@ export function assertMilestonesCoursesResolve(): void {
     }
   }
 }
+
+// 2026-10-19 复审：本断言此前是「已导出但全仓无调用」的死函数——它正是防手抄漂移的那道闸。
+// 在模块加载时自调一次：slug 词表对不上就让构建期直接炸，而不是等读者点到坏链接。
+assertMilestonesCoursesResolve();
