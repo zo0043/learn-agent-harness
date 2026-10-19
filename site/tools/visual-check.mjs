@@ -83,7 +83,7 @@ const PAGES = [
   { path: 'details/', id: 'details', label: '详解', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
   { path: 'c/rag/', id: 'course-rag', label: '课程页·RAG与检索', title: 'article.markdown h1', container: 'article.markdown', cardsMin: 1, course: true },
   // G0-2 / 03-D16(a)（2026-10-14）：以下两页此前**没有任何几何回归**，本次纳入三视口断言。
-  // nav/ —— 33 页里唯一没进回归的一页（verify.yml 早已把它列为关键页，几何断言却漏了它）。
+  // nav/ —— 2026-10-14 时点（当时站点 33 页）里唯一没进回归的一页（verify.yml 早已把它列为关键页，几何断言却漏了它）。
   //   mustHave 选 `.cards .card`（LLM_EVOLUTION 派生的代际卡，数量稳定）；
   //   **不要**选 `.nav-course-group`（5 个阶段数会变，会造成假红）。
   // details/01-context-rot/ —— 详情页此前零几何覆盖（03-D16：现状「没有任何几何回归」）。
@@ -358,19 +358,24 @@ async function runMain() {
             clientWidth: document.documentElement.clientWidth,
           }));
           const titleGone = FAULT === 'missing-element' ? (await page.locator(pg.title).count()) === 0 : null;
+          // 失败现场截图必须在 ctx.close() **之前**拍：2026-10-19 复审发现原代码把
+          // page.screenshot() 放在 ctx.close() 之后，playwright 下必抛
+          // "Target page, context or browser has been closed"，又被 .catch(()=>{}) 静默吞掉——
+          // 于是 verify.yml:201-203 与 03 日志宣称的「*_fault-*.png 入 artifact」从未发生，
+          // report.json 里还记录着一个不存在的路径（用 exit 0 冒充交付证据的典型）。
+          const faultShot = path.join(OUT, `${pg.id}_${vp.id}_fault-${FAULT}.png`);
+          let shotErr = '';
+          try { await page.screenshot({ path: faultShot, fullPage: true }); }
+          catch (e) { shotErr = String(e).slice(0, 120); }
           await ctx.close();
 
           const detectedOverflow = FAULT === 'overflow' && ov.scrollWidth > ov.clientWidth + TOLERANCE;
           const detectedMissing = FAULT === 'missing-element' && titleGone === true;
           const detected = detectedOverflow || detectedMissing;
-          // 失败现场截图（t16/F2：fault 模式 artifact 原只有 report.json、失败现场不可视——
-          // 注入后的现场直接落盘，artifact 里可见）
-          const faultShot = path.join(OUT, `${pg.id}_${vp.id}_fault-${FAULT}.png`);
-          await page.screenshot({ path: faultShot }).catch(() => {});
           const d = {
             page: pg.id, viewport: `${vp.width}x${vp.height}`, url: BASE + pg.path,
             fault: FAULT,
-            screenshot: path.relative(process.cwd(), faultShot),
+            screenshot: shotErr ? `未生成（${shotErr}）` : path.relative(process.cwd(), faultShot),
             injection: { scrollWidth: ov.scrollWidth, clientWidth: ov.clientWidth, titleGone, overflowDetected: detectedOverflow, missingDetected: detectedMissing },
             pass: false, // 负路径下作业必须失败（exit 1），即使检出也保持 1
             failures: detected
