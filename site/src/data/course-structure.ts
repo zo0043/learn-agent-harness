@@ -3,7 +3,7 @@
  *
  * **阶段口径（唯一真源声明）**：本文件的 `stage` ∈ `P0–P4` 是**教学阶段**（基础篇 / 工具与安全 /
  * 生产可靠性 / 体系与数据 / 收口与前沿），也是站点 `/learn/` 的线性阅读序。
- * `notes/knowledge-map.md` 课程总表里的 **W0–W2** 是**岗位权重**（备考优先级），两者**不是同一套标签、
+ * `notes/knowledge-map.md` 课程总表里的 **W0–W2** 是**内容权重**（W0 主必修 / W1 重要 / W2 扩展），两者**不是同一套标签、
  * 不可互换**——2026-10-19 修复前该表用同一批 `P0–P2` 表达权重，导致 `/learn` 与 `/map` 对同一门课
  * 给出相反顺序（评审 `PED-F1`）。阶段以本文件为准，权重以 knowledge-map 为准。
  *
@@ -95,7 +95,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     prereqs: [],
     next: ['harness-from-scratch'],
     mvpSlug: 'llm-history',
-    teachingFocus: 'agent 里程碑 / 能力代际 / 面试谈资（序章背景地图，非动手课）',
+    teachingFocus: 'agent 里程碑 / 能力代际（序章背景地图，非动手课）',
     practicalOutput:
       '交付 agent 视角 12 节点时间线正文（notes/llm-timeline.md）。判定「跑得起来」= npm run build 后 /c/llm-timeline 渲染出 12 节点表；横向资产另见 mvpSlug=llm-history（/nav 发展史 10 节点 + 5 代演进，与本文互补：模型史 vs agent 史）',
     prerequisiteNote: '0 经验可读：会看网页即可，无代码/数学门槛',
@@ -140,7 +140,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     stage: 'P0',
     domain: 'RAG 与检索',
     title: 'RAG 与检索',
-    intro: '检索 pipeline 每层为何存在；rag-demo 132 chunks golden set，recall@3=0.31',
+    intro: '检索 pipeline 每层为何存在；rag-demo 123 chunks golden set，recall@3=0.31',
     prereqs: ['harness-from-scratch'],
     next: ['system-design'],
     mvpSlug: 'rag-mvp',
@@ -331,7 +331,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     stage: 'P3',
     domain: '模型基础',
     title: '模型基础',
-    intro: 'KV cache / 推理成本 / 微调意识 + 八股速查 16 题——够用不深挖',
+    intro: 'KV cache / 推理成本 / 微调意识 + 一次延迟归因走查——够用不深挖',
     prereqs: ['llm-timeline'],
     next: ['framework-ecosystem'],
     mvpSlug: 'model-basics-mvp',
@@ -373,7 +373,7 @@ const COURSE_STRUCTURE_BASE: Omit<Course, 'mvpStatus'>[] = [
     mvpSlug: 'industry-research',
     teachingFocus: '行业一手源 / 8 分水岭细节 / 资深判断素材',
     practicalOutput:
-      '交付 industry-research（横向资产·非代码：notes/industry-2026.md + notes/details/ 8 页）。判定 = 每条 [2026现行] 论断带官方一手源 URL + 文末 U-26 核实台账（curl / npm view 命令可重跑、结论分确认/需修正/无法确认三态）+ 文首截断时间点「2026-10-13 复核」；framework-ecosystem 复用它的「框架生态收敛」结论做 P4 收口，interview-bank 复用它的「八条分水岭 + 面试含义」做弹药',
+      '交付 industry-research（横向资产·非代码：notes/industry-2026.md + notes/details/ 8 页）。判定 = 每条 [2026现行] 论断带官方一手源 URL + 文末 U-26 核实台账（curl / npm view 命令可重跑、结论分确认/需修正/无法确认三态）+ 文首截断时间点「2026-10-13 复核」；framework-ecosystem 复用它的「框架生态收敛」结论做 P4 收口，其余课程复用它的「八条分水岭」结论做背景',
     prerequisiteNote:
       '无硬前置（横向收口：建议先修完前 16 课再读）；只需会读「结论→出处→[稳定历史]/[2026现行] 标注」三元组——唯一门槛是时效判断而非技能，截断时间点已标在文首与核实台账（2026-10-13 复核），不要求会任何新工具',
     isHorizontal: true,

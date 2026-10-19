@@ -63,7 +63,10 @@ export const EXPECTED = {
   toolNames: ["get_weather", "list_dir", "list_dir", "read_file", "read_file", "read_file", "run_shell", "write_file"],
   toolStatus: { ok: 7, denied: 1, error: 0 },
   /** 历史报告值：活端点跑出、仓内无回放日志 → 只能标"未验证"，不得当作断言 */
-  historicalReportOnly: { spans: 11, traces: 1, source: "handoff.md:77 / notes/harness-from-scratch.md:210（活端点报告值，无可复跑日志）" },
+  // 2026-10-19：source 原写 `handoff.md:77 / notes/harness-from-scratch.md:210` 两个**行号**。
+  // handoff 那个是本次编辑（文首加定位声明）把行号推漂了；harness-from-scratch 那个**本来就已经错**（内容在 212）。
+  // 行号引用会被任何一次编辑静默作废，故改为**内容锚点**（按表格行的语义定位，不再依赖行号）。
+  historicalReportOnly: { spans: 11, traces: 1, source: "handoff.md「OTel 埋点」行 / notes/harness-from-scratch.md 验收表「可观测」行（活端点报告值，无可复跑日志）" },
 } as const;
 
 interface MockStep {

@@ -196,7 +196,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
   <!-- ── whiteboard ───────────────────────────────────── -->
   <section class="work" id="whiteboard">
     <h2>whiteboard · 白板版 agent（~180 行 Python）</h2>
-    <p class="work-tag">面试口述版 · 纯标准库 · 与 TS 版架构 1:1 对应</p>
+    <p class="work-tag">纯标准库单文件 · 与 TS 版架构 1:1 对应</p>
     <div class="card card-block work-card">
       <p>
         白板 20 分钟能写完、能边写边讲的版本。与 <code>harness-demo/src/</code> 一一对应：
@@ -209,7 +209,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
       </p>
       <h3>跑法 / 读法</h3>
       <div class="runbox">
-        <span class="cmt"># 直接读源码（面试口述用）</span><br />
+        <span class="cmt"># 直接读源码（单文件无依赖）</span><br />
         whiteboard/agent_whiteboard.py<br /><br />
         <span class="cmt"># 想真跑（复用 harness-demo 的 .env）：</span><br />
         set -a; . ../harness-demo/.env; set +a<br />
@@ -407,7 +407,7 @@ const DEMO_ANCHORS = Object.keys(DEMO_RUN_MODE);
     <p class="work-soft">
       本页共 <strong>{WORK_COUNT} 个<em>具名作品</em>目录</strong>（harness-demo / rag-demo /
       sandbox-demo / mcp-demo / durable-execution-demo / framework-demo）；另有 <code>whiteboard/</code>
-      （Python 面试口述版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
+      （Python 纯标准库版）与轨迹可视化作为配套资产单列，不计入 {WORK_COUNT}。
       ⚠️ 本值<strong>不是</strong>「有 <code>npm run demo</code> 的目录数」——实测为 10（另含 model-basics-demo /
       flywheel-demo / api-demo / my-agent / memory-redteam；而 <code>rag-demo</code> 的入口是
       <code>demo:eval</code>，反而不在那 10 个里）。口径见 <code>notes/knowledge-map.md</code> 计数口径块。

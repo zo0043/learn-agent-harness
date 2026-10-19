@@ -6,7 +6,7 @@
 #     可以在约 17 分钟内成功完成（首次 560s 超时被杀**非** OOM，dist HTML=32 含 404.html），
 #     但极慢/超时风险使其**不可依赖**——CI 仍是可靠回归路径。故本作业建立在 CI 上：
 #     CI（ubuntu-latest）构建站点 → headless Chromium 在 3 视口（375/768/1280）加载
-#     10 条页面清单：首页 /learn/ /works/ /interview/ /map/ /details/ /nav/ /details/01-context-rot/ /c/rag/ 404
+#     10 条页面清单：首页 /learn/ /works/ /map/ /details/ /nav/ /details/01-context-rot/ /c/rag/ /c/rag/ 404
 #     （共 30 组合。**权威来源 = site/tools/visual-check.mjs 的 PAGES**，本行与 README 只是它的镜像）
 #     G0-2（2026-10-14）：`/nav/` 此前是 33 页里唯一没有任何几何回归的一页（本文件早已把它列为
 #     关键页，几何断言却漏了它）；`details/01-context-rot/` 此前详情页零几何覆盖（03-D16(a)）。
@@ -74,7 +74,7 @@ jobs:
       # 之前就失败，而不是等构建跑完才在下方的 Build sanity 里暴露。
       # 本步骤不依赖站点构建产物（不读 site/dist）、不读 node_modules，仅用 Node 内置模块读源码与文件系统，秒级完成。
       # 边界诚实：本步骤绿只证明「口径块与实数一致」，**不**证明页面渲染正确——渲染正确性由下方
-      # Build sanity（dist 等值断言 33 + 关键页非空）与本作业后续的 3 视口 headless 断言覆盖。
+      # Build sanity（dist 等值断言 32 + 关键页非空）与本作业后续的 3 视口 headless 断言覆盖。
       - name: Counter consistency gate (口径门禁)
         run: node site/tools/check-counters.mjs
 
@@ -91,6 +91,20 @@ jobs:
       - name: Class-set gate (类集合门禁)
         run: node site/tools/check-classes.mjs
 
+      # ── 语料 chunk 数守卫（2026-10-19 新增）────────────────────────────────
+      # 背景：rag-demo 的「语料 N chunks」在本仓**漂移过两次**（85 → 132 → 123），
+      # 每次都是删/增 notes 小节后声明值没同步，而它有 6 处副本（rag.md §13 是唯一真源，
+      # site/src/utils/ragStats.ts 构建期解析它并在站点上显示数字）。此前**没有任何机器校验**。
+      # 修法按「修生成器而非修显示值」：校验脚本放在生成器旁边（rag-demo/src/check-corpus.ts），
+      # 由它比对「rag.md §13 声明值」与「loadCorpus() 实际值」，不一致即 exit 1。
+      # 为什么单独一步而不并进 check-counters.mjs：口径门禁只用 Node 内置模块、不装依赖（秒级），
+      # 而语料计数必须 import rag-demo 的 TS 生成器；故单独装 rag-demo 依赖后运行。
+      - name: Corpus chunk-count guard (语料 chunk 数守卫)
+        working-directory: rag-demo
+        run: |
+          npm ci
+          npm run check:corpus
+
       - name: Build site
         working-directory: site
         run: npm run build
@@ -98,9 +112,9 @@ jobs:
       # 本机 OOM 事故的 CI 免疫：dist 必须真的产出了 HTML（本机曾留下 85 文件/0 HTML 的残骸，
       # 若构建被 OOM 杀掉而后续步骤侥幸跑过，这类静默残骸就是「页面没坏」假证据的温床）。
       # 站点 html 口径（2026-10-14 结构重组实测更正，见 notes/knowledge-map.md 计数口径块）：
-      #   33 = 8 静态页 + 17 课程页 + 8 专题页（三桶互斥且穷尽，成员逐一枚举）：
+      #   32 = 7 静态页 + 17 课程页 + 8 专题页（三桶互斥且穷尽，成员逐一枚举）：
       #      · 8 静态页（site/src/pages/**/*.astro 中的非动态页，即文件名不含 [ 参数者）：
-      #        index / learn / works / map / interview / nav / 404 / details/index
+      #        index / learn / works / map / nav / 404 / details/index
       #      · 17 课程页（site/src/pages/c/[slug].astro）
       #      · 8 专题页（site/src/pages/details/[slug].astro）
       #   等价写法：7 顶层页含 404 + 1 details/index + 17 + 8。
@@ -109,7 +123,8 @@ jobs:
       #   从而被读成 404 重复计数。
       # 原写「6 静态页…= 32」的枚举**漏了 nav**（site/src/pages/nav.astro 是真实顶层页，
       # Header 导航栏 + index 卡片均链向 /nav/）。下界断言 `-ge 32` 结构上永远发现不了
-      # 「少枚举一个页面」，故这里改为**等值断言 33**，并把 nav/index.html 补进关键页清单。
+      # 「少枚举一个页面」，故这里改为**等值断言**（2026-10-14 起为 33），并把 nav/index.html 补进关键页清单。
+      # 2026-10-19 去面试化：删除 /interview/ 页后等值断言 33 → **32**（静态页 8 → 7）。
       # 实测依据：2026-10-14 t2 本机全量构建 `astro build` → 「33 page(s) built in 484.44s」+
       # `find site/dist -name '*.html' | wc -l` → 33。但本机构建**不稳定**：同日复跑一次在
       # `client (vite) transforming` 阶段被杀（内存 3.4G 争用），故本机成或败都不代表 CI 结果——
@@ -117,9 +132,9 @@ jobs:
       - name: Build sanity (dist must contain real HTML)
         run: |
           count=$(find site/dist -name '*.html' | wc -l)
-          echo "dist HTML 文件数 = $count（等值断言 33 = 8 静态页（index/learn/works/map/interview/nav/404/details/index）+ 17 课程页（c/[slug]）+ 8 专题页（details/[slug]））"
-          test "$count" -eq 33
-          for p in index.html nav/index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html 404.html; do
+          echo "dist HTML 文件数 = $count（等值断言 32 = 7 静态页（index/learn/works/map/nav/404/details/index）+ 17 课程页（c/[slug]）+ 8 专题页（details/[slug]））"
+          test "$count" -eq 32
+          for p in index.html nav/index.html learn/index.html works/index.html map/index.html details/index.html c/rag/index.html 404.html; do
             [ -s "site/dist/$p" ] || { echo "关键页缺失或为空：$p"; exit 1; }
             echo "  关键页存在且非空：$p"
           done

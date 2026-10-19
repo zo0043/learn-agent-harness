@@ -1,7 +1,7 @@
 # 行业前线调研(2026-10)
 
 > 调研素材（非课程正文）。两轮外部调研（2026-10-11），核心论断均实抓官方一手源；2025 前时间线节点为公认公开事件。
-> 用途:1 站点「2026 前线」「资深分水岭」板块底稿 2 MCP 与供应链安全 / 框架生态 / 系统设计 更新输入 3 面试谈资弹药库。
+> 用途:1 站点「2026 前线」「资深分水岭」板块底稿 2 MCP 与供应链安全 / 框架生态 / 系统设计 更新输入 3 实战谈资弹药库。
 
 ---
 
@@ -32,11 +32,11 @@
 5. [2026现行，2026-10-19 复核] A2A 于 **2026-08-27** 以 Growth Stage 项目加入 AAIF（**不是** 2025-12：MCP 才是 2025-12-09 AAIF 成立时的创始项目，两者不同时）；**TSC 共 8 席**（AWS、Cisco、Google、IBM Research、Microsoft、Salesforce、SAP、ServiceNow）；官方明示"不规定子 agent 通信与工具调用"——企业互操作标准、采用慢，应用端"知道即可"。https://a2a-protocol.org/latest/blog/2026/08/27/a-new-chapter-for-a2a-joining-the-agentic-ai-foundation/ ＋ https://a2a-protocol.org/latest/
 6. [2026现行] Claude Agent SDK=Claude Code harness 的产品化（loop 当库用：subagents/hooks/MCP/权限/sessions continue-resume-fork/会话外存）；2026 Claude Code 扩到 desktop/mobile/cloud/computer use，是目标岗最近的"参考实现+SDK"。https://code.claude.com/docs/en/agent-sdk/overview
 7. [2026现行] OpenAI Codex 由 CLI 转向 agent 基础设施：hosted/self-hosted sandbox+预热、workspace agents、Secure MCP Tunnel、SandboxAgent（Agents SDK：handoffs/guardrails/100+ 模型）；AgentKit 为低代码入口。https://developers.openai.com/codex
-8. [稳定历史 + 2026-10-13 复核] LangGraph 1.x 系：1.0（2025-10）→ 1.0.x 稳定为**历史口径**；~~（1.0.1）~~ ~~（1.4.21）~~ **截至 2026-10-13 复核 registry latest = 1.5.0**（time.modified 2026-10-12T23:19:38.982Z，全新缓存 `npm view` 独立复核；版本演变：1.0.1→1.4.21（2026-10-12 复核）→1.5.0（2026-10-13 复核），命令/来源见文末核实台账第 4/4a 行）。定位编排库（显式图+checkpoint+HITL，评测靠 LangSmith）；四框架收敛于同一问题集（会话持久化/子代理边界/工具标准化/权限护栏）——"框架收敛=行业问题定义收敛"是面试高分句。https://github.com/langchain-ai/langgraph
+8. [稳定历史 + 2026-10-13 复核] LangGraph 1.x 系：1.0（2025-10）→ 1.0.x 稳定为**历史口径**；~~（1.0.1）~~ ~~（1.4.21）~~ **截至 2026-10-13 复核 registry latest = 1.5.0**（time.modified 2026-10-12T23:19:38.982Z，全新缓存 `npm view` 独立复核；版本演变：1.0.1→1.4.21（2026-10-12 复核）→1.5.0（2026-10-13 复核），命令/来源见文末核实台账第 4/4a 行）。定位编排库（显式图+checkpoint+HITL，评测靠 LangSmith）；四框架收敛于同一问题集（会话持久化/子代理边界/工具标准化/权限护栏）——"框架收敛=行业问题定义收敛"是实战高分句。https://github.com/langchain-ai/langgraph
 
 **必须会用**：MCP + 目标岗所属阵营一家 harness/SDK（Codex 系→Agents SDK+SandboxAgent，Claude 系→Agent SDK）；LangGraph 定位级；A2A/AG-UI 一句话。
 
-## 三、LLM 时间线（agent 开发者视角，12 节点，★=面试谈资必需）
+## 三、LLM 时间线（agent 开发者视角，12 节点，★=实战谈资必需）
 
 - 2023.03 GPT-4 发布（32k 上下文）——agent 能力起点。
 - 2023.06★ OpenAI function calling 发布——工具调用开始标准化，一切 agent 的协议地基。
@@ -68,15 +68,6 @@
 - **A2A 身份互操作 = 真实但热度低于 MCP** → 维持观察级，备一句："AAIF 治理下与 MCP 互补（agent↔agent vs agent↔工具），企业采用早期，我们尚未引入"——主动说"未引入"即显示做过功课。
 - **deep research = 本轮无协议级新动作**，属应用形态层，知道即可。
 - **生成式 UI = AG-UI 与 MCP/A2A 并列为第三支柱**（agent↔前端），知道即可。
-
-## 六、对面试的直接含义（与 interview-bank 交叉验证）
-
-1. 主战场核心 = "设计一个 coding agent"（与 interview-bank §2 一致）；2026 新主线 = agent 基础设施（沙箱隔离 + 评测闭环，OpenAI 连 Context/Computer Use 都设了专职研究岗）→ 答题时主动带沙箱与评测闭环，比只画 loop 高半档。
-2. OpenAI 2026 岗位拆分 = 追问方向的直接证据：Codex Core Agents（harness）、Computer Use Research、Context Research、Agent Post-Training、Agent Security、Agent Infrastructure。
-3. 实操题典型 = 20 分钟白板最小 agent + 崩溃/恢复模式讲解（本地 whiteboard/ + harness-demo 五模式已备）。
-4. 行为题考"可预测处事方式"：Action="我"+决策链、Result 带数字、Learn 出可迁移规则；真实生产事故→机制的故事是市场顶配（幽灵事故）。
-5. 英文面经三件套：系统设计 + pair coding + 快问快答；agent 系统设计核心考点="为什么是 agent 不是 workflow"+ 评测设计取舍。
-6. 新面经边际收益低 → 时间投题库 §6 四个 🟡：sandbox-demo 源码 / OTel 埋点 / MCP 投毒演示 / 框架实操。
 
 ## 来源清单（本次实抓）
 

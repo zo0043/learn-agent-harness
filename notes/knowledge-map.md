@@ -1,22 +1,22 @@
-## 知识点总地图(面试导向:coding agent)
+## 知识点总地图(实战导向:coding agent)
 
 > 建立：2026-10-11 · 依据：handoff.md 路线图（2026-10-10）+ 仓库最新实况（10-11）
 > 用途:全部知识点的一次性盘点——每课的知识结构在各自课程文件里,本文件是**索引 + 状态 + 依赖**。
 > 命名(2026-10-11 起):课程一律以**知识域名**引用,弃用 A–N 字母代号与课程顺序编号(历史文档已批量改齐)。
 > 状态记号：✅ 已完成 / 🔄 进行中 / 📐 讲义已展开（待提问演练） / ⏳ 未开始（已建知识结构，待开课）
 >
-> **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 / `interview-bank.md` §8 行为面 5 题；LangGraph 1.0.x 已核实。各课题库同步补题（现行题量见下方计数口径「题目」条，按块内规则不另起数）。
+> **四次整理（2026-10-11，系统时钟）：🔶1-5 五个缺口项全部写入**——系统设计 `system-design.md` S8 范式速查 / 评测工程化 `evaluation.md` S8 指标四代+奖励模型意识（judge 偏差三篇一手文献已核实）/ MCP 与供应链安全 `mcp.md` S4 升级为 Agent 安全全景（OWASP LLM Top 10 **2026 版**（2026-08-04 发布）+ Agentic Top 10（2026）全文核实）/ 模型基础 `model-basics.md` S7 八股速查表 16 题 ；LangGraph 1.0.x 已核实；各课题库同步补题。**注意：本条提到的 `interview-bank.md` 与各课「练习题库」已于 2026-10-19 移除、`interview-bank.md` 已删除**（现行站点不含题目，见下方「题目」条），此处保留只为记录当时做了什么。
 > ✅ 日期口径（2026-10-11 确认）：前两轮记录误标 "10-17"（未来日期），已按机器时钟 + 文件 mtime 证据归一到系统时钟 2026-10-11，共 11 文件 27 行 28 处修正（handoff/notes/代码注释）；文中残留的 "10-17" 均为引用原始错误写法的元记录引文。
 >
 > **计数口径（2026-10-12 冻结，全仓唯一参照，其余位置只引用本块、不另起数）**：
-> · **知识域 15** = 课程总表 14 编号课 + Harness 架构主线 `agent-harness.md`；`interview-bank` / `llm-timeline` / `industry-2026` / `details/` 为横向资产，不计入门数。
-> · **课程页 17** = 站点 `/c/<slug>/` 实生成路由数（notes 顶层 19 − knowledge-map − interview-bank）。**19 = 17 课程正文 + `knowledge-map.md` + `interview-bank.md`**；20 份设计/过程文档（15 capstone 设计 + 3 MVP 规格 + 2 施工规范）在 `notes/process/`，被 `site/src/content/config.ts` 的 `pattern:'*.md'` 挡在 courses 集合外，故不计入 19（2026-10-14 结构重组：迁移前顶层为 39，算式左端与实数不符，现首次自洽）。取证：`ls notes/*.md \| wc -l` → 19；`ls notes/process/*.md \| wc -l` → 20。
-> · **顶层 19 的溯源（2026-10-14 git 考古，可独立复现）**：**19 是原有的正确状态，不是本轮新造的数字**。① 2026-10-11 ~ 10-13 长期稳定：`5a04da0` 顶层 = **19**、`EXCLUDED_FROM_COURSE_ROUTE` = **2**；② **`cc1b906`（2026-10-14 11:08:58，提交信息「refactor: 五阶段课程体系 + 增量主线 my-agent(M0-M4) + 生成层毕业项目」）单次提交把恰好 20 份过程文档加入 notes/ 顶层 → 顶层 39、`EXCLUDED` 被迫从 2 膨胀到 22**；经 `diff` 比对，该提交新增的 20 个文件与本轮移入 `notes/process/` 的 20 份**逐名一致**；③ 本轮结构重组把这 20 份移入 `notes/process/`，**是恢复原架构而非发明新布局**，`EXCLUDED` 随之收回 2 条，`19 − 2 = 17` 首次自洽（旧 22 条是**对症绕过**——不修目录布局，改用排除清单兜住，故算式左端与实数长期不符）；④ 机制结论：**大功能提交会静默破坏「课程目录纯度」这类不变量，只因当时没有任何机器校验**——这正是 `site/tools/check-counters.mjs` 存在的理由。复现：`for rev in 5a04da0 cc1b906 ea277ab; do echo "$rev 顶层=$(git ls-tree -r --name-only $rev -- notes/ \| awk -F/ 'NF==2 && /\.md$/' \| wc -l)"; done` → 19 / 39 / 39；`git show --name-status --format="" cc1b906 -- notes/ \| grep '^A'` → 20 个新增。
+> · **知识域 15** = 课程总表 14 编号课 + Harness 架构主线 `agent-harness.md`；`llm-timeline` / `industry-2026` / `details/` 为横向资产，不计入门数（2026-10-19 去面试化：`interview-bank` 已整体删除）。
+> · **课程页 17** = 站点 `/c/<slug>/` 实生成路由数（notes 顶层 18 − knowledge-map）。**18 = 17 课程正文 + `knowledge-map.md`**（2026-10-19 去面试化前为 19，少的那份是已删除的 `interview-bank.md`）；20 份设计/过程文档（15 capstone 设计 + 3 MVP 规格 + 2 施工规范）在 `notes/process/`，被 `site/src/content/config.ts` 的 `pattern:'*.md'` 挡在 courses 集合外，故不计入 19（2026-10-14 结构重组：迁移前顶层为 39，算式左端与实数不符，现首次自洽）。取证：`ls notes/*.md \| wc -l` → **18**（2026-10-19 实测）；`ls notes/process/*.md \| wc -l` → 20。
+> · **顶层数的溯源（2026-10-14 git 考古，可独立复现；下列「19」为**当时**的值，2026-10-19 去面试化后为 18）**：**19 是当时的正确状态，不是那一轮新造的数字**。① 2026-10-11 ~ 10-13 长期稳定：`5a04da0` 顶层 = **19**、`EXCLUDED_FROM_COURSE_ROUTE` = **2**；② **`cc1b906`（2026-10-14 11:08:58，提交信息「refactor: 五阶段课程体系 + 增量主线 my-agent(M0-M4) + 生成层毕业项目」）单次提交把恰好 20 份过程文档加入 notes/ 顶层 → 顶层 39、`EXCLUDED` 被迫从 2 膨胀到 22**；经 `diff` 比对，该提交新增的 20 个文件与本轮移入 `notes/process/` 的 20 份**逐名一致**；③ 本轮结构重组把这 20 份移入 `notes/process/`，**是恢复原架构而非发明新布局**，`EXCLUDED` 随之收回 2 条，`19 − 2 = 17` 首次自洽（旧 22 条是**对症绕过**——不修目录布局，改用排除清单兜住，故算式左端与实数长期不符）；④ 机制结论：**大功能提交会静默破坏「课程目录纯度」这类不变量，只因当时没有任何机器校验**——这正是 `site/tools/check-counters.mjs` 存在的理由。复现：`for rev in 5a04da0 cc1b906 ea277ab; do echo "$rev 顶层=$(git ls-tree -r --name-only $rev -- notes/ \| awk -F/ 'NF==2 && /\.md$/' \| wc -l)"; done` → 19 / 39 / 39；`git show --name-status --format="" cc1b906 -- notes/ \| grep '^A'` → 20 个新增。
 > · **课程卡 18** = `site/src/data/courses.ts` 全部条目；含 `whiteboard` 白板卡（无独立 notes 文件与课程页，链向 /works/#whiteboard），故课程卡比课程页多 1。
 > · **可运行 demo 作品 6** = harness-demo / rag-demo / sandbox-demo / mcp-demo / durable-execution-demo / framework-demo（六个**具名作品**目录——作为作品列在 README 作品表与站点 `/works/` 页）；`whiteboard` / `viz` / `site` 为配套资产；`memory-redteam/`（2026-10-12 起有 `npm run demo`）按**回归套件/自研实操证据**计，同样不计入作品数。即"6"指上列六个具名目录，**不是"所有带 demo 脚本的目录"**（该措辞在 memory-redteam 加上 demo 脚本后已不成立，就地更正）。
-> · **题目**：课内嵌 **205** 题（13 课练习题库 176 + agent-harness §13 八题 + rag S1 五题 + model-basics S7 十六题）+ 面试题库精选 **37** 题（interview-bank §3 22 + §4 10 + §8 5）。
-> · **站点 html 33**（2026-10-14 结构重组实测更正：原写 32，枚举漏 `nav`）= **8 静态页（index / learn / works / map / interview / **nav** / 404 / details/index）+ 17 课程页（见上条）+ 8 专题页（details/[slug]）= 33**（三个桶**互斥且穷尽**、成员逐一枚举；等价写法：7 顶层页含 404 + 1 `details/index` + 17 + 8。⚠️ 禁止把 404 在静态页之外**再计一次**——历史上曾写成未枚举成员的「7 静态页」另外再加一个 404，那种写法会被读成 404 重复计数，且与 `ls site/src/pages/*.astro` 的 7 个文件集混淆）。实测取证（由源派生，不手工复述分解）：`site/src/pages/` 递归下**非动态**页 **8** 个（`index.astro` / `learn.astro` / `works.astro` / `map.astro` / `interview.astro` / `nav.astro` / `404.astro` / `details/index.astro`）+ `c/[slug].astro` 渲染 **17** + `details/[slug].astro` 渲染 **8**（`notes/details/` 8 篇）= 33；构建产物侧为**同一划分**（`index.html` / `learn/index.html` / `works/index.html` / `map/index.html` / `interview/index.html` / `nav/index.html` / `404.html` / `details/index.html` + `c/` 17 + `details/` 8 篇专题）。**本机 `astro build` 不稳定**——曾成功产出「33 page(s) built in 484.44s」，也曾复跑在 `client (vite) transforming` 阶段被杀，故**构建产物数以 CI 为准**，本机成或败均不代表 CI 结果。历史链（不得省略）：① 旧口径「站点 html 32」**当初是凑数**——404.html 加数当时并不存在（audit 侧「静态页 7 含 timeline」同样不存在，两套算式互相矛盾且均未对照构建产物，且那套「7 静态页」漏的其实是 nav、不是 timeline）；② 审计（U-22/C-13）查出后，本条 2026-10-13（t16）曾就地更正 32 → 31（依据：CI 绿 run [38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346) 日志「dist HTML 文件数 = 31」+ 当时 `ls site/src/pages/404.astro` 不存在 + 线上 `/404.html` 返回 HTTP 404）；③ 2026-10-13 用户决定**实际实现**自定义 404 页（t20），404 这个加数从此真实存在（CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634) 日志「dist HTML 文件数 = 32」）——但**「6 静态页」的枚举始终漏了 `nav`**，CI 的 `test "$count" -ge 32` 是**下界**断言，结构上不可能发现「少枚举一个页面」（多一页仍 ≥32），故 32 这个数一直未暴露缺口；④ 2026-10-14（notes/ 结构重组）实测 `ls site/src/pages/*.astro` = 7 个顶层页（含 `nav.astro`：`Header.astro` 导航栏指向 `/nav/`、`index.astro` 有卡片链接，其渲染 LLM 时间线/演进/阶段计数全量内容），并以本机全量构建产出 **33** 定值，本条与 `.github/workflows/verify.yml` 同步更正。**一句话：32 是「404 缺口已补但 nav 缺口未发现」的状态，33 才是加数完整的真值**。构建产物数以 CI 为准（CI 日志应与本机 33 一致；若 CI 报 32 则说明 nav 页在 CI 未被生成，须查 `nav.astro` 是否被条件跳过）。
-> · **rag-demo 评测口径**（2026-10-12 锚点式 golden set 复测，以 `notes/rag.md §13` 为唯一数字源）：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50，PASS 3/8，语料 132 chunks；旧值 recall@3=1.00 / @5=0.94 出自已废止的「行号指针」golden set（旧语料口径同时作废，全仓禁用旧值）。
+> · **题目（2026-10-19 已全部移除）**：按产品决定「站点专注讲义与知识库详解」，本轮删除了各课的「练习题库」小节（原 205 题）与题库页（原 37 题）。**当前站点不含任何题目**；`check-counters.mjs` 的题数判据随之删除，改为两条守卫判据：**① 用户面残留 = 0**（`notes/`、`notes/details/`、`site/src/`、`README.md`、`AGENTS.md` 不得再出现 `面试|题库|interview`）；**② 死引用 = 0**（全仓不得再指向已删除的 `interview-bank.md` / `/interview/`）。`handoff.md` 与 `notes/process/` 属内部历史，**允许**出现该词，但 handoff.md 文首必须声明当前定位（正向判据，非禁词）。
+> · **站点 html 32**（2026-10-19 去面试化后实测：删掉 `/interview/` 页，静态页由 8 降为 7）= **7 静态页（index / learn / works / map / nav / 404 / details/index）+ 17 课程页（见上条）+ 8 专题页（details/[slug]）= 32**（三个桶**互斥且穷尽**、成员逐一枚举；等价写法：7 顶层页含 404 + 1 `details/index` + 17 + 8。⚠️ 禁止把 404 在静态页之外**再计一次**——历史上曾写成未枚举成员的「7 静态页」另外再加一个 404，那种写法会被读成 404 重复计数，且与 `ls site/src/pages/*.astro` 的 7 个文件集混淆）。实测取证（由源派生，不手工复述分解）：`site/src/pages/` 递归下**非动态**页 **7** 个（`index.astro` / `learn.astro` / `works.astro` / `map.astro` / `nav.astro` / `404.astro` / `details/index.astro`）+ `c/[slug].astro` 渲染 **17** + `details/[slug].astro` 渲染 **8**（`notes/details/` 8 篇）= **32**（`interview.astro` 已于 2026-10-19 删除）；构建产物侧为**同一划分**（`index.html` / `learn/index.html` / `works/index.html` / `map/index.html` / `nav/index.html` / `404.html` / `details/index.html` + `c/` 17 + `details/` 8 篇专题）。**本机 `astro build` 不稳定**——曾成功产出「33 page(s) built in 484.44s」，也曾复跑在 `client (vite) transforming` 阶段被杀，故**构建产物数以 CI 为准**，本机成或败均不代表 CI 结果。历史链（不得省略）：① 旧口径「站点 html 32」**当初是凑数**——404.html 加数当时并不存在（audit 侧「静态页 7 含 timeline」同样不存在，两套算式互相矛盾且均未对照构建产物，且那套「7 静态页」漏的其实是 nav、不是 timeline）；② 审计（U-22/C-13）查出后，本条 2026-10-13（t16）曾就地更正 32 → 31（依据：CI 绿 run [38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346) 日志「dist HTML 文件数 = 31」+ 当时 `ls site/src/pages/404.astro` 不存在 + 线上 `/404.html` 返回 HTTP 404）；③ 2026-10-13 用户决定**实际实现**自定义 404 页（t20），404 这个加数从此真实存在（CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634) 日志「dist HTML 文件数 = 32」）——但**「6 静态页」的枚举始终漏了 `nav`**，CI 的 `test "$count" -ge 32` 是**下界**断言，结构上不可能发现「少枚举一个页面」（多一页仍 ≥32），故 32 这个数一直未暴露缺口；④ 2026-10-14（notes/ 结构重组）实测 `ls site/src/pages/*.astro` = 7 个顶层页（含 `nav.astro`：`Header.astro` 导航栏指向 `/nav/`、`index.astro` 有卡片链接，其渲染 LLM 时间线/演进/阶段计数全量内容），并以本机全量构建产出 **33** 定值，本条与 `.github/workflows/verify.yml` 同步更正。**一句话：32 是「404 缺口已补但 nav 缺口未发现」的状态，33 才是加数完整的真值**。构建产物数以 CI 为准（CI 日志应与本机 33 一致；若 CI 报 32 则说明 nav 页在 CI 未被生成，须查 `nav.astro` 是否被条件跳过）。
+> · **rag-demo 评测口径**（2026-10-12 锚点式 golden set 复测，以 `notes/rag.md §13` 为唯一数字源）：recall@3 = 0.31 / recall@5 = 0.44 / recall@10 = 0.50，PASS 3/8，语料 123 chunks；旧值 recall@3=1.00 / @5=0.94 出自已废止的「行号指针」golden set（旧语料口径同时作废，全仓禁用旧值）。
 
 ## 命名总表(唯一真源)
 
@@ -42,7 +42,6 @@
 | 模型基础 | `model-basics.md` | 编号课 |
 | 框架生态 | `framework-ecosystem.md`(`framework-demo/`) | 编号课 |
 | 多智能体编排 | `multi-agent.md` | 编号课 |
-| 面试题库 | `interview-bank.md` | 横向资产 |
 | LLM 时间线 | `llm-timeline.md` | 横向资产 |
 | 行业前线调研 | `industry-2026.md` | 横向资产 |
 | 资深分水岭 1–8 | `details/*.md` | 横向资产 |
@@ -50,26 +49,26 @@
 
 ## 课程总表
 
-| 主题 | 岗位权重 | 状态 | 课程文件 | 完成后你能做到 |
+| 主题 | 内容权重 | 状态 | 课程文件 | 完成后你能做到 |
 |---|---|---|---|---|
 | 从零写 harness | W0 | ✅ | `harness-from-scratch.md` | 白板 20 分钟写出可运行 agent loop（含恢复/权限/压缩） |
-| RAG 与检索 | W0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 132-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
+| RAG 与检索 | W0 | ✅ | `rag.md`（含 13 实操复盘） | 讲清 pipeline 每层为什么存在 + 跑过 123-chunk 评测（recall@3=0.31，2026-10-12 锚点式复测） |
 | Agent 系统设计模板 | W0 | 📐 | `system-design.md` | 30 分钟结构化答“设计一个 X agent” |
-| Agent 可观测 | W2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：提问演练 + 题库 14 题通过） |
+| Agent 可观测 | W2 | 📐 讲义已展开（2026-10-11） | `observability.md` | 画 agent tracing 模型 + OTel GenAI 属性 + 成本归因（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
 | 沙箱与凭据·可复现 | W0 | 📐 讲义已展开（2026-10-11） | `sandbox.md` | 讲清“权限层 ≠ 沙箱” + 隔离技术选型 + 幽灵事故完整故事 |
-| 长期记忆 | W2 | 📐 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：提问演练 + 题库 14 题通过） |
+| 长期记忆 | W2 | 📐 讲义已展开（2026-10-11） | `long-term-memory.md` | 设计跨会话 memory（写/读/遗忘/安全）（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
 | durable execution | W1 | 📐 | `durable-execution.md`(`durable-execution-demo/`,S7 demo 已落地) | 讲清长任务不丢不重（journal/checkpoint/幂等） |
 | 评测工程化 | W0 | 📐 | `evaluation.md` | 设计 LLM-judge + golden set 版本化 + 评测 CI 门禁 |
 | MCP 协议 + 供应链安全 | W1 | 📐 | `mcp.md` | 讲清 MCP 架构/原语/认证 + 四类投毒攻击与防御 |
 | API 实操 + 多模型路由 | W1 | 📐 | `api-engineering.md` | 讲清流式/结构化输出/caching/重试分类/路由成本 |
 | 数据飞轮 | W1 | 📐 | `data-flywheel.md` | 把 FinHot 台账+labeler 讲成“生产数据飞轮”故事 |
-| 模型基础 | W2 | 📐 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：提问演练 + 题库 14 题通过） |
-| 框架生态 | W2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：提问演练 + 题库 14 题通过） |
+| 模型基础 | W2 | 📐 讲义已展开（2026-10-11） | `model-basics.md` | KV cache/推理成本/微调意识——够用不深挖（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
+| 框架生态 | W2 | 📐 讲义已展开（2026-10-11） | `framework-ecosystem.md` | 讲清框架给你什么/藏什么 + pi 源码级实操故事（出口判据：能脱稿讲清本课三条核心机制，并能指出一个自己实现里踩过的坑） |
 | 多智能体编排 | W0 | 📐 讲义已展开（2026-10-11） | `multi-agent.md` | 讲清何时多智能体 + orchestrator-worker/单线程写 + 给自己 harness 设计子代理方案 |
 
-> **第 2 列口径（2026-10-19 改名）**：`W0/W1/W2` 是**岗位权重**，由旧列名「优先级」及其旧值 `P0/P1/P2` 改名而来（一一对应：P0→W0、P1→W1、P2→W2）。**它不是教学阶段、不是阅读序**——阶段标签 `P0–P4` 与线性阅读序见站点 `/learn/`（唯一真源 `site/src/data/course-structure.ts` 的 `stage` 与数组序）。历史上两套 `P0/P1/P2` 曾同名不同义（旧优先级 vs 站点阶段），改名为消歧。
+> **第 2 列口径（2026-10-19 二度改名）**：`W0/W1/W2` 现为**内容权重**——`W0` = 主必修（不懂它后面都悬空）、`W1` = 重要、`W2` = 扩展。**它不是教学阶段、不是阅读序**——阶段标签 `P0–P4` 与线性阅读序见站点 `/learn/`（唯一真源 `site/src/data/course-structure.ts` 的 `stage` 与数组序）。沿革：2026-10-19 之前该列叫「岗位权重」（由更早的「优先级 / P0-P2」改名而来），语义是**按目标 JD 的备考优先级**；随面试定位一并移除后改为内容权重，**列名与语义同步换，不再有 JD 派生含义**。
 
-横向资产:`interview-bank.md`(模拟面试结构 + 交叉题库 + JD 关键词覆盖矩阵)· `llm-timeline.md`(LLM 时间线 12 节点)· `industry-2026.md`(2026-10 行业前线调研,MCP 与供应链安全 / 框架生态 / 系统设计 / 多智能体编排 一手源)· `details/`(资深分水岭 8 细节页)
+横向资产:`llm-timeline.md`(LLM 时间线 12 节点)· `industry-2026.md`(2026-10 行业前线调研,MCP 与供应链安全 / 框架生态 / 系统设计 / 多智能体编排 一手源)· `details/`(资深分水岭 8 细节页)
 
 > 口径：课程总表 14 行 = 14 个编号课；另加 1 条主线 `agent-harness.md`（Harness 架构），合计 15 个知识域。
 
@@ -78,7 +77,7 @@
 ## 依赖图（实线 = `course-structure.ts` 的 `prereqs`，2026-10-19 对齐）
 
 > 本图实线只表示「先修课 → 后修课」，与 `site/src/data/course-structure.ts` 的 `prereqs` 字段**逐条一致**（取值源只读，比对命令与输出见本轮修复日志 `reviews/2026-10-19/fix-knowledge-map.md` 的 P2 条）。
-> `INTERVIEW`（面试演练）是**收口活动、不是课程**，无 `prereqs`，因此不画前置边；原「加深 / 进设计题」的虚线语义改为图下文字（勿读成依赖）。
+> `SYNTH`（复盘整合）是**收口活动、不是课程**，无 `prereqs`，因此不画前置边；原「加深 / 进设计题」的虚线语义改为图下文字（勿读成依赖）。2026-10-19 去面试化前该节点叫 `INTERVIEW`（实战演练），随题库与面试叙事一并移除后改名。
 > 阶段标签 `P0–P4` 与线性阅读序不在本图呈现，见站点 `/learn/`。
 
 ```mermaid
@@ -105,7 +104,7 @@ graph TD
   MULTIAGENT["📐 多智能体编排 · W0"]:::doing
   TIMELINE["✅ LLM 时间线 · 横向资产"]:::done
   INDUSTRY["✅ 行业前线调研 · 横向资产"]:::done
-  INTERVIEW["🎯 面试演练 · 收口活动（非课程·无前置边）"]:::hub
+  SYNTH["🔁 复盘整合 · 收口活动（非课程·无前置边）"]:::hub
 
   HARNESS --> AGENTH
   HARNESS --> RAG
@@ -126,12 +125,12 @@ graph TD
   AGENTH --> FRAMEWORK
 ```
 
-图外补充（**非前置边**，勿读成依赖）：可观测加深评测工程化（指标的数据管道上游）；长期记忆进系统设计设计题（`long-term-memory.md §S9` 收口系统设计）；面试演练是全部课程之后的收口活动。
+图外补充（**非前置边**，勿读成依赖）：可观测加深评测工程化（指标的数据管道上游）；长期记忆进系统设计设计题（`long-term-memory.md §S9` 收口系统设计）；实战演练是全部课程之后的收口活动。
 
 **建议修读顺序（唯一真源 = 站点 `/learn/` 线性阅读序）**：即 `course-structure.ts` 数组序 #1→#17（llm-timeline → 从零写 harness → Harness 架构 → RAG 与检索 → 系统设计 → 沙箱与凭据 → MCP 与供应链安全 → 评测工程化 → 多智能体编排 → durable execution → API 与多模型路由 → 可观测 → 长期记忆 → 数据飞轮 → 模型基础 → 框架生态 → 行业前线调研）。
-理由：线性序满足全部 `prereqs`（拓扑序已校验，见上依赖图），且每门课带「前置 / 参考样本 / 主线挂钩」；单链阅读不打散跨课依赖。若按目标岗位调先后，只调整**本表岗位权重**的排法，不改 `/learn/` 线性序。
+理由：线性序满足全部 `prereqs`（拓扑序已校验，见上依赖图），且每门课带「前置 / 参考样本 / 主线挂钩」；单链阅读不打散跨课依赖。若想换深入方向，只调整**本表内容权重**的侧重，不改 `/learn/` 线性序。
 
-## 横切知识点（多课重复出现，面试时按"一个主题三个锚点"讲）
+## 横切知识点（多课重复出现，讲解时按"一个主题三个锚点"讲）
 
 | 横切主题 | 出现位置 | 三个锚点（证据链） |
 |---|---|---|
@@ -146,7 +145,7 @@ graph TD
 | 资产 | 证明的能力 | 被哪些课引用 |
 |---|---|---|
 | `harness-demo/`(13 源文件 = 9 运行时 + 3 OTel 离线判据/断言(`otel-mock.ts`/`otel-assert.ts`/`otel-mock-scenario.ts`) + 1 压缩自测；+ trajectories 落盘，覆盖 harness-from-scratch ①-⑩ 十节；5 种运行模式实测) | loop/工具协议/流式/权限/恢复/压缩 | 系统设计(coding agent 设计)、沙箱与凭据(policy 层)、durable execution(session.ts=最小 journal)、评测工程化(mock 评测)、多智能体编排(§S7 子代理设计练习) |
-| `whiteboard/agent_whiteboard.py`(178 行，2026-10-19 统一，原写 ~180 行) | 白板手写 | 系统设计、面试演练 |
+| `whiteboard/agent_whiteboard.py`(178 行，2026-10-19 统一，原写 ~180 行) | 白板手写 | 系统设计、实战演练 |
 | `rag-demo/`(15 文件 + golden set) | 检索全 pipeline + 评测 | 系统设计(KB 设计题)、评测工程化(检索层评测)、数据飞轮(指标驱动) |
 | `durable-execution-demo/`(9 src 文件/821 行,3 崩溃点×各 3 次真实 SIGKILL 恢复:副作用恒=1、恢复报告逐字节一致,含负向测试) | journal/checkpoint/幂等三机制 + 未知态处置实操 | durable execution §S7、沙箱与凭据(崩溃恢复)、系统设计(长任务设计题) |
 | `sandbox-demo/`(7 个 src 文件 + README,3 次重放逐字节一致) | 四通道 policy + 事故重放 | 沙箱与凭据 §S2 |
@@ -165,7 +164,7 @@ graph TD
 
 ## 术语表（中英对照与首选写法，2026-10-19 新增）
 
-> 用途：全站口径统一。**首选写法**一列是写课件/README/面试口径时的统一说法；同义词只列一次，不再另造。
+> 用途：全站口径统一。**首选写法**一列是写课件/README/实战口径时的统一说法；同义词只列一次，不再另造。
 
 | 术语 | 英文 | 首选写法与备注 |
 |---|---|---|
@@ -189,14 +188,14 @@ graph TD
 
 ## 未结事项（非课程，来自 handoff）
 
-> **本清单是全站待办的唯一事实源**（2026-10-12 合并）：原散在三处的待办——`handoff.md` §三 待办 3/5、`interview-bank.md` §7 未结清单——已全部并入此处，另两处只保留一行引用。带 [interview-bank] / [handoff] 标注的条目是合并时带入；同事项不同表述的已归并（面试模拟、JD 补盲、岗位方向三处重复各留一条）。完成判据与口径块同源，改待办只改这一节。
+> **本清单是全站待办的唯一事实源**（2026-10-12 合并）：原散在三处的待办——`handoff.md` §三 待办 3/5、`interview-bank.md` §7 未结清单——已全部并入此处，另两处只保留一行引用。**2026-10-19 去面试化**：`interview-bank.md` 已删除，原带 `[interview-bank]` 标注的条目与 JD 补盲 / 岗位方向三条随面试定位一并作废；带 `[handoff]` 标注的条目是合并时带入。同事项不同表述的已归并（实战模拟、JD 补盲、岗位方向三处重复各留一条）。完成判据与口径块同源，改待办只改这一节。
 
-- [x] 讲义展开（2026-10-11）：系统设计 / 多智能体编排 / 沙箱与凭据 / 评测工程化 四课从"结构建成"→"开课版讲义"（各 4 张 mermaid、实战走查节、题库 12-16 题）；引用一手源复核修正 4 处
-- [x] 讲义展开（2026-10-11 Phase 2）：durable execution / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 四课 →"开课版讲义"（各 4-5 张 mermaid、实战走查节、题库各 14 题）；引用一手源复核修正 8 处；数据飞轮回填 FinHot 真实三轮评测指标
-- [x] 讲义展开（2026-10-11 Phase 3）：可观测 / 长期记忆 / 模型基础 / 框架生态 四课 →"开课版讲义"（各 4 张 mermaid、实战走查节、题库扩充）
-- [ ] 面试模拟问（题库已备 → `interview-bank.md`，开课式提问另约时间）；[handoff 待办 5 并入] 2 场 60 分钟模拟：Phase 1 完成后排初验、全部完成后排终验
-- [ ] [interview-bank §7 并入] 开课顺序确认（**唯一真源 = 站点 `/learn/` 线性阅读序**，即 `site/src/data/course-structure.ts` 数组序 #1→#17；本文件不再另列顺序清单——原此处与「依赖图」节各有一份重复列表，2026-10-19 已删并为上方单一指针）
-- [ ] [interview-bank §7 并入] 旧课遗留确认题自测（不混入新课，另约时间；题已存档）：从零写 harness 练习题库 8 题 / 从零写 harness §S2-S4+白板题 / RAG S1 五道确认题（2026-10-12 已写入 `rag.md` 文末题库节）
+- [x] 讲义展开（2026-10-11）：系统设计 / 多智能体编排 / 沙箱与凭据 / 评测工程化 四课从"结构建成"→"开课版讲义"（各 4 张 mermaid、实战走查节、当时的练习题库 12-16 题——该题库已于 2026-10-19 移除）；引用一手源复核修正 4 处
+- [x] 讲义展开（2026-10-11 Phase 2）：durable execution / MCP 与供应链安全 / API 与多模型路由 / 数据飞轮 四课 →"开课版讲义"（各 4-5 张 mermaid、实战走查节、当时的练习题库各 14 题——已于 2026-10-19 移除）；引用一手源复核修正 8 处；数据飞轮回填 FinHot 真实三轮评测指标
+- [x] 讲义展开（2026-10-11 Phase 3）：可观测 / 长期记忆 / 模型基础 / 框架生态 四课 →"开课版讲义"（各 4 张 mermaid、实战走查节、当时的题库扩充——已于 2026-10-19 移除）
+- [ ] 开课式提问自测（2026-10-19 起站点不再含题库，此项转为纯口头复盘，无配套题面）；[handoff 待办 5 并入] 2 场 60 分钟模拟：Phase 1 完成后排初验、全部完成后排终验
+- [ ] 开课顺序确认（**唯一真源 = 站点 `/learn/` 线性阅读序**，即 `site/src/data/course-structure.ts` 数组序 #1→#17；本文件不再另列顺序清单——原此处与「依赖图」节各有一份重复列表，2026-10-19 已删并为上方单一指针）
+- [ ] 旧课遗留确认题自测（不混入新课，另约时间；题已存档）（原题面已于 2026-10-19 随题库一并移除，仅保留自测动作本身）
 - [x] 项目打磨（2026-10-12）：rag-demo / harness-demo README 补齐（harness-demo 模型名同步为 qwen3.8-flash-next）；durable-execution S7 demo 落地（durable-execution-demo/，3 崩溃点×3 次真实 SIGKILL 验收）
 - [x] 实操补强 ×4（2026-10-11 完成）：sandbox-demo 四通道 policy+幽灵重放（600 行，3 次重放逐字节一致）/ harness-demo OTel 埋点（demo:otel 离线 mock 实测 **15 spans/1 trace**，2026-10-12；历史活端点「11 spans」未验证、不作判据）/ mcp-demo 投毒+四层防御+消融 / framework-demo Claude Agent SDK（10 条 `ok()` 断言 + 1 条整体判定；「11/11」混口径已按 U-24 废弃）
 - [x] 记忆投毒红队回归（2026-10-12）：`memory-redteam/` 零依赖可执行套件——11 条探针全部守住、10/10 对防线敏感（消融自检），编码自长期记忆 §S7 四道防线与 §S10 步骤 6-7；首次运行即抓出"scope 缺省字段按 `undefined` 比较致冲突检测静默失效"的真 bug。原 interview-bank 补强项 4「未做」已闭环。**（同日原地升级：现为 16/16 守住、15 条探针/18 层逐层承重——见下条；本条保留为当时的验收记录，不再是当前能力描述）**
@@ -205,6 +204,3 @@ graph TD
 - [x] 日期口径确认（2026-10-11）：归一到系统时钟，11 文件 27 行 28 处修正
 - [x] 站点建设：Astro 站（site/）+ GitHub Pages 部署——已上线 [https://blog.zero43.top/learn-agent-harness/](https://blog.zero43.top/learn-agent-harness/)（**33 个 html**，构成见上方计数口径「站点 html 33」条——2026-10-14 实测更正，原写 32 因枚举漏 `nav`；历史链：旧「32」当初是凑数（404.html 不存在）→ 审计查出后 2026-10-13 曾就地更正为 31（t16）→ 用户决定实现自定义 404 页后 32 真正成立（t20，CI run [38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)「dist HTML 文件数 = 32」））
 - [x] CI 结构与几何回归（W4/t5，2026-10-12；2026-10-13 t16 按 t12 评审加固 F3 搜索断言 + F2 fault 失败现场截图；t20 新增自定义 404 页并纳入断言——8 页×3 视口=24、sanity 下界 ≥32）：`Verify site (structure + 3-viewport)` 作业（`.github/workflows/verify.yml` + `site/tools/visual-check.mjs`）——CI（ubuntu-latest）构建站点 → headless Chromium 3 视口（375/768/1280）× 8 页（含自定义 404 页）：① 无横向溢出（容差 4px）② 关键元素可见（header 导航/页标题/卡片容器/课程正文+meta 栏；404 页=标题+3 个引导卡片）③ 无 console error + 搜索入口交互（**入口必须存在、缺失即失败**；点击开 dialog/Esc 关）+ 负路径自证（注入 overflow/missing-element 必须被检出且作业必须失败）。绿基线 [run 38282562346](https://github.com/zo0043/learn-agent-harness/actions/runs/38282562346)（21/21 + selftest）/ 注入负路径 [run 38282852860](https://github.com/zo0043/learn-agent-harness/actions/runs/38282852860)（按设计失败）/ 加固后 [run 38345995909](https://github.com/zo0043/learn-agent-harness/actions/runs/38345995909)（21/21，dist HTML=31）/ 含 404 页后 [run 38350151634](https://github.com/zo0043/learn-agent-harness/actions/runs/38350151634)（24/24，dist HTML=32）。**边界：只断言结构+几何，不覆盖视觉审美——像素级仍留浏览器人工目检**
-- [ ] JD 关键词覆盖：见 `interview-bank.md` §6 矩阵。**判据（2026-10-19 改，原写「目标全 🟢」不可达）：除 ⚪ 观察项外全 🟢**。已知豁免行（矩阵自带、不计入判据）：`A2A / agent 身份 → —（观察级）｜未排课｜⚪ 按 roadmap 保持观察`；其余 11 行目标全 🟢。
-- [ ] 人工抽字节/百度 20-30 条 JD 补盲（反爬绕不过；一手数据已在 `jd-research/`，其余六家已抓 1799 条）[handoff 待办 3 / interview-bank §7 并入]
-- [ ] 确认目标岗位方向（coding agent / 企业工作流 / 平台）→ 调 W1/W2 岗位权重 [interview-bank §7 并入]

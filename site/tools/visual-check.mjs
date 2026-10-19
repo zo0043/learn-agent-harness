@@ -73,12 +73,12 @@ if (FAULT !== 'none' && FAULT !== 'overflow' && FAULT !== 'missing-element') {
 // title = 页标题选择器；container + cardsMin = 卡片/容器断言；mustHave = 额外必须命中的选择器
 // （正常模式下也会断言命中，见 checkOne 的 ②c —— 不是只在 fault 模式用）。
 // 课程页（c/rag）正文在 article.markdown 内（NotePageLayout），标题来自笔记 `# ` 渲染。
-// 条目数 10 × 3 视口 = 30 组合；页数由本表派生（README/CI 文案是它的镜像，不是第二份真源）。
+// 条目数 9 × 3 视口 = 27 组合（2026-10-19 去面试化后删去 interview 项，原为 10 × 3 = 30）；
+// 页数由本表派生（README/CI 文案是它的镜像，不是第二份真源）。
 const PAGES = [
   { path: '', id: 'home', label: '首页', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'learn/', id: 'learn', label: '学习路线', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
   { path: 'works/', id: 'works', label: '作品详解', title: 'h1.page-title', container: 'section.work', cardsMin: 6 },
-  { path: 'interview/', id: 'interview', label: '面试题库', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'map/', id: 'map', label: '知识地图', title: 'h1', container: '.cards .card', cardsMin: 1 },
   { path: 'details/', id: 'details', label: '详解', title: 'h1.page-title', container: '.cards .card', cardsMin: 1 },
   { path: 'c/rag/', id: 'course-rag', label: '课程页·RAG与检索', title: 'article.markdown h1', container: 'article.markdown', cardsMin: 1, course: true },
@@ -220,7 +220,7 @@ async function checkOne(browser, base, pageDef, vp, outDir, { screenshot = true,
     // ②e 标题唯一性（2026-10-19 新增，PRES-F1/PRES-F2 的机器判据）。
     // 为什么：原有断言只要求「**存在**一个 h1」（`title: 'h1'` / `'h1.page-title'`），
     // 一页有 2 个甚至 4 个 h1 照样通过。线上实测两类漏网：
-    //   · /map/ 与 /interview/ 各 2 个 h1——上一轮的 demoteNoteH1 靠 vfile 文件名判断，
+    //   · /map/ 曾输出 2 个 h1——上一轮的 demoteNoteH1 靠 vfile 文件名判断，
     //     而 content 集合条目没有 filePath（见 astro.config.mjs 注释），插件恒走保守分支，
     //     **静默 no-op**；终审只在隔离环境测过该函数，故误判为已修。
     //   · /works/ 4 个 h1——内嵌 demo 文档与轨迹事件里的 `# 标题` 未降级（PRES-F2）。

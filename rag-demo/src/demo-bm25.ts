@@ -48,14 +48,28 @@ for (const { q, relevant, label } of queries) {
   console.log("");
 }
 
-// —— 发票：Q1 在"目标 chunk"和"S2 的 cosine 榜首"上各收了多少钱
+// —— 发票：Q1 在「目标 chunk」和「cosine 榜首的非目标 chunk」上各收多少钱
+// 2026-10-19：原实现按 headingPath.includes("练习题库") 找噪声 chunk；该节随题库移除后
+// bank 恒为 undefined，第二条发票被 `idx < 0 → continue` 静默跳过（有兜底所以不报错，但演示少了一半）。
+// 改为**不依赖具体小节名**的通用定义：cosine 排名里第一个不是目标的 chunk = 「噪声压过解释」的那一块。
+// 这样语料任何增删都不影响这条演示（修生成器，而不是修死值）。
+const TARGET_ID = "rag.md#28";
 const q1 = queries[0].q;
 const cosQ1 = cosine.topK(embedder.embed([q1])[0], chunks.length);
-const bank = cosQ1.find((r) => r.chunk.headingPath.includes("练习题库"));
+const targetIdx = chunks.findIndex((c) => c.id === TARGET_ID);
+if (targetIdx < 0) {
+  throw new Error(`demo-bm25：目标 chunk ${TARGET_ID} 不在语料里——rag.md 增删小节后需同步本常量`);
+}
+const noise = cosQ1.find((r) => r.chunk.id !== TARGET_ID);
 const invoices: [string, number][] = [
-  ["目标 rag.md#28（真正的解释）", chunks.findIndex((c) => c.id === "rag.md#28")],
-  [`${bank?.chunk.id ?? "?"}（S2 cosine 榜首）`, bank ? chunks.findIndex((c) => c.id === bank.chunk.id) : -1],
+  [`目标 ${TARGET_ID}（真正的解释）`, targetIdx],
+  ...(noise
+    ? [[`${noise.chunk.id}（cosine 榜首的非目标 chunk：${noise.chunk.headingPath.slice(0, 24)}）`, chunks.findIndex((c) => c.id === noise.chunk.id)] as [string, number]]
+    : []),
 ];
+if (!noise) {
+  console.log("⚠ 语料里除目标外没有其它 chunk，第二条发票跳过");
+}
 
 for (const [name, idx] of invoices) {
   if (idx < 0) continue;

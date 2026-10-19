@@ -32,7 +32,7 @@ const slugSet = new Set(entries.map((e) => e.id));
 const bySlug = new Map(COURSE_STRUCTURE.map((c) => [c.slug, c]));
 
 /** 课程卡联合视图：结构（stage/prereqs/next/mvpSlug/教学字段，course-structure.ts）
- *  + 元数据（状态/面试视角，courses.ts）+ MVP 词表（mvps.ts 三态如实标注）。 */
+ *  + 元数据（状态，courses.ts）+ MVP 词表（mvps.ts 三态如实标注）。 */
 const items = COURSE_STRUCTURE.map((c) => ({
   course: c,
   meta: courseMeta(c.slug),
@@ -140,9 +140,6 @@ const STATUS_FILTERS = (() => {
                         </p>
                       )
                     }
-                    {meta.interviewAngle && (
-                      <p class="dc-angle"><strong>面试视角</strong>：{meta.interviewAngle}</p>
-                    )}
                     <p class="dc-foot">
                       <span class="chip">参考样本 <code>{course.mvpSlug}</code></span>
                       {course.capstoneHook && <span class="chip chip-hook">主线挂钩 {course.capstoneHook}</span>}

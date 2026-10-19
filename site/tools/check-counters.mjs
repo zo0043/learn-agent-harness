@@ -40,7 +40,6 @@ const P = {
   knowledgeMap: path.join(ROOT, 'notes', 'knowledge-map.md'),
   notesDir: path.join(ROOT, 'notes'),
   detailsDir: path.join(ROOT, 'notes', 'details'),
-  interviewBank: path.join(ROOT, 'notes', 'interview-bank.md'),
   coursesTs: path.join(ROOT, 'site', 'src', 'data', 'courses.ts'),
   pagesDir: path.join(ROOT, 'site', 'src', 'pages'),
   readme: path.join(ROOT, 'README.md'),
@@ -92,11 +91,10 @@ if (!hardError) {
     domains: num(/知识域\s*(\d+)/, '知识域'),
     coursePages: num(/课程页\s*(\d+)/, '课程页'),
     cards: num(/课程卡\s*(\d+)/, '课程卡'),
-    exercises: num(/课内嵌\s*\*\*(\d+)\*\*/, '课内嵌题'),
-    interviews: num(/面试题库精选\s*\*\*(\d+)\*\*/, '面试题库'),
     siteHtml: num(/站点 html\s*(\d+)/, '站点 html'),
   };
-  // notes 顶层数与 EXCLUDED 条数由同一条算式给出：`notes 顶层 19 − knowledge-map − interview-bank`
+  // notes 顶层数与 EXCLUDED 条数由同一条算式给出：`notes 顶层 18 − knowledge-map`
+  // （2026-10-19 去面试化：interview-bank.md 已删除，算式左端与被减数同步少 1）
   const m = block.match(/notes 顶层\s*(\d+)\s*−\s*([^）)]+)/);
   if (!m) {
     hardError = hardError ?? '口径块缺少「notes 顶层 N − …」算式';
@@ -150,80 +148,107 @@ if (!hardError) {
     }
   }
 
-  // 课内嵌题 = 13 课练习题库（表格行）+ agent-harness §13 八题 + rag S1 五题 + model-basics S7 十六题
-  const bankFiles = mdFiles(P.notesDir).filter((f) => f !== 'agent-harness.md');
-  let bank = 0;
-  for (const f of bankFiles) {
-    const lines = read(path.join(P.notesDir, f)).split('\n');
-    let inBank = false;
-    for (const L of lines) {
-      const h = L.match(/^#{1,3}\s*(.+)$/);
-      if (h) {
-        if (/练习题库/.test(h[1])) {
-          inBank = true;
-          continue;
-        }
-        if (inBank) inBank = false;
-      }
-      if (inBank && /^\|\s*\d+\s*\|/.test(L)) bank++;
-    }
-  }
-  // agent-harness §13 存档题：同级标题「第十三节 练习题库」下的表格行
-  let ah = 0;
-  if (exists(path.join(P.notesDir, 'agent-harness.md'))) {
-    const lines = read(path.join(P.notesDir, 'agent-harness.md')).split('\n');
-    let inBank = false;
-    for (const L of lines) {
-      const h = L.match(/^#{1,3}\s*(.+)$/);
-      if (h) {
-        if (/练习题库/.test(h[1])) {
-          inBank = true;
-          continue;
-        }
-        if (inBank) inBank = false;
-      }
-      if (inBank && /^\|\s*\d+\s*\|/.test(L)) ah++;
-    }
-  }
-  // rag S1 五道确认题
-  let ragQ = 0;
-  if (exists(path.join(P.notesDir, 'rag.md'))) {
-    const seg = read(path.join(P.notesDir, 'rag.md')).split(/^## S1 /m)[1] ?? '';
-    ragQ = (seg.split(/^## /m)[0].match(/^\*\*Q\d+/gm) ?? []).length;
-  }
-  // model-basics S7 八股速查表：节标题声明「(N 题 × …)」
-  let mbQ = 0;
-  if (exists(path.join(P.notesDir, 'model-basics.md'))) {
-    const mb = read(path.join(P.notesDir, 'model-basics.md'));
-    const seg = mb.split(/^## S7 /m)[1] ?? '';
-    const body = seg.split(/^## /m)[0];
-    const head = (seg.split('\n')[0].match(/（(\d+)\s*题/) ?? [])[1];
-    const listed = (body.match(/^\d+\.\s+\*\*/gm) ?? []).length;
-    // 标题声明与正文列表必须自洽，否则也算口径失真
-    if (head !== undefined && Number(head) !== listed) {
-      hardError =
-        hardError ??
-        `model-basics S7 标题声明 ${head} 题，正文实列 ${listed} 题（两者必须一致）`;
-    }
-    mbQ = listed;
-  }
-  act.exercises = bank + ah + ragQ + mbQ;
-  act.exerciseParts = { bank, agentHarness: ah, ragS1: ragQ, modelBasicsS7: mbQ };
+  // 2026-10-19 去面试化：练习题库（原 205 题）与题库页（原 37 题）已按产品决定整体移除，
+  // 原「课内嵌题 / 题库精选」两条判据连同其解析代码一并删除（被计数的对象已不存在）。
+  // 改为下面这条**反向守卫判据**：全仓不得再出现面试/题库痕迹，防回潮。
 
-  // 面试题库 = §3 + §4 + §8
-  if (exists(P.interviewBank)) {
-    const secs = read(P.interviewBank).split(/^## /m).slice(1);
-    let s3 = 0, s4 = 0, s8 = 0;
-    for (const s of secs) {
-      const title = s.split('\n')[0];
-      if (/^3[ .、]/.test(title)) s3 += (s.match(/^- Q\d+/gm) ?? []).length;
-      if (/^4[ .、]/.test(title)) s4 += (s.match(/^\|\s*\d+\s*\|/gm) ?? []).length;
-      if (/^8[ .、]/.test(title)) s8 += (s.match(/^\*\*Q\d+/gm) ?? []).length;
+  // ══ 去面试化守卫（2026-10-19 新增，两条判据）═════════════════════════════════
+  // 设计理由（第一性原理）：用户要的不是「面试这个词出现 0 次」，而是
+  // 「站点呈现的内容不再是面试备考，且没有因此坏掉的死引用」。
+  // 所以禁词只覆盖**用户面**（真正渲染给读者的东西），而**内部历史**（handoff.md /
+  // notes/process/ / reviews/）允许出现该词——把 dated 日志里的词改掉等于伪造历史，
+  // 一条「不改谎话就无法满足」的判据本身就是坏判据。
+  //
+  // 判据 A · 用户面残留 = 0：notes/*.md + notes/details/*.md + site/src/** + README/AGENTS
+  //   + site/public/**（这些是站点渲染面）。允许「明确记述已移除」的句子。
+  // 判据 B · 死引用 = 0：全仓活源码不得再指向已删除的 interview-bank.md / /interview/。
+  //   允许记述「已删除」的句子，以及 §HISTORY 列出的内部历史文件。
+  const DECOM_ALLOW = /已删|已移除|去面试化|已整体移除|一并移除|已随|不再含题库|已于 2026-10-19|原练习题库|当时的|已删除|作废|原落在/;
+  const DECOM_PAT = /面试|题库|interview|JD\s*关键词/;
+  const DEAD_PAT = /interview-bank|\/interview\//;
+  // 内部历史：dated 工作日志 / 过程文档 / 审计归档。它们**不在站点渲染面**上，
+  // 保留当时语境是可追溯性的一部分；handoff.md 另有一条正向判据（文首必须声明当前定位）。
+  const HISTORY_FILES = [
+    'handoff.md',
+    'notes/process/',
+    'reviews/',
+    'analysis/',
+    '.agent-teams/',
+    // 根目录的历史审计 / 结构重组报告：记录的是 2026-10-14 当时的真实状态，
+    // 与 reviews/ 同属归档（不得改写），故同样豁免。
+    'notes-restructure-plan.md',
+    'restructure-',
+  ];
+  const isHistory = (rel) => HISTORY_FILES.some((h) => rel === h || rel.startsWith(h) || rel.includes(h));
+
+  const walkSrc = (dir) => {
+    if (!exists(dir)) return [];
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
+      const full = path.join(dir, d.name);
+      if (d.isDirectory()) return walkSrc(full);
+      return /\.(astro|ts|mjs|css)$/.test(d.name) ? [full] : [];
+    });
+  };
+  const scanLines = (files) => {
+    const hits = [];
+    for (const rel of files) {
+      const abs = path.isAbsolute(rel) ? rel : path.join(ROOT, rel);
+      if (!exists(abs)) continue;
+      read(abs).split('\n').forEach((L, i) => {
+        if (DECOM_PAT.test(L) && !DECOM_ALLOW.test(L)) hits.push(`${rel}:${i + 1}: ${L.trim().slice(0, 80)}`);
+      });
     }
-    act.interviews = s3 + s4 + s8;
-    act.interviewParts = { s3, s4, s8 };
-  } else {
-    hardError = '未找到 notes/interview-bank.md';
+    return hits;
+  };
+
+  // 判据 A 的输入面 = 站点渲染面
+  const SURFACE_FILES = [
+    ...mdFiles(P.notesDir).map((f) => path.join('notes', f)),
+    ...mdFiles(path.join(ROOT, 'notes', 'details')).map((f) => path.join('notes', 'details', f)),
+    ...['README.md', 'AGENTS.md'].filter((f) => exists(path.join(ROOT, f))),
+    ...walkSrc(path.join(ROOT, 'site', 'src')),
+    ...['site/public/sitemap.xml', 'site/public/robots.txt'].filter((f) => exists(path.join(ROOT, f))),
+  ];
+  act.surfaceResidue = scanLines(SURFACE_FILES);
+  act.surfaceSample = act.surfaceResidue.slice(0, 8);
+
+  // 判据 B 的输入面 = 全仓活源码（.md/.astro/.ts/.mjs/.css/.yml/.json/.xml/.txt），排除内部历史
+  const walkAll = (dir, out = []) => {
+    if (!exists(dir)) return out;
+    for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (d.name === 'node_modules' || d.name === '.git' || d.name === 'dist') continue;
+      const full = path.join(dir, d.name);
+      const rel = path.relative(ROOT, full);
+      if (d.isDirectory()) { walkAll(full, out); continue; }
+      if (!/\.(md|astro|ts|mjs|css|yml|yaml|json|xml|txt)$/.test(d.name)) continue;
+      if (isHistory(rel)) continue;
+      out.push(rel);
+    }
+    return out;
+  };
+  const deadHits = [];
+  // SELF：本文件自己的正则字面量不得判自己（本会话早期已因同类自匹配产出过假阳性）。
+  // 注：SELF 常量在文件后半段才声明，故此处用同一表达式就地求值，不改声明位置。
+  const SELF_REL = path.relative(ROOT, fileURLToPath(import.meta.url));
+  for (const rel of walkAll(ROOT)) {
+    if (rel === SELF_REL) continue;
+    const abs = path.join(ROOT, rel);
+    read(abs).split('\n').forEach((L, i) => {
+      if (DEAD_PAT.test(L) && !DECOM_ALLOW.test(L)) deadHits.push(`${rel}:${i + 1}: ${L.trim().slice(0, 80)}`);
+    });
+  }
+  act.deadRefs = deadHits;
+  act.deadRefSample = deadHits.slice(0, 8);
+
+  // 判据 C（正向）：handoff.md 文首必须声明当前定位——否则读者从历史条目读入会重新激活旧定位。
+  const handoff = path.join(ROOT, 'handoff.md');
+  if (exists(handoff)) {
+    // 要求声明出现在**第一个 `## ` 标题之前**——即读者进入任何历史条目之前先看到当前定位。
+    // 不用固定字符窗口（声明位置随前文增减而漂移，窗口法是脆的）。
+    const txt = read(handoff);
+    const firstH2 = txt.search(/^## /m);
+    const head = firstH2 === -1 ? txt : txt.slice(0, firstH2);
+    act.handoffNotice = /当前定位（2026-10-19 更新，以此为准）/.test(head) ? 1 : 0;
   }
 
   // 站点 html = **三桶互斥且穷尽**的划分，自源文件派生（不再用字面量复述分解式）
@@ -286,8 +311,6 @@ if (hardError) {
 check('知识域', dec.domains, act.domains, 'courses.ts DOMAIN_COUNT 复刻（排除 whiteboard 与 phase=—）');
 check('课程页 /c/<slug>/', dec.coursePages, act.coursePages, 'COURSES 条目排除白板卡');
 check('课程卡', dec.cards, act.cards, 'COURSES 全部条目');
-check('课内嵌题', dec.exercises, act.exercises, `13课题库 ${act.exerciseParts.bank} + agent-harness ${act.exerciseParts.agentHarness} + rag S1 ${act.exerciseParts.ragS1} + model-basics S7 ${act.exerciseParts.modelBasicsS7}`);
-check('面试题库精选', dec.interviews, act.interviews, `§3 ${act.interviewParts.s3} + §4 ${act.interviewParts.s4} + §8 ${act.interviewParts.s8}`);
 check('notes 顶层 md 数', dec.notesTop, act.notesTop, 'notes/*.md（process/ 与 details/ 不计）');
 check('EXCLUDED_FROM_COURSE_ROUTE 条数', dec.excluded, act.excluded, 'courses.ts 的 Set 元素数');
 check(
@@ -415,6 +438,9 @@ check('rag.md recall@5 = 0.44', true, /@5[=: ]*0\.44|recall@5[ =:]*0\.44/.test(r
 // D7 sitemap：手写 site/public/sitemap.xml 的 url 数必须等于站点 html 数（否则新增页面会静默漏收）
 const sitemapXml = read(path.join(ROOT, 'site', 'public', 'sitemap.xml'));
 check('sitemap url 数 = 站点 html', dec.siteHtml, (sitemapXml.match(/<url>/g) ?? []).length, 'site/public/sitemap.xml（手写，未装 @astrojs/sitemap）');
+check('去面试化 A：站点渲染面不得残留 面试/题库/interview', 0, act.surfaceResidue.length, `命中 ${act.surfaceResidue.length} 处（样例：${act.surfaceSample.join(' ｜ ') || '无'}）`);
+check('去面试化 B：活源码不得残留指向已删文件/页的死引用', 0, act.deadRefs.length, `命中 ${act.deadRefs.length} 处（样例：${act.deadRefSample.join(' ｜ ') || '无'}）`);
+check('handoff.md 在首个 ## 标题前声明当前定位', 1, act.handoffNotice ?? 0, 'handoff.md 第一个 `## ` 标题之前须含「当前定位（2026-10-19 更新，以此为准）」——防读者从历史日志读入已作废的面试定位');
 
 // D8 旧写法/旧引用残留（豁免词同句出现时不算残留——那是「主动说明已废弃」的正确用法）
 const staleIBM = grepRepo(/SAP、IBM[^ ]/);

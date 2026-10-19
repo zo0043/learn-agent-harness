@@ -6,15 +6,14 @@ const base = import.meta.env.BASE_URL;
 const nav = [
   { href: '/', label: '首页', start: true },
   // 横向知识导航页（LLM 发展史与演进 + 五阶段课程地图）：按方案位于 P0 之前，
-  // 故排在首页之后、题库之前。
+  // 故排在首页之后。
   { href: '/nav/', label: '导航' },
-  { href: '/interview/', label: '题库', featured: true },
   { href: '/learn/', label: '学习路线' },
   { href: '/details/', label: '详解' },
   { href: '/works/', label: '作品' },
   { href: '/map/', label: '知识地图' },
   // W3-A：/timeline 路由已删（内容与 /c/llm-timeline 100% 重复且是残缺版：无 TOC / 无 page-foot）。
-  // 入口不破——导航改链课程页版本，那里有 meta-bar + TOC + 相关题 + page-foot。
+  // 入口不破——导航改链课程页版本，那里有 meta-bar + TOC + page-foot。
   { href: '/c/llm-timeline/', label: '时间线' },
 ];
 const rawPath = Astro.url.pathname;

@@ -3,7 +3,7 @@
  * /map：知识地图 = 顶部交互式知识域视图（DomainMap，courses.ts 派生，P-05）
  * + notes/knowledge-map.md 原文渲染（单一真源，2026-10-12 起）。
  * 此前是手绘副本（mermaid 依赖图 + 横切表 + 资产表），与 canonical 反复漂移；
- * 现改为与 /interview 同模式：从 courses 集合 render knowledge-map.md，
+ * 从 courses 集合 render knowledge-map.md，
  * 笔记改动即同步。图内 mermaid 由 markdown 管线转 .mermaid div、客户端渲染
  * （viz/mermaid-check.mjs 覆盖本页，语法错会 FAIL）。
  * 框架统一：meta-bar / 面包屑 / TOC 侧栏 / page-foot 由 NotePageLayout 提供（P-06）。
@@ -39,7 +39,6 @@ const base = import.meta.env.BASE_URL;
       toc={toc}
       footLinks={[
         { label: '学习路线', href: base + 'learn/' },
-        { label: '面试题库', href: base + 'interview/' },
         { label: '作品详解', href: base + 'works/' },
       ]}
     >

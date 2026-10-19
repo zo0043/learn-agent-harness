@@ -1,15 +1,15 @@
 ---
 /**
- * NotePageLayout：原文渲染页（/map、/interview）的统一框架。
+ * NotePageLayout：原文渲染页（当前只有 /map）的统一框架。
  *
- * 背景（P-06）：/map、/interview、/timeline 三个「笔记原文渲染」页曾各写一遍框架，
- * 且能力不对等——/map 有 meta-bar + TOC + page-foot，/interview 有 meta-bar + 手写复习区
+ * 背景（P-06）：/map、/timeline 等多个「笔记原文渲染」页曾各写一遍框架，
+ * 且能力不对等——有的有 meta-bar + TOC + page-foot，有的只有 meta-bar + 手写区
  * 但**调了 extractToc 却从不渲染目录**，/timeline 更只有 meta-bar（无 TOC / 无 page-foot）。
  * 本组件把「meta-bar + 面包屑 + 正文 + TOC 侧栏 + page-foot + 可选相关题区」收敛成一处，
  * 与 /c/[slug] 课程页同一套 CSS 类（.course-layout / .markdown / .toc / .page-foot）。
  *
  * 槽位：
- *   - `before`：正文之前的自定义区（/interview 的复习主区），可省略
+ *   - `before`：正文之前的自定义区，可省略
  *   - 默认槽：笔记正文（`<rendered.Content />`）+ 页面自己的尾注
  *   - `note`：page-foot 之后的小字脚注（源码说明等），可省略
  *
@@ -31,13 +31,6 @@ export interface MetaChip {
   strong?: boolean;
 }
 
-export interface RelatedQuestion {
-  no: string;
-  text: string;
-  /** 指向面试题库小节锚点（与 TOC 同算法） */
-  anchor: string;
-}
-
 export interface FootLink {
   label: string;
   href: string;
@@ -54,19 +47,15 @@ interface Props {
   crumbs: Crumb[];
   /** 本页目录（extractToc 产物）；空数组 = 不渲染侧栏 */
   toc: TocItem[];
-  /** 可选：相关面试题交叉索引区。当前 /map、/interview 均不传（题库页自身即索引源），
-   *  保留为统一框架的扩展点——与 /c/[slug] 的 relatedQuestions 同一形态。 */
-  relatedQuestions?: RelatedQuestion[];
   /** page-foot 横向链接；省略则用站点默认四项 */
   footLinks?: FootLink[];
 }
 
-const { title, description, chips, crumbs, toc, relatedQuestions = [], footLinks } = Astro.props;
+const { title, description, chips, crumbs, toc, footLinks } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const DEFAULT_FOOT: FootLink[] = [
   { label: '学习路线', href: base + 'learn/' },
-  { label: '面试题库', href: base + 'interview/' },
   { label: '作品详解', href: base + 'works/' },
   { label: '知识地图', href: base + 'map/' },
 ];
@@ -75,7 +64,7 @@ const foot = footLinks ?? DEFAULT_FOOT;
 /**
  * C2/PRES-F3：把 description 转发给 <Base>。
  * 此前本 layout 调用 `<Base title={title}>` 不带 description，于是 8 个课程页 + 8 个专题页
- * 以及 /map、/interview 全都落到 Base 的同一条默认摘要上（33 页里 31 页共用一条 meta description）。
+ * 以及 /map 全都落到 Base 的同一条默认摘要上。
  * 调用方未显式传时按 title 派生一条，仍保证每页摘要可区分。
  */
 const desc =
@@ -108,7 +97,7 @@ const desc =
 
       {/* C2/PRES-F1：页面自身的 <h1>。
           此前本 layout 不输出 h1，页标题只能由 markdown 正文首行的 `#` 提供；而 `before` 槽
-          （/map 的 DomainMap、/interview 的复习主区）会先输出 h2–h4，于是 /map、/interview 的 h1
+          （如 /map 的 DomainMap）会先输出 h2–h4，于是 /map 的 h1
           被挤到十几个标题之后（文档大纲倒置）。现在 h1 由 layout 在 meta-bar 之后、before 槽之前
           输出；正文首个 h1 由 astro.config.mjs 的 demoteNoteH1 降级为 h2，保证全页唯一 h1 且排在
           所有 h2 之前。类名复用既有 `.page-title`（global.css:670，其他页已在用，不新增死选择器）。 */}
@@ -118,28 +107,6 @@ const desc =
 
       <slot />
 
-      {
-        relatedQuestions.length > 0 && (
-          <section class="related-questions" aria-label="相关面试题">
-            <h3>相关面试题</h3>
-            <p class="rq-note">
-              选自 <a href={base + 'interview/'}>面试题库</a>（题号 = 题库内编号，链接锚到对应小节）——追问到底 = 合格线。
-            </p>
-            <ul class="rq-list">
-              {
-                relatedQuestions.map((q) => (
-                  <li>
-                    <a href={`${base}interview/#${encodeURIComponent(q.anchor)}`}>
-                      <span class="rq-no">{q.no}</span>
-                      {q.text}
-                    </a>
-                  </li>
-                ))
-              }
-            </ul>
-          </section>
-        )
-      }
 
       <footer class="page-foot">
         {foot.map((l) => <a href={l.href}>{l.label}</a>)}

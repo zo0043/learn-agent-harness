@@ -41,18 +41,18 @@ jobs:
 
       # ── Build sanity（PRES-F7 修复，2026-10-19 新增）────────────────────────────
       # 修复前：本部署作业只跑 `npm run build` 就直接 `upload-pages-artifact`，
-      # 而产物断言（dist HTML 等值 33 + 关键页非空）只存在于 `verify.yml`——
+      # 而产物断言（dist HTML 等值 32 + 关键页非空）只存在于 `verify.yml`——
       # 两个 workflow 互不阻塞，于是「构建产出 0 HTML 但 exit 0」时**没有任何步骤会拦下**，
       # 空目录会被上传到 Pages 并覆盖线上站点（本机 site/dist 正是「89 文件 / 0 HTML」残骸）。
       # 现把 verify.yml 的同款断言复制到这里，使**部署路径自身**校验产物后再上传。
       # 边界诚实：本断言只证明「产物文件数与非空性」，**不**证明页面渲染/视觉正确（后者由 verify.yml 的
-      # 3 视口 headless 断言覆盖）；等值 33 的口径来源见 site/tools/check-counters.mjs 与 knowledge-map 口径块。
+      # 3 视口 headless 断言覆盖）；等值 32 的口径来源见 site/tools/check-counters.mjs 与 knowledge-map 口径块。
       - name: Build sanity (dist must contain real HTML)
         run: |
           count=$(find site/dist -name '*.html' | wc -l)
-          echo "dist HTML 文件数 = $count（等值断言 33 = 8 静态页（index/learn/works/map/interview/nav/404/details/index）+ 17 课程页（c/[slug]）+ 8 专题页（details/[slug]））"
-          test "$count" -eq 33
-          for p in index.html nav/index.html learn/index.html works/index.html interview/index.html map/index.html details/index.html c/rag/index.html 404.html; do
+          echo "dist HTML 文件数 = $count（等值断言 32 = 7 静态页（index/learn/works/map/nav/404/details/index）+ 17 课程页（c/[slug]）+ 8 专题页（details/[slug]））"
+          test "$count" -eq 32
+          for p in index.html nav/index.html learn/index.html works/index.html map/index.html details/index.html c/rag/index.html 404.html; do
             [ -s "site/dist/$p" ] || { echo "关键页缺失或为空：$p"; exit 1; }
             echo "  关键页存在且非空：$p"
           done

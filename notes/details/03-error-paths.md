@@ -4,7 +4,7 @@ slug: "03-error-paths"
 domain: "恢复与可靠性"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "稳定历史"
-kind: "interview-question"
+kind: "mechanism-deepdive"
 ---
 
 # 资深分水岭 3:错误路径优先于快乐路径
@@ -26,6 +26,6 @@ OpenAI《A Practical Guide to Building Agents》：失败时必须停机并把�
 - 已覆盖：从零写 harness §7（先记 tool_intent 再执行；intent 在、exec 不在=结果未知；非只读不盲目重放、先摆状态让模型用 read_file 核对——模拟崩溃（harness 内 `process.exit(137)` 自触发）+ 真实恢复的实测输出）；Harness 架构 §6.1 三状态表 + §6.2 guarded_tool_step 契约；§9.1"loop 正常结束 ≠ 正确"；从零写 harness §9 四种 demo 模式，崩溃恢复模式全实测通过。
 - 未覆盖：没有行业一手数字；本地恢复是"日志重建"路径，没有"session API 级冷启动"（wake+getSession）的对应物——那是产品化 SDK 的形态，本地课程未涉及。
 
-## 面试一句话
+## 一句话概括
 
 "我设计 agent 先问'它崩溃了会不会重复伤害'：先记 intent 再执行，结果未知时先用只读工具核对现状，绝不盲目重放。"

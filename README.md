@@ -1,8 +1,8 @@
 # learn-agent-harness
 
-AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
+AI agent 开发学习系统 + **coding agent 工程方向讲义库与知识地图**。
 
-核心思路：用 AI 教 AI（pi-web 学习系统）的同时，把每节课的知识点落成**零框架可运行作品**——从零写 harness、零依赖 RAG pipeline、白板版……作品里每个文件对应课程一节，配套完整课程笔记与面试题库。
+核心思路：用 AI 教 AI（pi-web 学习系统）的同时，把每节课的知识点落成**零框架可运行作品**——从零写 harness、零依赖 RAG pipeline、白板版……作品里每个文件对应课程一节，配套完整课程笔记。
 
 ## 作品
 
@@ -17,11 +17,11 @@ AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 | [`durable-execution-demo/`](durable-execution-demo/) | **durable execution**：长任务不丢不重——journal（intent→exec 双锚点）+ checkpoint 原子写 + 幂等存储 + mock 外部消息服务；3 种崩溃点（intent 前 / intent 后 exec 前 / exec 后）真实 SIGKILL 自杀重启，恢复按 §S8.2 判定表逐步行 replay / skip / unknown→confirm；验收 = 3 崩溃点 × 各 3 次，副作用计数恒=1、恢复报告逐字节一致（负向测试证伪有牙）。全离线零依赖 | `cd durable-execution-demo && npm i` → `npm run demo` |
 | [`framework-demo/`](framework-demo/) | **框架生态** 实操：① Claude Agent SDK 指向自持 OpenAI/Anthropic 双格式代理，四能力实证——agent / 自定义 subagent（forwardSubagentText 证明委派真发生）/ permissions（canUseTool 拦截 rm）/ session resume（上下文延续），`npm run demo` 退出码 0 = 10 条 `ok()` 断言 + 1 条整体判定；② **三家 SDK 同任务离线 mock 对照**（**demo pin**：Claude Agent SDK `0.3.296` / OpenAI Agents SDK `0.20.0` / LangGraph `1.4.21`，pin 快照 2026-10-12；**registry latest 2026-10-19**：`0.3.302` / `0.20.0` / `1.5.1`）——`npm run compare` 一条命令五维结构化对照、`npm run compare:assert` 16 条断言（本地 mock 端点：无外网、零 key、非真实模型实跑），逐维结论见 `framework-demo/docs/sdk-comparison.md`。含与 harness-demo 的"给什么/藏什么"对照表 | `cd framework-demo && npm i` → `npm run compare`（全离线）/ `npm run demo`（.env 需支持 Anthropic 格式 /v1/messages 的端点） |
 
-配套资产（非 demo，支撑面试口述与站点）：
+配套资产（非 demo，支撑讲义讲解与站点）：
 
 | 目录 | 内容 | 跑法 |
 |---|---|---|
-| [`whiteboard/`](whiteboard/) | 白板版 agent（~180 行 Python，面试口述用） | 直接读源码 |
+| [`whiteboard/`](whiteboard/) | 白板版 agent（~180 行 Python，纯标准库单文件） | 直接读源码 |
 | [`memory-redteam/`](memory-redteam/) | **长期记忆自研实操**（按计数口径**不计入 6 作品数**，见 knowledge-map 口径块）：写路径 7 项能力（信任分级/注入扫描/高危审批/审计留痕/冲突消解/时效窗口/遗忘传播）+ BM25∥字符三元组 hash 向量 RRF 混合检索（逐条注入理由审计）+ JSONL 跨进程持久化（三方 digest 逐字节一致）+ 16 条红队探针（逐层消融 18/18 层承重） | `cd memory-redteam && npm run demo`（全离线零依赖；`node test.mjs` / `--ablate` / `--persist` 可重跑判据） |
 | [`viz/render.mjs`](viz/render.mjs) | SVG→PNG 渲染器（node12 re-exec 自举 + playwright-core，复用本机 Chromium 零下载） | `node viz/render.mjs x.svg` |
 | [`site/`](site/) | Astro 公开学习站（本仓库内容的网站形态，GitHub Pages 部署） | 构建 `cd site && npm i && npm run build` |
@@ -31,12 +31,11 @@ AI agent 开发学习系统 + **coding agent 方向面试备考作品**。
 
 ## 课程笔记（`notes/`）
 
-**19 篇课程内容（顶层）**＝ 17 课程正文 + 总索引 `knowledge-map.md` + 面试题库 `interview-bank.md`；另有 `process/` 20 份设计/过程文档 + `details/` 8 篇专题（合计 47 个 md）。**体积不写绝对值**——口径随内容增长而漂移，需要时以 `wc -c` 实测为准：`find notes -maxdepth 1 -name '*.md' -printf '%s\n' | awk '{s+=$1} END{print s}'`（顶层）/ `find notes -name '*.md' …`（全部 47 个）；不要用 `du`（默认 4K 块取整，会高估约 7–10%）。Obsidian vault（LaTeX / mermaid 全渲染；PNG 由 `viz/render.mjs` 按需生成，非随笔记入库的资产）。备考 coding agent 岗（Codex Core / Claude Code 类）的知识结构：
+**18 篇课程内容（顶层）**＝ 17 课程正文 + 总索引 `knowledge-map.md`；另有 `process/` 20 份设计/过程文档 + `details/` 8 篇专题（合计 47 个 md）。**体积不写绝对值**——口径随内容增长而漂移，需要时以 `wc -c` 实测为准：`find notes -maxdepth 1 -name '*.md' -printf '%s\n' | awk '{s+=$1} END{print s}'`（顶层）/ `find notes -name '*.md' …`（全部 47 个）；不要用 `du`（默认 4K 块取整，会高估约 7–10%）。Obsidian vault（LaTeX / mermaid 全渲染；PNG 由 `viz/render.mjs` 按需生成，非随笔记入库的资产）。备考 coding agent 岗（Codex Core / Claude Code 类）的知识结构：
 
-> `notes/` 顶层**恰为课程内容**（19 个 md）——这正是站点课程路由数 17 的来源（19 − `knowledge-map` − `interview-bank`，后两者有独立页面 `/map`、`/interview`）。设计/过程文档集中在 `notes/process/`，不生成课程页。
+> `notes/` 顶层**恰为课程内容**（18 个 md，2026-10-19 去面试化前为 19）——这正是站点课程路由数 17 的来源（18 − `knowledge-map.md`）
 
 - **总索引**：[knowledge-map.md](notes/knowledge-map.md)——15 个知识域状态 + 分阶段学习路线 + 完成判据
-- **面试题库**：[interview-bank.md](notes/interview-bank.md)——结构题 / 交叉题 / JD 覆盖矩阵 / 行为面
 - **架构主线**：[agent-harness.md](notes/agent-harness.md)（15 节：第 1-2 节为回顾，3-15 为正文）· [harness-from-scratch.md](notes/harness-from-scratch.md)（从零写 harness 实录）· [rag.md](notes/rag.md)（RAG 与检索 实录）
 - **知识域课程**：system-design / durable-execution / sandbox / evaluation / mcp / api-engineering / data-flywheel / long-term-memory / observability / framework-ecosystem / model-basics
 

@@ -8,7 +8,8 @@
     "demo:retrieval": "tsx src/demo-retrieval.ts",
     "demo:bm25": "tsx src/demo-bm25.ts",
     "demo:rag": "tsx src/demo-rag.ts",
-    "demo:eval": "tsx src/evaluate.ts"
+    "demo:eval": "tsx src/evaluate.ts",
+    "check:corpus": "tsx src/check-corpus.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.0",

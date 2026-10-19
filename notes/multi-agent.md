@@ -138,7 +138,7 @@ agent 之间的"通信"有两种形态：**传上下文**（把别的 agent 的�
 - 上行传无结构长文 → 汇总层上下文爆炸，orchestrator 反而成了瓶颈（原本开子 agent 就是为了省它的上下文）。
 - 为了"求共识"而共享上下文 → 独立判断被磨平，评审/投票失去意义（debate-judge 的多样性收益来自独立）。
 
-**A2A 一句话卡** [2026现行]：由 Linux Foundation 的 **Agentic AI Foundation（AAIF）** 托管（与 MCP、goose、AGENTS.md、agentgateway 同列，见 aaif.io/projects）；规范最新正式发布 **v1.0.1（2026-05-28，前版 v1.0.0 2026-03-12）**；官方定位"不规定子 agent 通信与工具调用"，面向企业互操作、采用早期。治理名单别混淆两套：**AAIF 技术委员会现列 8 家**（Anthropic、Microsoft、Block、OpenAI、Google、Cloudflare、Bloomberg、AWS），**A2A 另设自己的 TSC**（Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM Research）。面试一句："AAIF 治理下与 MCP 互补（agent↔agent vs agent↔工具），企业采用早期——我们尚未引入，但调研过。"
+**A2A 一句话卡** [2026现行]：由 Linux Foundation 的 **Agentic AI Foundation（AAIF）** 托管（与 MCP、goose、AGENTS.md、agentgateway 同列，见 aaif.io/projects）；规范最新正式发布 **v1.0.1（2026-05-28，前版 v1.0.0 2026-03-12）**；官方定位"不规定子 agent 通信与工具调用"，面向企业互操作、采用早期。治理名单别混淆两套：**AAIF 技术委员会现列 8 家**（Anthropic、Microsoft、Block、OpenAI、Google、Cloudflare、Bloomberg、AWS），**A2A 另设自己的 TSC**（Google、Microsoft、Cisco、AWS、Salesforce、ServiceNow、SAP、IBM Research）。实战一句："AAIF 治理下与 MCP 互补（agent↔agent vs agent↔工具），企业采用早期——我们尚未引入，但调研过。"
 
 ---
 
@@ -176,7 +176,7 @@ flowchart TD
 
 ## S5 成本与评测
 
-**Token 经济学**：agent ≈ **4x** chat、多智能体 ≈ **15x**；token 解释 **80%** 方差 → "更大模型 vs 更多 agent"本质是 token 经济学问题；预算是一等公民（从零写 harness §⑧）。面试时把这三个数字和"预算是一等公民"一起说，比背架构图更显资深。
+**Token 经济学**：agent ≈ **4x** chat、多智能体 ≈ **15x**；token 解释 **80%** 方差 → "更大模型 vs 更多 agent"本质是 token 经济学问题；预算是一等公民（从零写 harness §⑧）。讲解时把这三个数字和"预算是一等公民"一起说，比背架构图更显资深。
 
 **为什么多智能体评测更难**：多一层**组合问题**——**逐 agent 局部指标加不出系统指标**。举例：3 个 researcher 各自的检索准确率都 0.9，但 orchestrator 分解时漏了一个子问题、或汇总时把矛盾摘要强行平均，系统级答案仍然错。worker 都好、汇总照样错。
 
@@ -204,7 +204,7 @@ flowchart TD
 - **handoffs**（OpenAI Agents SDK）：水平**移交控制权**，不是并行分解——一次只有一个活跃 agent，适合"分诊→专门链路"，不适合 orchestrator-worker 的并行扇出。
 - **supervisor**（LangGraph）：把调度画成显式图（节点+边+typed state），藏的是 checkpoint/状态序列化语义；好处是控制流可见、可测、可回放。
 
-三家的**问题集相同**（持久化/子代理边界/工具标准化/权限护栏）——"框架收敛 = 行业问题定义收敛"是面试高分句（框架生态 §S3）。也就是说：选哪家不是重点，**这四类问题你怎么答**才是重点（框架生态 §S5 四层选型：控制循环模型 / 持久化恢复语义 / 权限护栏模型 / 可观测出口）。
+三家的**问题集相同**（持久化/子代理边界/工具标准化/权限护栏）——"框架收敛 = 行业问题定义收敛"是实战高分句（框架生态 §S3）。也就是说：选哪家不是重点，**这四类问题你怎么答**才是重点（框架生态 §S5 四层选型：控制循环模型 / 持久化恢复语义 / 权限护栏模型 / 可观测出口）。
 
 ---
 
@@ -315,7 +315,7 @@ sequenceDiagram
 {"kind":"tool_exec","id":"call_r3","name":"spawn_subagent","status":"ok","result":{"subagentId":"researcher-mcp","summary":"mcp-demo：只读到 allow、egress/write 到 approve、未分级到 deny（src/defense.ts:46-50）；L2 黑名单命中 attacker 地址→deny。"},"ms":19780}
 {"kind":"model_response","assistant":{"role":"assistant","content":"r3 未回答『未分级工具的默认返回』是否就是 deny 的原文依据，且与 r1/r2 的 default=deny 表述口径不一。定向复核（只引用源码原文），不靠猜。","tool_calls":[{"id":"call_r3b","name":"spawn_subagent","arguments":{"subagentId":"researcher-mcp-verify","goal":"引用 mcp-demo 未分级工具的默认返回原文","outputFormat":"一行原文 + 文件:行","boundary":"只读 mcp-demo/src/defense.ts"}}]},"finishReason":"tool_calls","ms":2410,"usage":{"prompt_tokens":1360,"completion_tokens":96}}
 {"kind":"tool_intent","id":"call_r3b","name":"spawn_subagent","args":{"subagentId":"researcher-mcp-verify","boundary":"mcp-demo/src/defense.ts","readonly":true}}
-{"kind":"tool_exec","id":"call_r3b","name":"spawn_subagent","status":"ok","result":{"subagentId":"researcher-mcp-verify","summary":"defense.ts:50 `return \"deny\"; // 未分级 = 默认 deny（安全默认，面试点）`"},"ms":7300}
+{"kind":"tool_exec","id":"call_r3b","name":"spawn_subagent","status":"ok","result":{"subagentId":"researcher-mcp-verify","summary":"defense.ts:50 `return \"deny\"; // 未分级 = 默认 deny（安全默认，要点）`"},"ms":7300}
 {"kind":"tool_intent","id":"call_write","name":"write_file","args":{"path":"workspace/out/permission-compare.md"}}
 {"kind":"tool_exec","id":"call_write","name":"write_file","status":"ok","result":"已写入 workspace/out/permission-compare.md（三 demo 均为默认 deny，差异在通道集合与审批/egress 触发点）","ms":6}
 {"kind":"final","content":"三 demo 的共同点=默认 deny；差异：harness-demo 三通道、sandbox-demo 四通道(+sandbox)、mcp-demo 按风险分级+黑名单+egress 白名单。已单线程写入对比文件。未解决项：无。","totalMs":72140}
@@ -347,7 +347,7 @@ sequenceDiagram
 
 **崩溃分支**(复用从零写 harness 的实测机制)：若父进程在 `tool_intent` 与 `tool_exec` 之间崩溃，日志里就是 **intent 在、exec 不在 = 结果未知**。恢复时只读工具可安全重放；非只读工具**不盲目重放**，先把 `[未知状态]` 摆给模型，让它先只读核对现状再决定（`harness-demo/src/agent.ts` 的 `guardedToolStep`，以及 `harness-demo/src/session.ts:50` 的 `rebuild`；从零写 harness §⑦ 实测输出）。
 
-**成本账**：3 个 worker 各自烧掉上万 token 检索，但只回 ≤500 字（约 400-700 token）摘要；父上下文保持小。代价在总量：总 token 仍会逼近 **15x chat**（S5）。所以这一步的收益不是"省 token"，是"父上下文不被撑爆 + 三个子任务并行省墙钟时间"——面试时要把这句说清，否则会被追问"你不是说多智能体很贵吗"。
+**成本账**：3 个 worker 各自烧掉上万 token 检索，但只回 ≤500 字（约 400-700 token）摘要；父上下文保持小。代价在总量：总 token 仍会逼近 **15x chat**（S5）。所以这一步的收益不是"省 token"，是"父上下文不被撑爆 + 三个子任务并行省墙钟时间"——讲解时要把这句说清，否则会被追问"你不是说多智能体很贵吗"。
 
 ---
 
@@ -401,7 +401,7 @@ flowchart TD
   G -- "是" --> H["上多智能体：<br/>orchestrator-worker + 单线程写"]
 ```
 
-**面试句**："多智能体的默认答案是'不用'，它买的是上下文隔离和并行，不是聪明。我会先跑单 agent 基线，再检查四级——可拆、可并行、写可单线程、评测能同时看整体和逐 agent；四级都过才上。这也是 Cognition 2026 的结论：多智能体出智力，写保持单线程。"
+**实战句**："多智能体的默认答案是'不用'，它买的是上下文隔离和并行，不是聪明。我会先跑单 agent 基线，再检查四级——可拆、可并行、写可单线程、评测能同时看整体和逐 agent；四级都过才上。这也是 Cognition 2026 的结论：多智能体出智力，写保持单线程。"
 
 ---
 
@@ -413,28 +413,6 @@ flowchart TD
 - 评测工程化（评测）：整体 vs 逐 agent 接 H S4 轨迹评测、H S6 CI 门禁。
 - 框架生态 §S3（各家要点）：S6 三列对照 = "子代理边界"共同点展开；框架生态 §S4 = pi RPC 子进程模式。
 - 沙箱与凭据（沙箱）：子代理共享文件系统 → 并行写要 worktree/沙箱隔离；本课 S4 的"独立上下文≠文件隔离"与本课同源。
-
----
-
-## 练习题库（后续提问用）
-> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
-> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
-> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
-
-| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
-|---|---|---|---|
-| 1 | "上 5 个 agent 为何又慢又贵"——三句话答 | S1+S5 | ≥3 点：①贵：多智能体 ≈15x chat token，token 解释 80% 方差；②慢：协调与串行汇总加墙钟，收益只在并行读；③默认不用，除非高价值且可并行（S1+S5） |
-| 2 | 评审 agent 为何零共享上下文最好？最小输入？ | S3 | ≥3 点：①编码者推理会把评审者锚定，独立上下文=独立判断；②最小输入=产物 diff/代码原文，不带父轨迹；③Devin Review 零共享平均每 PR 抓 2 个 bug（S3） |
-| 3 | 设计评审循环：哪写单线程、哪读多路 | S4+S7 | ≥3 点：①读多路并行：检索/分析/评审各跑独立上下文；②写单线程：落文件与副作用只一个 agent，或 worktree 后串行合并；③汇报只回 ≤500 字摘要（S4+S7） |
-| 4 | handoffs/subagents/supervisor：各对什么任务形态 | S6 | ≥3 点：①handoffs=水平移交控制权，一次只一个活跃 agent，适合分诊链路；②subagents=进程内子循环，藏上下文隔离，适合并行扇出；③supervisor=显式图调度，控制流可见可回放（S6） |
-| 5 | orchestrator-worker 里某个 worker 返回的摘要明显比另两个短、信息少。返工前先查哪三件事？ | S8 失败分支 | ≥3 点：①查委派三要素是否写全（目标/输出格式/边界）；②查该 worker 的 token/工具日志，是没检索到还是摘要被截断；③仍不足则定向复核，引用源码原文而非猜（S8） |
-| 6 | 两个 worker 摘要矛盾，为什么"让 judge 挑一个"是坏默认？给出更好的流程 | S3+S8 | ≥3 点：①judge 有位置/冗长/自我偏好偏差，质量接近时挑一个是噪声；②更好流程：字段级对比定位矛盾点，派定向复核引用一手原文；③确实无解就标注未解决项，不包装（S3+S8） |
-| 7 | 为什么"独立上下文≠文件隔离"？子代理并行写同一工作区，给出两种可行隔离方案 | S4+harness §8.2 | ≥3 点：①上下文隔离只是各自的 prompt 独立，文件系统仍共享；②并行写同一工作区=后写覆盖或语义冲突；③方案：每 worker 一个 git worktree 后串行合并；或写收敛到单 agent（S4） |
-| 8 | Anthropic 说多智能体内部评测 +90.2%，但这个数字不能直接作为上多智能体的理由。给出三个限定条件 | S1+S5 | ≥3 点：①限定口径：那是 Anthropic 内部研究任务，不是通用定理；②代价：15x token，只在可并行高价值任务收得回；③条件：任务可拆、写可单线程、有整体+逐 agent 评测（S1+S5） |
-| 9 | 把固定 workflow（FinHot 6 次调用）改成 orchestrator-worker，买到了什么、放弃了什么？何时值得改？ | S2+S5 | ≥3 点：①买到：分解可动态、子任务并行省墙钟、父上下文不被撑爆；②放弃：确定性、可复现性与约 15x token 预算；③值得改的时机=步骤不可预知且子任务只读（S2+S5） |
-| 10 | 给 S8 走查加"定向复核"子任务后，token 账本怎么变？什么指标能证明它值？ | S5+S8 | ≥3 点：①定向复核再多一次 spawn，多烧一个 worker 的全量检索，只回一行原文；②父上下文只增委派+摘要两段；③用「矛盾字段是否消解、终稿是否返工」证明值（S5+S8） |
-| 11 | 多智能体系统里，子 agent 的权限、凭据、trace 分别怎么管？ | S7+S8（接 interview-bank E4+M4+C3） | ≥3 点：①权限：子 policy ⊆ 父 policy，只允许收紧（如只读）；②凭据：由父/宿主侧代持，子代理结构性不可触及；③trace：子段带 subagentId，完整子轨迹独立落盘供审计（S7） |
-| 12 | 团队第 3 次遇到"多智能体跑得慢且结果不一致"。作为负责人，先要求哪三个验证再决定是否继续投入？ | S9 决策清单 | ≥3 点：①可重放轨迹：拉出整棵任务树定位慢在哪层；②逐 agent 失败归因：分解错、执行错还是汇总错；③成本账：15x token 是否被价值覆盖；不过先补评测与可观测（S9） |
 
 ---
 

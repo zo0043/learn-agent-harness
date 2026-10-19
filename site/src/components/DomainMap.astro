@@ -4,13 +4,13 @@
  *
  * 五档迁移（t36）：阶段单一真源 = course-structure.ts 的 STAGES / STAGE_LABELS / stage 字段，
  * 与 /learn/ 同口径（同一 stage 标签），替换旧 courses.ts 三档 phase（P0/P1/P2）及其 PHASE_DESC 文案。
- * 卡片状态/导读/面试视角仍取自 courses.ts（courseMeta），与旧卡逐字一致；
+ * 卡片状态/导读仍取自 courses.ts（courseMeta）；
  * 域集合 = COURSE_STRUCTURE 排除横向资产（isHorizontal）后按 domain 去重——
  * 白板卡本就不在 COURSE_STRUCTURE，无需单独排除。
  * 构建期断言派生集合与 DOMAIN_COUNT 严格相等，防漂移。
  *
  * 交互形态（契约约束）：
- *   - 纯 HTML/CSS：阶段分组 + 页内锚点导航（无 JS 可用）+ hover/focus-within 揭示面试视角，
+ *   - 纯 HTML/CSS：阶段分组 + 页内锚点导航（无 JS 可用），
  *     触屏设备（hover: none）常显——不引第三方库、不写一行 JS，禁用 JS 的访客内容完整可见；
  *   - 不做 mermaid 节点事件绑定：securityLevel:'strict' 下绑定被禁（W3-C 已核实 strict 并不
  *     禁用 htmlLabels，但节点事件绑定在 strict 下确实无效），依赖关系继续由笔记内 mermaid
@@ -25,10 +25,9 @@ interface DomainCard {
   stage: string;
   status: string;
   intro: string;
-  interviewAngle: string;
 }
 
-// 域集合：course-structure.ts 阶段单一真源 + courses.ts 状态/导读/面试视角联合视图；
+// 域集合：course-structure.ts 阶段单一真源 + courses.ts 状态/导读联合视图；
 // 排除横向资产（isHorizontal）：llm-timeline / industry-2026 不是「知识域」，不计入 15。
 const domains: DomainCard[] = COURSE_STRUCTURE.filter((c) => !c.isHorizontal).map((c) => {
   const meta = courseMeta(c.slug);
@@ -38,7 +37,6 @@ const domains: DomainCard[] = COURSE_STRUCTURE.filter((c) => !c.isHorizontal).ma
     stage: c.stage,
     status: meta.status,
     intro: meta.intro,
-    interviewAngle: meta.interviewAngle,
   };
 });
 
@@ -77,7 +75,6 @@ const base = import.meta.env.BASE_URL;
     <span><span class="legend-dot ok"></span>已完成</span>
     <span><span class="legend-dot doing"></span>进行中 / 讲义已展开</span>
     <span><span class="legend-dot todo"></span>规划中</span>
-    <span class="dm-count">面试视角：悬停或聚焦卡片显示</span>
   </div>
 
   <nav class="dm-nav" aria-label="按阶段跳转">
@@ -107,9 +104,6 @@ const base = import.meta.env.BASE_URL;
                   <span class="chip">{d.stage}</span>
                 </div>
                 <p class="dc-intro">{d.intro}</p>
-                <p class="dc-angle dm-angle">
-                  <strong>面试视角</strong>：{d.interviewAngle}
-                </p>
                 <p class="dc-foot">进入课程 →</p>
               </a>
             );

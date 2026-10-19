@@ -252,7 +252,7 @@ main.wrap {
   background: var(--accent-soft);
   font-weight: 600;
 }
-/* 题库强调位（/interview 提到导航第二位，底色 + 字重区别于其他项） */
+/* 导航强调位（featured 项底色 + 字重区别于其他项） */
 .site-nav a.featured {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent-soft) 72%, var(--accent) 12%);
@@ -417,8 +417,8 @@ a.card:hover {
   font-weight: 600;
 }
 
-/* 详解 kind 徽标（interview-question / design-detail / cost-detail） */
-.chip.kind-interview-question {
+/* 详解 kind 徽标（mechanism-deepdive / design-detail / cost-detail） */
+.chip.kind-mechanism-deepdive {
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
   background: var(--accent-soft);
@@ -724,7 +724,7 @@ div.mermaid.mermaid-error {
 /* /details 入口卡
    注：本条原带两个「真死选择器」，已被纪律 #9 的类集合门禁（site/tools/check-classes.mjs）判定为
    「CSS 定义但全仓从不输出」，并按 G0-5 / 03-D1 默认路径 (a) 就地删除：
-     · works-note —— 作品卡区下方 small 注（whiteboard 口述版），页面已改用别的类；
+     · works-note —— 作品卡区下方 small 注（whiteboard 单文件版），页面已改用别的类；
      · details-entry —— 页面只输出 details-entry-links（见 index.astro:221），从不输出 details-entry 本身。
    这两个类名在此**故意不写前导点**：本脚本自己的注释若带 `.` 会被上面的类集合扫描器当成一条新定义。
    details-entry-links 是活规则（有输出点），保留。 */
@@ -783,32 +783,11 @@ div.mermaid.mermaid-error {
   min-width: 120px;
   font-size: 1rem;
 }
-.dc-letter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 6px;
-  border-radius: 9px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 0.92rem;
-}
 .dc-intro {
   color: var(--text-soft);
   font-size: 0.9rem;
 }
-.dc-angle {
-  color: var(--text-faint);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-.dc-angle strong {
-  color: var(--accent);
-  font-weight: 600;
-}
+/* .dc-angle 已随「面试视角」一并移除（2026-10-19 去面试化）*/
 .dc-foot {
   margin-top: auto;
   font-size: 0.85rem;
@@ -906,54 +885,7 @@ a.domain-card:hover .dc-foot {
   flex-wrap: wrap;
 }
 
-/* 课页底部：相关面试题交叉索引 */
-.related-questions {
-  margin-top: 40px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-}
-.related-questions h3 {
-  margin-top: 0;
-  font-size: 1.15rem;
-}
-.rq-note {
-  color: var(--text-faint);
-  font-size: 0.85rem;
-}
-.rq-list {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
-}
-.rq-list li {
-  margin: 6px 0;
-}
-.rq-list a {
-  display: block;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
-  color: var(--text);
-  font-size: 0.92rem;
-  line-height: 1.55;
-}
-.rq-list a:hover {
-  border-color: var(--accent);
-  text-decoration: none;
-}
-.rq-no {
-  display: inline-block;
-  margin-right: 8px;
-  padding: 0 7px;
-  border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
+/* 课页底部：交叉索引（2026-10-19 起随题库一并移除，规则保留给 future 用） */
 
 /* ── 作品详解 /works ──────────────────────────────────── */
 .work {
@@ -1322,7 +1254,7 @@ a.domain-card:hover .dc-foot {
 .legend-dot.todo { background: #6e7681; }
 
 /* ── 知识域交互视图（P-05 · W3-B：DomainMap）─────────────────
- * 纯 HTML/CSS：锚点导航 + hover/focus 揭示面试视角，零 JS、零第三方库；
+ * 纯 HTML/CSS：锚点导航 + hover/focus 揭示导读，零 JS、零第三方库；
  * 卡片本体复用 .card/.domain-card/.dc-*，这里只加视图层规则。 */
 .dm-zone { margin: 0 0 28px; }
 .dm-title { font-size: 1.3rem; margin: 0 0 6px; }
@@ -1341,7 +1273,7 @@ a.domain-card:hover .dc-foot {
   color: var(--text-faint);
   white-space: nowrap;
 }
-/* 面试视角默认收起，hover / 键盘聚焦展开；触屏设备（无 hover）常显 */
+/* 导读默认收起，hover / 键盘聚焦展开；触屏设备（无 hover）常显 */
 .dm-angle { display: none; }
 .dm-card:hover .dm-angle,
 .dm-card:focus-within .dm-angle { display: block; }
@@ -1349,91 +1281,6 @@ a.domain-card:hover .dc-foot {
   .dm-angle { display: block; }
 }
 
-/* ── 面试题库 /interview 复习主区 ──────────────────────────── */
-.review-zone {
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  border-radius: 14px;
-  padding: 20px 22px;
-  margin: 0 0 28px;
-  box-shadow: var(--shadow);
-}
-.review-head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.review-zone .review-head h2 {
-  margin: 0;
-  padding: 0;
-  border: none;
-  font-size: 1.3rem;
-}
-.review-head-note {
-  color: var(--text-faint);
-  font-size: 0.88rem;
-}
-.review-block {
-  margin-top: 22px;
-}
-.review-sec {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 0 0 12px;
-  font-size: 1.05rem;
-}
-.review-sec .sec-note {
-  color: var(--text-faint);
-  font-size: 0.85rem;
-  font-weight: 400;
-}
-.review-group {
-  margin-top: 18px;
-}
-.review-group:first-child {
-  margin-top: 4px;
-}
-.review-group-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 0 0 10px;
-  font-size: 1rem;
-}
-.q-card {
-  gap: 6px;
-}
-.q-num {
-  align-self: flex-start;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-radius: 6px;
-  padding: 1px 8px;
-  white-space: nowrap;
-}
-.q-text {
-  margin: 0;
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-.q-hint {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.88rem;
-}
-.q-foot {
-  margin-top: auto;
-  font-size: 0.82rem;
-  font-weight: 500;
-}
 /* 复习动线：pipe-step 可点击 */
 a.pipe-step {
   color: inherit;

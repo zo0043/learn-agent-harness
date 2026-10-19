@@ -4,7 +4,7 @@ slug: "05-hitl-security"
 domain: "沙箱安全"
 source: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
 status: "2026现行"
-kind: "interview-question"
+kind: "mechanism-deepdive"
 ---
 
 # 资深分水岭 5:HITL 审批与结构性安全边界
@@ -26,6 +26,6 @@ OpenAI《A Practical Guide to Building Agents》：护栏分层，按工具风�
 - 已覆盖：从零写 harness §5（policy：deny>approve>allow、默认 deny，write_file→approve 即 human-in-the-loop，审批拒绝模式实测通过）；Harness 架构 §7.1（提示词不构成防线）+ §7.2（审批管"能不能"、scope 管"影响什么"）；沙箱与凭据 §S1（权限层≠沙箱三道独立门，提示词只能当第一道不能当最后道）+ S2 四通道 policy 引擎（approve 通道=挂起等人工批准）+ S4（最小凭据/零常驻凭据/egress 默认关/代执行）。
 - 未覆盖：行业"按风险维度分级"（只读/写、可逆性、财务影响）没有落进本地 policy（本地是按工具名平铺三档，不是风险矩阵）；"vault + MCP 代理代签"在 E S4 只有"代执行"的定性描述，无完整实现。
 
-## 面试一句话
+## 一句话概括
 
 "我不把安全写进 prompt——审批管'能不能做'，沙箱管'做了能炸多大'，凭据对 agent 结构性不可触及，注入攻击拿不到 token 就炸不出圈。"

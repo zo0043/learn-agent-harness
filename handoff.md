@@ -15,11 +15,13 @@
 
 ---
 
+> **当前定位（2026-10-19 更新，以此为准）**：本项目是**系统学懂 coding agent 工程的讲义库与知识地图**——每门课讲清机制、实现与权衡，配可运行的参考样本。2026-10-19 起已按产品决定移除全部练习题库与面试题库（`notes/interview-bank.md` 与 `/interview/` 页已删除）。**本文是 chronological 工作日志：下方 dated 条目记录的是「当时做了什么」，其中的面试/题库语境是历史事实，不做改写**；凡与本节定位冲突的，以本节为准。
+
 ## 一、这个项目是什么
 
-`/home/ubuntu/app/learn-agent-harness` = **AI 学习系统 + 面试备考课程**目录。当前目标：
+`/home/ubuntu/app/learn-agent-harness` = **AI agent 工程讲义库 + 知识地图**目录。当前目标：
 
-> **备考 agent 开发工程师岗位**，方向已定：**coding agent**（Codex Core / Claude Code / CodeBuddy 那类岗）
+> **把 coding agent 的工程机制讲透**（Codex Core / Claude Code / CodeBuddy 那类系统的内部原理），配套零依赖可运行参考样本
 
 产出全部落在本目录，按 Obsidian vault 组织（`notes/` 即课程日志，用 Obsidian 打开可读 LaTeX、mermaid、PNG）。
 
@@ -62,7 +64,7 @@ harness-demo/                       TS 可运行版
   src/test-compact.ts               压缩逻辑的本地 mock 测试（不依赖代理）
   workspace/docs/...                demo 测试语料
   trajectories/demo.example.jsonl 轨迹日志样例（已入库；`demo.jsonl` 由 npm run demo 本地生成，被 .gitignore 排除）
-whiteboard/agent_whiteboard.py      178 行纯标准库白板版（面试现场手写用）
+whiteboard/agent_whiteboard.py      178 行纯标准库白板版（单文件、无第三方依赖）
 viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core）
 ```
 
@@ -113,10 +115,10 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 
 ## 四、学习总纲（2026-10-11 规划）
 
-> 规范索引 = `notes/knowledge-map.md`（课程总表/依赖图/横切点/资产映射）；本节 = **学习状态 + 顺序 + 完成判据**，是开课与面试准备的单一事实源。
-> 状态记号：✅ 已完成（讲完+实操）/ 📐 结构建成未开（内容已写入，讲解与题库未做）/ 🔄 进行中 / 🔶 缺口补强（2026-10-11 面经检索，待写入）
+> 规范索引 = `notes/knowledge-map.md`（课程总表/依赖图/横切点/资产映射）；本节 = **学习状态 + 顺序 + 完成判据**，是学习推进的单一事实源。
+> 状态记号：✅ 已完成（讲完+实操）/ 📐 结构建成未开（内容已写入，讲解未做）/ 🔄 进行中 / 🔶 缺口补强
 
-### 4.1 知识点总览(15 个知识域 + 面试结构)
+### 4.1 知识点总览(15 个知识域 + 横向资产)
 
 > 命名:课程一律以知识域名引用(2026-10-11 起弃用 A–N 字母代号);节号引用写作 `§Sn`(如 `沙箱与凭据 §S2`)。
 
@@ -136,7 +138,6 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | 12 | 长期记忆(`long-term-memory.md`) | S1 四类记忆 / S2 三层生命周期 / S3 写侧 / S4 读侧 / S5 冲突消解与遗忘 / S6 评测 / S7 记忆投毒 / S8 框架与学术 / S9 设计题 / S10 实战走查 / S11 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 13 | 模型基础(`model-basics.md`) | S1 prefill/decode+KV cache / S2 采样 / S3 窗口 vs 有效 / S4 成本模型 / S5 微调意识 / S6 能力漂移 / S7 八股速查 / S8 实战走查 / S9 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
 | 14 | 框架生态(`framework-ecosystem.md`) | S1 框架三族 / S2 框架版图 / S3 抽象泄漏 / S4 选型决策树 / S5 迁移路径 / S6 pi 深潜 / S7 实战走查 / S8 常见错误 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 14 题通过 |
-| 16 | 面试结构(`interview-bank.md`) | 30 秒自我介绍 / 60 分钟模拟 / 5 组项目深挖追问链 / 10 道交叉题 / JD 覆盖矩阵 | 📐 | 2 场模拟通过 + 矩阵全 🟢 + 🔶5 STAR 模板 |
 | 15 | 多智能体编排(`multi-agent.md`) | S1 何时多智能体 / S2 架构模式 / S3 通信与上下文隔离 / S4 单线程写 / S5 成本与评测 / S6 框架对照 / S7 子代理设计 / S8 实战走查 / S9 什么时候不要用多智能体 | 📐 讲义已展开(2026-10-11) | 提问演练 + 题库 12 题通过 |
 | — | 范围外：算法编码（LeetCode） | 英文面经确认仍考（medium） | ⚪ 不在教程范围 | 建议 ~50 道 medium，并行轨 |
 
@@ -148,7 +149,7 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | 🔶2 | **评测工程化**：评测指标四代演进（exact match → BLEU/ROUGE → BERTScore → LLM-judge → 轨迹评测）+ reward model 意识 | 面经 40+ 题 / 30 必问题单列"BLEU/ROUGE 区别""RLHF 原理" | `evaluation.md` 新增"S8 指标四代演进" | ✅ 已写入 2026-10-11（S8，含奖励模型意识） |
 | 🔶3 | **MCP 与供应链安全**：Agent 安全独立节点——OWASP LLM Top 10（2025）+ OWASP Agentic Top 10（2026）清单、direct/indirect 注入分类、防御分层（input/execution/output/data） | 3 个独立安全面经源（知乎专文/专栏/面经站） | `mcp.md` S4 扩展为"Agent 安全总节"（与现有四攻击面合并） | ✅ 已写入 2026-10-11（S4.1-4.4；注意 OWASP LLM Top 10 已是 2026 版非 2025） |
 | 🔶4 | **系统设计**：经典范式点名（ReAct / Plan-and-Execute / Reflexion / self-consistency / ToT） | 英文系统设计标准题（ReAct vs Plan-and-Execute） | `system-design.md` 新增"S8 范式速查"（5 名 × 机制 × 适用场景，30 秒版） | ✅ 已写入 2026-10-11（S8） |
-| 🔶5 | **interview-bank**：行为面 STAR 模板 + 5 道常备题（最大挑战/失败/冲突/为什么做 agent/为什么来） | 英文面经确认 behavioral 轮仍存在 | `interview-bank.md` 新增节 | ✅ 已写入 2026-10-11（§8，早于 Phase 4 计划） |
+| 🔶5 | 行为面 STAR 模板 + 5 道常备题（原落在 `interview-bank.md` §8，该文件 2026-10-19 已删） | 英文面经确认 behavioral 轮仍存在 | 已随题库移除 | ⛔ 2026-10-19 作废 |
 | ⚪ | 算法编码（LeetCode medium）——不在教程范围，需另轨 | 英文面经：仍会出 | 不写入教程，另轨备考 | 并行 |
 
 **面经趋势印证**（2026 版面经共识）："RAG 考频下降，Agent 工程（记忆/工具可靠性/恢复）+ 评测（judge/轨迹评测）成主航道"（真实公司面经占比：agent 架构 33% / 系统设计 22% / 工程实现 22% / RAG 18%）→ 我们 P0 选「系统设计 / 沙箱与凭据 / 评测工程化」、强项押「长期记忆 / durable execution / 评测工程化 / 数据飞轮」的排序被印证，无需调权。
@@ -166,15 +167,15 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 | **Phase 1 · P0 收口** | 系统设计 → 沙箱与凭据(续 §S2) → 评测工程化 | 讲解(先完整讲完,提问后续约)+ 各课题库 8 题 + 🔶4(系统设计范式)/ sandbox-demo src / 🔶2(评测工程化指标演进) | 3 课讲完 + 24 题通过 + S2 demo 验收通过 |
 | **Phase 2 · P1** | durable execution → MCP 与供应链安全 → API 与多模型路由 → 数据飞轮 | 同上 + 🔶3(MCP 与供应链安全安全总节) | 4 课讲完 + 32 题通过 |
 | **Phase 3 · P2** | 可观测 → 长期记忆 → 模型基础 → 框架生态 | 同上 + 🔶1(模型基础八股升级) | 4 课讲完 + 32 题通过 + 模型基础 ~15 道八股可答 |
-| **Phase 4 · 面试演练** | 模拟面试 ×2 + 缺口收尾 | 按 `interview-bank.md` §2 执行（自我介绍→项目深挖→白板→设计→快问→反问） | 两轮均可追问到底 + 覆盖矩阵全 🟢 |
-| 并行轨 | LeetCode medium（范围外）/ 字节 JD 人工补盲（待办 3） | 独立于课程 | ~50 题 / 20-30 条 JD |
+| **Phase 4 · 复盘整合** | 全库复盘 + 缺口收尾 | 脱稿复述每课核心机制 + 复盘自己的实现（2026-10-19 起不再依赖题库） | 15 域均可脱稿讲清三条机制 |
+| 并行轨 | LeetCode medium（范围外） | 独立于课程 | ~50 题 |
 
 ### 4.4 完成判据（Definition of Done）
 
-- **单课**：讲解完成（用户习惯：先完整讲完、后续再提问）→ 该课题库 8 题通过 → demo（若该课有）跑通并验收
-- **面试就绪**：Phase 1-4 全过 + 覆盖矩阵（`interview-bank.md` §6）全 🟢 + 能连续通过 2 场 60 分钟模拟（自我介绍→任一项目被追三层→白板 20 分钟 agent→设计题 30 分钟）
+- **单课**：讲解完成（用户习惯：先完整讲完、后续再提问）→ 能脱稿复述本课机制 → demo（若该课有）跑通并验收
+- **全库就绪**：Phase 1-4 全过 + 15 域均可脱稿讲清 + 6 个作品全部跑通（原「面试就绪」判据依赖的题库与覆盖矩阵已于 2026-10-19 移除）
 
-**用户偏好（重申）**：先完整讲完再提问（提问另约时间）；当前阶段以讲解 + 面试知识为主，实操跟课走；模型选择：写 agent demo 必须用支持 tool calling 的模型（现用 `qwen3.8-flash-next`）。
+**用户偏好（重申）**：先完整讲完再提问（提问另约时间）；当前阶段以讲解机制 + 实操跟课为主；模型选择：写 agent demo 必须用支持 tool calling 的模型（现用 `qwen3.8-flash-next`）。
 
 ---
 
@@ -195,10 +196,10 @@ viz/render.mjs                      SVG→PNG（node 12 自举 + playwright-core
 ## 六、接手建议（按优先级，2026-10-10 晚 更新）
 
 1. ~~核对 FinHot/.env~~ ✅、~~demo:compact 活体~~ ✅ —— 已完成，无需再动
-2. 出练习题：`notes/*.md` 里题库已扩充（原 16 题 + 各编号课各 8 题 + interview-bank 交叉 10 道）；本次修的 5 个 bug（见待办 1）本身就能出 2-3 道好题（import 提升、wire 格式）；提问另约时间（用户要求整理阶段不急着考）
-3. 下一步：按 §四 学习总纲执行 **Phase 1**：系统设计 → 沙箱与凭据续 §S2（写 sandbox-demo src）→ 评测工程化；**🔶1-5 已全部写入（2026-10-11 四次整理：系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代 / MCP 与供应链安全 §S4.2-4.4 OWASP 2026 双清单 / 模型基础 §S7 八股速查表 / interview §8 行为面 5 题）**，15 个知识域知识结构已建成，开课 = 展开讲解 + 提问演练（用户要求整理阶段不急着考，提问另约时间）
-4. 补强优先级（interview-bank.md 覆盖矩阵 🟡→🟢）：① sandbox-demo src ② harness-demo 加 OTel 埋点导出 ③ 本地 MCP server 投毒演示
-5. 若用户提供目标 JD（字节等），重新校准 P1/P2 权重（一手数据在 `jd-research/`）
+2. ~~出练习题：`notes/*.md` 里题库已扩充~~ ⛔ 2026-10-19 作废——各课练习题库与 `interview-bank` 已整体删除；本次修的 5 个 bug（见待办 1）本身仍可作为口头追问的素材（import 提升、wire 格式）；提问另约时间（用户要求整理阶段不急着考）
+3. 下一步：按 §四 学习总纲执行 **Phase 1**：系统设计 → 沙箱与凭据续 §S2（写 sandbox-demo src）→ 评测工程化；**🔶1-5 已全部写入（2026-10-11 四次整理：系统设计 §S8 范式速查 / 评测工程化 §S8 指标四代 / MCP 与供应链安全 §S4.2-4.4 OWASP 2026 双清单 / 模型基础 §S7 八股速查表）**（原第 5 项是题库行为面 5 题，2026-10-19 已删），15 个知识域知识结构已建成，开课 = 展开讲解 + 口头复盘（用户要求整理阶段不急着考，提问另约时间）
+4. 补强优先级（按作品完整度，不再看覆盖矩阵）：① sandbox-demo src ② harness-demo 加 OTel 埋点导出 ③ 本地 MCP server 投毒演示
+5. ~~若用户提供目标 JD（字节等），重新校准 P1/P2 权重~~ ⛔ 2026-10-19 作废（岗位权重口径已随面试定位一并取消）
 
 ---
 

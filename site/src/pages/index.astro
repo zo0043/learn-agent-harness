@@ -6,7 +6,7 @@
  * 才知道这是个 17 课的五阶段体系。新版按「读者来干什么」排序：
  *   ① 这里能学到什么（五阶段路线一屏可见，可点进任一阶段）
  *   ② 怎么学（增量主线：自己搭 vs 参考答案）
- *   ③ 学完能干什么（作品/题库/详解 = 横向纵深）
+ *   ③ 学完能干什么（作品/详解 = 横向纵深）
  *   ④ 数据（进度总览，降到页尾）
  * 作品与事故不再是主角，而是「路线走完后的纵深材料」。
  */
@@ -30,10 +30,8 @@ const repo = 'https://github.com/zo0043/learn-agent-harness';
 const ragEntry = (await getCollection('courses')).find((e) => e.id === 'rag');
 const rag = parseRagStats(ragEntry?.body ?? '');
 
-// 题目计数口径见 notes/knowledge-map.md 头部「计数口径」块（课内嵌 205 + 面试题库精选 37）。
+// 2026-10-19 去面试化：练习题库与面试题库已整体移除，题数统计项随之删除。
 const DETAIL_COUNT = (await getCollection('details')).length;
-const Q_IN_LESSON = 205;
-const Q_BANK = 37;
 
 /** 各阶段首课（读者点进就能立刻开始，不用先回 /learn/ 找）。 */
 const bySlug = new Map(COURSE_STRUCTURE.map((c) => [c.slug, c]));
@@ -131,12 +129,12 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
     </p>
   </section>
 
-  <!-- ③ 纵深材料：作品 / 题库 / 详解（路线之外，按需取用） -->
+  <!-- ③ 纵深材料：作品 / 详解（路线之外，按需取用） -->
   <section class="route-section">
     <div class="route-head">
       <h2 class="page-title">课程之外的三类纵深</h2>
       <p class="page-lead">
-        路线走完后按需取用——作品是参考样本的完整形态，题库是检验，详解是资深判断。
+        路线走完后按需取用——作品是参考样本的完整形态，详解是资深判断。
       </p>
     </div>
 
@@ -194,21 +192,11 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         </a>
       </div>
       <p class="depth-foot">
-        <a href={base + 'works/#whiteboard'}>whiteboard/</a>：180 行 Python 面试口述版 · 全部作品见
+        <a href={base + 'works/#whiteboard'}>whiteboard/</a>：180 行 Python 纯标准库实现 · 全部作品见
         <a href={base + 'works/'}>作品页 →</a>
       </p>
     </div>
 
-    <!-- 3b. 题库 -->
-    <div class="depth-block">
-      <div class="depth-head">
-        <h3>题库：{Q_IN_LESSON} 题课内嵌 + {Q_BANK} 题精选</h3>
-        <p>课内嵌练习题随课出现；面试题库精选按知识域组织，可当模拟考卷用。</p>
-      </div>
-      <p class="route-more">
-        <a class="btn" href={base + 'interview/'}>进题库 →</a>
-      </p>
-    </div>
 
     <!-- 3c. 详解 -->
     <div class="depth-block">
@@ -216,7 +204,7 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         <h3>详解：{DETAIL_COUNT} 个资深分水岭</h3>
         <p>
           每个带<strong>行业一手源</strong> + <strong>本地映射</strong>（已覆盖 / 未覆盖）——
-          面试答到机制层时直接用的素材。
+          答到机制层时直接用的素材。
         </p>
       </div>
       <div class="details-entry-links">
@@ -266,19 +254,10 @@ const mDone = MILESTONES.filter((m) => m.status === 'done').length;
         <span class="stat-num">{WORK_COUNT}</span>
         <span class="stat-label">可运行作品</span>
       </div>
-      <div class="stat">
-        <span class="stat-num">{Q_IN_LESSON}</span>
-        <span class="stat-label">课内嵌练习题</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num">{Q_BANK}</span>
-        <span class="stat-label">面试题库精选</span>
-      </div>
     </div>
     <p class="tight">
       学习路线：<a href={base + 'learn/'}>P0–P4 五阶段 × {COURSE_COUNT} 课线性阅读序 →</a> ·
-      知识依赖：<a href={base + 'map/'}>知识地图 →</a> ·
-      模拟考卷：<a href={base + 'interview/'}>面试题库 →</a>
+      知识依赖：<a href={base + 'map/'}>知识地图 →</a>
     </p>
     <p class="snap-note">
       📸 <strong>本站为构建时快照</strong>——内容由 Astro 在构建期从仓库 <code>notes/</code>

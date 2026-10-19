@@ -4,7 +4,7 @@ slug: "08-single-threaded-write"
 domain: "多智能体协作"
 source: "https://cognition.ai/blog/multi-agents-working"
 status: "2026现行"
-kind: "interview-question"
+kind: "mechanism-deepdive"
 ---
 
 # 资深分水岭 8:决策一致性·单线程写
@@ -26,6 +26,6 @@ Cognition《Multi-Agents Working》（2026）：确认唯一能工作的模式�
 - 已覆盖：Harness 架构 §8.2（两个常见误区：独立上下文≠文件隔离，并行写同一工作区必须独立 worktree/串行合并）+ §8.3（pi-agents-team 实例：写路径 pathScope + 摘要回传，多代理是"最后才选的选项"）；沙箱与凭据 §S1（幽灵事故：并行会话各自做"合法"动作、却把生产换成幽灵代码——并行写冲突的真实案例）。
 - 未覆盖：没有"决策一致性"理论框架（行动携带隐式决策→并行=决策冲突）；Devin Review 的行业数字（2 个 bug/PR、58% 严重级）已列在「行业一手源」，但未转成本地可复现判据；本地幽灵事故的归因口径是"缺 scope"，还没有"缺写线程"这个归因视角。
 
-## 面试一句话
+## 一句话概括
 
 "我让多智能体并行做研究和评审、但写保持单线程——每个行动携带隐式决策，并行写只会产出风格与边界都不一致的碎片。"

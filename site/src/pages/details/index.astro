@@ -2,7 +2,7 @@
 /**
  * /details 列表页：notes/details/*.md（frontmatter 带 title/slug/domain/source/status/kind）。
  * 目录可能为空（并行 worker 正在新增）→ 显示空态。
- * kind：interview-question 面试高频问法 / design-detail 设计细节 / cost-detail 成本细节。
+ * kind：mechanism-deepdive 机制深挖 / design-detail 设计细节 / cost-detail 成本细节。
  */
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
@@ -11,14 +11,14 @@ import { getCollection } from 'astro:content';
 const items = await getCollection('details');
 
 const KIND_LABEL: Record<string, string> = {
-  'interview-question': '面试高频',
+  'mechanism-deepdive': '机制深挖',
   'design-detail': '设计细节',
   'cost-detail': '成本细节',
 };
 const kindOf = (item: (typeof items)[number]) =>
   KIND_LABEL[item.data.kind as string] ? (item.data.kind as string) : undefined;
 
-/** 面试最常考 top3（C2b 指定：context-rot / tool-granularity / harness-rot） */
+/** 最该先读的 top3（context-rot / tool-granularity / harness-rot） */
 const TOP3_SLUGS = ['01-context-rot', '02-tool-granularity', '07-harness-rot'];
 const top3Set = new Set(TOP3_SLUGS);
 const top3 = TOP3_SLUGS.map(
@@ -48,7 +48,7 @@ function oneLiner(body: string | undefined): string {
   <h1 class="page-title">详解</h1>
   <p class="page-lead">
     课程之外的延伸详解：<strong>{items.length} 个资深分水岭</strong>——每篇带行业一手源 + 本地映射
-    （哪些课已覆盖 / 哪些没覆盖），面试答到机制层时直接可用。
+    （哪些课已覆盖 / 哪些没覆盖），答到机制层时直接可用。
   </p>
 
   <!-- ── 全景索引：先给「这些分水岭分别属于哪个领域」──────
@@ -81,7 +81,7 @@ function oneLiner(body: string | undefined): string {
   {
     top3.length > 0 && (
       <section class="details-top3">
-        <h2 class="page-title section-gap">面试最常考 top3</h2>
+        <h2 class="page-title section-gap">最该先读的三篇</h2>
         <div class="cards">
           {
             top3.map((item) => {

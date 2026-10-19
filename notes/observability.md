@@ -1,10 +1,10 @@
 # 可观测(tracing / OTel GenAI / 成本归因)
 
-> 优先级 P2（JD 显示是 2026 新热点，腾讯有专门岗——若目标平台向则提级）
+> 内容权重 W2（扩展）：2026 年工业界的新热点，多家已有专门团队；自建 agent 到一定规模就会需要
 > 状态：📐 讲义已展开，待提问演练（S2 OTel GenAI 埋点已在 harness-demo 实操）
 > 前置：从零写 harness §⑥（JSONL 日志=harness 内置的轨迹源）+ 评测工程化（可观测=数据采集，评测=决策）
 > 定位句：**可观测是评测的数据管道**——没有轨迹采得全，golden set/judge/飞轮（数据飞轮）全是无源之水
-> 本课怎么读：S1-S2 是坐标系与格式（为什么 agent 观测不同、OTel GenAI 要报得出名字）；S3-S4 是数据模型与经营（span 树怎么建、成本怎么归因、SLO 怎么定）；S5 是诊断工作流；S6 是工具选型；**S7 实战走查**把一条真实轨迹从异常信号追到加固；**S8 常见错误与追问**是反向题库。练习题按"考察"列回查对应小节。
+> 本课怎么读：S1-S2 是坐标系与格式（为什么 agent 观测不同、OTel GenAI 要报得出名字）；S3-S4 是数据模型与经营（span 树怎么建、成本怎么归因、SLO 怎么定）；S5 是诊断工作流；S6 是工具选型；**S7 实战走查**把一条真实轨迹从异常信号追到加固；**S8 常见错误与追问**是反向清单——每条对应一个真实踩坑点。
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## S1 为什么 agent 可观测 ≠ 微服务可观测
 
-**这一节解决什么问题**：先把坐标系立起来。面试官问"你怎么做可观测"，如果答"上 Prometheus + Grafana"或"日志全量采"，说明还把 agent 当普通后端——普通后端的可观测回答"哪台机器慢了"，agent 的可观测要回答"这次任务为什么跑偏、钱花在哪一步、下次怎么更好"。前者是运维视角，后者是**数据管道视角**：观测的产出不只是告警，还有能回放、能对比、能喂评测的轨迹。
+**这一节解决什么问题**：先把坐标系立起来。常见问法是"你怎么做可观测"，如果答"上 Prometheus + Grafana"或"日志全量采"，说明还把 agent 当普通后端——普通后端的可观测回答"哪台机器慢了"，agent 的可观测要回答"这次任务为什么跑偏、钱花在哪一步、下次怎么更好"。前者是运维视角，后者是**数据管道视角**：观测的产出不只是告警，还有能回放、能对比、能喂评测的轨迹。
 
 | 维度 | 微服务 | agent |
 |---|---|---|
@@ -36,7 +36,7 @@
 - **采样率一刀切**：把异常轨迹和正常轨迹按同一比例采样，最该分析的长尾失败样本恰恰被比例丢掉。
 - **用 HTTP 200 当成功**：调用全绿、答案全错，监控面板一片祥和，用户已经在投诉。
 
-**反例（面试里真实的坏答案）**：候选人说"我们有 ELK，日志全量采"。面试官追问"给我看一次失败任务的完整时间线——哪一步开始偏、那一步花了多少 token、重试了几次"，他答不上来，因为日志是**按时间打散的文本**，没有任务级父子关系。正确答案是"一个 trace = 一个任务，trace 内 span 树承载步与调用，日志作为 span 的补充"。
+**反例（实战中真实的坏答案）**：常见回答是"我们有 ELK，日志全量采"。自查追问"给我看一次失败任务的完整时间线——哪一步开始偏、那一步花了多少 token、重试了几次"，他答不上来，因为日志是**按时间打散的文本**，没有任务级父子关系。正确答案是"一个 trace = 一个任务，trace 内 span 树承载步与调用，日志作为 span 的补充"。
 
 三层数据各回答什么问题——它们是三把不同的尺子，不是三个能互相替代的产品：
 
@@ -58,23 +58,23 @@ flowchart TD
 
 **这图的一句话记法**：metrics 告诉你"出事了"（便宜、可长期留存、驱动告警），traces 告诉你"哪条任务、哪一步出事了"（任务级结构），logs 告诉你"那一刻的原始现场"。可观测工程的成熟度，很大程度上看你能不能**从 metrics 自动下钻到 trace，再从 trace 下钻到 log**——三者用同一套关联 ID（`trace_id` / `span_id` / `gen_ai.conversation.id`）串起来才有意义。**反例**：把三层各接一个平台、没有关联 ID，等于有了三本账却对不上。
 
-**面试信号**：先说出"agent 的工作单元是轨迹、错误率包含语义失败、成本是一等指标"三条，再补一句"metrics 负责发现、traces 负责归因、logs 负责取证"——表明你按**问题类型**选数据层，而不是按工具品牌选。
+**判断要点**：先说出"agent 的工作单元是轨迹、错误率包含语义失败、成本是一等指标"三条，再补一句"metrics 负责发现、traces 负责归因、logs 负责取证"——表明你按**问题类型**选数据层，而不是按工具品牌选。
 
 ---
 
-## S2 OTel GenAI 语义约定（面试要能报名字）
+## S2 OTel GenAI 语义约定（实战要能报名字）
 
 **这一节解决什么问题**：把"我打点"升级成"我按厂商中立的格式打点"。这一节解决 N×M 问题：没有统一约定时，harness 对接 Langfuse 一套字段、对接 Phoenix 又一套字段，每换一个后端就重写一次埋点。OTel GenAI 语义约定就是把这套字段标准化，让"埋点"与"后端"解耦——埋一次，任意 OTel 后端可读。
 
 OpenTelemetry 为 GenAI 定义了语义约定（`gen_ai.*` 属性族）。
 
-**状态注（面试要能答"它稳定吗"）**：截至本讲义核实，GenAI 语义约定**已从主 semconv 仓库迁到独立仓库** `open-telemetry/semantic-conventions-genai`，官方文档状态标注为 **Development**（不是 stable）；核心 semantic conventions 当前处于 v1.44.0 线。所以准确说法不是"它是稳定契约"，而是"**属性名已是事实标准，但仍处 Development，稳定化时可能改名**"。LangSmith / Langfuse / Phoenix / Helicone 等都已向它收敛。面试说法："**Development ≠ 不能用**：它是唯一厂商中立的轨迹格式，早用的代价是 stable 化时的属性改名，不用的代价是每个平台一套适配（N×M）。"
+**状态注（实战要能答"它稳定吗"）**：截至本讲义核实，GenAI 语义约定**已从主 semconv 仓库迁到独立仓库** `open-telemetry/semantic-conventions-genai`，官方文档状态标注为 **Development**（不是 stable）；核心 semantic conventions 当前处于 v1.44.0 线。所以准确说法不是"它是稳定契约"，而是"**属性名已是事实标准，但仍处 Development，稳定化时可能改名**"。LangSmith / Langfuse / Phoenix / Helicone 等都已向它收敛。实战说法："**Development ≠ 不能用**：它是唯一厂商中立的轨迹格式，早用的代价是 stable 化时的属性改名，不用的代价是每个平台一套适配（N×M）。"
 
-<!-- TODO 核实: 本讲义已核实 GenAI semconv 迁至独立仓库 semantic-conventions-genai 且状态为 Development；旧的 "experimental / v1.39.0" 说法作废。官方未给出 stable 的具体时间线，若面试要引用"何时 stable"需再核官方 issue/roadmap。 -->
+<!-- TODO 核实: 本讲义已核实 GenAI semconv 迁至独立仓库 semantic-conventions-genai 且状态为 Development；旧的 "experimental / v1.39.0" 说法作废。官方未给出 stable 的具体时间线，若实战要引用"何时 stable"需再核官方 issue/roadmap。 -->
 
 - **span 命名/操作类型**（`gen_ai.operation.name` 取值，已核实）：`chat` / `text_completion` / `embeddings` / `execute_tool` / `create_agent` / `invoke_agent`（新仓库另含 `generate_content` / `invoke_workflow` / `plan` / `retrieval` / `fetch_response` 等）
 - **关键属性**（已核实存在；**注意新旧名差异**）：provider 用 **`gen_ai.provider.name`**（旧文常写 `gen_ai.system`）、`gen_ai.request.model` / `gen_ai.response.model`、`gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens`、`gen_ai.agent.name` / `gen_ai.agent.id`、**`gen_ai.conversation.id`**（会话/线程关联，旧文常写 `gen_ai.session.id`）、`gen_ai.tool.name` + `gen_ai.tool.call.id` / `gen_ai.tool.call.arguments` / `gen_ai.tool.call.result`、温度等请求参数
-- **为什么重要（面试点）**：语义约定=**厂商中立的轨迹格式**——harness 按它埋点，后端接 Langfuse / Phoenix / Jaeger 任意一个，不用为每个平台重写。**"OTel 之于可观测，就是 MCP 之于工具接口"——都是把 N×M 降成 N+M**
+- **为什么重要（要点）**：语义约定=**厂商中立的轨迹格式**——harness 按它埋点，后端接 Langfuse / Phoenix / Jaeger 任意一个，不用为每个平台重写。**"OTel 之于可观测，就是 MCP 之于工具接口"——都是把 N×M 降成 N+M**
 
 **实操锚（harness-demo 已实现，复现命令 `npm run demo:otel`）**：`harness-demo/src/otel.ts`（SDK + console 导出，`OTEL_EXPORT_OTLP=1` 才追加 OTLP/HTTP）+ `src/agent.ts`（`invoke_agent`→`chat` / `execute_tool` span 树）+ `src/llm.ts`（流式 usage/model 回填）。`npm run demo:otel` 跑最小 agent 循环并在收尾打印 span 摘要（span 名 + 关键属性）。**验收标准**：收尾摘要显示 `收到 N 个 span（M 个 trace）`，每个 `chat` span 带 `gen_ai.usage.input_tokens` / `output_tokens`，每个 `execute_tool` span 带 `harness.tool.status`。**注意仓库内代码用的是旧属性名**：`gen_ai.system` 与 `gen_ai.session.id`（相对当前规范应为 `gen_ai.provider.name` 与 `gen_ai.conversation.id`）——这是本课埋点与最新约定的一处不一致，见 S8 与文末核实清单。**离线可重跑判据（U-23 收口，2026-10-12 实跑）**：`npm run demo:otel:mock` 用本地 mock 端点（无外网、无 LLM key）打印确定性 span 树，`npm run demo:otel:assert` 对其形态/计数断言、不符即非 0 退出；本次 mock 实测 **15 spans / 1 trace**（invoke_agent×1 + chat×6 + execute_tool×8，含 denied×1），历史活端点报告值「11 spans / 1 trace」仓内无可复跑日志、标**未验证**、不作判据（详见 从零写 harness §⑨）。
 
@@ -134,7 +134,7 @@ flowchart LR
   C6 -.-> E4
 ```
 
-**怎么读这张对照图**：左边是"运行时可观测"（span 由 SDK 管理，父子关系天然正确，但 span 结束才导出），右边是"持久化事实源"（逐行 `appendFileSync`，进程被 kill 也不丢，可崩溃后重建）。两者的字段不是一一对应：span 的 `gen_ai.tool.call.arguments` 截断 500 字符，JSONL 的 `tool_intent.args` 是全量对象；span 的 `harness.tool.status` 有 `ok/error/denied`，JSONL 的 `tool_exec.status` 还多一个 `unknown-state`（⑦ 恢复用）。**面试点**：不要把 span 当唯一事实源——trace 后端可能采样、可能丢导出；可恢复系统的唯一事实源永远是本地持久日志。
+**怎么读这张对照图**：左边是"运行时可观测"（span 由 SDK 管理，父子关系天然正确，但 span 结束才导出），右边是"持久化事实源"（逐行 `appendFileSync`，进程被 kill 也不丢，可崩溃后重建）。两者的字段不是一一对应：span 的 `gen_ai.tool.call.arguments` 截断 500 字符，JSONL 的 `tool_intent.args` 是全量对象；span 的 `harness.tool.status` 有 `ok/error/denied`，JSONL 的 `tool_exec.status` 还多一个 `unknown-state`（⑦ 恢复用）。**要点**：不要把 span 当唯一事实源——trace 后端可能采样、可能丢导出；可恢复系统的唯一事实源永远是本地持久日志。
 
 **实测口径（务必分清 schema 与实测）**：入库样本 `trajectories/demo.example.jsonl` 中真实出现的事件类型是 **`init` / `model_response` / `tool_intent` / `tool_exec` / `final`**（22 行：`init`×1、`model_response`×6、`tool_intent`×6、`tool_exec`×8、`final`×1）。本地跑 `npm run demo` 会另生成 `trajectories/demo.jsonl`（**未入库**，`.gitignore` 排除），事件分布与入库样本一致、逐次数字有波动。`compaction` 与 `crash` **只在 `src/types.ts` 的 `TrajectoryEvent` schema 里定义、尚未出现在 demo 轨迹中**（分别由 `demo:compact` / `demo:crash` 模式单独触发）。另有一个容易看错的细节：`tool_exec` 比 `tool_intent` 多 2 条——`write_file` / `run_shell` 在策略判定为 `deny` / 审批未通过时，**先返回、未记 intent**，只留下 `status:"denied"` 的 `tool_exec`；所以"有 exec 无 intent"是拒绝路径，"有 intent 无 exec"才是崩溃未知状态（S7 会用到这个判据）。**不要把 schema 里定义的类型说成"实测出现"**。
 
@@ -142,7 +142,7 @@ flowchart LR
 
 ## S3 span 建模：一棵轨迹树
 
-**这一节解决什么问题**：OTel 给了属性词汇表，但"哪些调用放进同一个 trace、谁是谁的 parent"是设计决策——建错了，成本归因和回放都会散架。这一节的四条设计要点就是四道建模题，面试常从任意一条追问。
+**这一节解决什么问题**：OTel 给了属性词汇表，但"哪些调用放进同一个 trace、谁是谁的 parent"是设计决策——建错了，成本归因和回放都会散架。这一节的四条设计要点就是四道建模题，实战常从任意一条追问。
 
 ```
 trace（=一个任务/一次会话）
@@ -170,7 +170,7 @@ trace（=一个任务/一次会话）
 - **子 agent 断链**：worker 在自己的进程里新开 trace、不传 parent → orchestrator 视角下 worker 的工作是"黑洞"，成本无法汇总到主任务。
 - **重试记成新 trace**：一次工具被拒重试 3 次 → 失败率统计里变成 3 次失败 + 1 次成功 = 75% 失败率，而真实逻辑调用成功率是 100%。
 
-**面试点**："span 树的形状就是你对'什么是一个工作单元'的定义——定义错了，后面的成本归因、回放、告警全部建立在错误的分母上。"
+**要点**："span 树的形状就是你对'什么是一个工作单元'的定义——定义错了，后面的成本归因、回放、告警全部建立在错误的分母上。"
 
 ---
 
@@ -183,7 +183,7 @@ trace（=一个任务/一次会话）
 **这一节解决什么问题**：token 是 agent 的第一类成本，也是最容易被记成"日志字段"而不是"metric 维度"的东西。归因的目标不是算总账，而是把账单切到能行动的最小单元（step / 工具 / 用户 / 模型）。
 
 - 每 LLM span 带 token×单价 → trace 成本 = 求和 → 按**用户/功能/模型/任务类型**四维聚合
-- 面试要能答的四个问题：**哪个功能最烧钱？哪个用户账单异常？哪次 prompt 改动让成本涨了？哪个模型的每美元效果最差？**（前三个=归因，第四个=归因×评测=API 与多模型路由的决策输入）
+- 实战要能答的四个问题：**哪个功能最烧钱？哪个用户账单异常？哪次 prompt 改动让成本涨了？哪个模型的每美元效果最差？**（前三个=归因，第四个=归因×评测=API 与多模型路由的决策输入）
 - 归因要能**下钻到 step / 工具**：同一个任务里，是 prefill（长 prompt）贵，还是 decode（长输出）贵，还是工具重试贵？没有 step 维度的归因只能得到"这个任务花了 7863 token"，无法回答"该压缩还是该换模型"。
 - FinHot 锚点：吞吐事故期（#11）"每天烧多少钱、每篇成本多少"当时没有归因只能算总账——**这就是"成本工程缺归因"的活案例**
 
@@ -211,7 +211,7 @@ flowchart TD
 
 **怎么读这张图**：错误预算是"这个月还能错多少"的额度。burn-rate 1x 表示按 SLO 允许的速度在烧，不告警；14.4x 表示**1 小时就烧掉月度预算的 2%**（照此速度 3 天烧光），必须在 minutes 级 page；6x / 6h 是中速燃烧（6 小时烧掉 5%）；1x / 3d 是慢速耗尽（3 天烧掉 10%），开单即可。**agent 语境**：SLO 低于 100% 是刻意的——如果要求零失败，任何变更都会被"再稳一点"绑架，迭代速度归零；错误预算的存在就是为了**用可控的失败换取可度量的迭代自由**。
 
-**面试点**："先定义成功（SLO 的分子），再谈告警；没有 SLI/SLO 的告警是拍脑袋的阈值。"
+**要点**："先定义成功（SLO 的分子），再谈告警；没有 SLI/SLO 的告警是拍脑袋的阈值。"
 
 ---
 
@@ -245,9 +245,9 @@ flowchart LR
 
 ## S6 工具版图（2026-10 已核实）
 
-**这一节解决什么问题**：面试问"你用什么 tracing 平台"时，考的不是你记得几个产品名，而是你的**选型顺序**。平台能力分三层：数据管道、评测闭环、合规部署。顺序错了，等于先买仪表盘再修发动机。
+**这一节解决什么问题**：实战问"你用什么 tracing 平台"时，考的不是你记得几个产品名，而是你的**选型顺序**。平台能力分三层：数据管道、评测闭环、合规部署。顺序错了，等于先买仪表盘再修发动机。
 
-LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 核实均为 OTel 原生接入）——面试只需定位级："托管 vs 自托管、是否 OTel 原生、是否带 judge/评测闭环（LangSmith/Braintrust 带，纯 tracing 的只管管道）"。**选型句：先看数据管道（OTel 兼容性），再看评测闭环，最后看合规（自托管）**。
+LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 核实均为 OTel 原生接入）——实战只需定位级："托管 vs 自托管、是否 OTel 原生、是否带 judge/评测闭环（LangSmith/Braintrust 带，纯 tracing 的只管管道）"。**选型句：先看数据管道（OTel 兼容性），再看评测闭环，最后看合规（自托管）**。
 **自建最小版**：从零写 harness §⑥ 的 JSONL 就是最小 trace 存储——"我理解为什么 OTel 值得用，也亲手建过最小版"= 双向证据。
 
 **怎么用这段话**：先报选型顺序（管道 > 闭环 > 合规），再补一句"我自己的 harness-demo 里已经用 OTel GenAI 埋了一棵最小 span 树，同时保留 JSONL 作为可恢复的唯一事实源"——把平台理解和动手证据一起端上桌。**反例**：先说"我们用 Langfuse"，被追问"为什么不是 Phoenix"时答不出维度差异——说明是按品牌而非按需求选。
@@ -298,15 +298,14 @@ LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 �
 
 **反面对照 · FinHot 幽灵事故：没有可观测性时会怎样**。2026-10-09 的幽灵事故里，一个并行会话在错误的目录执行了"构建并启动"，生产 worker/api 被幽灵代码替换了 25 分钟——**因为当时没有 task 级 trace，只有零散日志，定位靠猜**：不知道是哪条会话、哪一步、哪个工具触发，只能等人肉比对容器创建时间。同一时期的 backfill 长任务（**1645 行**、~10% 失败）也只有一个 `/tmp/finhot-backfill-direction.log` 作为"手工版可观测"，失败分类靠人读文本。**如果当时有本课的 trace**：一次按 `conversation.id` 拉树就能看到"某会话 → 某 execute_tool(bash) → 某命令"，成本和耗时按 step 归因，"幽灵代码替换"会以"非预期路径的写/执行 span"形式直接暴露。这就是"**可观测是评测/安全/成本三条线的共同数据管道**"的生产注脚。
 
-**面试信号**：走查时先报"信号 → trace → 分诊（prefill/decode/工具/重试）→ step → 加固 → 验证"的节奏，再用一个真实字段值收口（如"输入 token 从 765 涨到 1489，说明 prefill 在累积"）——比罗列工具名更有说服力。
+**判断要点**：走查时先报"信号 → trace → 分诊（prefill/decode/工具/重试）→ step → 加固 → 验证"的节奏，再用一个真实字段值收口（如"输入 token 从 765 涨到 1489，说明 prefill 在累积"）——比罗列工具名更有说服力。
 
 ---
 
-## S8 常见错误与面试官追问
+## S8 常见错误与自查要点
+**这一节解决什么问题**：反向自查。上面各节讲"应该怎么做"，这里列"最常见的做错方式 + 读者会怎么追"。每一条都是可背的对话骨架。
 
-**这一节解决什么问题**：反向自查。上面各节讲"应该怎么做"，这里列"最常见的做错方式 + 面试官会怎么追"。每一条都是可背的对话骨架。
-
-| # | 常见错误 | 修正 | 面试官追问 & 应答骨架 |
+| # | 常见错误 | 修正 | 自查追问 & 应答骨架 |
 |---|---|---|---|
 | 1 | **只打日志不做 trace 关联**：任务级问题答不出 | trace=任务、span 承载步与调用；log 挂 `trace_id` | "你怎么看一次失败任务的全貌？"→ 按 `trace_id` 拉 span 树，log 是 span 的现场补充 |
 | 2 | **把 token 当日志字段而不是 metric 维度** | 每 span 记 token，按 用户/功能/模型/step 四维聚合成指标 | "哪个功能最烧钱？"→ 按 `gen_ai.usage.*` 聚合，能下钻到 step 与工具 |
@@ -315,34 +314,12 @@ LangSmith / Langfuse / Braintrust / Phoenix（Arize）/ Helicone 等（2026-10 �
 | 5 | **成本归因只算总账不算到 step/工具** | 归因粒度到 step 与工具，区分 prefill / decode / 重试 | "这次任务贵在哪？"→ 报输入/输出 token 与工具重试，而不是月度总额 |
 | 6 | **用 HTTP 200 当成功** | 失败率分子含语义失败（judge 抽审不达标率） | "调用全成功为什么用户还投诉？"→ agent 的失败定义是任务级+语义级，不是传输级 |
 | 7 | **span 只记元数据不记 payload** | prompt/工具 I/O 落 span 或对象存储指针，支持回放 | "怎么复现昨天那次 bad case？"→ 从 trace 重建当时世界，单变量重跑 |
-| 8 | **全量 prompt 无隐私开关** | 分级：摘要 / 全文本地 / 全文上云，按敏感度与合规选 | "合规不让存 prompt 怎么办？"→ 三档折中（题库第 4 题同款） |
+| 8 | **全量 prompt 无隐私开关** | 分级：摘要 / 全文本地 / 全文上云，按敏感度与合规选 | "合规不让存 prompt 怎么办？"→ 三档折中（同类问题在 S8 常见错误清单里也有） |
 | 9 | **重试记成新 trace / 新失败** | 重试是同父下的 child 或 span 内事件，不计入失败率 | "3 次重试把失败率算成多少？"→ 逻辑调用成功率 100%，重试单列 |
 
-**怎么用这张表**：面试里被追到某一点时，先承认错误模式（"这确实是常见坑"），再给修正（一两个具体机制），最后补一句"我自己的 harness-demo 是这么做的/我看到的生产反例是 FinHot 幽灵事故"——用证据收口。**没有证据的错误清单只是背课文**。
+**怎么用这张表**：实战中被追到某一点时，先承认错误模式（"这确实是常见坑"），再给修正（一两个具体机制），最后补一句"我自己的 harness-demo 是这么做的/我看到的生产反例是 FinHot 幽灵事故"——用证据收口。**没有证据的错误清单只是背课文**。
 
 ---
-
-## 练习题库（后续提问用）
-> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
-> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
-> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
-
-| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
-|---|---|---|---|
-| 1 | 为什么"每个 LLM 调用一个 trace"是错的粒度？成本归因会怎么坏？ | S3 | ≥3 点：①粒度认任务不认调用，一次任务被拆成几十个孤立 trace；②成本只得总账，答不出哪步烧钱；③按 trace_id 回放不出任务链（S3） |
-| 2 | 重试 3 次的工具调用，错误率指标怎么记才不被重试污染？ | S3 | ≥3 点：①重试记为同父 child span 或 span 内事件，不新开 trace；②失败率分母=逻辑调用数，非物理调用数；③否则 3 重试+1 成功=75% 失败率（S3） |
-| 3 | 老板问"这个月 agent 功能花了多少"。列出你需要的四个维度+查询路径 | S4 | ≥3 点：①四维：用户/功能/模型/任务类型，逐维 token×单价；②路径：chat span 的 usage 求和后按维 group；③须能下钻 step/工具，区分 prefill/decode（S4） |
-| 4 | 轨迹里要存全量 prompt。合规团队反对。设计三档折中 | S3/S5 | ≥3 点：①摘要档：只存 span 元数据+对象存储指针，最合规；②全文本地档：payload 留本地/对象存储，限权可回放；③全文上云档：加密+审计+按敏感度分级，成本最高（S3/S5） |
-| 5 | 子 agent 跑在另一个进程/服务。trace 怎么不断？ | S3 多 agent | ≥3 点：①显式传 traceparent，把 worker span 挂回父任务；②worker 独立 trace 时用 task id 关联汇总；③不传则主任务视角断链，成本成黑洞（S3） |
-| 6 | OTel GenAI 约定里 usage 属性缺失（provider 不报 token）。成本归因怎么办？ | S2+S4 | ≥3 点：①本地按字符/分词估算 token，属性标 estimated；②归因用相对量+单价表，记录估算误差；③把 provider 不报 usage 当选型约束（S2+S4） |
-| 7 | 语义失败（全 200 答案错）怎么进告警？和 评测工程化 judge 怎么分工？ | S1+S5 | ≥3 点：①失败率分子=传输失败+语义失败（judge 抽审不达标率）；②judge 产出标签、观测侧聚合成 SLI 驱动告警；③只报 HTTP 错误率面板永远绿（S1+S5） |
-| 8 | 回放一次生产轨迹，换 prompt 重跑结果不同。排三个可疑的非确定源 | S5（沙箱与凭据 §S6 联动） | ≥3 点：①温度/seed 未固定，或模型版本静默漂移；②外部状态（时间/文件/网络）泄漏进 prompt；③上游数据或并发导致输入不同；先单变量固定再 diff（S5） |
-| 9 | OTel GenAI 现在的稳定状态是什么？把 `gen_ai.system` / `gen_ai.session.id` 迁到当前约定，各要改成哪个属性名？ | S2 | ≥3 点：①仍是 Development，已迁独立仓库，不是 stable；②gen_ai.system→gen_ai.provider.name；③gen_ai.session.id→conversation.id（S2） |
-| 10 | SLI / SLO / 错误预算三者关系是什么？99% 的 30 天错误预算约多少？为什么 fast burn 用 14.4x / 1h？ | S4 SLO | ≥3 点：①SLI 信号→SLO 目标→错误预算=1−SLO；②99% 的 30 天预算约 7.2h；③14.4x/1h=1 小时烧月度预算 2%，须立即 page（S4） |
-| 11 | 实战走查：同样 6 次 LLM 调用，输入 token 从 765 涨到 1489、step-6 输出 471。你怎么判断是 prefill 贵还是 decode 慢、分别给什么动作？ | S7/S4 | ≥3 点：①input 765→1489 是 prefill 累积，压缩上下文或加缓存；②out=471/ms=7579 是 decode 慢，动作限输出或换小模型；③两者须分开归因（S7） |
-| 12 | 实战走查：demo 轨迹里 8 个 `tool_exec` 但只有 6 个 `tool_intent`，多出的 2 个是什么？"有 intent 无 exec"又说明什么？ | S7/S3 | ≥3 点：①多的 2 个是 denied 的 exec：取拒路径先返回，未记 intent；②有 intent 无 exec=崩溃未知态，先核对现状；③两者判据不同，不可混用（S7） |
-| 13 | FinHot 幽灵事故如果当时有 task 级 trace，最先暴露问题的是哪类 span / 属性？为什么 log-only 会靠猜？ | S7+S1 | ≥3 点：①最先异常的是非预期路径的 write/bash 调用 span；②按 conversation.id 拉树可定位会话与步号；③log-only 无任务级父子关系，只能人肉比对（S7） |
-| 14 | 面试官说"我们 OTel GenAI 埋点全上 stable 契约"。这句话哪里有问题？你会怎么设计属性改名的适配层？ | S8/S2 | ≥3 点：①GenAI semconv 仍是 Development，不是 stable；②适配层：埋点收敛到单一 adapter，业务只调它；③改名只动 adapter 一层，留双写过渡期（S8） |
 
 ## 来源与锚点（2026-10 核实回填）
 

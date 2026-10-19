@@ -1,6 +1,6 @@
 # 从零写 harness(最小 Agent Harness 完整教程)
 
-> 课程日志 · 2026-10-10 开课 · 从零写 harness（面试导向：coding agent 方向）
+> 课程日志 · 2026-10-10 开课 · 从零写 harness（实战导向：coding agent 方向）
 > 目标：把"会讲架构"变成"能写出来"——手写一个可运行的最小 harness + 20 分钟白板版
 > 探测结论：TS+Python 双版本；流式从零讲
 > 作品位置：`harness-demo/`（TS 可运行版）+ `whiteboard/agent_whiteboard.py`（178 行纯标准库）
@@ -16,7 +16,7 @@
 
 依赖图：① one-shot → ② loop → ③ 工具协议 → ④ SSE 流式 → ⑤ 权限门 → ⑥ 会话持久化 → ⑦ 恢复/未知状态 → ⑧ 预算/压缩 → ⑨ 轨迹/演示 → ⑩ 白板蒸馏。每节 = naive 版的一个坏法长出一层。
 
-模型选择侦察（2026-10-10 实测某 OpenAI 兼容代理）：`step-5-preview` 不支持 tool calling（直接回"无法调用工具"）；`qwen3.8-flash` 支持（tools + SSE 均验证）→ demo 用 qwen3.8-flash。**面试点：模型能力参差，harness 必须能降级。**
+模型选择侦察（2026-10-10 实测某 OpenAI 兼容代理）：`step-5-preview` 不支持 tool calling（直接回"无法调用工具"）；`qwen3.8-flash` 支持（tools + SSE 均验证）→ demo 用 qwen3.8-flash。**要点：模型能力参差，harness 必须能降级。**
 
 ---
 
@@ -67,7 +67,7 @@ export interface ToolSpec {
 }
 
 export function validateArgs(schema, args): string[] {
-  // 面试手写三层：required / type / enum（生产用 zod/ajv）
+  // 实战手写三层：required / type / enum（生产用 zod/ajv）
 }
 
 function scoped(p: string): string {            // 路径范围 = 沙箱的执行层实现
@@ -89,7 +89,7 @@ data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\
 data: [DONE]
 ```
 
-三件必须处理的事（面试口述版）：
+三件必须处理的事（三句话版本）：
 1. 帧以 `\n\n` 分隔，每行 `data: {json}`，结束帧 `data: [DONE]`
 2. content 碎片边收边拼（`onDelta` 回调实时显示）
 3. **tool_calls 也是碎片**：首块带 id+name，后续块带 arguments 的**不完整 JSON 片段**——按 index 拼接、流结束后整体 `JSON.parse`（绝不能对单片段 parse）
@@ -121,7 +121,7 @@ sequenceDiagram
 decide(tool) → 优先级 deny > approve > allow；fallback = "deny"
 ```
 
-**默认 deny**（没写规则的工具一律不放行——安全默认，面试点）。检查发生在**执行路径上**，不在提示词里（Harness 架构 §7）。demo 策略：`run_shell`→deny、`write_file`→approve（human-in-the-loop）、只读→allow。
+**默认 deny**（没写规则的工具一律不放行——安全默认，要点）。检查发生在**执行路径上**，不在提示词里（Harness 架构 §7）。demo 策略：`run_shell`→deny、`write_file`→approve（human-in-the-loop）、只读→allow。
 
 权限门判定流程（对照 `src/policy.ts`）：
 
@@ -195,7 +195,7 @@ estimateTokens = JSON长度 / 3.5   // 预算检查用估算；精确计数只�
 compactIfNeeded: 保 head(system+首user) + 尾 keepTail 条，中间 LLM 摘要替换
 ```
 
-mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：mock provider 后每个控制层都能独立验证**）：`压缩前 tokens≈1378 → 摘要 3 条 → 压缩后 5 条，tokens≈426` ✅（2026-10-12 复跑值；更早测试版本的数字与当前断言矛盾、已废，修正经过见 handoff.md）。日志永远保留全量，压缩只改"送模型的视图"。
+mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**要点：mock provider 后每个控制层都能独立验证**）：`压缩前 tokens≈1378 → 摘要 3 条 → 压缩后 5 条，tokens≈426` ✅（2026-10-12 复跑值；更早测试版本的数字与当前断言矛盾、已废，修正经过见 handoff.md）。日志永远保留全量，压缩只改"送模型的视图"。
 
 ## ⑨ 完整 demo（`src/demo.ts`，真实模型 qwen3.8-flash）
 
@@ -211,7 +211,7 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 | 压缩 | `demo:compact` | ⑧ 预算/摘要 | ✅ mock 验证（代理故障期） |
 | 可观测 | `demo:otel`（活端点，人工补充）/ `demo:otel:mock` + `demo:otel:assert`（离线判据） | OTel GenAI span 树（invoke_agent → chat / execute_tool，可观测 §S2 埋点） | ✅ 离线判据（U-23 收口，2026-10-12 实跑）：本地 mock 端点（无外网、无 key）跑出确定性 span 树 = **15 spans / 1 trace**（invoke_agent×1 + chat×6 + execute_tool×8，含 denied×1），`demo:otel:assert` 对形态/计数断言、不符即非 0 退出（快照 `harness-demo/workspace/out/otel-spans.md`，生成器产出勿手改）；历史「11 spans / 1 trace」为**活端点报告值**（仓内无回放日志，**未验证**——不作为任何判据） |
 
-**代理不稳定实录（真实可靠性故事）**：19:25-19:33 全部正常，19:33 起该代理持续 400（`"functions parameter of the code model must be provided"`——代理把请求路由到了要求旧版 functions 格式的 code 模型后端）；期间还出现工具名带不可见字符（`unknown tool: get_weather` 假错）→ 加了一行防御 `tc.name.trim()`。**面试点：provider 也是不可靠组件；重试/降级/防御性解析属于 API 层职责。**
+**代理不稳定实录（真实可靠性故事）**：19:25-19:33 全部正常，19:33 起该代理持续 400（`"functions parameter of the code model must be provided"`——代理把请求路由到了要求旧版 functions 格式的 code 模型后端）；期间还出现工具名带不可见字符（`unknown tool: get_weather` 假错）→ 加了一行防御 `tc.name.trim()`。**要点：provider 也是不可靠组件；重试/降级/防御性解析属于 API 层职责。**
 
 ## ⑩ 白板蒸馏（`whiteboard/agent_whiteboard.py`，178 行纯标准库）
 
@@ -220,22 +220,6 @@ mock 模型验证（`src/test-compact.ts`，本地 HTTP mock——**面试点：
 > "模型是无状态函数，只能出请求不能行动。所以我写一个 while 循环：调模型 → 有工具请求就过三道门（校验/权限/执行）并把结果回写 → 没有就结束。三个关键设计：**先记 intent 再执行**（崩溃后能区分'没执行'和'执行了没记录'）；**默认 deny**（没规则的工具不放行）；**结果永远回写**（拒绝也是结果，模型才能调整）。"
 
 ---
-
-## 练习题库（后续提问用）
-> 用途：本课学完后的自学核查——先合上讲义自己讲一遍，再对照「合格线」列自判。
-> **合格线口径**：能不看讲义说出该题「合格线」列的**全部圆码要点**即通过；少于 2 点回到括注的小节重读。
-> 这是确认题不是面试题，答到「能讲清为什么」即通过（与 `rag.md` S1 同一口径）。
-
-| # | 题目 | 考察  | 合格线（讲出 ≥N 点即通过） |
-|---|---|---|---|
-| 1 | 为什么 tool_calls 流式解析要"拼接后整体 parse"而不能逐片段 parse？ | ④ | ≥3 点：①后续帧只带 arguments 的不完整片段，单帧 parse 必抛异常；②需按 index 分槽拼接、流结束才整体 parse；③content 与 tool_calls 是两套拼接逻辑（④） |
-| 2 | intent/exec 之间崩溃，工具是"转账"（非只读、非幂等）。恢复时该怎么办？如果工具是"查余额"呢？ | ⑦ | ≥3 点：①转账=非只读非幂等，绝不盲目重放；②把 [未知状态] 摆给模型，先用只读工具核对现状再决定；③查余额=只读，可安全重放并补记 tool_exec（⑦） |
-| 3 | policy 默认 allow 会怎样？举一个"默认 allow + 模型被注入"的事故链 | ⑤ | ≥3 点：①默认 allow=没写规则的工具全部放行，权限门形同不存在；②链：注入让模型调 run_shell 删数据→无规则→直接执行；③默认 deny 才是安全默认，规则是白名单（⑤） |
-| 4 | 压缩后模型忘了最初目标的约束（"不许改生产目录"），会发生什么？压缩策略怎么改？ | ⑧ | ≥3 点：①中间被摘要替换，最初约束若没进 head 就会丢失；②会把生产目录当普通目录写；③策略：head 固定保 system+首 user（⑧） |
-| 5 | 日志里有 3 条 tool_intent 都没有 exec，其中 2 个是只读工具。恢复流程具体怎么走？ | ⑥⑦ | ≥3 点：①先 loadAll+rebuild 从 JSONL 重建上下文；②2 个只读工具→安全重放补记 exec；③非只读那个→摆 [未知状态] 让模型先只读核对再决定（⑥⑦） |
-| 6 | 为什么"loop 正常结束"不能当验收？你 demo 里的 final 消息证明了什么、没证明什么？ | ⑨（Harness 架构） | ≥3 点：①loop 结束只证明模型不再请求工具，不证明任务正确；②final 证明了流程走完、工具结果已回写；③没证明答案对、范围对，验收靠可复查产物（⑨） |
-| 7 | 模型连续 3 次调用同一被拒工具，harness 该在哪一层拦？ | ⑤ | ≥3 点：①该在 policy 门拦：同一被拒工具反复调用=判定仍 deny，结果照样回写；②不在提示词里求它别调；③可加重试预算/重复调用熔断，防无谓烧钱（⑤） |
-| 8 | 白板 20 分钟版你会砍掉哪三样、保留哪三样？为什么？ | 综合 | ≥3 点：①保留：loop 与结果回写、先记 intent 再执行、默认 deny；②可砍：压缩摘要细节、OTel 埋点、多模式 demo；③理由：白板讲清三道门与两个纪律即可（综合） |
 
 ## 来源
 

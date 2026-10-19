@@ -4,7 +4,7 @@ slug: "01-context-rot"
 domain: "上下文工程"
 source: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
 status: "2026现行"
-kind: "interview-question"
+kind: "mechanism-deepdive"
 ---
 
 # 资深分水岭 1:context rot(长上下文衰减)
@@ -23,9 +23,9 @@ Anthropic《Effective Context Engineering for AI Agents》（2025-09）：注意
 
 ## 本地映射
 
-- 已覆盖：Harness 架构 §5.1 直接用"注意力边际递减（context rot）"并推出"窗口有限 ≠ 会话必须短"；§5.2 给出四技术（压缩/结构化笔记/即时检索/子代理），§8.1 有子代理"只回传 1-2k token 浓缩摘要"的量化说法；从零写 harness §8 实现了预算与压缩（estimateTokens、compactIfNeeded 保 head+尾、中间 LLM 摘要，实测 1378→426 tokens、摘要 3 条），练习题库第 4 题考"压缩后忘了约束怎么办"。
+- 已覆盖：Harness 架构 §5.1 直接用"注意力边际递减（context rot）"并推出"窗口有限 ≠ 会话必须短"；§5.2 给出四技术（压缩/结构化笔记/即时检索/子代理），§8.1 有子代理"只回传 1-2k token 浓缩摘要"的量化说法；从零写 harness §8 实现了预算与压缩（estimateTokens、compactIfNeeded 保 head+尾、中间 LLM 摘要，实测 1378→426 tokens、摘要 3 条）。（原练习题库第 4 题曾考「压缩后忘了约束怎么办」，该题库已于 2026-10-19 移除）
 - 未覆盖：没有 n² 注意力关系与"填充率 vs 召回"的行业对比数字；课程是定性论证，Anthropic 的"最小高信号"没有转成可执行的检查清单。
 
-## 面试一句话
+## 一句话概括
 
 "别把窗口塞满——注意力是平方级预算，上下文工程就是挑'本轮真正需要的最小 token 集'。"
