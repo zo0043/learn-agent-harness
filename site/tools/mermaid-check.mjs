@@ -40,6 +40,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// 静态服务器实例（main 内赋值；错误路径要能 close，故模块级声明）。
+// 曾漏声明直接 `server = await serve(...)` → ReferenceError，selftest 从未真正跑通过。
+let server = null;
 
 // ── CLI 参数 ────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
@@ -64,7 +67,12 @@ const DIST = path.resolve(arg('dist', path.join(__dirname, '..', 'dist')));
 const TMP_DIST = path.join(os.tmpdir(), 'mermaid-check-selftest');
 
 if (!HAS_SELFTEST && !fs.existsSync(DIST)) {
-  console.error(`[mermaid-check] dist 不存在：${DIST}（先 cd site && npm run build，或用 --selftest 预检）`);
+  console.error(
+    `[mermaid-check] dist 不存在：${DIST}\n` +
+      `  正确位置是 site/dist（astro 的 outDir 相对 site/）。示例：\n` +
+      `    cd site && node tools/mermaid-check.mjs --dist dist\n` +
+      `  或省略 --dist（脚本默认按自身位置解析 site/dist）。`,
+  );
   process.exit(2);
 }
 
@@ -112,9 +120,26 @@ function serve(root, port) {
 async function checkPage(browser, url) {
   const page = await browser.newPage();
   const errors = [];
+  const exempt404 = []; // 已豁免的 4xx（favicon）
+  const real404 = [];   // 未豁免的 4xx
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(`console.error: ${m.text()}`); });
-  page.on('response', (r) => { if (r.status() >= 400) errors.push(`http ${r.status()}: ${r.url()}`); });
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    const t = m.text();
+    // 「Failed to load resource: 404」是资源加载失败在 console 侧的**副产品**，
+    // 与 response 事件重复。favicon 的 404 已被 response 侧豁免，但 console 侧
+    // 仍会记一条——不丢的话 good 页会被自己冤杀（本轮 selftest 实测踩到）。
+    // 只在「确实没有任何未豁免 4xx」时丢；真有 4xx 时由 response 事件负责报。
+    if (/Failed to load resource/i.test(t) && real404.length === 0) return;
+    errors.push(`console.error: ${t}`);
+  });
+  page.on('response', (r) => {
+    if (r.status() < 400) return;
+    const u = new URL(r.url());
+    // 豁免 favicon：headless 页面会自动请求它，静态 dist 里没这个文件，每页必 404。
+    if (/^\/favicon(\.\w+)?$/.test(u.pathname)) { exempt404.push(r.url()); return; }
+    real404.push(`http ${r.status()}: ${r.url()}`);
+  });
   try {
     await page.goto(url, { waitUntil: 'load', timeout: 30000 });
     // 等渲染落定：每张图要么成 svg，要么落 .mermaid-error（脚本对两者都加类）。
@@ -168,18 +193,40 @@ async function main() {
 
   server = await serve(root, 4174);
 
-  // ── 本机无浏览器二进制时：只验证到「服务器路由」层，检出逻辑明确留 CI ──────────
-  // 背景：本机 2 核 3.4GB 不保证装得起 chromium（与 visual-check 同样的边界声明）。
+  // ── 浏览器启动：主路径 = playwright 自带 chromium（CI 装好即通）；
+  //    回退 = viz/chrome.mjs 的本机 Chromium 候选表（与 visual-check.mjs 同源）──
+  // 背景：本机 playwright 缓存里是 rev 1234，而 site 的 playwright 1.64 要 1248，
+  // `chromium.launch()` 直接起会失败；但 rev 1234 的完整 chromium 二进制就在
+  // ~/.cache/ms-playwright 里，能用。回退只在主路径抛错时发生，CI 行为不变。
   // 退出码 2 = 预检环境不具备（既不是断言失败 1，也不是通过 0）——不冒充任何结论。
   let browser = null;
   try {
     const { chromium } = await import('playwright');
     browser = await chromium.launch();
   } catch (e) {
-    console.error(`[mermaid-check] ⚠️ 本机起不了 chromium（${String(e).split('\n')[0]}）`);
-    console.error('[mermaid-check] 本机预检到此为止：服务器路由已验证，渲染检出逻辑留 CI 实跑（CI 在 visual-check 前已装 chromium）');
-    server.close();
-    process.exit(2);
+    let resolveChrome = null;
+    try {
+      ({ resolveChrome } = await import('../../viz/chrome.mjs'));
+    } catch {
+      /* viz/ 不存在（site 被单独拷出去时）：保留原始错误 */
+    }
+    const exe = resolveChrome ? resolveChrome() : null;
+    if (!exe) {
+      console.error(`[mermaid-check] ⚠️ 起不了 chromium：${String(e).split('\n')[0]}`);
+      console.error('[mermaid-check] 本机预检到此为止：服务器路由已验证，渲染检出逻辑留 CI 实跑（CI 在 visual-check 前已装 chromium）');
+      server?.close();
+      process.exit(2);
+    }
+    console.log(`[mermaid-check] ⚠️ playwright 自带浏览器不可用 → 回退本机 chromium：${exe}`);
+    try {
+      const { chromium } = await import('playwright');
+      browser = await chromium.launch({ executablePath: exe });
+    } catch (e2) {
+      console.error(`[mermaid-check] ⚠️ 本机 chromium 也起不来：${String(e2).split('\n')[0]}`);
+      console.error('[mermaid-check] 本机预检到此为止：服务器路由已验证，渲染检出逻辑留 CI 实跑');
+      server?.close();
+      process.exit(2);
+    }
   }
   const base = `http://127.0.0.1:4174${BASE_PREFIX}`;
 
@@ -190,14 +237,16 @@ async function main() {
     const goodOk = good.errors === 0 && good.svgs === good.divs && good.divs > 0 && good.consoleErrors.length === 0;
     const badCaught = bad.errors > 0 || bad.svgs + bad.errors < bad.divs;
     console.log(`  good 页：divs=${good.divs} svg=${good.svgs} err=${good.errors} → ${goodOk ? '✅ 判过' : '✖ 误报'}`);
+    if (!goodOk && good.consoleErrors.length) console.log(`      ↳ good 页错误明细：${good.consoleErrors.join(' | ')}`);
     console.log(`  bad  页：divs=${bad.divs} svg=${bad.svgs} err=${bad.errors} → ${badCaught ? '✅ 检出' : '✖ 漏检（断言器过弱）'}`);
+    if (badCaught && bad.consoleErrors.length) console.log(`      ↳ bad 页检出明细：${bad.consoleErrors.slice(0, 3).join(' | ')}`);
     console.log(
       goodOk && badCaught
         ? '\n[mermaid-check] ✅ selftest 通过：检出逻辑双向成立\n'
         : '\n[mermaid-check] ✖ selftest 失败：检出逻辑不成立\n',
     );
     await browser.close();
-    server.close();
+    server?.close();
     process.exit(goodOk && badCaught ? 0 : 1);
   }
 

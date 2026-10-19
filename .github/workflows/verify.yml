@@ -157,9 +157,12 @@ jobs:
       # （节点连对不对、文字全不全）——仍留浏览器人工目检。
       # 自建服务器（node:http，按 base 前缀路由 dist），与下方 visual-check 的
       # python http.server 互不干扰（端口 4174 vs 4173）。
+      # ⚠️ --dist 用 `dist`（相对 site/，即 site/dist）：曾误写 `../dist`——那解析到
+      #    仓库根的 dist（不存在），步骤以 exit 2「dist 不存在」失败，白跑一轮 CI。
+      #    省略 --dist 也行（脚本默认按自身位置解析 site/dist）。
       - name: Mermaid render regression (mermaid 图渲染回归)
         working-directory: site
-        run: node tools/mermaid-check.mjs --dist ../dist
+        run: node tools/mermaid-check.mjs --dist dist
 
       # 站点以 base=/learn-agent-harness/ 构建（astro 只改 URL 前缀，dist 仍是平铺结构），
       # 线上由反代把 /learn-agent-harness/ 前缀映射到 Pages 内容根。这里用符号链接目录
